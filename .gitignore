@@ -1,0 +1,10 @@
+# Ignore nested standalone git repos so the umbrella repo stays clean
+verisci/
+rlvr-forge/
+branchbox/
+mlx-tree/
+steerlens/
+everbench/
+__pycache__/
+*.pyc
+.DS_Store

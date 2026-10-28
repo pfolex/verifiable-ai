@@ -1,0 +1,56 @@
+name: Fishtest Parameter PR Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  fishtest-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Umbrella Repo
+        uses: actions/checkout@v4
+      - name: Checkout verisci
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/verisci
+          path: verisci
+      - name: Checkout rlvr-forge
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/rlvr-forge
+          path: rlvr-forge
+      - name: Checkout branchbox
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/branchbox
+          path: branchbox
+      - name: Checkout mlx-tree
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/mlx-tree
+          path: mlx-tree
+      - name: Checkout steerlens
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/steerlens
+          path: steerlens
+      - name: Checkout everbench
+        uses: actions/checkout@v4
+        with:
+          repository: pfolex/everbench
+          path: everbench
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install NumPy
+        run: pip install numpy
+      - name: Run All 6 Repository Unit Test Suites
+        run: |
+          for repo in verisci rlvr-forge branchbox mlx-tree steerlens everbench; do
+            PYTHONPATH="verisci/src:${repo}/src" python3 -m unittest discover -s "${repo}/tests" -v
+          done
+      - name: Run End-to-End 6-Repo Parameter PR & SPRT Merge Loop
+        run: python3 run_fishtest_loop.py
