@@ -62,33 +62,29 @@ VOCAB_SIZE = 151665
 
 
 def slerp(t: float, v0: torch.Tensor, v1: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
-    """Row-wise Spherical Linear Interpolation preserving exact geometric vector norms."""
+    """Spherical linear interpolation matching hierarchical_slerp_merge.py without near-collinear acos noise."""
     if v0.dim() <= 1:
         return ((1.0 - t) * v0.float() + t * v1.float()).to(v0.dtype)
 
     v0_f = v0.float()
     v1_f = v1.float()
 
-    norm0 = torch.norm(v0_f, dim=-1, keepdim=True)
-    norm1 = torch.norm(v1_f, dim=-1, keepdim=True)
-    v0_n = v0_f / (norm0 + eps)
-    v1_n = v1_f / (norm1 + eps)
+    v0_n = v0_f / (torch.norm(v0_f, dim=-1, keepdim=True) + eps)
+    v1_n = v1_f / (torch.norm(v1_f, dim=-1, keepdim=True) + eps)
 
     dot = (v0_n * v1_n).sum(dim=-1, keepdim=True).clamp(-1.0, 1.0)
     omega = torch.acos(dot)
     sin_omega = torch.sin(omega)
 
-    mask = (sin_omega.abs() < 1e-5).squeeze(-1)
-    res_dir = torch.empty_like(v0_f)
+    mask = (sin_omega.abs() < 1e-4).squeeze(-1)
+    res = torch.empty_like(v0_f)
 
-    res_dir[mask] = (1.0 - t) * v0_n[mask] + t * v1_n[mask]
-    res_dir[~mask] = (
-        (torch.sin((1.0 - t) * omega[~mask]) / sin_omega[~mask]) * v0_n[~mask]
-        + (torch.sin(t * omega[~mask]) / sin_omega[~mask]) * v1_n[~mask]
+    res[mask] = (1.0 - t) * v0_f[mask] + t * v1_f[mask]
+    res[~mask] = (
+        (torch.sin((1.0 - t) * omega[~mask]) / sin_omega[~mask]) * v0_f[~mask]
+        + (torch.sin(t * omega[~mask]) / sin_omega[~mask]) * v1_f[~mask]
     )
-    # Preserve smoothly interpolated row norm (anchored to Base R1 norm)
-    target_norm = (1.0 - t) * norm0 + t * norm1
-    return (res_dir * target_norm).to(v0.dtype)
+    return res.to(v0.dtype)
 
 
 def mlp_slerp_schedule(layer_num: int) -> tuple[float, float]:
@@ -147,13 +143,14 @@ def main() -> None:
             elif "layers." in key:
                 layer_num = int(key.split("layers.")[1].split(".")[0])
                 if key == "model.layers.27.self_attn.o_proj.weight":
-                    # Ultra-fine spherical fold (0.2% step) preserving 99.8% native R1 </think> stopping head
+                    # Direct float32 spherical projection (avoids bfloat16 acos singularity near dot=1.0)
                     w0 = t_base.float()
                     w0_row_norm = torch.norm(w0, dim=-1, keepdim=True).clamp(min=1e-8)
                     lora_row_norm = torch.norm(raw_lora_delta, dim=-1, keepdim=True).clamp(min=1e-8)
-                    norm_matched_target = w0 + 0.005 * (raw_lora_delta / lora_row_norm) * w0_row_norm
-                    merged_tensors[key] = slerp(0.005, t_base, norm_matched_target.to(t_base.dtype))
-                    status = "ULTRA-FINE SPHERICAL LORA FOLD (Layer 27 o_proj, 99.99% R1 </think> preserved)"
+                    w_perturbed = w0 + 0.008 * (raw_lora_delta / lora_row_norm) * w0_row_norm
+                    w_projected = w_perturbed * (w0_row_norm / torch.norm(w_perturbed, dim=-1, keepdim=True).clamp(min=1e-8))
+                    merged_tensors[key] = w_projected.to(t_base.dtype)
+                    status = "FLOAT32 SPHERICAL LORA FOLD (Layer 27 o_proj, exact row-norm projection)"
                 elif "self_attn" in key:
                     merged_tensors[key] = t_base
                     status = f"ATTN PROTECTED (Layer {layer_num}: 100% R1)"
