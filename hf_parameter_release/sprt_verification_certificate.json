@@ -1,0 +1,42 @@
+{
+  "base_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+  "donor_prior": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+  "epoch_beacon": "huggingface-release-epoch-2026-10-28",
+  "domains_verified": [
+    "logic",
+    "silicon",
+    "systems",
+    "matter"
+  ],
+  "domain_wld": {
+    "logic": {
+      "wins": 70,
+      "losses": 0,
+      "draws": 0
+    },
+    "silicon": {
+      "wins": 70,
+      "losses": 0,
+      "draws": 0
+    },
+    "systems": {
+      "wins": 70,
+      "losses": 0,
+      "draws": 0
+    },
+    "matter": {
+      "wins": 70,
+      "losses": 0,
+      "draws": 0
+    }
+  },
+  "avg_logprob_margin_gain": {
+    "logic": 22.680415868759155,
+    "silicon": 17.320835992268155,
+    "systems": 23.026763916015625,
+    "matter": 18.876614890779766
+  },
+  "lora_rank": 16,
+  "d_model": 1536,
+  "status": "SPRT_VERIFIED_ACCEPT_H1"
+}
