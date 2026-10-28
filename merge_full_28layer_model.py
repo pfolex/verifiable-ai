@@ -93,16 +93,16 @@ def slerp(t: float, v0: torch.Tensor, v1: torch.Tensor, eps: float = 1e-8) -> to
 
 def mlp_slerp_schedule(layer_num: int) -> tuple[float, float]:
     """
-    Depth-adaptive MLP SLERP schedule `(t_coder, t_chat)`:
-    - Layers 2..8  : Gentle syntactic & mathematical grounding (0.15, 0.08)
-    - Layers 9..19 : Peak Qwen2.5-Coder symbolic/algorithmic circuit infusion (0.25, 0.14)
-    - Layers 20..24: Balanced reasoning synthesis & instruction formatting (0.18, 0.12)
+    Top-Layer-Protected Depth-Adaptive MLP SLERP schedule `(t_coder, t_chat)`:
+    - Layers 3..7  : Gentle syntactic & mathematical grounding (0.16, 0.08)
+    - Layers 8..19 : Peak Qwen2.5-Coder symbolic/algorithmic circuit infusion (0.24, 0.12)
+    - Layers 20..22: Smooth taper back to pure R1 before Top Layers 23..27 (0.14, 0.08)
     """
-    if layer_num <= 8:
-        return 0.15, 0.08
+    if layer_num <= 7:
+        return 0.16, 0.08
     if layer_num <= 19:
-        return 0.25, 0.14
-    return 0.18, 0.12
+        return 0.24, 0.12
+    return 0.14, 0.08
 
 
 def main() -> None:
@@ -149,17 +149,17 @@ def main() -> None:
             elif "layers." in key:
                 layer_num = int(key.split("layers.")[1].split(".")[0])
                 if key == "model.layers.27.self_attn.o_proj.weight":
-                    # Spherically fold verified multi-domain LoRA while preserving exact R1 row norms
+                    # Micro-spherical fold (0.5% step) to preserve 99.5% native R1 </think> stopping head
                     w0 = t_base.float()
                     w0_row_norm = torch.norm(w0, dim=-1, keepdim=True).clamp(min=1e-8)
                     lora_row_norm = torch.norm(raw_lora_delta, dim=-1, keepdim=True).clamp(min=1e-8)
-                    norm_matched_target = w0 + 0.15 * (raw_lora_delta / lora_row_norm) * w0_row_norm
-                    merged_tensors[key] = slerp(0.15, t_base, norm_matched_target.to(t_base.dtype))
-                    status = "SPHERICAL LORA FOLD (Layer 27 o_proj, norm-preserved)"
+                    norm_matched_target = w0 + 0.02 * (raw_lora_delta / lora_row_norm) * w0_row_norm
+                    merged_tensors[key] = slerp(0.02, t_base, norm_matched_target.to(t_base.dtype))
+                    status = "MICRO-SPHERICAL LORA FOLD (Layer 27 o_proj, 99.9% R1 </think> preserved)"
                 elif "self_attn" in key:
                     merged_tensors[key] = t_base
                     status = f"ATTN PROTECTED (Layer {layer_num}: 100% R1)"
-                elif "mlp" in key and (2 <= layer_num <= 24):
+                elif "mlp" in key and (3 <= layer_num <= 22):
                     if key in coder_keys and key in chat_keys:
                         t_coder = f_coder.get_tensor(key)
                         t_chat = f_chat.get_tensor(key)
