@@ -1,0 +1,152 @@
+{
+  "swebench": [
+    {
+      "id": "SWEBENCH-PY-01",
+      "repo": "algos/interval_merger",
+      "correct": true,
+      "b1_correct": true,
+      "pytest_status": "ALL_TESTS_PASSED",
+      "selected": "aix3-primary (1.5B)",
+      "tokens": 559,
+      "tok_s": 6.9,
+      "elapsed_s": 81.31
+    },
+    {
+      "id": "SWEBENCH-PY-02",
+      "repo": "cache/token_bucket",
+      "correct": true,
+      "b1_correct": false,
+      "pytest_status": "ALL_TESTS_PASSED",
+      "selected": "aix3-pytest-self-repair (1.5B)",
+      "tokens": 1459,
+      "tok_s": 6.2,
+      "elapsed_s": 223.18
+    }
+  ],
+  "artificial_analysis": [
+    {
+      "id": "MATH500-NT-01",
+      "suite": "MATH-500 (Number Theory)",
+      "expected": "7",
+      "extracted": "7",
+      "correct": true,
+      "b1_correct": true,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 7.3,
+      "selected": "aix3-primary (1.5B)",
+      "total_tokens": 960,
+      "total_elapsed_s": 127.92
+    },
+    {
+      "id": "MATH500-COMBI-02",
+      "suite": "MATH-500 (Combinatorics & Algebra)",
+      "expected": "35",
+      "extracted": "35",
+      "correct": true,
+      "b1_correct": false,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 12.7,
+      "selected": "aix3-tir-reflection (1.5B)",
+      "total_tokens": 960,
+      "total_elapsed_s": 74.95
+    },
+    {
+      "id": "GPQA-DIAMOND-PHYS-01",
+      "suite": "GPQA Diamond (Relativistic Kinematics)",
+      "expected": "5",
+      "extracted": "5",
+      "correct": true,
+      "b1_correct": false,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 9.4,
+      "selected": "aix3-tir-reflection (1.5B)",
+      "total_tokens": 959,
+      "total_elapsed_s": 113.6
+    },
+    {
+      "id": "GPQA-DIAMOND-QUANT-02",
+      "suite": "GPQA Diamond (Quantum Degeneracy)",
+      "expected": "18",
+      "extracted": "18",
+      "correct": true,
+      "b1_correct": false,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 8.0,
+      "selected": "aix3-tir-reflection (1.5B)",
+      "total_tokens": 960,
+      "total_elapsed_s": 115.08
+    }
+  ],
+  "mtbench": [
+    {
+      "id": "MTBENCH-REASON-01-T1",
+      "suite": "MT-Bench (2-Turn Stateful Resource Allocation)",
+      "expected": "152",
+      "extracted": "152",
+      "correct": true,
+      "b1_correct": true,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 8.5,
+      "selected": "aix3-primary (1.5B)",
+      "total_tokens": 560,
+      "total_elapsed_s": 65.66
+    },
+    {
+      "id": "MTBENCH-REASON-01-T2",
+      "suite": "MT-Bench (2-Turn Stateful Resource Allocation)",
+      "expected": "80",
+      "extracted": "80",
+      "correct": true,
+      "b1_correct": true,
+      "b1_confidence": 0.92,
+      "b1_tokens": 540,
+      "b1_tok_s": 8.1,
+      "selected": "aix3-primary (1.5B)",
+      "total_tokens": 540,
+      "total_elapsed_s": 66.62
+    }
+  ],
+  "helm": [
+    {
+      "id": "HELM-ROBUST-01-CLEAN",
+      "suite": "Stanford HELM (Perturbation & Distractor Invariance)",
+      "expected": "60",
+      "extracted": "60",
+      "correct": true,
+      "b1_correct": true,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 8.6,
+      "selected": "aix3-primary (1.5B)",
+      "total_tokens": 560,
+      "total_elapsed_s": 65.03
+    },
+    {
+      "id": "HELM-ROBUST-01-PERTURBED",
+      "suite": "Stanford HELM (Perturbation & Distractor Invariance)",
+      "expected": "60",
+      "extracted": "60",
+      "correct": true,
+      "b1_correct": false,
+      "b1_confidence": 0.45,
+      "b1_tokens": 560,
+      "b1_tok_s": 8.3,
+      "selected": "aix3-tir-reflection (1.5B)",
+      "total_tokens": 960,
+      "total_elapsed_s": 116.82
+    }
+  ],
+  "summary": {
+    "total_passed": 10,
+    "total_tasks": 10,
+    "accuracy_pct": 100.0,
+    "mean_tok_s": 10.1,
+    "helm_ece": 0.203,
+    "perturbation_invariance": true
+  }
+}
