@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "smoke-local-001",
+  "created_at": "2026-10-31T00:00:00Z",
+  "dataset": {
+    "name": "synthetic-smoke",
+    "revision": "v1",
+    "split": "test"
+  },
+  "model": {
+    "provider": "mock",
+    "model_id": "deterministic-echo",
+    "parameters": {
+      "temperature": 0
+    }
+  },
+  "scorer": {
+    "name": "exact-match",
+    "version": "1.0.0"
+  },
+  "samples": [
+    {
+      "sample_id": "example-1",
+      "output": "4",
+      "score": 1,
+      "latency_ms": 1,
+      "input_tokens": 5,
+      "output_tokens": 1,
+      "cost_usd": 0
+    }
+  ],
+  "summary": {
+    "sample_count": 1,
+    "mean_score": 1,
+    "total_cost_usd": 0
+  }
+}
