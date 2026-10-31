@@ -70,3 +70,28 @@ done
 
 python3 run_fishtest_loop.py
 ```
+
+## Versioned evaluation results (EVAL-001)
+
+Evaluation artifacts use `schemas/evaluation-result-v1.schema.json`. Validate
+schema fields and semantic invariants before accepting or saving an artifact:
+
+```python
+from evaluation_result import validate_evaluation_result
+validate_evaluation_result(result)
+```
+
+For existing JSON artifacts and contract tests:
+
+```bash
+python -m pip install -r requirements-test.txt
+python evaluation_result.py examples/evaluation-result-v1.json
+python -m unittest discover -s tests -v
+```
+
+Validation rejects duplicate sample IDs, mismatched sample counts, and incorrect
+mean scores. Empty runs must report a zero mean. Mean comparisons allow relative
+rounding error of `1e-9` and absolute error of `1e-12`. CI requires JSON Schema
+Draft 2020-12 validation, including date-time formats; missing dependencies fail
+the contract suite instead of skipping it. Provider adapters and benchmark runner
+integration are follow-up work.
