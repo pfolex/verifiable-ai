@@ -68,9 +68,9 @@ jobs:
         run: |
           set +e
           python gate_benchmarks.py benchmark-results/reference.json benchmark-results/rerun.json --manifest benchmark-results/manifest.json --policy examples/regression-policy-v1.json --output benchmark-results/gate.json
-          status=$?
+          gate_exit_code=$?
           set -e
-          test "$status" -eq 2
+          test "$gate_exit_code" -eq 2
       - name: Upload Validated Evaluation Result
         uses: actions/upload-artifact@v4
         with:

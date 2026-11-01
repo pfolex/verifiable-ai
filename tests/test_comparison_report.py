@@ -51,6 +51,7 @@ class ComparisonTests(unittest.TestCase):
         sample = self.candidate["samples"][0]
         sample.update(score=0, error="provider: TimeoutError")
         del sample["cost_usd"]
+        del self.candidate["summary"]["total_cost_usd"]
         del sample["input_tokens"]
         self.candidate["summary"].update(mean_score=0.5625)
         report = self.compare()

@@ -2,7 +2,6 @@
 import copy
 from datetime import datetime, timezone
 import hashlib
-import json
 import math
 import time
 import uuid
@@ -49,11 +48,15 @@ def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=N
         else:
             sample["output"] = response.output
             sample.update(response.usage())
+            if "cache_write_input_tokens" in sample:
+                result["schema_version"] = "1.1.0"
+            if response.error is not None:
+                sample["error"] = response.error
         sample["latency_ms"] = (time.perf_counter() - started) * 1000
+        # Failure responses can still carry billable usage. Validate those too.
+        probe = dict(result, samples=[sample], summary={"sample_count": 1, "mean_score": 0})
+        validate_evaluation_result(probe)
         if "error" not in sample:
-            # Validate adapter output/usage before passing it to the scorer.
-            probe = dict(result, samples=[sample], summary={"sample_count": 1, "mean_score": 0})
-            validate_evaluation_result(probe)
             try:
                 sample["score"] = scorer(copy.deepcopy(case["input"]), response.output)
             except Exception as exc:
@@ -65,6 +68,7 @@ def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=N
     # Unknown cost stays unknown; do not silently treat missing costs as free.
     if all("cost_usd" in sample for sample in result["samples"]):
         result["summary"]["total_cost_usd"] = math.fsum(s["cost_usd"] for s in result["samples"])
+    result["model"] = copy.deepcopy(provider.model)
     validate_evaluation_result(result)
     return result
 

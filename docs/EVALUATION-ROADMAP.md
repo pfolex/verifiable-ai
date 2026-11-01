@@ -17,6 +17,9 @@ and live Ollama inference. The authorized remaining milestones are:
   accurate cached/uncached token costing and unknown-cost behavior. CI uses HTTP
   fixtures rather than spending credentials or money.
 
+Hosted providers in EVAL-007 are OpenAI Responses and Groq Chat. Cache-write usage
+is explicitly versioned as result 1.1.0, retaining support for result 1.0.0.
+
 Each milestone requires regression tests, usage/limitation documentation, a feature
 branch PR and passing CI before merge. No real hosted call is required without
 available credentials; fixtures verify authentication and transport behavior.
