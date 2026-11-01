@@ -23,6 +23,8 @@ def validate_evaluation_result(result):
             if isinstance(value, (int, float)) and not math.isfinite(value):
                 raise ValueError(f"{key} must be finite")
     samples = result["samples"]
+    if any("error" in sample and sample["score"] != 0 for sample in samples):
+        raise ValueError("error samples must have zero score")
     ids = [sample["sample_id"] for sample in samples]
     if len(ids) != len(set(ids)):
         raise ValueError("duplicate sample IDs")

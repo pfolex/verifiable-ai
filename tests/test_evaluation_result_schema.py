@@ -3,6 +3,7 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from jsonschema import Draft202012Validator
 
 from jsonschema import ValidationError
 
@@ -23,6 +24,16 @@ class EvaluationResultContractTests(unittest.TestCase):
     def test_schema_rejects_wrong_version(self):
         self.example["schema_version"] = "2.0.0"
         with self.assertRaises(ValidationError):
+            validate_evaluation_result(self.example)
+
+    def test_all_contract_schemas_are_well_formed(self):
+        for path in (ROOT / "schemas").glob("*.schema.json"):
+            with self.subTest(path=path):
+                Draft202012Validator.check_schema(json.loads(path.read_text()))
+
+    def test_error_sample_cannot_claim_a_positive_score(self):
+        self.example["samples"][0]["error"] = "provider: TimeoutError"
+        with self.assertRaisesRegex(ValueError, "zero score"):
             validate_evaluation_result(self.example)
 
     def test_schema_rejects_missing_required_field(self):

@@ -64,6 +64,13 @@ jobs:
           python evaluation_result.py benchmark-results/reference.json
       - name: Compare Manifest Reruns
         run: python compare_benchmarks.py benchmark-results/reference.json benchmark-results/rerun.json --manifest benchmark-results/manifest.json --output benchmark-results/comparison.json --markdown benchmark-results/comparison.md
+      - name: Verify Smoke Gate Is Inconclusive
+        run: |
+          set +e
+          python gate_benchmarks.py benchmark-results/reference.json benchmark-results/rerun.json --manifest benchmark-results/manifest.json --policy examples/regression-policy-v1.json --output benchmark-results/gate.json
+          status=$?
+          set -e
+          test "$status" -eq 2
       - name: Upload Validated Evaluation Result
         uses: actions/upload-artifact@v4
         with:

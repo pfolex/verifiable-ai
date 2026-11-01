@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_version",
+    "alpha",
+    "min_samples_per_domain",
+    "min_improvement",
+    "non_regression_margin",
+    "max_error_rate",
+    "independent_samples"
+  ],
+  "properties": {
+    "policy_version": {
+      "const": "1.0.0"
+    },
+    "alpha": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1
+    },
+    "min_samples_per_domain": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "min_improvement": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "non_regression_margin": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "max_error_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "independent_samples": {
+      "type": "boolean"
+    }
+  }
+}
