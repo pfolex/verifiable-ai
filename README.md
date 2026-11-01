@@ -143,3 +143,16 @@ python run_benchmark.py --manifest tasks.json --output benchmark-results/referen
 Manifests exclude reference solutions and bind task contents, generation settings
 and source revisions with a verified hash. See [EVAL-004](docs/EVAL-004.md) and
 the [remaining evaluation roadmap](docs/EVALUATION-ROADMAP.md).
+
+## Compare models (EVAL-005)
+
+Run baseline and candidate against one saved manifest, then compare them:
+
+```bash
+python compare_benchmarks.py baseline.json candidate.json --manifest tasks.json \
+  --output comparison.json --markdown comparison.md
+```
+
+Reports include overall and per-domain scores, errors, usage, latency and costs.
+Mismatched provenance is rejected, and unknown usage remains explicit. See
+[EVAL-005](docs/EVAL-005.md).
