@@ -62,9 +62,11 @@ jobs:
           python run_benchmark.py --output benchmark-results/reference.json --export-manifest benchmark-results/manifest.json
           python run_benchmark.py --manifest benchmark-results/manifest.json --output benchmark-results/rerun.json
           python evaluation_result.py benchmark-results/reference.json
+      - name: Compare Manifest Reruns
+        run: python compare_benchmarks.py benchmark-results/reference.json benchmark-results/rerun.json --manifest benchmark-results/manifest.json --output benchmark-results/comparison.json --markdown benchmark-results/comparison.md
       - name: Upload Validated Evaluation Result
         uses: actions/upload-artifact@v4
         with:
           name: evaluation-result-v1
-          path: benchmark-results/*.json
+          path: benchmark-results/*
           if-no-files-found: error

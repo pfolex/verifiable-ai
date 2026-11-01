@@ -1,0 +1,273 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_sha256",
+    "dataset",
+    "scorer",
+    "baseline",
+    "candidate",
+    "pairs",
+    "overall",
+    "domains"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dataset": {
+      "type": "object"
+    },
+    "scorer": {
+      "type": "object"
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "model"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "object"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "model"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "object"
+        }
+      }
+    },
+    "pairs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sample_id",
+          "domain",
+          "baseline_score",
+          "candidate_score",
+          "delta",
+          "baseline_error",
+          "candidate_error"
+        ],
+        "properties": {
+          "sample_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "enum": [
+              "logic",
+              "silicon",
+              "systems",
+              "matter"
+            ]
+          },
+          "baseline_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "candidate_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "delta": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "baseline_error": {
+            "type": "boolean"
+          },
+          "candidate_error": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "overall": {
+      "$ref": "#/$defs/group"
+    },
+    "domains": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "logic",
+          "silicon",
+          "systems",
+          "matter"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/group"
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "known_samples",
+        "known_total",
+        "total"
+      ],
+      "properties": {
+        "known_samples": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "known_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mean_score",
+        "error_count",
+        "latency_ms",
+        "tokens",
+        "cost_usd"
+      ],
+      "properties": {
+        "mean_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "error_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latency_ms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mean",
+            "median",
+            "p95"
+          ],
+          "properties": {
+            "mean": {
+              "type": "number",
+              "minimum": 0
+            },
+            "median": {
+              "type": "number",
+              "minimum": 0
+            },
+            "p95": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "input_tokens",
+            "output_tokens",
+            "cached_input_tokens"
+          ],
+          "properties": {
+            "input_tokens": {
+              "$ref": "#/$defs/total"
+            },
+            "output_tokens": {
+              "$ref": "#/$defs/total"
+            },
+            "cached_input_tokens": {
+              "$ref": "#/$defs/total"
+            }
+          }
+        },
+        "cost_usd": {
+          "$ref": "#/$defs/total"
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_count",
+        "baseline",
+        "candidate",
+        "mean_score_delta",
+        "wins",
+        "ties",
+        "losses"
+      ],
+      "properties": {
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "baseline": {
+          "$ref": "#/$defs/metrics"
+        },
+        "candidate": {
+          "$ref": "#/$defs/metrics"
+        },
+        "mean_score_delta": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "wins": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ties": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "losses": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
