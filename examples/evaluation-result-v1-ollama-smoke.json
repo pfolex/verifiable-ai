@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "6504411b-c003-4e4f-b7a7-8e322f1edf04",
+  "created_at": "2026-11-01T01:51:38.068867+00:00",
+  "dataset": {
+    "name": "rlvr-forge-procedural",
+    "revision": "53f7a05e0b47ba54426d32ad07dbdc020aad6d5d",
+    "split": "eval",
+    "manifest_sha256": "82af275a0879acd555a1795620b1d9ac3c1ab6e7f2c45da1d3a5dda468af7584"
+  },
+  "model": {
+    "provider": "ollama",
+    "model_id": "aix3:latest",
+    "parameters": {
+      "temperature": 0,
+      "num_predict": 2048,
+      "seed": 2026
+    },
+    "adapter_version": "ollama-chat-1.0.0",
+    "revision": "ca5263dc0d0d6f7c7a89a194674cd1acc872c797e5ee06554a451c4f4bdbbd39"
+  },
+  "scorer": {
+    "name": "verisci-reward",
+    "version": "71dd70c47f049303bc926a953373efb50b8b0231",
+    "configuration": {
+      "seed": 2026,
+      "difficulty": 1,
+      "domains": [
+        "logic"
+      ],
+      "samples_per_domain": 1
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "eval-logic-d1-s2026",
+      "output": "{\"proof_steps\": [{\"p1\": 0, \"p2\": 0, \"conclusion\": [false]}, {\"p3\": true, \"p4\": false}], \"assignment\": { \"P0\": true, \"P1\": false, \"P2\": false }}",
+      "score": 0.3,
+      "input_tokens": 209,
+      "output_tokens": 1926,
+      "cached_input_tokens": 208,
+      "latency_ms": 183993.13565
+    }
+  ],
+  "summary": {
+    "sample_count": 1,
+    "mean_score": 0.3
+  }
+}
