@@ -1,7 +1,7 @@
 # Evaluation milestones
 
 EVAL-001–003 established the result contract, runner, reference/replay adapters,
-and live Ollama inference. The authorized remaining milestones are:
+and live Ollama inference. EVAL-004–007 are implemented and merged:
 
 - **EVAL-004:** versioned public dataset manifests, integrity validation, exact
   saved-task reruns, source revision checks and manifest-bound result artifacts.
@@ -23,3 +23,8 @@ is explicitly versioned as result 1.1.0, retaining support for result 1.0.0.
 Each milestone requires regression tests, usage/limitation documentation, a feature
 branch PR and passing CI before merge. No real hosted call is required without
 available credentials; fixtures verify authentication and transport behavior.
+
+Implementation history: [EVAL-004 PR #4](https://github.com/pfolex/verifiable-ai/pull/4),
+[EVAL-005 PR #5](https://github.com/pfolex/verifiable-ai/pull/5),
+[EVAL-006 PR #6](https://github.com/pfolex/verifiable-ai/pull/6), and
+[EVAL-007 PR #7](https://github.com/pfolex/verifiable-ai/pull/7).

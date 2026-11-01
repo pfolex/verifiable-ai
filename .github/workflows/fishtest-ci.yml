@@ -71,6 +71,7 @@ jobs:
           gate_exit_code=$?
           set -e
           test "$gate_exit_code" -eq 2
+          python -c 'import json; from pathlib import Path; report = json.loads(Path("benchmark-results/gate.json").read_text()); manifest = json.loads(Path("benchmark-results/manifest.json").read_text()); assert report["decision"] == "INCONCLUSIVE"; assert report["manifest_sha256"] == manifest["manifest_sha256"]'
       - name: Upload Validated Evaluation Result
         uses: actions/upload-artifact@v4
         with:
