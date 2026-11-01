@@ -156,3 +156,16 @@ python compare_benchmarks.py baseline.json candidate.json --manifest tasks.json 
 Reports include overall and per-domain scores, errors, usage, latency and costs.
 Mismatched provenance is rejected, and unknown usage remains explicit. See
 [EVAL-005](docs/EVAL-005.md).
+
+## Statistical gates (EVAL-006)
+
+```bash
+python gate_benchmarks.py baseline.json candidate.json --manifest tasks.json \
+  --policy examples/regression-policy-v1.json --output gate.json
+```
+
+Gates require overall improvement and non-regression in every domain, using
+simultaneous paired confidence bounds. Exit codes are 0 PASS, 1 FAIL, 2
+INCONCLUSIVE and 3 invalid data/output failure. The example policy deliberately
+does not assert independent sampling; small smoke runs must remain inconclusive.
+See [EVAL-006](docs/EVAL-006.md) before using a gate for a release decision.

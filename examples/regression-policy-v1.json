@@ -1,0 +1,9 @@
+{
+  "policy_version": "1.0.0",
+  "alpha": 0.05,
+  "min_samples_per_domain": 30,
+  "min_improvement": 0,
+  "non_regression_margin": 0.02,
+  "max_error_rate": 0,
+  "independent_samples": false
+}
