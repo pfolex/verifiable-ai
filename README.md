@@ -184,3 +184,22 @@ and estimate token costs from an explicit versioned price card. The example card
 contain synthetic rates, not current prices. Cache-write usage uses result schema
 1.1.0; existing 1.0.0 artifacts remain supported. See [EVAL-007](docs/EVAL-007.md)
 for authentication, pricing, error handling and verification limits.
+
+## Train an AIX candidate yourself
+
+```bash
+./scripts/aix.sh setup
+./scripts/aix.sh doctor
+./scripts/aix.sh run --run-dir training-runs/pilot-001 --steps 20
+```
+
+The script auto-detects the existing sibling AIX Hugging Face checkpoint, or accepts
+`--base-model /path/to/checkpoint`. It prepares content-disjoint verified training
+examples, measures a baseline, trains a separate LoRA adapter through the full
+language model, then generates and scores candidate answers on the same saved
+manifest. Read `training-runs/pilot-001/comparison.md` and `gate.json` afterward.
+
+The base stays unchanged. The current machine exposes CPU only, so full-size runs
+can be slow. Small pilots measure observed changes and may remain statistically
+inconclusive. See [the training guide](docs/TRAINING-AIX.md) for settings, staged
+commands, memory considerations and interpretation.

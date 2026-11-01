@@ -1,0 +1,8 @@
+-r requirements-test.txt
+numpy>=1.26,<2
+torch==2.2.2
+transformers==4.46.3
+peft==0.13.2
+accelerate==0.34.2
+safetensors>=0.4.3,<1
+huggingface-hub>=0.23.2,<1
