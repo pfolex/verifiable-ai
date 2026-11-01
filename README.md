@@ -93,5 +93,22 @@ Validation rejects duplicate sample IDs, mismatched sample counts, and incorrect
 mean scores. Empty runs must report a zero mean. Mean comparisons allow relative
 rounding error of `1e-9` and absolute error of `1e-12`. CI requires JSON Schema
 Draft 2020-12 validation, including date-time formats; missing dependencies fail
-the contract suite instead of skipping it. Provider adapters and benchmark runner
-integration are follow-up work.
+the contract suite instead of skipping it.
+
+## Benchmark runner (EVAL-002)
+
+Run actual provider submissions through VeriSci and save a validated v1 artifact:
+
+```bash
+python -m pip install -r requirements-test.txt
+python run_benchmark.py --provider reference --output benchmark-results/reference.json
+python evaluation_result.py benchmark-results/reference.json
+```
+
+This requires the `verisci` and `rlvr-forge` checkouts from the quickstart. The
+default evaluates two seeded tasks in each of the four domains. The reference
+provider is an oracle baseline with access to reference solutions, not a trained
+model measurement. The replay provider evaluates recorded model responses without
+API calls. See [the EVAL-002 specification](docs/EVAL-002.md) for the recording
+format, provenance, error behavior, and extension interface. CI tests both adapters,
+runs the reference benchmark, and uploads its validated JSON result.
