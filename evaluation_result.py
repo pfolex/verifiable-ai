@@ -18,6 +18,10 @@ def validate_evaluation_result(result):
     schema = json.loads(SCHEMA_PATH.read_text())
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER).validate(result)
+    for record in [*result["samples"], result["summary"]]:
+        for key, value in record.items():
+            if isinstance(value, (int, float)) and not math.isfinite(value):
+                raise ValueError(f"{key} must be finite")
     samples = result["samples"]
     ids = [sample["sample_id"] for sample in samples]
     if len(ids) != len(set(ids)):
