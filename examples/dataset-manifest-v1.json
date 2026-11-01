@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0.0",
+  "dataset": {
+    "name": "rlvr-forge-procedural",
+    "revision": "53f7a05e0b47ba54426d32ad07dbdc020aad6d5d",
+    "split": "eval"
+  },
+  "scorer": {
+    "name": "verisci-reward",
+    "version": "71dd70c47f049303bc926a953373efb50b8b0231",
+    "configuration": {
+      "seed": 2026,
+      "difficulty": 1,
+      "domains": [
+        "logic",
+        "silicon",
+        "systems",
+        "matter"
+      ],
+      "samples_per_domain": 1
+    }
+  },
+  "generation": {
+    "seed": 2026,
+    "difficulty": 1,
+    "domains": [
+      "logic",
+      "silicon",
+      "systems",
+      "matter"
+    ],
+    "samples_per_domain": 1
+  },
+  "cases": [
+    {
+      "sample_id": "eval-logic-d1-s2026",
+      "input": {
+        "task_id": "eval-logic-d1-s2026",
+        "domain": "logic",
+        "difficulty": 1,
+        "prompt": "Derive goal clause ['~P2'] from 3 CNF premises via sound propositional resolution and provide a satisfying truth assignment.",
+        "spec": {
+          "variables": [
+            "P0",
+            "P1",
+            "P2"
+          ],
+          "premises": [
+            [
+              "P0"
+            ],
+            [
+              "~P0",
+              "~P1"
+            ],
+            [
+              "P1",
+              "~P2"
+            ]
+          ],
+          "goal_clause": [
+            "~P2"
+          ],
+          "require_sat": true
+        }
+      }
+    },
+    {
+      "sample_id": "eval-silicon-d1-s2026",
+      "input": {
+        "task_id": "eval-silicon-d1-s2026",
+        "domain": "silicon",
+        "difficulty": 1,
+        "prompt": "Synthesize an acyclic digital logic netlist mapping inputs ['sel', 'd0', 'd1'] to outputs ['y', 'p'] within 6 gates and depth 4.",
+        "spec": {
+          "inputs": [
+            "sel",
+            "d0",
+            "d1"
+          ],
+          "outputs": [
+            "y",
+            "p"
+          ],
+          "truth_table": [
+            {
+              "inputs": {
+                "sel": 0,
+                "d0": 0,
+                "d1": 0
+              },
+              "outputs": {
+                "y": 0,
+                "p": 0
+              }
+            },
+            {
+              "inputs": {
+                "sel": 0,
+                "d0": 0,
+                "d1": 1
+              },
+              "outputs": {
+                "y": 0,
+                "p": 1
+              }
+            },
+            {
+              "inputs": {
+                "sel": 0,
+                "d0": 1,
+                "d1": 0
+              },
+              "outputs": {
+                "y": 1,
+                "p": 1
+              }
+            },
+            {
+              "inputs": {
+                "sel": 0,
+                "d0": 1,
+                "d1": 1
+              },
+              "outputs": {
+                "y": 1,
+                "p": 0
+              }
+            },
+            {
+              "inputs": {
+                "sel": 1,
+                "d0": 0,
+                "d1": 0
+              },
+              "outputs": {
+                "y": 0,
+                "p": 1
+              }
+            },
+            {
+              "inputs": {
+                "sel": 1,
+                "d0": 0,
+                "d1": 1
+              },
+              "outputs": {
+                "y": 1,
+                "p": 0
+              }
+            },
+            {
+              "inputs": {
+                "sel": 1,
+                "d0": 1,
+                "d1": 0
+              },
+              "outputs": {
+                "y": 0,
+                "p": 0
+              }
+            },
+            {
+              "inputs": {
+                "sel": 1,
+                "d0": 1,
+                "d1": 1
+              },
+              "outputs": {
+                "y": 1,
+                "p": 1
+              }
+            }
+          ],
+          "max_gates": 6,
+          "max_depth": 4
+        }
+      }
+    },
+    {
+      "sample_id": "eval-systems-d1-s2026",
+      "input": {
+        "task_id": "eval-systems-d1-s2026",
+        "domain": "systems",
+        "difficulty": 1,
+        "prompt": "Synthesize a deadlock-free, linearizable concurrent schedule for 2 workers over resources ['lock_primary'] achieving 2 quorum commits with strict Lamport clocks.",
+        "spec": {
+          "num_workers": 2,
+          "required_commits": 2,
+          "resources": [
+            "lock_primary"
+          ],
+          "max_buffer": 3
+        }
+      }
+    },
+    {
+      "sample_id": "eval-matter-d1-s2026",
+      "input": {
+        "task_id": "eval-matter-d1-s2026",
+        "domain": "matter",
+        "difficulty": 1,
+        "prompt": "Synthesize a valid connected molecular graph for Formaldehyde (CH2O) matching stoichiometry {'C': 1, 'H': 2, 'O': 1} and motifs ['C=O', 'C-H'].",
+        "spec": {
+          "formula": {
+            "C": 1,
+            "H": 2,
+            "O": 1
+          },
+          "required_motifs": [
+            "C=O",
+            "C-H"
+          ],
+          "expected_rings": 0
+        }
+      }
+    }
+  ],
+  "manifest_sha256": "23b449a65590d81fa41b35790790993407a3009c11de68257b8cf39cadcb0336"
+}

@@ -59,11 +59,12 @@ jobs:
         run: python3 run_fishtest_loop.py
       - name: Run Four-Domain Evaluation Benchmark
         run: |
-          python run_benchmark.py --output benchmark-results/reference.json
+          python run_benchmark.py --output benchmark-results/reference.json --export-manifest benchmark-results/manifest.json
+          python run_benchmark.py --manifest benchmark-results/manifest.json --output benchmark-results/rerun.json
           python evaluation_result.py benchmark-results/reference.json
       - name: Upload Validated Evaluation Result
         uses: actions/upload-artifact@v4
         with:
           name: evaluation-result-v1
-          path: benchmark-results/reference.json
+          path: benchmark-results/*.json
           if-no-files-found: error

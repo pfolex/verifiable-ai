@@ -1,0 +1,378 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset",
+    "scorer",
+    "generation",
+    "cases",
+    "manifest_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "revision",
+        "split"
+      ],
+      "properties": {
+        "name": {
+          "const": "rlvr-forge-procedural"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "split": {
+          "const": "eval"
+        }
+      }
+    },
+    "scorer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "configuration"
+      ],
+      "properties": {
+        "name": {
+          "const": "verisci-reward"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configuration": {
+          "type": "object"
+        }
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "difficulty",
+        "domains",
+        "samples_per_domain"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer"
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "domains": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "logic",
+              "silicon",
+              "systems",
+              "matter"
+            ]
+          }
+        },
+        "samples_per_domain": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sample_id",
+          "input"
+        ],
+        "properties": {
+          "sample_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "task_id",
+              "domain",
+              "difficulty",
+              "prompt",
+              "spec"
+            ],
+            "properties": {
+              "task_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "domain": {
+                "enum": [
+                  "logic",
+                  "silicon",
+                  "systems",
+                  "matter"
+                ]
+              },
+              "difficulty": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "prompt": {
+                "type": "string",
+                "minLength": 1
+              },
+              "spec": {
+                "type": "object"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "domain": {
+                      "const": "logic"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "spec": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "variables",
+                        "premises",
+                        "goal_clause",
+                        "require_sat"
+                      ],
+                      "properties": {
+                        "variables": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "premises": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          }
+                        },
+                        "goal_clause": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "require_sat": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "domain": {
+                      "const": "silicon"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "spec": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "inputs",
+                        "outputs",
+                        "truth_table",
+                        "max_gates",
+                        "max_depth"
+                      ],
+                      "properties": {
+                        "inputs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "outputs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "truth_table": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "inputs",
+                              "outputs"
+                            ],
+                            "properties": {
+                              "inputs": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "integer",
+                                  "enum": [
+                                    0,
+                                    1
+                                  ]
+                                }
+                              },
+                              "outputs": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "integer",
+                                  "enum": [
+                                    0,
+                                    1
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "max_gates": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "max_depth": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "domain": {
+                      "const": "systems"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "spec": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "num_workers",
+                        "required_commits",
+                        "resources",
+                        "max_buffer"
+                      ],
+                      "properties": {
+                        "num_workers": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "required_commits": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "resources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "max_buffer": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "domain": {
+                      "const": "matter"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "spec": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "formula",
+                        "required_motifs",
+                        "expected_rings"
+                      ],
+                      "properties": {
+                        "formula": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required_motifs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "expected_rings": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Public procedural VeriSci dataset manifest v1"
+}

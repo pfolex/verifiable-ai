@@ -4,20 +4,14 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import math
-import os
-from pathlib import Path
-import tempfile
 import time
 import uuid
 
 from evaluation_result import validate_evaluation_result
+from artifact_io import canonical_json, write_json
 
 
-def canonical_json(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
-
-
-def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=None):
+def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=None, manifest=None):
     """Evaluate every case. Provider/scorer failures count as zero-score samples.
 
     Invalid adapter metadata, usage, or score values fail the run. They are
@@ -28,6 +22,12 @@ def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=N
     if any(not isinstance(i, str) or not i for i in ids) or len(ids) != len(set(ids)):
         raise ValueError("case sample IDs must be nonempty and unique")
     manifest_hash = hashlib.sha256(canonical_json(cases).encode()).hexdigest()
+    if manifest is not None:
+        from dataset_manifest import validate_manifest
+        validate_manifest(manifest)
+        if cases != manifest["cases"] or dataset != manifest["dataset"] or scorer_metadata != manifest["scorer"]:
+            raise ValueError("run inputs do not match manifest")
+        manifest_hash = manifest["manifest_sha256"]
     dataset = copy.deepcopy(dataset)
     dataset["manifest_sha256"] = manifest_hash
     result = {
@@ -72,18 +72,4 @@ def run_benchmark(cases, *, dataset, provider, scorer, scorer_metadata, run_id=N
 def save_result(result, path):
     """Validate before touching the destination; atomically replace a complete file."""
     validate_evaluation_result(result)
-    payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
-                                         prefix=f".{path.name}.", delete=False) as handle:
-            temporary = handle.name
-            handle.write(payload)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        if temporary is not None and os.path.exists(temporary):
-            os.unlink(temporary)
+    write_json(result, path)
