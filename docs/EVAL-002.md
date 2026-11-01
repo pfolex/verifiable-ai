@@ -97,8 +97,9 @@ metadata dictionary to add another adapter. Supply a scorer callable and version
 metadata to `run_benchmark`. The caller must not expose reference solutions to an
 untrusted model: the local procedural CLI includes privileged task metadata for the
 reference solver and offline replay, and is not a live hosted-provider harness.
-Hosted API adapters, retries, parallel execution, and trained-model inference are
-future work; no credentials, paid calls, or external SDKs are needed here.
+EVAL-003 adds a live Ollama adapter with an explicit public-field projection;
+see [EVAL-003](EVAL-003.md). Hosted API adapters, retries and parallel execution
+remain future work. No credentials, paid calls, or external SDKs are needed here.
 
 ## Verification
 

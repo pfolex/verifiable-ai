@@ -112,3 +112,21 @@ model measurement. The replay provider evaluates recorded model responses withou
 API calls. See [the EVAL-002 specification](docs/EVAL-002.md) for the recording
 format, provenance, error behavior, and extension interface. CI tests both adapters,
 runs the reference benchmark, and uploads its validated JSON result.
+
+## Live model evaluation (EVAL-003)
+
+Evaluate an installed Ollama model using the same seeded tasks and result contract:
+
+```bash
+python run_benchmark.py --provider ollama --model aix3:latest \
+  --domains logic --samples-per-domain 1 --difficulty 1 \
+  --max-output-tokens 2048 --timeout 240 --output benchmark-results/live.json
+python evaluation_result.py benchmark-results/live.json
+```
+
+Start Ollama and install the chosen model before running. The adapter sends only
+public task fields and verifier inputs; reference solutions stay local to the
+scorer. It records the installed model digest, generation settings, actual token
+usage when available, and measured latency. CI uses a local HTTP fixture for all
+four domains and failure paths, so it needs neither model downloads nor credentials.
+See [EVAL-003](docs/EVAL-003.md) for configuration and limitations.
