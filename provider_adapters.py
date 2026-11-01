@@ -50,7 +50,10 @@ class ReplayProvider:
         import copy
         self.model = copy.deepcopy(recording["model"])
         self.model["adapter_version"] = "replay-1.0.0"
-        self.responses = copy.deepcopy(recording["responses"])
+        self.responses = {
+            sample_id: ProviderResponse(**copy.deepcopy(response))
+            for sample_id, response in recording["responses"].items()
+        }
 
     def generate(self, sample_id, task):
-        return ProviderResponse(**self.responses[sample_id])
+        return self.responses[sample_id]

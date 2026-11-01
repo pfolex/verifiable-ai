@@ -91,6 +91,14 @@ class RunnerTests(unittest.TestCase):
         self.assertNotIn("cost_usd", result["samples"][0])
         self.assertNotIn("total_cost_usd", result["summary"])
 
+    def test_malformed_recording_fails_before_evaluation(self):
+        for response in ({"output": "yes", "unsupported_field": 1}, {"cost_usd": 0.01}):
+            with self.subTest(response=response):
+                recording = copy.deepcopy(self.recording)
+                recording["responses"]["a"] = response
+                with self.assertRaises(TypeError):
+                    ReplayProvider(recording)
+
     def test_invalid_model_provenance_fails_before_provider_call(self):
         provider = ReplayProvider(self.recording)
         del provider.model["model_id"]
