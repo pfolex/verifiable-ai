@@ -9,6 +9,7 @@ import sys
 from benchmark_runner import run_benchmark, save_result
 from provider_adapters import ReferenceProvider, ReplayProvider
 from ollama_provider import OllamaProvider
+from dataset_manifest import load_manifest, make_manifest, save_manifest
 
 ROOT = Path(__file__).resolve().parent
 for repo in ("verisci", "rlvr-forge"):
@@ -34,16 +35,30 @@ def verisci_score(task, output):
     return verify_submission(DomainTask(**task), submission).reward
 
 
+def generate_cases(generation):
+    from rlvr_forge import TaskForge
+    forge = TaskForge(split="eval")
+    cases = []
+    for domain in generation["domains"]:
+        for offset in range(generation["samples_per_domain"]):
+            task = forge.generate(seed=generation["seed"] + offset, domain=domain, difficulty=generation["difficulty"])
+            cases.append({"sample_id": task.task_id, "input": task.to_dict()})
+    return cases
+
+
 def main(argv=None):
     from rlvr_forge import TaskForge
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provider", choices=("reference", "replay", "ollama"), default="reference")
     parser.add_argument("--recording", type=Path, help="JSON object with model and responses keyed by sample ID")
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--seed", type=int, default=2026)
-    parser.add_argument("--samples-per-domain", type=int, default=2)
-    parser.add_argument("--difficulty", type=int, choices=range(1, 11), default=3)
-    parser.add_argument("--domains", nargs="+", choices=TaskForge.DOMAINS, default=list(TaskForge.DOMAINS))
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--manifest", type=Path, help="Rerun an integrity-checked saved public manifest")
+    parser.add_argument("--export-manifest", type=Path, help="Save the exact public task manifest")
+    parser.add_argument("--manifest-only", action="store_true", help="Export without invoking a provider")
+    parser.add_argument("--seed", type=int)
+    parser.add_argument("--samples-per-domain", type=int)
+    parser.add_argument("--difficulty", type=int, choices=range(1, 11))
+    parser.add_argument("--domains", nargs="+", choices=TaskForge.DOMAINS)
     parser.add_argument("--model", help="Installed Ollama model name (required for ollama)")
     parser.add_argument("--ollama-url", help="Ollama HTTP(S) origin, default http://localhost:11434")
     parser.add_argument("--timeout", type=float, help="Ollama request timeout in seconds, default 120")
@@ -51,8 +66,18 @@ def main(argv=None):
     parser.add_argument("--max-output-tokens", type=int, help="Ollama num_predict, default 2048")
     parser.add_argument("--thinking", choices=("auto", "on", "off"), help="Ollama thinking control, default auto")
     args = parser.parse_args(argv)
-    if args.samples_per_domain < 1 or len(args.domains) != len(set(args.domains)):
-        parser.error("require positive samples-per-domain and unique domains")
+    generation_options = (args.seed, args.difficulty, args.domains, args.samples_per_domain)
+    if args.manifest and any(value is not None for value in generation_options):
+        parser.error("generation options cannot override a saved manifest")
+    if args.manifest_only:
+        if not args.export_manifest or args.output or args.provider != "reference":
+            parser.error("--manifest-only requires --export-manifest, no --output and no live/replay provider")
+    elif not args.output:
+        parser.error("--output is required unless exporting a manifest only")
+    inputs = [path.resolve() for path in (args.manifest, args.recording) if path]
+    outputs = [path.resolve() for path in (args.output, args.export_manifest) if path]
+    if len(outputs) != len(set(outputs)) or set(inputs) & set(outputs):
+        parser.error("input and output paths must be distinct")
     if (args.provider == "replay") != (args.recording is not None):
         parser.error("--recording is required only with --provider replay")
     live_options = (args.model, args.ollama_url, args.timeout, args.temperature, args.max_output_tokens, args.thinking)
@@ -60,16 +85,42 @@ def main(argv=None):
         parser.error("live provider options require --provider ollama")
     if args.provider == "ollama" and not args.model:
         parser.error("--model is required with --provider ollama")
-    forge_revision = revision("rlvr-forge")
     verifier_revision = revision("verisci")
-    forge = TaskForge(split="eval")
-    cases = []
-    for domain in args.domains:
-        for offset in range(args.samples_per_domain):
-            task = forge.generate(seed=args.seed + offset, domain=domain, difficulty=args.difficulty)
-            cases.append({"sample_id": task.task_id, "input": task.to_dict()})
+    private_tasks = None
+    if args.manifest:
+        manifest = load_manifest(args.manifest)
+        if manifest["scorer"]["version"] != verifier_revision:
+            parser.error("saved manifest requires a different VeriSci scorer revision")
+    else:
+        generation = {"seed": 2026 if args.seed is None else args.seed,
+                      "difficulty": 3 if args.difficulty is None else args.difficulty,
+                      "domains": list(TaskForge.DOMAINS) if args.domains is None else args.domains,
+                      "samples_per_domain": 2 if args.samples_per_domain is None else args.samples_per_domain}
+        if generation["samples_per_domain"] < 1 or len(generation["domains"]) != len(set(generation["domains"])):
+            parser.error("require positive samples-per-domain and unique domains")
+        cases = generate_cases(generation)
+        private_tasks = {case["sample_id"]: case["input"] for case in cases}
+        manifest = make_manifest(cases,
+            {"name": "rlvr-forge-procedural", "revision": revision("rlvr-forge"), "split": "eval"},
+            {"name": "verisci-reward", "version": verifier_revision, "configuration": generation}, generation)
+    generation = manifest["generation"]
+    cases = manifest["cases"]
+    forge_revision = manifest["dataset"]["revision"]
+    if args.provider == "reference" and not args.manifest_only and private_tasks is None:
+        if forge_revision != revision("rlvr-forge"):
+            parser.error("reference reruns require the manifest's RLVR-Forge revision")
+        reconstructed = generate_cases(generation)
+        expected = make_manifest(reconstructed, manifest["dataset"], manifest["scorer"], generation)
+        if expected != manifest:
+            parser.error("manifest does not match reconstructed public tasks")
+        private_tasks = {case["sample_id"]: case["input"] for case in reconstructed}
+    if args.export_manifest:
+        save_manifest(manifest, args.export_manifest)
+    if args.manifest_only:
+        print(f"Saved manifest {args.export_manifest}: {len(cases)} public samples")
+        return 0
     if args.provider == "reference":
-        provider = ReferenceProvider(forge_revision)
+        provider = ReferenceProvider(forge_revision, private_tasks)
     elif args.provider == "replay":
         provider = ReplayProvider(json.loads(args.recording.read_text()))
         if set(provider.responses) != {case["sample_id"] for case in cases}:
@@ -81,17 +132,14 @@ def main(argv=None):
                 timeout=120 if args.timeout is None else args.timeout,
                 temperature=0 if args.temperature is None else args.temperature,
                 num_predict=2048 if args.max_output_tokens is None else args.max_output_tokens,
-                seed=args.seed,
+                seed=generation["seed"],
                 think={"on": True, "off": False}.get(args.thinking),
             )
         except Exception as exc:
             parser.error(f"Ollama setup failed ({type(exc).__name__}); check URL, installed model and options")
     result = run_benchmark(
-        cases, dataset={"name": "rlvr-forge-procedural", "revision": forge_revision, "split": "eval"},
-        provider=provider, scorer=verisci_score,
-        scorer_metadata={"name": "verisci-reward", "version": verifier_revision,
-                         "configuration": {"seed": args.seed, "difficulty": args.difficulty,
-                                           "domains": args.domains, "samples_per_domain": args.samples_per_domain}},
+        cases, dataset=manifest["dataset"], provider=provider, scorer=verisci_score,
+        scorer_metadata=manifest["scorer"], manifest=manifest,
     )
     save_result(result, args.output)
     failures = sum("error" in sample for sample in result["samples"])

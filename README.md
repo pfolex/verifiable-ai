@@ -130,3 +130,16 @@ scorer. It records the installed model digest, generation settings, actual token
 usage when available, and measured latency. CI uses a local HTTP fixture for all
 four domains and failure paths, so it needs neither model downloads nor credentials.
 See [EVAL-003](docs/EVAL-003.md) for configuration and limitations.
+
+## Reproducible datasets (EVAL-004)
+
+Export a public task manifest and rerun its exact tasks:
+
+```bash
+python run_benchmark.py --manifest-only --export-manifest tasks.json
+python run_benchmark.py --manifest tasks.json --output benchmark-results/reference.json
+```
+
+Manifests exclude reference solutions and bind task contents, generation settings
+and source revisions with a verified hash. See [EVAL-004](docs/EVAL-004.md) and
+the [remaining evaluation roadmap](docs/EVALUATION-ROADMAP.md).

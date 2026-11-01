@@ -30,7 +30,9 @@ class Provider(Protocol):
 class ReferenceProvider:
     """Local oracle baseline, explicitly identified as such in results."""
 
-    def __init__(self, revision: str):
+    def __init__(self, revision: str, private_tasks=None):
+        import copy
+        self.private_tasks = copy.deepcopy(private_tasks) if private_tasks is not None else None
         self.model = {"provider": "local-reference", "model_id": "rlvr-forge-reference",
                       "revision": revision, "parameters": {}, "adapter_version": "1.0.0"}
 
@@ -39,6 +41,8 @@ class ReferenceProvider:
         from rlvr_forge import solve_reference
         from verisci import DomainTask
 
+        if self.private_tasks is not None:
+            task = self.private_tasks[sample_id]
         submission, _ = solve_reference(DomainTask(**task))
         return ProviderResponse(json.dumps(submission, sort_keys=True), cost_usd=0.0)
 

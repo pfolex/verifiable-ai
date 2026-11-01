@@ -127,7 +127,7 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
             path.write_text("original")
-            with patch("benchmark_runner.os.replace", side_effect=OSError("disk failure")):
+            with patch("artifact_io.os.replace", side_effect=OSError("disk failure")):
                 with self.assertRaises(OSError):
                     save_result(self.run_result(), path)
             self.assertEqual(path.read_text(), "original")
