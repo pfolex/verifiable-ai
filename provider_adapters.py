@@ -12,11 +12,13 @@ class ProviderResponse:
     input_tokens: Optional[int] = None
     output_tokens: Optional[int] = None
     cached_input_tokens: Optional[int] = None
+    cache_write_input_tokens: Optional[int] = None
     cost_usd: Optional[float] = None
+    error: Optional[str] = None
 
     def usage(self):
         return {key: value for key, value in vars(self).items()
-                if key != "output" and value is not None}
+                if key not in ("output", "error") and value is not None}
 
 
 class Provider(Protocol):

@@ -169,3 +169,18 @@ simultaneous paired confidence bounds. Exit codes are 0 PASS, 1 FAIL, 2
 INCONCLUSIVE and 3 invalid data/output failure. The example policy deliberately
 does not assert independent sampling; small smoke runs must remain inconclusive.
 See [EVAL-006](docs/EVAL-006.md) before using a gate for a release decision.
+
+## Hosted providers and costs (EVAL-007)
+
+With `OPENAI_API_KEY` or `GROQ_API_KEY` set in the environment:
+
+```bash
+python run_benchmark.py --manifest tasks.json --provider openai --model "$MODEL_ID" \
+  --pricing rates.json --output benchmark-results/hosted.json
+```
+
+OpenAI Responses and Groq Chat adapters send public inputs, retain reported usage,
+and estimate token costs from an explicit versioned price card. The example cards
+contain synthetic rates, not current prices. Cache-write usage uses result schema
+1.1.0; existing 1.0.0 artifacts remain supported. See [EVAL-007](docs/EVAL-007.md)
+for authentication, pricing, error handling and verification limits.

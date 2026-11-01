@@ -36,6 +36,16 @@ class EvaluationResultContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "zero score"):
             validate_evaluation_result(self.example)
 
+    def test_cache_write_usage_requires_new_version_and_valid_input_partition(self):
+        self.example["samples"][0]["cache_write_input_tokens"] = 2
+        with self.assertRaises(ValidationError):
+            validate_evaluation_result(self.example)
+        self.example["schema_version"] = "1.1.0"
+        validate_evaluation_result(self.example)
+        self.example["samples"][0]["cached_input_tokens"] = 4
+        with self.assertRaisesRegex(ValueError, "exceed input"):
+            validate_evaluation_result(self.example)
+
     def test_schema_rejects_missing_required_field(self):
         del self.example["dataset"]
         with self.assertRaises(ValidationError):
@@ -88,6 +98,19 @@ class EvaluationResultContractTests(unittest.TestCase):
     def test_nonfinite_scores_are_rejected(self):
         self.example["samples"][0]["score"] = float("nan")
         with self.assertRaisesRegex(ValueError, "finite"):
+            validate_evaluation_result(self.example)
+
+    def test_incorrect_cost_summary_and_cached_token_counts_are_rejected(self):
+        self.example["summary"]["total_cost_usd"] = 1
+        with self.assertRaisesRegex(ValueError, "total_cost_usd"):
+            validate_evaluation_result(self.example)
+        self.example["summary"]["total_cost_usd"] = 0
+        self.example["samples"][0]["cached_input_tokens"] = 100
+        with self.assertRaisesRegex(ValueError, "cached input"):
+            validate_evaluation_result(self.example)
+        del self.example["samples"][0]["cached_input_tokens"]
+        del self.example["samples"][0]["cost_usd"]
+        with self.assertRaisesRegex(ValueError, "known costs"):
             validate_evaluation_result(self.example)
 
 

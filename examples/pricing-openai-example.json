@@ -1,0 +1,11 @@
+{
+  "pricing_version": "1.0.0",
+  "rate_card_id": "synthetic-example-not-current-prices",
+  "provider": "openai",
+  "model_id": "replace-with-model-id",
+  "currency": "USD",
+  "input_per_million": 2,
+  "output_per_million": 4,
+  "cached_input_per_million": 1,
+  "cache_write_input_per_million": 2
+}
