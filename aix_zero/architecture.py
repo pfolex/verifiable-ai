@@ -1,16 +1,20 @@
 """AIX-Zero Neural Network Architecture written 100% from scratch in PyTorch.
 
-Core architectural innovations over standard fixed-depth Transformers:
+Core architectural modules (configurable for head-to-head ablation):
 1. RMSNorm + 2D Rotary Position Embeddings (RoPE) + Grouped-Query Attention (GQA) + SwiGLU FFN.
 2. RecurrentReasoningBlock (Latent Ponder Core):
-   Instead of forcing every token through a static number of layers, the middle reasoning core
-   iterates K steps in continuous latent space with step-indexed embeddings and a learned
-   Adaptive Halting Gate p_halt = sigmoid(W_halt(h_t)), allowing deeper latent compute on
-   complex mathematical states before emitting tokens.
-3. ValueVerificationHead:
-   A built-in verifier head V(h) -> [0, 1] trained jointly to score whether a generated
-   reasoning trace is mathematically valid, enabling self-verified Best-of-N search without
-   any external teacher model.
+   Iterates K steps in continuous latent space with step-indexed embeddings and a learned
+   Adaptive Halting Gate p_halt = sigmoid(W_halt(h_t)).
+3. MixtureOfReasoningExperts (MoRE):
+   Replaces a monolithic FFN with N specialized SwiGLU expert networks and a Top-K sparse
+   router G(x) = TopK(softmax(W_router(x)), k), allowing separate experts to specialize in
+   arithmetic, algebra, modular number theory, and boolean logic.
+4. DifferentiableMemoryBank (Working-Memory Registers):
+   A bank of M persistent working-memory slots that hidden states read from and gated-write
+   into via attention, acting as a differentiable scratchpad across multi-step derivations.
+5. ValueVerificationHead:
+   Built-in verifier head V(h) -> [0, 1] trained jointly to score whether a generated
+   reasoning trace is mathematically valid.
 """
 
 from __future__ import annotations
@@ -26,17 +30,23 @@ import torch.nn.functional as F
 @dataclass
 class AIXZeroConfig:
     vocab_size: int = 104
-    d_model: int = 192
-    n_heads: int = 6
+    d_model: int = 128
+    n_heads: int = 4
     n_kv_heads: int = 2
-    d_ff: int = 512
-    n_encoder_layers: int = 2
-    n_recurrent_steps: int = 3  # Latent recurrent thinking iterations per token
-    n_decoder_layers: int = 2
-    max_seq_len: int = 256
+    d_ff: int = 256
+    n_encoder_layers: int = 1
+    n_recurrent_steps: int = 3  # Set to 1 for fixed-depth baseline
+    n_decoder_layers: int = 1
+    max_seq_len: int = 96
     rope_theta: float = 10000.0
     rms_eps: float = 1e-6
     dropout: float = 0.0
+    # Architectural switches for multi-architecture ablation
+    use_moe: bool = False
+    n_experts: int = 4
+    moe_top_k: int = 2
+    use_memory_bank: bool = False
+    n_memory_slots: int = 8
 
 
 class RMSNorm(nn.Module):
@@ -66,15 +76,14 @@ class RotaryEmbedding(nn.Module):
         inv_freq = 1.0 / (theta ** (torch.arange(0, head_dim, 2, dtype=torch.float32) / head_dim))
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         t = torch.arange(max_seq_len, dtype=torch.float32)
-        freqs = torch.outer(t, inv_freq)  # (seq_len, head_dim // 2)
+        freqs = torch.outer(t, inv_freq)
         self.register_buffer("cos_cached", torch.cos(freqs), persistent=False)
         self.register_buffer("sin_cached", torch.sin(freqs), persistent=False)
 
     def apply_rotary(self, x: torch.Tensor) -> torch.Tensor:
-        # x: (B, n_heads, T, head_dim)
         seq_len = x.shape[2]
         half = x.shape[-1] // 2
-        cos = self.cos_cached[:seq_len].unsqueeze(0).unsqueeze(0)  # (1, 1, T, half)
+        cos = self.cos_cached[:seq_len].unsqueeze(0).unsqueeze(0)
         sin = self.sin_cached[:seq_len].unsqueeze(0).unsqueeze(0)
         x1 = x[..., :half]
         x2 = x[..., half:]
@@ -121,57 +130,141 @@ class GroupedQueryAttention(nn.Module):
 class SwiGLUFFN(nn.Module):
     """SwiGLU Feed-Forward Network: W_down(SiLU(W_gate(x)) * W_up(x))."""
 
-    def __init__(self, config: AIXZeroConfig) -> None:
+    def __init__(self, config: AIXZeroConfig, d_ff_override: Optional[int] = None) -> None:
         super().__init__()
-        self.gate_proj = nn.Linear(config.d_model, config.d_ff, bias=False)
-        self.up_proj = nn.Linear(config.d_model, config.d_ff, bias=False)
-        self.down_proj = nn.Linear(config.d_ff, config.d_model, bias=False)
+        hidden_dim = d_ff_override if d_ff_override is not None else config.d_ff
+        self.gate_proj = nn.Linear(config.d_model, hidden_dim, bias=False)
+        self.up_proj = nn.Linear(config.d_model, hidden_dim, bias=False)
+        self.down_proj = nn.Linear(hidden_dim, config.d_model, bias=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))
 
 
-class TransformerBlock(nn.Module):
-    """Standard pre-RMSNorm Transformer block with GQA + SwiGLU."""
+class MixtureOfReasoningExperts(nn.Module):
+    """Top-K Sparse Mixture-of-Reasoning-Experts (MoRE) written from scratch.
 
-    def __init__(self, config: AIXZeroConfig) -> None:
-        super().__init__()
-        self.attn_norm = RMSNorm(config.d_model, config.rms_eps)
-        self.attn = GroupedQueryAttention(config)
-        self.ffn_norm = RMSNorm(config.d_model, config.rms_eps)
-        self.ffn = SwiGLUFFN(config)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.attn(self.attn_norm(x))
-        x = x + self.ffn(self.ffn_norm(x))
-        return x
-
-
-class RecurrentReasoningBlock(nn.Module):
-    """Latent-Recurrent Reasoning Core with Adaptive Halting Gate.
-
-    Iterates `n_recurrent_steps` times in continuous hidden space before token emission.
-    At each latent step k, injects a learned step embedding e_k and computes a soft
-    halting gate g_k = sigmoid(halt_proj(h_k)) that blends shallow and deep latent states.
+    Routes each token representation x to the top-k specialized SwiGLU experts:
+      y = sum_{i in TopK(p)} p_i * Expert_i(x)
+    and tracks expert utilization entropy for load balancing.
     """
 
     def __init__(self, config: AIXZeroConfig) -> None:
         super().__init__()
-        self.n_steps = config.n_recurrent_steps
-        self.step_embeddings = nn.Embedding(config.n_recurrent_steps, config.d_model)
-        self.core_block = TransformerBlock(config)
-        self.halt_gate = nn.Linear(config.d_model, 1, bias=True)
+        self.n_experts = config.n_experts
+        self.top_k = min(config.moe_top_k, config.n_experts)
+        # Each expert uses d_ff // 2 so active parameter compute per token matches a dense layer
+        expert_ff = max(64, config.d_ff // 2)
+        self.router = nn.Linear(config.d_model, config.n_experts, bias=False)
+        self.experts = nn.ModuleList(
+            [SwiGLUFFN(config, d_ff_override=expert_ff) for _ in range(config.n_experts)]
+        )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        # x: (B, T, D)
+        router_logits = self.router(x)  # (B, T, E)
+        router_probs = F.softmax(router_logits, dim=-1)
+        top_vals, top_idx = torch.topk(router_probs, k=self.top_k, dim=-1)  # (B, T, k)
+        top_vals = top_vals / (top_vals.sum(dim=-1, keepdim=True) + 1e-8)
+
+        # Compute expert outputs and gather active top-k combinations
+        expert_outs = torch.stack([exp(x) for exp in self.experts], dim=-2)  # (B, T, E, D)
+        gather_idx = top_idx.unsqueeze(-1).expand(-1, -1, -1, x.shape[-1])  # (B, T, k, D)
+        selected_outs = torch.gather(expert_outs, dim=-2, index=gather_idx)  # (B, T, k, D)
+        combined = (selected_outs * top_vals.unsqueeze(-1)).sum(dim=-2)  # (B, T, D)
+
+        # Load-balancing auxiliary loss (encourages uniform marginal expert probability)
+        mean_prob = router_probs.mean(dim=(0, 1))  # (E,)
+        target_uniform = 1.0 / self.n_experts
+        aux_loss = ((mean_prob - target_uniform) ** 2).sum() * self.n_experts
+        return combined, aux_loss
+
+
+class DifferentiableMemoryBank(nn.Module):
+    """Differentiable Working-Memory Register Bank written from scratch.
+
+    Maintains M persistent learnable memory register slots R in R^{M x D}.
+    During reasoning, hidden states h query the memory registers via cross-attention
+    and blend retrieved scratchpad values via a learned sigmoid memory gate.
+    """
+
+    def __init__(self, config: AIXZeroConfig) -> None:
+        super().__init__()
+        self.n_slots = config.n_memory_slots
+        self.d_model = config.d_model
+        self.norm = RMSNorm(config.d_model, config.rms_eps)
+        self.memory_keys = nn.Parameter(torch.randn(config.n_memory_slots, config.d_model) * 0.02)
+        self.memory_values = nn.Parameter(torch.randn(config.n_memory_slots, config.d_model) * 0.02)
+        self.q_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.out_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.gate = nn.Linear(config.d_model, config.d_model, bias=True)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (B, T, D)
+        h = self.norm(x)
+        q = self.q_proj(h)  # (B, T, D)
+        scale = self.d_model ** -0.5
+        attn_scores = torch.matmul(q, self.memory_keys.t()) * scale  # (B, T, M)
+        attn_weights = F.softmax(attn_scores, dim=-1)
+        retrieved = torch.matmul(attn_weights, self.memory_values)  # (B, T, D)
+        mem_delta = self.out_proj(retrieved)
+        g = torch.sigmoid(self.gate(h))
+        return x + g * mem_delta
+
+
+class TransformerBlock(nn.Module):
+    """Pre-RMSNorm Transformer block supporting either dense SwiGLU or sparse MoRE."""
+
+    def __init__(self, config: AIXZeroConfig, use_moe: bool = False) -> None:
+        super().__init__()
+        self.use_moe = use_moe
+        self.attn_norm = RMSNorm(config.d_model, config.rms_eps)
+        self.attn = GroupedQueryAttention(config)
+        self.ffn_norm = RMSNorm(config.d_model, config.rms_eps)
+        if use_moe:
+            self.moe = MixtureOfReasoningExperts(config)
+        else:
+            self.ffn = SwiGLUFFN(config)
+
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        x = x + self.attn(self.attn_norm(x))
+        if self.use_moe:
+            ff_out, aux_loss = self.moe(self.ffn_norm(x))
+            x = x + ff_out
+            return x, aux_loss
+        else:
+            x = x + self.ffn(self.ffn_norm(x))
+            return x, torch.tensor(0.0, device=x.device, dtype=x.dtype)
+
+
+class RecurrentReasoningBlock(nn.Module):
+    """Latent-Recurrent Reasoning Core with Adaptive Halting Gate, optional MoRE, and Memory Bank."""
+
+    def __init__(self, config: AIXZeroConfig) -> None:
+        super().__init__()
+        self.n_steps = config.n_recurrent_steps
+        self.use_memory_bank = config.use_memory_bank
+        self.step_embeddings = nn.Embedding(config.n_recurrent_steps, config.d_model)
+        self.core_block = TransformerBlock(config, use_moe=config.use_moe)
+        if config.use_memory_bank:
+            self.memory_bank = DifferentiableMemoryBank(config)
+        self.halt_gate = nn.Linear(config.d_model, 1, bias=True)
+
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         B, T, D = x.shape
         h = x
         accumulated_state = torch.zeros_like(x)
         remaining_prob = torch.ones((B, T, 1), device=x.device, dtype=x.dtype)
         ponder_steps = torch.zeros((B, T, 1), device=x.device, dtype=x.dtype)
+        total_aux_loss = torch.tensor(0.0, device=x.device, dtype=x.dtype)
 
         for step_idx in range(self.n_steps):
             step_emb = self.step_embeddings.weight[step_idx].view(1, 1, D)
-            h = self.core_block(h + step_emb)
+            h, aux_loss = self.core_block(h + step_emb)
+            total_aux_loss = total_aux_loss + aux_loss
+            if self.use_memory_bank:
+                h = self.memory_bank(h)
+
             if step_idx == self.n_steps - 1:
                 p_halt = remaining_prob
             else:
@@ -180,7 +273,7 @@ class RecurrentReasoningBlock(nn.Module):
             remaining_prob = remaining_prob - p_halt
             ponder_steps = ponder_steps + (step_idx + 1) * p_halt
 
-        return accumulated_state, ponder_steps.mean()
+        return accumulated_state, ponder_steps.mean(), total_aux_loss / max(1, self.n_steps)
 
 
 class ValueVerificationHead(nn.Module):
@@ -194,9 +287,9 @@ class ValueVerificationHead(nn.Module):
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         h = self.norm(hidden_states)
-        pooled = h.mean(dim=1)  # Sequence-pooled representation (B, D)
+        pooled = h.mean(dim=1)
         score = torch.sigmoid(self.fc2(F.silu(self.fc1(pooled))))
-        return score.squeeze(-1)  # (B,)
+        return score.squeeze(-1)
 
 
 class AIXZeroModel(nn.Module):
@@ -207,11 +300,11 @@ class AIXZeroModel(nn.Module):
         self.config = config
         self.token_emb = nn.Embedding(config.vocab_size, config.d_model)
         self.encoder_layers = nn.ModuleList(
-            [TransformerBlock(config) for _ in range(config.n_encoder_layers)]
+            [TransformerBlock(config, use_moe=False) for _ in range(config.n_encoder_layers)]
         )
         self.latent_reasoning_core = RecurrentReasoningBlock(config)
         self.decoder_layers = nn.ModuleList(
-            [TransformerBlock(config) for _ in range(config.n_decoder_layers)]
+            [TransformerBlock(config, use_moe=False) for _ in range(config.n_decoder_layers)]
         )
         self.final_norm = RMSNorm(config.d_model, config.rms_eps)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
@@ -246,12 +339,12 @@ class AIXZeroModel(nn.Module):
     ) -> Dict[str, torch.Tensor]:
         h = self.token_emb(input_ids)
         for layer in self.encoder_layers:
-            h = layer(h)
+            h, _ = layer(h)
 
-        h, ponder_depth = self.latent_reasoning_core(h)
+        h, ponder_depth, moe_aux_loss = self.latent_reasoning_core(h)
 
         for layer in self.decoder_layers:
-            h = layer(h)
+            h, _ = layer(h)
 
         h_norm = self.final_norm(h)
         logits = self.lm_head(h_norm)
@@ -261,6 +354,7 @@ class AIXZeroModel(nn.Module):
             "logits": logits,
             "value_pred": value_pred,
             "ponder_depth": ponder_depth,
+            "moe_aux_loss": moe_aux_loss,
         }
 
         if labels is not None:
@@ -269,9 +363,9 @@ class AIXZeroModel(nn.Module):
             ce_loss = F.cross_entropy(
                 shift_logits.view(-1, self.config.vocab_size),
                 shift_labels.view(-1),
-                ignore_index=0,  # <pad> token ID is 0
+                ignore_index=0,
             )
-            total_loss = ce_loss
+            total_loss = ce_loss + 0.02 * moe_aux_loss
             out["ce_loss"] = ce_loss
 
             if verify_targets is not None:

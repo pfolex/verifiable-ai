@@ -1,0 +1,244 @@
+{
+  "architectures": [
+    {
+      "architecture_name": "Arch-1: Fixed-Depth Baseline (Standard Transformer)",
+      "config": {
+        "n_recurrent_steps": 1,
+        "use_moe": false,
+        "n_experts": 1,
+        "use_memory_bank": false,
+        "n_memory_slots": 0
+      },
+      "parameters": {
+        "total_parameters": 478338,
+        "latent_recurrent_core_parameters": 147969,
+        "value_verifier_parameters": 8449,
+        "effective_virtual_parameters_with_looping": 478338
+      },
+      "training_seconds": 44.04,
+      "epoch1_ce_loss": 3.2336,
+      "final_ce_loss": 0.3494,
+      "final_verifier_bce_loss": 0.4335,
+      "final_moe_aux_loss": 0.0,
+      "pure_neural_best_of_3": {
+        "correct": 9,
+        "total": 20,
+        "accuracy_pct": 45.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 0.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 60.0,
+          "ALGEBRA_SOLVE": 20.0
+        },
+        "mean_ponder_steps": 1.0,
+        "mean_verifier_confidence": 0.8432
+      },
+      "step_alu_best_of_3": {
+        "correct": 6,
+        "total": 20,
+        "accuracy_pct": 30.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 0.0,
+          "LOGIC_DEDUCT": 80.0,
+          "MODULAR_NT": 40.0,
+          "ALGEBRA_SOLVE": 0.0
+        },
+        "mean_ponder_steps": 1.0,
+        "mean_verifier_confidence": 0.8432
+      },
+      "grounded_alu_best_of_3": {
+        "correct": 20,
+        "total": 20,
+        "accuracy_pct": 100.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 100.0
+        },
+        "mean_ponder_steps": 1.0,
+        "mean_verifier_confidence": 0.8437
+      }
+    },
+    {
+      "architecture_name": "Arch-2: AIX-Zero-Recurrent (3-Step Latent Ponder Core)",
+      "config": {
+        "n_recurrent_steps": 3,
+        "use_moe": false,
+        "n_experts": 1,
+        "use_memory_bank": false,
+        "n_memory_slots": 0
+      },
+      "parameters": {
+        "total_parameters": 478594,
+        "latent_recurrent_core_parameters": 148225,
+        "value_verifier_parameters": 8449,
+        "effective_virtual_parameters_with_looping": 775044
+      },
+      "training_seconds": 68.1,
+      "epoch1_ce_loss": 3.2613,
+      "final_ce_loss": 0.1326,
+      "final_verifier_bce_loss": 0.4291,
+      "final_moe_aux_loss": 0.0,
+      "pure_neural_best_of_3": {
+        "correct": 6,
+        "total": 20,
+        "accuracy_pct": 30.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 20.0,
+          "LOGIC_DEDUCT": 80.0,
+          "MODULAR_NT": 20.0,
+          "ALGEBRA_SOLVE": 0.0
+        },
+        "mean_ponder_steps": 1.001,
+        "mean_verifier_confidence": 0.8486
+      },
+      "step_alu_best_of_3": {
+        "correct": 19,
+        "total": 20,
+        "accuracy_pct": 95.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 80.0
+        },
+        "mean_ponder_steps": 1.001,
+        "mean_verifier_confidence": 0.8482
+      },
+      "grounded_alu_best_of_3": {
+        "correct": 20,
+        "total": 20,
+        "accuracy_pct": 100.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 100.0
+        },
+        "mean_ponder_steps": 1.001,
+        "mean_verifier_confidence": 0.8512
+      }
+    },
+    {
+      "architecture_name": "Arch-3: AIX-Zero-MoRE (Latent Ponder + 4-Expert Top-2 MoE)",
+      "config": {
+        "n_recurrent_steps": 3,
+        "use_moe": true,
+        "n_experts": 4,
+        "use_memory_bank": false,
+        "n_memory_slots": 0
+      },
+      "parameters": {
+        "total_parameters": 577410,
+        "latent_recurrent_core_parameters": 247041,
+        "value_verifier_parameters": 8449,
+        "effective_virtual_parameters_with_looping": 1071492
+      },
+      "training_seconds": 93.39,
+      "epoch1_ce_loss": 3.2222,
+      "final_ce_loss": 0.1673,
+      "final_verifier_bce_loss": 0.4331,
+      "final_moe_aux_loss": 0.00217,
+      "pure_neural_best_of_3": {
+        "correct": 9,
+        "total": 20,
+        "accuracy_pct": 45.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 20.0,
+          "LOGIC_DEDUCT": 80.0,
+          "MODULAR_NT": 60.0,
+          "ALGEBRA_SOLVE": 20.0
+        },
+        "mean_ponder_steps": 1.007,
+        "mean_verifier_confidence": 0.8336
+      },
+      "step_alu_best_of_3": {
+        "correct": 15,
+        "total": 20,
+        "accuracy_pct": 75.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 80.0,
+          "ALGEBRA_SOLVE": 20.0
+        },
+        "mean_ponder_steps": 1.007,
+        "mean_verifier_confidence": 0.8336
+      },
+      "grounded_alu_best_of_3": {
+        "correct": 20,
+        "total": 20,
+        "accuracy_pct": 100.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 100.0
+        },
+        "mean_ponder_steps": 1.007,
+        "mean_verifier_confidence": 0.8338
+      }
+    },
+    {
+      "architecture_name": "Arch-4: AIX-Zero-v2-Unified (Latent Ponder + 4-Expert MoRE + 8-Slot Memory Bank)",
+      "config": {
+        "n_recurrent_steps": 3,
+        "use_moe": true,
+        "n_experts": 4,
+        "use_memory_bank": true,
+        "n_memory_slots": 8
+      },
+      "parameters": {
+        "total_parameters": 628866,
+        "latent_recurrent_core_parameters": 298497,
+        "value_verifier_parameters": 8449,
+        "effective_virtual_parameters_with_looping": 1225860
+      },
+      "training_seconds": 112.92,
+      "epoch1_ce_loss": 3.1951,
+      "final_ce_loss": 0.1973,
+      "final_verifier_bce_loss": 0.4317,
+      "final_moe_aux_loss": 0.00241,
+      "pure_neural_best_of_3": {
+        "correct": 8,
+        "total": 20,
+        "accuracy_pct": 40.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 0.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 40.0,
+          "ALGEBRA_SOLVE": 20.0
+        },
+        "mean_ponder_steps": 1.316,
+        "mean_verifier_confidence": 0.844
+      },
+      "step_alu_best_of_3": {
+        "correct": 15,
+        "total": 20,
+        "accuracy_pct": 75.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 80.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 20.0
+        },
+        "mean_ponder_steps": 1.316,
+        "mean_verifier_confidence": 0.8447
+      },
+      "grounded_alu_best_of_3": {
+        "correct": 20,
+        "total": 20,
+        "accuracy_pct": 100.0,
+        "domain_accuracy_pct": {
+          "ARITH_CHAIN": 100.0,
+          "LOGIC_DEDUCT": 100.0,
+          "MODULAR_NT": 100.0,
+          "ALGEBRA_SOLVE": 100.0
+        },
+        "mean_ponder_steps": 1.319,
+        "mean_verifier_confidence": 0.8441
+      }
+    }
+  ]
+}
