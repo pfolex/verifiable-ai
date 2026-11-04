@@ -246,7 +246,12 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
     if "model" not in _AIX_ZERO_CACHE:
         tok = AIXZeroTokenizer(use_word_vocab=True)
         ckpt_dir = REPO_ROOT / "aix_zero" / "checkpoints"
-        for cand_name in ("aix_zero_v8.safetensors", "aix_zero_v7_10min.safetensors", "aix_zero_v4.safetensors"):
+        for cand_name in (
+            "aix_zero_v9_kip.safetensors",
+            "aix_zero_v8.safetensors",
+            "aix_zero_v7_10min.safetensors",
+            "aix_zero_v4.safetensors",
+        ):
             cand_path = ckpt_dir / cand_name
             if cand_path.exists():
                 ckpt_path = cand_path

@@ -42,10 +42,11 @@ from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
 def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
     v8_ckpt = ckpt_dir / "aix_zero_v8.safetensors"
     v7_ckpt = ckpt_dir / "aix_zero_v7_10min.safetensors"
 
-    active_ckpt = v8_ckpt if v8_ckpt.exists() else v7_ckpt
+    active_ckpt = v9_ckpt if v9_ckpt.exists() else (v8_ckpt if v8_ckpt.exists() else v7_ckpt)
     state = load_file(str(active_ckpt))
     ckpt_vocab = state["token_emb.weight"].shape[0]
 
@@ -150,6 +151,15 @@ def run_live_teach(
         f"  [LIVE PLASTICITY] Distilled `{prompt_part}` in 10 gradient steps ({elapsed_ms:.1f}ms) | "
         f"Weighted CE: {init_loss:.4f} -> {final_loss:.4f}"
     )
+    # Document the newly learned lesson in the Knowledge Is Power Codex
+    codex_dir = Path(__file__).resolve().parent / "knowledge_codex"
+    codex_dir.mkdir(parents=True, exist_ok=True)
+    live_log = codex_dir / "LIVE_TAUGHT_LESSONS.md"
+    if not live_log.exists():
+        live_log.write_text("# Knowledge Is Power: Live Interactive Lessons\n\n| Prompt | Verified Target Trace | Initial CE | Final CE | Latency |\n| :--- | :--- | :---: | :---: | :---: |\n")
+    with live_log.open("a") as f:
+        f.write(f"| `{prompt_part}` | `{target_part}` | `{init_loss:.4f}` | `{final_loss:.4f}` | `{elapsed_ms:.1f}ms` |\n")
+    print(f"  [KNOWLEDGE IS POWER] Documented lesson in `{live_log.name}`")
     run_query(model, tokenizer, prompt_part)
 
 

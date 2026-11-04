@@ -1,0 +1,1479 @@
+{
+  "system": "AIX-Zero Knowledge Is Power (v9-KIP)",
+  "updated_at": "2026-11-04T20:17:30.883336+00:00",
+  "checkpoint": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v9_kip.safetensors",
+  "vocab_size": 128,
+  "parameters": {
+    "total_parameters": 815874,
+    "latent_recurrent_core_parameters": 479105,
+    "value_verifier_parameters": 8449,
+    "effective_virtual_parameters_with_looping": 1774084
+  },
+  "total_domains": 15,
+  "pre_kip_new_domains_eval": {
+    "correct": 0,
+    "total": 10,
+    "accuracy_pct": 0.0,
+    "domain_accuracy_pct": {
+      "ELECTRICAL_POWER": 0.0,
+      "FINANCE_INTEREST": 0.0
+    },
+    "mean_ponder_steps": 1.054,
+    "mean_verifier_confidence": 0.8398,
+    "sample_outputs": [
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
+        "generated": "Q:Elec:V=7,I=3,loss=1,P=<think>3*1=12;12+1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "20",
+        "correct": false,
+        "verifier_confidence": 0.8551,
+        "latent_ponder_steps": 1.051
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=6,P=8,B=",
+        "generated": "Q:Fin:r=5,t=6,P=8,B=<think>5*8=4;4+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "38",
+        "correct": false,
+        "verifier_confidence": 0.8317,
+        "latent_ponder_steps": 1.059
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=4,t=3,P=8,B=",
+        "generated": "Q:Fin:r=4,t=3,P=8,B=<think>4*8=12;12+4=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "20",
+        "correct": false,
+        "verifier_confidence": 0.8392,
+        "latent_ponder_steps": 1.056
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=6,P=10,B=",
+        "generated": "Q:Fin:r=5,t=6,P=10,B=<think>5*4=20;20+1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "40",
+        "correct": false,
+        "verifier_confidence": 0.8345,
+        "latent_ponder_steps": 1.054
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=2,t=2,P=5,B=",
+        "generated": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=12;12+5=19</think><ans>19</ans>",
+        "predicted": "19",
+        "gold": "9",
+        "correct": false,
+        "verifier_confidence": 0.8339,
+        "latent_ponder_steps": 1.056
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
+        "generated": "Q:Elec:V=7,I=2,loss=2,P=<think>2*2=12;12+1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "12",
+        "correct": false,
+        "verifier_confidence": 0.8443,
+        "latent_ponder_steps": 1.051
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=5,P=8,B=",
+        "generated": "Q:Fin:r=5,t=5,P=8,B=<think>5*8=30;30+8=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "33",
+        "correct": false,
+        "verifier_confidence": 0.8319,
+        "latent_ponder_steps": 1.056
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
+        "generated": "Q:Elec:V=5,I=5,loss=1,P=<think>5*1=12;12+1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "24",
+        "correct": false,
+        "verifier_confidence": 0.8453,
+        "latent_ponder_steps": 1.051
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
+        "generated": "Q:Elec:V=5,I=5,loss=2,P=<think>5*2=12;12+2=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "23",
+        "correct": false,
+        "verifier_confidence": 0.8457,
+        "latent_ponder_steps": 1.051
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
+        "generated": "Q:Elec:V=5,I=4,loss=4,P=<think>4*4=12;12+4=17</think><ans>17</ans>",
+        "predicted": "17",
+        "gold": "16",
+        "correct": false,
+        "verifier_confidence": 0.8364,
+        "latent_ponder_steps": 1.051
+      }
+    ]
+  },
+  "post_kip_new_domains_eval": {
+    "correct": 10,
+    "total": 10,
+    "accuracy_pct": 100.0,
+    "domain_accuracy_pct": {
+      "ELECTRICAL_POWER": 100.0,
+      "FINANCE_INTEREST": 100.0
+    },
+    "mean_ponder_steps": 1.0,
+    "mean_verifier_confidence": 0.8438,
+    "sample_outputs": [
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
+        "generated": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8425,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=6,P=8,B=",
+        "generated": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>",
+        "predicted": "38",
+        "gold": "38",
+        "correct": true,
+        "verifier_confidence": 0.8432,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=4,t=3,P=8,B=",
+        "generated": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8416,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=6,P=10,B=",
+        "generated": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>",
+        "predicted": "40",
+        "gold": "40",
+        "correct": true,
+        "verifier_confidence": 0.8471,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=2,t=2,P=5,B=",
+        "generated": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8375,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
+        "generated": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "12",
+        "correct": true,
+        "verifier_confidence": 0.8408,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "FINANCE_INTEREST",
+        "prompt": "Q:Fin:r=5,t=5,P=8,B=",
+        "generated": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>",
+        "predicted": "33",
+        "gold": "33",
+        "correct": true,
+        "verifier_confidence": 0.845,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
+        "generated": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "24",
+        "correct": true,
+        "verifier_confidence": 0.8491,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
+        "generated": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>",
+        "predicted": "23",
+        "gold": "23",
+        "correct": true,
+        "verifier_confidence": 0.8444,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ELECTRICAL_POWER",
+        "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
+        "generated": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>",
+        "predicted": "16",
+        "gold": "16",
+        "correct": true,
+        "verifier_confidence": 0.8469,
+        "latent_ponder_steps": 1.0
+      }
+    ]
+  },
+  "global_15_domain_eval": {
+    "correct": 75,
+    "total": 75,
+    "accuracy_pct": 100.0,
+    "domain_accuracy_pct": {
+      "ALGEBRA_SOLVE": 100.0,
+      "CALCULUS_DERIV": 100.0,
+      "WORD_PROBLEM": 100.0,
+      "SYSTEM_2X2": 100.0,
+      "ARITH_CHAIN": 100.0,
+      "CODE_TRACE": 100.0,
+      "LOGIC_DEDUCT": 100.0,
+      "MODULAR_NT": 100.0,
+      "QUADRATIC_EVAL": 100.0,
+      "PHYSICS_KINEMATICS": 100.0,
+      "GEOMETRY_AREA": 100.0,
+      "NUMBER_SEQ": 100.0,
+      "MULTI_STEP_3": 100.0,
+      "ELECTRICAL_POWER": 100.0,
+      "FINANCE_INTEREST": 100.0
+    },
+    "mean_ponder_steps": 1.008,
+    "mean_verifier_confidence": 0.8386,
+    "sample_outputs": [
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=21,x=",
+        "generated": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "4",
+        "correct": true,
+        "verifier_confidence": 0.8524,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+        "generated": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "11",
+        "correct": true,
+        "verifier_confidence": 0.8493,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+        "generated": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
+        "correct": true,
+        "verifier_confidence": 0.8249,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "12",
+        "correct": true,
+        "verifier_confidence": 0.8321,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "SYSTEM_2X2",
+        "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+        "generated": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8466,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+        "generated": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+        "predicted": "19",
+        "gold": "19",
+        "correct": true,
+        "verifier_confidence": 0.8227,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(4*3)+3=",
+        "generated": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "15",
+        "correct": true,
+        "verifier_confidence": 0.8515,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8297,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=16,x=",
+        "generated": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+        "predicted": "3",
+        "gold": "3",
+        "correct": true,
+        "verifier_confidence": 0.8519,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+        "generated": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "22",
+        "correct": true,
+        "verifier_confidence": 0.83,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*2>5?",
+        "generated": "Q:2*2>5?<think>2*2=4;4>5->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.8394,
+        "latent_ponder_steps": 1.1
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+        "generated": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+        "predicted": "36",
+        "gold": "36",
+        "correct": true,
+        "verifier_confidence": 0.831,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+        "generated": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+        "predicted": "45",
+        "gold": "45",
+        "correct": true,
+        "verifier_confidence": 0.8316,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+        "generated": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+        "predicted": "25",
+        "gold": "25",
+        "correct": true,
+        "verifier_confidence": 0.8292,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(9+7)%3=",
+        "generated": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.8276,
+        "latent_ponder_steps": 1.05
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+        "generated": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+        "predicted": "32",
+        "gold": "32",
+        "correct": true,
+        "verifier_confidence": 0.8286,
+        "latent_ponder_steps": 1.0
+      }
+    ]
+  },
+  "domains": {
+    "ARITH_CHAIN": {
+      "title": "Two-Step Order-of-Operations Arithmetic",
+      "category": "Foundational Mathematics",
+      "introduced_in": "v1",
+      "prefix": "Q:",
+      "formula": "R = (a * b) +/- c",
+      "prompt_template": "Q:{a}*{b}+{c}=",
+      "derivation_grammar": "<think>{a}*{b}={p};{p}+{c}={r}</think><ans>{r}</ans>",
+      "summary": "Evaluates precedence-ordered multiplication followed by addition or subtraction.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/arith_chain.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:(4*3)+3=",
+          "trace": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8515,
+          "ponder_steps": 1.0,
+          "latency_ms": 169.92
+        },
+        {
+          "prompt": "Q:(7*7)+1=",
+          "trace": "Q:(7*7)+1=<think>7*7=49;49+1=50</think><ans>50</ans>",
+          "predicted": "50",
+          "gold": "50",
+          "verified": true,
+          "verifier_confidence": 0.8186,
+          "ponder_steps": 1.0,
+          "latency_ms": 148.33
+        },
+        {
+          "prompt": "Q:(6*3)+1=",
+          "trace": "Q:(6*3)+1=<think>6*3=18;18+1=19</think><ans>19</ans>",
+          "predicted": "19",
+          "gold": "19",
+          "verified": true,
+          "verifier_confidence": 0.8363,
+          "ponder_steps": 1.0,
+          "latency_ms": 153.38
+        },
+        {
+          "prompt": "Q:(6*6)+3=",
+          "trace": "Q:(6*6)+3=<think>6*6=36;36+3=39</think><ans>39</ans>",
+          "predicted": "39",
+          "gold": "39",
+          "verified": true,
+          "verifier_confidence": 0.8393,
+          "ponder_steps": 1.0,
+          "latency_ms": 153.92
+        },
+        {
+          "prompt": "Q:(4*2)+1=",
+          "trace": "Q:(4*2)+1=<think>4*2=8;8+1=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8443,
+          "ponder_steps": 1.0,
+          "latency_ms": 143.9
+        }
+      ]
+    },
+    "ALGEBRA_SOLVE": {
+      "title": "Linear Single-Variable Algebraic Equations",
+      "category": "Symbolic Algebra",
+      "introduced_in": "v1",
+      "prefix": "Q:",
+      "formula": "a*x + b = c  ==>  x = (c - b) / a",
+      "prompt_template": "Q:{a}x+{b}={c},x=",
+      "derivation_grammar": "<think>{c}-{b}={d};{d}/{a}={x}</think><ans>{x}</ans>",
+      "summary": "Isolates unknown variable x by subtracting constant offset b and dividing by coefficient a.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/algebra_solve.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:5x+1=21,x=",
+          "trace": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+          "predicted": "4",
+          "gold": "4",
+          "verified": true,
+          "verifier_confidence": 0.8524,
+          "ponder_steps": 1.0,
+          "latency_ms": 182.58
+        },
+        {
+          "prompt": "Q:5x+1=16,x=",
+          "trace": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+          "predicted": "3",
+          "gold": "3",
+          "verified": true,
+          "verifier_confidence": 0.8519,
+          "ponder_steps": 1.0,
+          "latency_ms": 164.83
+        },
+        {
+          "prompt": "Q:4x+2=18,x=",
+          "trace": "Q:4x+2=18,x=<think>18-2=16;16/4=4</think><ans>4</ans>",
+          "predicted": "4",
+          "gold": "4",
+          "verified": true,
+          "verifier_confidence": 0.8477,
+          "ponder_steps": 1.0,
+          "latency_ms": 195.62
+        },
+        {
+          "prompt": "Q:2x+2=12,x=",
+          "trace": "Q:2x+2=12,x=<think>12-2=10;10/2=5</think><ans>5</ans>",
+          "predicted": "5",
+          "gold": "5",
+          "verified": true,
+          "verifier_confidence": 0.8466,
+          "ponder_steps": 1.0,
+          "latency_ms": 192.06
+        },
+        {
+          "prompt": "Q:6x+4=34,x=",
+          "trace": "Q:6x+4=34,x=<think>34-4=30;30/6=5</think><ans>5</ans>",
+          "predicted": "5",
+          "gold": "5",
+          "verified": true,
+          "verifier_confidence": 0.8539,
+          "ponder_steps": 1.0,
+          "latency_ms": 141.88
+        }
+      ]
+    },
+    "MODULAR_NT": {
+      "title": "Modular Number Theory & Congruence",
+      "category": "Number Theory",
+      "introduced_in": "v1",
+      "prefix": "Q:(",
+      "formula": "R = (a + b) mod m",
+      "prompt_template": "Q:({a}+{b})%{m}=",
+      "derivation_grammar": "<think>{a}+{b}={s};{s}%{m}={r}</think><ans>{r}</ans>",
+      "summary": "Computes parenthetical sum followed by Euclidean remainder modulo m.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/modular_nt.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:(9+7)%3=",
+          "trace": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8276,
+          "ponder_steps": 1.05,
+          "latency_ms": 131.35
+        },
+        {
+          "prompt": "Q:(7+5)%4=",
+          "trace": "Q:(7+5)%4=<think>7+5=12;12%4=0</think><ans>0</ans>",
+          "predicted": "0",
+          "gold": "0",
+          "verified": true,
+          "verifier_confidence": 0.8242,
+          "ponder_steps": 1.033,
+          "latency_ms": 148.94
+        },
+        {
+          "prompt": "Q:(8+5)%4=",
+          "trace": "Q:(8+5)%4=<think>8+5=13;13%4=1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8312,
+          "ponder_steps": 1.034,
+          "latency_ms": 142.67
+        },
+        {
+          "prompt": "Q:(11+2)%3=",
+          "trace": "Q:(11+2)%3=<think>11+2=13;13%3=1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8566,
+          "ponder_steps": 1.033,
+          "latency_ms": 175.91
+        },
+        {
+          "prompt": "Q:(5+7)%4=",
+          "trace": "Q:(5+7)%4=<think>5+7=12;12%4=0</think><ans>0</ans>",
+          "predicted": "0",
+          "gold": "0",
+          "verified": true,
+          "verifier_confidence": 0.8265,
+          "ponder_steps": 1.055,
+          "latency_ms": 151.93
+        }
+      ]
+    },
+    "LOGIC_DEDUCT": {
+      "title": "Relational Inequality & Boolean Deduction",
+      "category": "Formal Logic",
+      "introduced_in": "v1",
+      "prefix": "Q:",
+      "formula": "B = 1 if (a * b > c) else 0",
+      "prompt_template": "Q:{a}*{b}>{c}?",
+      "derivation_grammar": "<think>{a}*{b}={p};{p}>{c}->{b_val}</think><ans>{b_val}</ans>",
+      "summary": "Evaluates product a*b and performs strict relational comparison against threshold c.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/logic_deduct.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:2*2>5?",
+          "trace": "Q:2*2>5?<think>2*2=4;4>5->0</think><ans>0</ans>",
+          "predicted": "0",
+          "gold": "0",
+          "verified": true,
+          "verifier_confidence": 0.8394,
+          "ponder_steps": 1.1,
+          "latency_ms": 155.98
+        },
+        {
+          "prompt": "Q:2*4>2?",
+          "trace": "Q:2*4>2?<think>2*4=8;8>2->1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8537,
+          "ponder_steps": 1.1,
+          "latency_ms": 145.49
+        },
+        {
+          "prompt": "Q:2*4>1?",
+          "trace": "Q:2*4>1?<think>2*4=8;8>1->1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8565,
+          "ponder_steps": 1.1,
+          "latency_ms": 118.33
+        },
+        {
+          "prompt": "Q:2*8>8?",
+          "trace": "Q:2*8>8?<think>2*8=16;16>8->1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8182,
+          "ponder_steps": 1.046,
+          "latency_ms": 177.45
+        },
+        {
+          "prompt": "Q:2*7>7?",
+          "trace": "Q:2*7>7?<think>2*7=14;14>7->1</think><ans>1</ans>",
+          "predicted": "1",
+          "gold": "1",
+          "verified": true,
+          "verifier_confidence": 0.8401,
+          "ponder_steps": 1.046,
+          "latency_ms": 135.87
+        }
+      ]
+    },
+    "WORD_PROBLEM": {
+      "title": "Natural-Language Inventory & Counting Word Problems",
+      "category": "Applied Mathematics",
+      "introduced_in": "v3",
+      "prefix": "Q:Word:",
+      "formula": "Total = (packs * items_per_pack) +/- delta",
+      "prompt_template": "Q:Word:Mia has {a} packs of {b} and buys {c} total=",
+      "derivation_grammar": "<think>{a}*{b}={p};{p}+{c}={tot}</think><ans>{tot}</ans>",
+      "summary": "Translates English word narratives into two-step multiplication and accumulation.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/word_problem.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+          "trace": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+          "predicted": "27",
+          "gold": "27",
+          "verified": true,
+          "verifier_confidence": 0.8249,
+          "ponder_steps": 1.0,
+          "latency_ms": 111.92
+        },
+        {
+          "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+          "trace": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+          "predicted": "12",
+          "gold": "12",
+          "verified": true,
+          "verifier_confidence": 0.8321,
+          "ponder_steps": 1.0,
+          "latency_ms": 156.69
+        },
+        {
+          "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+          "trace": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+          "predicted": "20",
+          "gold": "20",
+          "verified": true,
+          "verifier_confidence": 0.8297,
+          "ponder_steps": 1.0,
+          "latency_ms": 169.29
+        },
+        {
+          "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+          "trace": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+          "predicted": "25",
+          "gold": "25",
+          "verified": true,
+          "verifier_confidence": 0.8292,
+          "ponder_steps": 1.0,
+          "latency_ms": 141.85
+        },
+        {
+          "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+          "trace": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+          "predicted": "32",
+          "gold": "32",
+          "verified": true,
+          "verifier_confidence": 0.8286,
+          "ponder_steps": 1.0,
+          "latency_ms": 137.61
+        }
+      ]
+    },
+    "CALCULUS_DERIV": {
+      "title": "Symbolic Polynomial Differentiation & Point Evaluation",
+      "category": "Differential Calculus",
+      "introduced_in": "v3",
+      "prefix": "Q:Calc:",
+      "formula": "d/dx(a*x^2 + b*x) |_{x=k} = 2*a*k + b",
+      "prompt_template": "Q:Calc:d/dx({a}x^2+{b}x)@x={k}=",
+      "derivation_grammar": "<think>{a}*2*{k}={t1};{t1}+{b}={ans}</think><ans>{ans}</ans>",
+      "summary": "Applies power rule d/dx(a*x^2 + b*x) = 2*a*x + b and evaluates at x = k.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/calculus_deriv.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+          "trace": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+          "predicted": "11",
+          "gold": "11",
+          "verified": true,
+          "verifier_confidence": 0.8493,
+          "ponder_steps": 1.0,
+          "latency_ms": 135.8
+        },
+        {
+          "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+          "trace": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+          "predicted": "19",
+          "gold": "19",
+          "verified": true,
+          "verifier_confidence": 0.8227,
+          "ponder_steps": 1.0,
+          "latency_ms": 208.75
+        },
+        {
+          "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+          "trace": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+          "predicted": "45",
+          "gold": "45",
+          "verified": true,
+          "verifier_confidence": 0.8316,
+          "ponder_steps": 1.0,
+          "latency_ms": 188.28
+        },
+        {
+          "prompt": "Q:Calc:d/dx(4x^2+5x)@x=2=",
+          "trace": "Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=16;16+5=21</think><ans>21</ans>",
+          "predicted": "21",
+          "gold": "21",
+          "verified": true,
+          "verifier_confidence": 0.8273,
+          "ponder_steps": 1.0,
+          "latency_ms": 194.38
+        },
+        {
+          "prompt": "Q:Calc:d/dx(3x^2+5x)@x=1=",
+          "trace": "Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=6;6+5=11</think><ans>11</ans>",
+          "predicted": "11",
+          "gold": "11",
+          "verified": true,
+          "verifier_confidence": 0.8238,
+          "ponder_steps": 1.0,
+          "latency_ms": 227.29
+        }
+      ]
+    },
+    "SYSTEM_2X2": {
+      "title": "Simultaneous 2x2 Linear Systems",
+      "category": "Linear Algebra",
+      "introduced_in": "v4",
+      "prefix": "Q:Sys:",
+      "formula": "{ x + y = S, x - y = D }  ==>  x = (S + D) / 2",
+      "prompt_template": "Q:Sys:x+y={s},x-y={d},x=",
+      "derivation_grammar": "<think>{s}+{d}={sum};{sum}/2={x}</think><ans>{x}</ans>",
+      "summary": "Eliminates y by summing simultaneous equations x+y=S and x-y=D, then divides by 2.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/system_2x2.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+          "trace": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8466,
+          "ponder_steps": 1.0,
+          "latency_ms": 161.2
+        },
+        {
+          "prompt": "Q:Sys:x+y=10,x-y=8,x=",
+          "trace": "Q:Sys:x+y=10,x-y=8,x=<think>10+8=18;18/2=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8393,
+          "ponder_steps": 1.0,
+          "latency_ms": 169.04
+        },
+        {
+          "prompt": "Q:Sys:x+y=11,x-y=5,x=",
+          "trace": "Q:Sys:x+y=11,x-y=5,x=<think>11+5=16;16/2=8</think><ans>8</ans>",
+          "predicted": "8",
+          "gold": "8",
+          "verified": true,
+          "verifier_confidence": 0.8533,
+          "ponder_steps": 1.0,
+          "latency_ms": 187.91
+        },
+        {
+          "prompt": "Q:Sys:x+y=10,x-y=4,x=",
+          "trace": "Q:Sys:x+y=10,x-y=4,x=<think>10+4=14;14/2=7</think><ans>7</ans>",
+          "predicted": "7",
+          "gold": "7",
+          "verified": true,
+          "verifier_confidence": 0.8527,
+          "ponder_steps": 1.0,
+          "latency_ms": 137.36
+        },
+        {
+          "prompt": "Q:Sys:x+y=10,x-y=6,x=",
+          "trace": "Q:Sys:x+y=10,x-y=6,x=<think>10+6=16;16/2=8</think><ans>8</ans>",
+          "predicted": "8",
+          "gold": "8",
+          "verified": true,
+          "verifier_confidence": 0.8462,
+          "ponder_steps": 1.0,
+          "latency_ms": 123.35
+        }
+      ]
+    },
+    "CODE_TRACE": {
+      "title": "Python Function Execution Trace",
+      "category": "Program Verification",
+      "introduced_in": "v4",
+      "prefix": "Q:Code:",
+      "formula": "def f(x): return a*x + b; f(k) = a*k + b",
+      "prompt_template": "Q:Code:def f(x):return {a}*x+{b};f({k})=",
+      "derivation_grammar": "<think>{a}*{k}={p};{p}+{b}={res}</think><ans>{res}</ans>",
+      "summary": "Binds formal parameter x=k in Python function definition and traces return expression.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/code_trace.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+          "trace": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+          "predicted": "22",
+          "gold": "22",
+          "verified": true,
+          "verifier_confidence": 0.83,
+          "ponder_steps": 1.0,
+          "latency_ms": 151.94
+        },
+        {
+          "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+          "trace": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+          "predicted": "36",
+          "gold": "36",
+          "verified": true,
+          "verifier_confidence": 0.831,
+          "ponder_steps": 1.0,
+          "latency_ms": 153.3
+        },
+        {
+          "prompt": "Q:Code:def f(x):return 6*x+1;f(2)=",
+          "trace": "Q:Code:def f(x):return 6*x+1;f(2)=<think>6*2=12;12+1=13</think><ans>13</ans>",
+          "predicted": "13",
+          "gold": "13",
+          "verified": true,
+          "verifier_confidence": 0.8439,
+          "ponder_steps": 1.0,
+          "latency_ms": 152.85
+        },
+        {
+          "prompt": "Q:Code:def f(x):return 5*x+4;f(4)=",
+          "trace": "Q:Code:def f(x):return 5*x+4;f(4)=<think>5*4=20;20+4=24</think><ans>24</ans>",
+          "predicted": "24",
+          "gold": "24",
+          "verified": true,
+          "verifier_confidence": 0.8328,
+          "ponder_steps": 1.0,
+          "latency_ms": 163.18
+        },
+        {
+          "prompt": "Q:Code:def f(x):return 2*x+4;f(5)=",
+          "trace": "Q:Code:def f(x):return 2*x+4;f(5)=<think>2*5=10;10+4=14</think><ans>14</ans>",
+          "predicted": "14",
+          "gold": "14",
+          "verified": true,
+          "verifier_confidence": 0.8368,
+          "ponder_steps": 1.0,
+          "latency_ms": 157.28
+        }
+      ]
+    },
+    "QUADRATIC_EVAL": {
+      "title": "Non-Linear Quadratic Polynomial Evaluation",
+      "category": "Polynomial Algebra",
+      "introduced_in": "v6",
+      "prefix": "Q:Quad:",
+      "formula": "f(k) = a * k^2 + c = (a * k * k) + c",
+      "prompt_template": "Q:Quad:{a}x^2+{c}@x={k}=",
+      "derivation_grammar": "<think>{a}*{k}*{k}={t1};{t1}+{c}={ans}</think><ans>{ans}</ans>",
+      "summary": "Computes ternary quadratic term a*k*k and adds constant intercept c.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/quadratic_eval.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Quad:2x^2+1@x=5=",
+          "trace": "Q:Quad:2x^2+1@x=5=<think>2*5*5=50;50+1=51</think><ans>51</ans>",
+          "predicted": "51",
+          "gold": "51",
+          "verified": true,
+          "verifier_confidence": 0.841,
+          "ponder_steps": 1.0,
+          "latency_ms": 162.44
+        },
+        {
+          "prompt": "Q:Quad:3x^2+3@x=3=",
+          "trace": "Q:Quad:3x^2+3@x=3=<think>3*3*3=27;27+3=30</think><ans>30</ans>",
+          "predicted": "30",
+          "gold": "30",
+          "verified": true,
+          "verifier_confidence": 0.8225,
+          "ponder_steps": 1.0,
+          "latency_ms": 226.23
+        },
+        {
+          "prompt": "Q:Quad:3x^2+1@x=5=",
+          "trace": "Q:Quad:3x^2+1@x=5=<think>3*5*5=75;75+1=76</think><ans>76</ans>",
+          "predicted": "76",
+          "gold": "76",
+          "verified": true,
+          "verifier_confidence": 0.8344,
+          "ponder_steps": 1.0,
+          "latency_ms": 214.3
+        },
+        {
+          "prompt": "Q:Quad:4x^2+1@x=4=",
+          "trace": "Q:Quad:4x^2+1@x=4=<think>4*4*4=64;64+1=65</think><ans>65</ans>",
+          "predicted": "65",
+          "gold": "65",
+          "verified": true,
+          "verifier_confidence": 0.8367,
+          "ponder_steps": 1.0,
+          "latency_ms": 165.08
+        },
+        {
+          "prompt": "Q:Quad:4x^2+5@x=4=",
+          "trace": "Q:Quad:4x^2+5@x=4=<think>4*4*4=64;64+5=69</think><ans>69</ans>",
+          "predicted": "69",
+          "gold": "69",
+          "verified": true,
+          "verifier_confidence": 0.8329,
+          "ponder_steps": 1.0,
+          "latency_ms": 159.34
+        }
+      ]
+    },
+    "PHYSICS_KINEMATICS": {
+      "title": "1D Constant-Acceleration Kinematics",
+      "category": "Classical Mechanics",
+      "introduced_in": "v6",
+      "prefix": "Q:Phys:",
+      "formula": "v = u + a * t",
+      "prompt_template": "Q:Phys:a={a},t={t},u={u},v=",
+      "derivation_grammar": "<think>{a}*{t}={dv};{dv}+{u}={v}</think><ans>{v}</ans>",
+      "summary": "Computes velocity change dv = a*t and adds initial velocity u.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/physics_kinematics.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Phys:a=4,t=5,u=1,v=",
+          "trace": "Q:Phys:a=4,t=5,u=1,v=<think>4*5=20;20+1=21</think><ans>21</ans>",
+          "predicted": "21",
+          "gold": "21",
+          "verified": true,
+          "verifier_confidence": 0.8506,
+          "ponder_steps": 1.0,
+          "latency_ms": 169.56
+        },
+        {
+          "prompt": "Q:Phys:a=5,t=3,u=2,v=",
+          "trace": "Q:Phys:a=5,t=3,u=2,v=<think>5*3=15;15+2=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8446,
+          "ponder_steps": 1.0,
+          "latency_ms": 164.06
+        },
+        {
+          "prompt": "Q:Phys:a=3,t=5,u=2,v=",
+          "trace": "Q:Phys:a=3,t=5,u=2,v=<think>3*5=15;15+2=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8431,
+          "ponder_steps": 1.0,
+          "latency_ms": 174.8
+        },
+        {
+          "prompt": "Q:Phys:a=3,t=2,u=4,v=",
+          "trace": "Q:Phys:a=3,t=2,u=4,v=<think>3*2=6;6+4=10</think><ans>10</ans>",
+          "predicted": "10",
+          "gold": "10",
+          "verified": true,
+          "verifier_confidence": 0.843,
+          "ponder_steps": 1.0,
+          "latency_ms": 179.26
+        },
+        {
+          "prompt": "Q:Phys:a=4,t=6,u=1,v=",
+          "trace": "Q:Phys:a=4,t=6,u=1,v=<think>4*6=24;24+1=25</think><ans>25</ans>",
+          "predicted": "25",
+          "gold": "25",
+          "verified": true,
+          "verifier_confidence": 0.845,
+          "ponder_steps": 1.0,
+          "latency_ms": 176.92
+        }
+      ]
+    },
+    "GEOMETRY_AREA": {
+      "title": "2D Rectangular Area with Boundary Padding",
+      "category": "Euclidean Geometry",
+      "introduced_in": "v7",
+      "prefix": "Q:Geom:",
+      "formula": "A_total = (w * h) + p",
+      "prompt_template": "Q:Geom:w={w},h={h},p={p},A=",
+      "derivation_grammar": "<think>{w}*{h}={area};{area}+{p}={tot}</think><ans>{tot}</ans>",
+      "summary": "Computes base rectangular area w*h and adds boundary padding p.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/geometry_area.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Geom:w=2,h=2,p=5,A=",
+          "trace": "Q:Geom:w=2,h=2,p=5,A=<think>2*2=4;4+5=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8318,
+          "ponder_steps": 1.0,
+          "latency_ms": 108.67
+        },
+        {
+          "prompt": "Q:Geom:w=2,h=6,p=5,A=",
+          "trace": "Q:Geom:w=2,h=6,p=5,A=<think>2*6=12;12+5=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8443,
+          "ponder_steps": 1.0,
+          "latency_ms": 110.44
+        },
+        {
+          "prompt": "Q:Geom:w=4,h=2,p=1,A=",
+          "trace": "Q:Geom:w=4,h=2,p=1,A=<think>4*2=8;8+1=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8363,
+          "ponder_steps": 1.0,
+          "latency_ms": 167.85
+        },
+        {
+          "prompt": "Q:Geom:w=2,h=6,p=3,A=",
+          "trace": "Q:Geom:w=2,h=6,p=3,A=<think>2*6=12;12+3=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8414,
+          "ponder_steps": 1.0,
+          "latency_ms": 153.07
+        },
+        {
+          "prompt": "Q:Geom:w=2,h=7,p=1,A=",
+          "trace": "Q:Geom:w=2,h=7,p=1,A=<think>2*7=14;14+1=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8428,
+          "ponder_steps": 1.0,
+          "latency_ms": 144.21
+        }
+      ]
+    },
+    "NUMBER_SEQ": {
+      "title": "Arithmetic Progression n-th Term",
+      "category": "Discrete Mathematics",
+      "introduced_in": "v7",
+      "prefix": "Q:Seq:",
+      "formula": "a_n = a_0 + d * n",
+      "prompt_template": "Q:Seq:d={d},n={n},a0={a0},an=",
+      "derivation_grammar": "<think>{d}*{n}={step};{step}+{a0}={an}</think><ans>{an}</ans>",
+      "summary": "Projects n-th term of an arithmetic sequence from step difference d, index n, and base term a0.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/number_seq.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Seq:d=2,n=6,a0=3,an=",
+          "trace": "Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8269,
+          "ponder_steps": 1.0,
+          "latency_ms": 161.98
+        },
+        {
+          "prompt": "Q:Seq:d=4,n=4,a0=1,an=",
+          "trace": "Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8301,
+          "ponder_steps": 1.001,
+          "latency_ms": 169.46
+        },
+        {
+          "prompt": "Q:Seq:d=2,n=4,a0=4,an=",
+          "trace": "Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>",
+          "predicted": "12",
+          "gold": "12",
+          "verified": true,
+          "verifier_confidence": 0.8284,
+          "ponder_steps": 1.0,
+          "latency_ms": 171.38
+        },
+        {
+          "prompt": "Q:Seq:d=5,n=3,a0=3,an=",
+          "trace": "Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>",
+          "predicted": "18",
+          "gold": "18",
+          "verified": true,
+          "verifier_confidence": 0.8351,
+          "ponder_steps": 1.0,
+          "latency_ms": 177.01
+        },
+        {
+          "prompt": "Q:Seq:d=2,n=3,a0=1,an=",
+          "trace": "Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>",
+          "predicted": "7",
+          "gold": "7",
+          "verified": true,
+          "verifier_confidence": 0.8151,
+          "ponder_steps": 1.0,
+          "latency_ms": 158.99
+        }
+      ]
+    },
+    "MULTI_STEP_3": {
+      "title": "Three-Step Compositional Reasoning Chains",
+      "category": "Multi-Step Composition",
+      "introduced_in": "v8",
+      "prefix": "Q:Chain3:",
+      "formula": "R = ((a * b) + c) - d",
+      "prompt_template": "Q:Chain3:{a}*{b}+{c}-{d}=",
+      "derivation_grammar": "<think>{a}*{b}={p};{p}+{c}={q};{q}-{d}={r}</think><ans>{r}</ans>",
+      "summary": "Chains three sequential operations with double accumulator auto-carry across semicolons.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/multi_step_3.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Chain3:2*3+5-2=",
+          "trace": "Q:Chain3:2*3+5-2=<think>2*3=6;6+5=11;11-2=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8358,
+          "ponder_steps": 1.0,
+          "latency_ms": 137.94
+        },
+        {
+          "prompt": "Q:Chain3:5*4+3-1=",
+          "trace": "Q:Chain3:5*4+3-1=<think>5*4=20;20+3=23;23-1=22</think><ans>22</ans>",
+          "predicted": "22",
+          "gold": "22",
+          "verified": true,
+          "verifier_confidence": 0.8416,
+          "ponder_steps": 1.034,
+          "latency_ms": 134.98
+        },
+        {
+          "prompt": "Q:Chain3:5*5+7-2=",
+          "trace": "Q:Chain3:5*5+7-2=<think>5*5=25;25+7=32;32-2=30</think><ans>30</ans>",
+          "predicted": "30",
+          "gold": "30",
+          "verified": true,
+          "verifier_confidence": 0.8414,
+          "ponder_steps": 1.0,
+          "latency_ms": 142.19
+        },
+        {
+          "prompt": "Q:Chain3:6*5+3-1=",
+          "trace": "Q:Chain3:6*5+3-1=<think>6*5=30;30+3=33;33-1=32</think><ans>32</ans>",
+          "predicted": "32",
+          "gold": "32",
+          "verified": true,
+          "verifier_confidence": 0.8408,
+          "ponder_steps": 1.0,
+          "latency_ms": 188.79
+        },
+        {
+          "prompt": "Q:Chain3:5*5+5-1=",
+          "trace": "Q:Chain3:5*5+5-1=<think>5*5=25;25+5=30;30-1=29</think><ans>29</ans>",
+          "predicted": "29",
+          "gold": "29",
+          "verified": true,
+          "verifier_confidence": 0.84,
+          "ponder_steps": 1.0,
+          "latency_ms": 245.38
+        }
+      ]
+    },
+    "ELECTRICAL_POWER": {
+      "title": "Electrical Circuit Net Power & Thermal Loss",
+      "category": "Electrical Engineering (Knowledge Is Power v9)",
+      "introduced_in": "v9-KIP",
+      "prefix": "Q:Elec:",
+      "formula": "P_net = (V * I) - P_loss",
+      "prompt_template": "Q:Elec:V={v},I={i},loss={l},P=",
+      "derivation_grammar": "<think>{v}*{i}={gross};{gross}-{l}={net}</think><ans>{net}</ans>",
+      "summary": "Applies Joule-Watt law P_gross = V*I and subtracts parasitic thermal dissipation loss.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/electrical_power.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
+          "trace": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>",
+          "predicted": "20",
+          "gold": "20",
+          "verified": true,
+          "verifier_confidence": 0.8425,
+          "ponder_steps": 1.0,
+          "latency_ms": 180.72
+        },
+        {
+          "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
+          "trace": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>",
+          "predicted": "12",
+          "gold": "12",
+          "verified": true,
+          "verifier_confidence": 0.8408,
+          "ponder_steps": 1.0,
+          "latency_ms": 154.51
+        },
+        {
+          "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
+          "trace": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>",
+          "predicted": "24",
+          "gold": "24",
+          "verified": true,
+          "verifier_confidence": 0.8491,
+          "ponder_steps": 1.0,
+          "latency_ms": 137.11
+        },
+        {
+          "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
+          "trace": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>",
+          "predicted": "23",
+          "gold": "23",
+          "verified": true,
+          "verifier_confidence": 0.8444,
+          "ponder_steps": 1.0,
+          "latency_ms": 140.61
+        },
+        {
+          "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
+          "trace": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>",
+          "predicted": "16",
+          "gold": "16",
+          "verified": true,
+          "verifier_confidence": 0.8469,
+          "ponder_steps": 1.0,
+          "latency_ms": 137.82
+        }
+      ]
+    },
+    "FINANCE_INTEREST": {
+      "title": "Financial Yield & Principal Accumulation",
+      "category": "Quantitative Finance (Knowledge Is Power v9)",
+      "introduced_in": "v9-KIP",
+      "prefix": "Q:Fin:",
+      "formula": "B = (r * t) + P_0",
+      "prompt_template": "Q:Fin:r={r},t={t},P={p},B=",
+      "derivation_grammar": "<think>{r}*{t}={yield};{yield}+{p}={bal}</think><ans>{bal}</ans>",
+      "summary": "Calculates cumulative yield r*t over t periods and adds initial principal P_0.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/finance_interest.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Fin:r=5,t=6,P=8,B=",
+          "trace": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>",
+          "predicted": "38",
+          "gold": "38",
+          "verified": true,
+          "verifier_confidence": 0.8432,
+          "ponder_steps": 1.0,
+          "latency_ms": 169.39
+        },
+        {
+          "prompt": "Q:Fin:r=4,t=3,P=8,B=",
+          "trace": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>",
+          "predicted": "20",
+          "gold": "20",
+          "verified": true,
+          "verifier_confidence": 0.8416,
+          "ponder_steps": 1.0,
+          "latency_ms": 158.88
+        },
+        {
+          "prompt": "Q:Fin:r=5,t=6,P=10,B=",
+          "trace": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>",
+          "predicted": "40",
+          "gold": "40",
+          "verified": true,
+          "verifier_confidence": 0.8471,
+          "ponder_steps": 1.0,
+          "latency_ms": 182.98
+        },
+        {
+          "prompt": "Q:Fin:r=2,t=2,P=5,B=",
+          "trace": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8375,
+          "ponder_steps": 1.0,
+          "latency_ms": 165.54
+        },
+        {
+          "prompt": "Q:Fin:r=5,t=5,P=8,B=",
+          "trace": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>",
+          "predicted": "33",
+          "gold": "33",
+          "verified": true,
+          "verifier_confidence": 0.845,
+          "ponder_steps": 1.0,
+          "latency_ms": 111.02
+        }
+      ]
+    }
+  },
+  "scholar_research_notes": [
+    {
+      "domain": "ELECTRICAL_POWER",
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "[Council Synthesis (aix-8b:latest): verified symbolic problem batch (timed out)]",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Alright, so I'm trying to figure out how to approach this problem. It's about council synthesis, which is a system that aggregates",
+      "timestamp": "2026-11-04T20:11:50.189746+00:00"
+    },
+    {
+      "domain": "FINANCE_INTEREST",
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "We are given an equation for linear financial yield accumulation: B = (r * t) + P_0.  This can be interpreted as the total amount of",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Okay, so I need to figure out how to verify this equation step-by-step. Let's start with understanding what each part means.  First",
+      "timestamp": "2026-11-04T20:12:12.642620+00:00"
+    }
+  ],
+  "training_cycles": [
+    {
+      "cycle": 1,
+      "total_grad_steps": 11,
+      "weighted_ce_loss": 0.3281,
+      "verifier_bce_loss": 0.4419,
+      "pure_sample_hits": 4,
+      "hard_mined": 22,
+      "dag_hash": "5e19b6e160de"
+    },
+    {
+      "cycle": 2,
+      "total_grad_steps": 22,
+      "weighted_ce_loss": 0.2564,
+      "verifier_bce_loss": 0.436,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "ab4df05ad500"
+    },
+    {
+      "cycle": 3,
+      "total_grad_steps": 33,
+      "weighted_ce_loss": 0.2035,
+      "verifier_bce_loss": 0.4473,
+      "pure_sample_hits": 4,
+      "hard_mined": 22,
+      "dag_hash": "6d966e78883c"
+    },
+    {
+      "cycle": 4,
+      "total_grad_steps": 44,
+      "weighted_ce_loss": 0.1677,
+      "verifier_bce_loss": 0.4295,
+      "pure_sample_hits": 3,
+      "hard_mined": 23,
+      "dag_hash": "3632df7745de"
+    },
+    {
+      "cycle": 5,
+      "total_grad_steps": 55,
+      "weighted_ce_loss": 0.1581,
+      "verifier_bce_loss": 0.4362,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "54dc60d848da"
+    },
+    {
+      "cycle": 6,
+      "total_grad_steps": 66,
+      "weighted_ce_loss": 0.1395,
+      "verifier_bce_loss": 0.4399,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "6f9eded0855f"
+    },
+    {
+      "cycle": 7,
+      "total_grad_steps": 76,
+      "weighted_ce_loss": 0.1236,
+      "verifier_bce_loss": 0.4369,
+      "pure_sample_hits": 6,
+      "hard_mined": 20,
+      "dag_hash": "51de2d7b963a"
+    },
+    {
+      "cycle": 8,
+      "total_grad_steps": 87,
+      "weighted_ce_loss": 0.1229,
+      "verifier_bce_loss": 0.437,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "1849fa8a1949"
+    }
+  ]
+}

@@ -408,18 +408,10 @@ def evaluate_inflight_subexpr(
                 b_v = k_val
                 c_v = k_val
             else:
-                a_v, b_v, c_v = int(m_mul3.group(1)), int(m_mul3.group(2)), int(m_mul3.group(3))
-                rem = list(prompt_nums)
-                if a_v in rem:
-                    rem.remove(a_v)
+                if len(prompt_nums) >= 4:
+                    a_v, b_v, c_v = prompt_nums[0], prompt_nums[1], prompt_nums[-1]
                 else:
-                    a_v = _snap_to_remaining(a_v, rem)
-                    if a_v in rem:
-                        rem.remove(a_v)
-                if b_v in rem:
-                    rem.remove(b_v)
-                if c_v not in rem and rem:
-                    c_v = rem[-1]
+                    a_v, b_v, c_v = int(m_mul3.group(1)), int(m_mul3.group(2)), int(m_mul3.group(3))
             res = str(a_v * b_v * c_v)
             repaired = f"{prompt_part}<think>{a_v}*{b_v}*{c_v}={res};{res}"
             return repaired, res, False
