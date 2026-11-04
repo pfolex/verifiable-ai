@@ -19,8 +19,8 @@ Reasoning Grammar  : <think>{d}*{n}={step};{step}+{a0}={an}</think><ans>{an}</an
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Seq:d=2,n=6,a0=3,an=` | `Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8269` | `1.0` | `161.98ms` |
-| `Q:Seq:d=4,n=4,a0=1,an=` | `Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>` | `17` (PASS) | `0.8301` | `1.001` | `169.46ms` |
-| `Q:Seq:d=2,n=4,a0=4,an=` | `Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8284` | `1.0` | `171.38ms` |
-| `Q:Seq:d=5,n=3,a0=3,an=` | `Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>` | `18` (PASS) | `0.8351` | `1.0` | `177.01ms` |
-| `Q:Seq:d=2,n=3,a0=1,an=` | `Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>` | `7` (PASS) | `0.8151` | `1.0` | `158.99ms` |
+| `Q:Seq:d=2,n=6,a0=3,an=` | `Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8269` | `1.0` | `163.86ms` |
+| `Q:Seq:d=4,n=4,a0=1,an=` | `Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>` | `17` (PASS) | `0.8301` | `1.001` | `177.63ms` |
+| `Q:Seq:d=2,n=4,a0=4,an=` | `Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8284` | `1.0` | `138.22ms` |
+| `Q:Seq:d=5,n=3,a0=3,an=` | `Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>` | `18` (PASS) | `0.8351` | `1.0` | `125.72ms` |
+| `Q:Seq:d=2,n=3,a0=1,an=` | `Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>` | `7` (PASS) | `0.8151` | `1.0` | `142.65ms` |

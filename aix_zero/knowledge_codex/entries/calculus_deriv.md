@@ -19,8 +19,8 @@ Reasoning Grammar  : <think>{a}*2*{k}={t1};{t1}+{b}={ans}</think><ans>{ans}</ans
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Calc:d/dx(5x^2+1x)@x=1=` | `Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>` | `11` (PASS) | `0.8493` | `1.0` | `135.8ms` |
-| `Q:Calc:d/dx(2x^2+7x)@x=3=` | `Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>` | `19` (PASS) | `0.8227` | `1.0` | `208.75ms` |
-| `Q:Calc:d/dx(5x^2+5x)@x=4=` | `Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>` | `45` (PASS) | `0.8316` | `1.0` | `188.28ms` |
-| `Q:Calc:d/dx(4x^2+5x)@x=2=` | `Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=16;16+5=21</think><ans>21</ans>` | `21` (PASS) | `0.8273` | `1.0` | `194.38ms` |
-| `Q:Calc:d/dx(3x^2+5x)@x=1=` | `Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=6;6+5=11</think><ans>11</ans>` | `11` (PASS) | `0.8238` | `1.0` | `227.29ms` |
+| `Q:Calc:d/dx(5x^2+1x)@x=1=` | `Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>` | `11` (PASS) | `0.8493` | `1.0` | `240.68ms` |
+| `Q:Calc:d/dx(2x^2+7x)@x=3=` | `Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>` | `19` (PASS) | `0.8227` | `1.0` | `231.98ms` |
+| `Q:Calc:d/dx(5x^2+5x)@x=4=` | `Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>` | `45` (PASS) | `0.8316` | `1.0` | `194.38ms` |
+| `Q:Calc:d/dx(4x^2+5x)@x=2=` | `Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=16;16+5=21</think><ans>21</ans>` | `21` (PASS) | `0.8273` | `1.0` | `271.78ms` |
+| `Q:Calc:d/dx(3x^2+5x)@x=1=` | `Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=6;6+5=11</think><ans>11</ans>` | `11` (PASS) | `0.8238` | `1.0` | `154.27ms` |

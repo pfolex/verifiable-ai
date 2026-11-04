@@ -51,13 +51,16 @@ from aix_zero.train_v4_from_scratch import (
 OLLAMA_CHAT_URL = "http://localhost:11434/api/chat"
 
 
-def query_ollama_quick(model: str, prompt: str, max_tokens: int = 80) -> str:
-    """Streams a live council utterance from local Ollama, returning as soon as 120 chars arrive."""
+def query_ollama_quick(model: str, prompt: str, max_tokens: int = 120, min_chars: int = 160) -> str:
+    """Streams a live council utterance from local Ollama with `think: False` for direct, crisp
+    multi-LLM dialogue and a 60s timeout to accommodate model swaps in unified memory.
+    """
     try:
         payload = json.dumps(
             {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
+                "think": False,
                 "stream": True,
                 "options": {"temperature": 0.3, "num_predict": max_tokens},
             }
@@ -66,7 +69,7 @@ def query_ollama_quick(model: str, prompt: str, max_tokens: int = 80) -> str:
             OLLAMA_CHAT_URL, data=payload, headers={"Content-Type": "application/json"}
         )
         pieces: List[str] = []
-        with urllib.request.urlopen(req, timeout=25) as resp:
+        with urllib.request.urlopen(req, timeout=60) as resp:
             for line in resp:
                 if not line:
                     continue
@@ -76,7 +79,7 @@ def query_ollama_quick(model: str, prompt: str, max_tokens: int = 80) -> str:
                 if piece:
                     pieces.append(piece)
                 joined = "".join(pieces).strip()
-                if len(joined) >= 130:
+                if len(joined) >= min_chars:
                     return joined
         return "".join(pieces).strip()
     except Exception as exc:
