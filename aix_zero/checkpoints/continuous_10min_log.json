@@ -1,0 +1,1046 @@
+{
+  "status": "COMPLETED",
+  "model_name": "AIX-Zero-v7-10Min (Time-Budgeted Continuous Self-Play & 12-Domain Symbiont)",
+  "wall_clock_seconds": 683.33,
+  "total_cycles": 27,
+  "total_gradient_steps": 213,
+  "vocab_size": 125,
+  "parameters": {
+    "total_parameters": 815106,
+    "latent_recurrent_core_parameters": 479105,
+    "value_verifier_parameters": 8449,
+    "effective_virtual_parameters_with_looping": 1773316
+  },
+  "baseline_12_domain_inflight_eval": {
+    "correct": 49,
+    "total": 60,
+    "accuracy_pct": 81.67,
+    "domain_accuracy_pct": {
+      "ALGEBRA_SOLVE": 100.0,
+      "CALCULUS_DERIV": 100.0,
+      "WORD_PROBLEM": 100.0,
+      "SYSTEM_2X2": 100.0,
+      "ARITH_CHAIN": 100.0,
+      "CODE_TRACE": 100.0,
+      "LOGIC_DEDUCT": 80.0,
+      "MODULAR_NT": 80.0,
+      "QUADRATIC_EVAL": 80.0,
+      "PHYSICS_KINEMATICS": 100.0,
+      "GEOMETRY_AREA": 40.0,
+      "NUMBER_SEQ": 0.0
+    },
+    "mean_ponder_steps": 1.016,
+    "mean_verifier_confidence": 0.856,
+    "sample_outputs": [
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=21,x=",
+        "generated": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "4",
+        "correct": true,
+        "verifier_confidence": 0.85,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+        "generated": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "11",
+        "correct": true,
+        "verifier_confidence": 0.849,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+        "generated": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
+        "correct": true,
+        "verifier_confidence": 0.8594,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "12",
+        "correct": true,
+        "verifier_confidence": 0.8471,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "SYSTEM_2X2",
+        "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+        "generated": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8663,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+        "generated": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+        "predicted": "19",
+        "gold": "19",
+        "correct": true,
+        "verifier_confidence": 0.8502,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(4*3)+3=",
+        "generated": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "15",
+        "correct": true,
+        "verifier_confidence": 0.8468,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8571,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=16,x=",
+        "generated": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+        "predicted": "3",
+        "gold": "3",
+        "correct": true,
+        "verifier_confidence": 0.8517,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+        "generated": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "22",
+        "correct": true,
+        "verifier_confidence": 0.857,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*2>5?",
+        "generated": "Q:2*2>5?<think>2*2=4;4>5</think><ans>1</ans>>>2</think><ans>2</ans>",
+        "predicted": "1",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.8299,
+        "latent_ponder_steps": 1.133
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+        "generated": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+        "predicted": "36",
+        "gold": "36",
+        "correct": true,
+        "verifier_confidence": 0.8567,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+        "generated": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+        "predicted": "45",
+        "gold": "45",
+        "correct": true,
+        "verifier_confidence": 0.8531,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+        "generated": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+        "predicted": "25",
+        "gold": "25",
+        "correct": true,
+        "verifier_confidence": 0.8563,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(9+7)%3=",
+        "generated": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.851,
+        "latent_ponder_steps": 1.087
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+        "generated": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+        "predicted": "32",
+        "gold": "32",
+        "correct": true,
+        "verifier_confidence": 0.8577,
+        "latent_ponder_steps": 1.0
+      }
+    ]
+  },
+  "baseline_12_domain_pure_neural_eval": {
+    "correct": 8,
+    "total": 60,
+    "accuracy_pct": 13.33,
+    "domain_accuracy_pct": {
+      "ALGEBRA_SOLVE": 0.0,
+      "CALCULUS_DERIV": 0.0,
+      "WORD_PROBLEM": 20.0,
+      "SYSTEM_2X2": 20.0,
+      "ARITH_CHAIN": 0.0,
+      "CODE_TRACE": 20.0,
+      "LOGIC_DEDUCT": 60.0,
+      "MODULAR_NT": 40.0,
+      "QUADRATIC_EVAL": 0.0,
+      "PHYSICS_KINEMATICS": 0.0,
+      "GEOMETRY_AREA": 0.0,
+      "NUMBER_SEQ": 0.0
+    },
+    "mean_ponder_steps": 1.066,
+    "mean_verifier_confidence": 0.855,
+    "sample_outputs": [
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=21,x=",
+        "generated": "Q:5x+1=21,x=<think>13-1=10;10/4=7</think><ans>7</ans>",
+        "predicted": "7",
+        "gold": "4",
+        "correct": false,
+        "verifier_confidence": 0.8496,
+        "latent_ponder_steps": 1.062
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+        "generated": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=4;24+1=31</think><ans>31</ans>",
+        "predicted": "31",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.8494,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+        "generated": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=10;10+2=31</think><ans>31</ans>",
+        "predicted": "31",
+        "gold": "27",
+        "correct": false,
+        "verifier_confidence": 0.8575,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=12;12+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "12",
+        "correct": false,
+        "verifier_confidence": 0.8437,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "SYSTEM_2X2",
+        "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+        "generated": "Q:Sys:x+y=14,x-y=4,x=<think>17+2=12;12/2=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8677,
+        "latent_ponder_steps": 1.056
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+        "generated": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "19",
+        "correct": false,
+        "verifier_confidence": 0.851,
+        "latent_ponder_steps": 1.051
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(4*3)+3=",
+        "generated": "Q:(4*3)+3=<think>4*3=18;18+3=18</think><ans>18</ans>",
+        "predicted": "18",
+        "gold": "15",
+        "correct": false,
+        "verifier_confidence": 0.8493,
+        "latent_ponder_steps": 1.065
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=12;12+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.85,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=16,x=",
+        "generated": "Q:5x+1=16,x=<think>39-1=10;10/4=7</think><ans>7</ans>",
+        "predicted": "7",
+        "gold": "3",
+        "correct": false,
+        "verifier_confidence": 0.8522,
+        "latent_ponder_steps": 1.062
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+        "generated": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=8;8+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "22",
+        "correct": false,
+        "verifier_confidence": 0.8569,
+        "latent_ponder_steps": 1.063
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*2>5?",
+        "generated": "Q:2*2>5?<think>2*2=12;12>5->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.8323,
+        "latent_ponder_steps": 1.071
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+        "generated": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=12;12+6=28</think><ans>28</ans>",
+        "predicted": "28",
+        "gold": "36",
+        "correct": false,
+        "verifier_confidence": 0.8576,
+        "latent_ponder_steps": 1.059
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+        "generated": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=8;8+5=31</think><ans>31</ans>",
+        "predicted": "31",
+        "gold": "45",
+        "correct": false,
+        "verifier_confidence": 0.853,
+        "latent_ponder_steps": 1.054
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+        "generated": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=35;37+5=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "25",
+        "correct": false,
+        "verifier_confidence": 0.858,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(9+7)%3=",
+        "generated": "Q:(9+7)%3=<think>9+7=15;15%3=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.8479,
+        "latent_ponder_steps": 1.138
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+        "generated": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=12;12+2=30</think><ans>39</ans>",
+        "predicted": "39",
+        "gold": "32",
+        "correct": false,
+        "verifier_confidence": 0.8568,
+        "latent_ponder_steps": 1.053
+      }
+    ]
+  },
+  "final_12_domain_inflight_eval": {
+    "correct": 55,
+    "total": 60,
+    "accuracy_pct": 91.67,
+    "domain_accuracy_pct": {
+      "ALGEBRA_SOLVE": 100.0,
+      "CALCULUS_DERIV": 100.0,
+      "WORD_PROBLEM": 100.0,
+      "SYSTEM_2X2": 100.0,
+      "ARITH_CHAIN": 100.0,
+      "CODE_TRACE": 100.0,
+      "LOGIC_DEDUCT": 80.0,
+      "MODULAR_NT": 60.0,
+      "QUADRATIC_EVAL": 100.0,
+      "PHYSICS_KINEMATICS": 100.0,
+      "GEOMETRY_AREA": 60.0,
+      "NUMBER_SEQ": 100.0
+    },
+    "mean_ponder_steps": 1.417,
+    "mean_verifier_confidence": 0.8133,
+    "sample_outputs": [
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=21,x=",
+        "generated": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "4",
+        "correct": true,
+        "verifier_confidence": 0.8171,
+        "latent_ponder_steps": 1.308
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+        "generated": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "11",
+        "correct": true,
+        "verifier_confidence": 0.8304,
+        "latent_ponder_steps": 1.454
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+        "generated": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
+        "correct": true,
+        "verifier_confidence": 0.8238,
+        "latent_ponder_steps": 1.398
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "12",
+        "correct": true,
+        "verifier_confidence": 0.8091,
+        "latent_ponder_steps": 1.357
+      },
+      {
+        "domain": "SYSTEM_2X2",
+        "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+        "generated": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8105,
+        "latent_ponder_steps": 1.333
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+        "generated": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+        "predicted": "19",
+        "gold": "19",
+        "correct": true,
+        "verifier_confidence": 0.8206,
+        "latent_ponder_steps": 1.457
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(4*3)+3=",
+        "generated": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "15",
+        "correct": true,
+        "verifier_confidence": 0.8188,
+        "latent_ponder_steps": 1.348
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8089,
+        "latent_ponder_steps": 1.361
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=16,x=",
+        "generated": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+        "predicted": "3",
+        "gold": "3",
+        "correct": true,
+        "verifier_confidence": 0.819,
+        "latent_ponder_steps": 1.308
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+        "generated": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "22",
+        "correct": true,
+        "verifier_confidence": 0.8016,
+        "latent_ponder_steps": 1.385
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*2>5?",
+        "generated": "Q:2*2>5?<think>2*2=4;4>5->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.7929,
+        "latent_ponder_steps": 1.4
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+        "generated": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+        "predicted": "36",
+        "gold": "36",
+        "correct": true,
+        "verifier_confidence": 0.8045,
+        "latent_ponder_steps": 1.385
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+        "generated": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+        "predicted": "45",
+        "gold": "45",
+        "correct": true,
+        "verifier_confidence": 0.8232,
+        "latent_ponder_steps": 1.452
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+        "generated": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+        "predicted": "25",
+        "gold": "25",
+        "correct": true,
+        "verifier_confidence": 0.8216,
+        "latent_ponder_steps": 1.367
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(9+7)%3=",
+        "generated": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.7929,
+        "latent_ponder_steps": 1.434
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+        "generated": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+        "predicted": "32",
+        "gold": "32",
+        "correct": true,
+        "verifier_confidence": 0.8192,
+        "latent_ponder_steps": 1.33
+      }
+    ]
+  },
+  "final_12_domain_pure_neural_eval": {
+    "correct": 7,
+    "total": 60,
+    "accuracy_pct": 11.67,
+    "domain_accuracy_pct": {
+      "ALGEBRA_SOLVE": 20.0,
+      "CALCULUS_DERIV": 0.0,
+      "WORD_PROBLEM": 0.0,
+      "SYSTEM_2X2": 0.0,
+      "ARITH_CHAIN": 0.0,
+      "CODE_TRACE": 60.0,
+      "LOGIC_DEDUCT": 20.0,
+      "MODULAR_NT": 40.0,
+      "QUADRATIC_EVAL": 0.0,
+      "PHYSICS_KINEMATICS": 0.0,
+      "GEOMETRY_AREA": 0.0,
+      "NUMBER_SEQ": 0.0
+    },
+    "mean_ponder_steps": 1.382,
+    "mean_verifier_confidence": 0.817,
+    "sample_outputs": [
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=21,x=",
+        "generated": "Q:5x+1=21,x=<think>13-1=24;24/5=4</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "4",
+        "correct": true,
+        "verifier_confidence": 0.8214,
+        "latent_ponder_steps": 1.312
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+        "generated": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=12;12+1=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.8305,
+        "latent_ponder_steps": 1.412
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+        "generated": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "27",
+        "correct": false,
+        "verifier_confidence": 0.8249,
+        "latent_ponder_steps": 1.367
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=12;12+4=22</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "12",
+        "correct": false,
+        "verifier_confidence": 0.8104,
+        "latent_ponder_steps": 1.315
+      },
+      {
+        "domain": "SYSTEM_2X2",
+        "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+        "generated": "Q:Sys:x+y=14,x-y=4,x=<think>13+4=12;12/2=6</think><ans>6</ans>",
+        "predicted": "6",
+        "gold": "9",
+        "correct": false,
+        "verifier_confidence": 0.8163,
+        "latent_ponder_steps": 1.316
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+        "generated": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "19",
+        "correct": false,
+        "verifier_confidence": 0.8232,
+        "latent_ponder_steps": 1.415
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(4*3)+3=",
+        "generated": "Q:(4*3)+3=<think>4*3=12;12+3=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "15",
+        "correct": false,
+        "verifier_confidence": 0.8168,
+        "latent_ponder_steps": 1.323
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+        "generated": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=18;18+4=46</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "20",
+        "correct": false,
+        "verifier_confidence": 0.8108,
+        "latent_ponder_steps": 1.346
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:5x+1=16,x=",
+        "generated": "Q:5x+1=16,x=<think>13-1=25;25/5=4</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "3",
+        "correct": false,
+        "verifier_confidence": 0.822,
+        "latent_ponder_steps": 1.312
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+        "generated": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=24;24+6=16</think><ans>16</ans>",
+        "predicted": "16",
+        "gold": "22",
+        "correct": false,
+        "verifier_confidence": 0.7996,
+        "latent_ponder_steps": 1.353
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*2>5?",
+        "generated": "Q:2*2>5?<think>2*2=1;1/5=24;24/5=2</think><ans>2</ans>",
+        "predicted": "2",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.8161,
+        "latent_ponder_steps": 1.212
+      },
+      {
+        "domain": "CODE_TRACE",
+        "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+        "generated": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=12;12+6=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "36",
+        "correct": false,
+        "verifier_confidence": 0.8059,
+        "latent_ponder_steps": 1.353
+      },
+      {
+        "domain": "CALCULUS_DERIV",
+        "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+        "generated": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=12;12+5=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "45",
+        "correct": false,
+        "verifier_confidence": 0.829,
+        "latent_ponder_steps": 1.41
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+        "generated": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=25;25+5=25</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "25",
+        "correct": false,
+        "verifier_confidence": 0.8237,
+        "latent_ponder_steps": 1.343
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(9+7)%3=",
+        "generated": "Q:(9+7)%3=<think>9+7=4;4%7=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.8003,
+        "latent_ponder_steps": 1.443
+      },
+      {
+        "domain": "WORD_PROBLEM",
+        "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+        "generated": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=12;12+2=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "32",
+        "correct": false,
+        "verifier_confidence": 0.8188,
+        "latent_ponder_steps": 1.313
+      }
+    ]
+  },
+  "cycles": [
+    {
+      "cycle": 1,
+      "elapsed_sec": 157.4,
+      "total_grad_steps": 8,
+      "weighted_ce_loss": 0.267,
+      "verifier_bce_loss": 0.4381,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "38ac652be41d",
+      "council_note": "Alright, so I'm trying to figure out how to solve this equation: \\( a x^2 + c = v \\) or \\("
+    },
+    {
+      "cycle": 2,
+      "elapsed_sec": 173.8,
+      "total_grad_steps": 16,
+      "weighted_ce_loss": 0.1979,
+      "verifier_bce_loss": 0.4358,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "771af8f47c77",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 3,
+      "elapsed_sec": 190.0,
+      "total_grad_steps": 24,
+      "weighted_ce_loss": 0.166,
+      "verifier_bce_loss": 0.4377,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "72490ebccc60",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 4,
+      "elapsed_sec": 205.8,
+      "total_grad_steps": 32,
+      "weighted_ce_loss": 0.154,
+      "verifier_bce_loss": 0.435,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "599d2a9bf813",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 5,
+      "elapsed_sec": 228.9,
+      "total_grad_steps": 40,
+      "weighted_ce_loss": 0.1377,
+      "verifier_bce_loss": 0.4363,
+      "pure_neural_sample_hits_of_24": 6,
+      "hard_examples_mined": 18,
+      "dag_hash": "bb77da7a12f4",
+      "council_note": "Alright, so I'm trying to figure out how to solve this equation: \\(a x^2 + c = v\\). Hmm, o"
+    },
+    {
+      "cycle": 6,
+      "elapsed_sec": 245.0,
+      "total_grad_steps": 48,
+      "weighted_ce_loss": 0.1334,
+      "verifier_bce_loss": 0.4356,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "a2e2e1fd8779",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 7,
+      "elapsed_sec": 260.7,
+      "total_grad_steps": 56,
+      "weighted_ce_loss": 0.1421,
+      "verifier_bce_loss": 0.4358,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "8824e0032d93",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 8,
+      "elapsed_sec": 277.1,
+      "total_grad_steps": 65,
+      "weighted_ce_loss": 0.1577,
+      "verifier_bce_loss": 0.4697,
+      "pure_neural_sample_hits_of_24": 2,
+      "hard_examples_mined": 22,
+      "dag_hash": "868b2ef04d9f",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 9,
+      "elapsed_sec": 298.9,
+      "total_grad_steps": 74,
+      "weighted_ce_loss": 0.1741,
+      "verifier_bce_loss": 0.4691,
+      "pure_neural_sample_hits_of_24": 2,
+      "hard_examples_mined": 22,
+      "dag_hash": "4609bc8a092f",
+      "council_note": "Okay, so I'm trying to figure out how to solve equations like \\(a x^2 + c\\) or something s"
+    },
+    {
+      "cycle": 10,
+      "elapsed_sec": 314.8,
+      "total_grad_steps": 82,
+      "weighted_ce_loss": 0.1712,
+      "verifier_bce_loss": 0.4357,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "d0a8377ec45f",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 11,
+      "elapsed_sec": 330.7,
+      "total_grad_steps": 91,
+      "weighted_ce_loss": 0.1544,
+      "verifier_bce_loss": 0.4684,
+      "pure_neural_sample_hits_of_24": 2,
+      "hard_examples_mined": 22,
+      "dag_hash": "241101456d5b",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 12,
+      "elapsed_sec": 346.1,
+      "total_grad_steps": 99,
+      "weighted_ce_loss": 0.1464,
+      "verifier_bce_loss": 0.4377,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "0bde3d374266",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 13,
+      "elapsed_sec": 367.5,
+      "total_grad_steps": 107,
+      "weighted_ce_loss": 0.1332,
+      "verifier_bce_loss": 0.4346,
+      "pure_neural_sample_hits_of_24": 6,
+      "hard_examples_mined": 18,
+      "dag_hash": "b142922c395f",
+      "council_note": "Okay, so I'm trying to figure out how to solve this equation: a*x\u00b2 + c = 0. Hmm, let's bre"
+    },
+    {
+      "cycle": 14,
+      "elapsed_sec": 382.9,
+      "total_grad_steps": 115,
+      "weighted_ce_loss": 0.1165,
+      "verifier_bce_loss": 0.4352,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "c5ee9f32b91c",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 15,
+      "elapsed_sec": 398.0,
+      "total_grad_steps": 123,
+      "weighted_ce_loss": 0.1254,
+      "verifier_bce_loss": 0.4329,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "a826d2062fa6",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 16,
+      "elapsed_sec": 412.8,
+      "total_grad_steps": 131,
+      "weighted_ce_loss": 0.1013,
+      "verifier_bce_loss": 0.435,
+      "pure_neural_sample_hits_of_24": 7,
+      "hard_examples_mined": 17,
+      "dag_hash": "733755d8a7bf",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 17,
+      "elapsed_sec": 433.4,
+      "total_grad_steps": 140,
+      "weighted_ce_loss": 0.0929,
+      "verifier_bce_loss": 0.4387,
+      "pure_neural_sample_hits_of_24": 1,
+      "hard_examples_mined": 23,
+      "dag_hash": "e8a8db9337f0",
+      "council_note": "Okay, so I just came across this problem where I need to solve an equation like a*x\u00b2 + c ="
+    },
+    {
+      "cycle": 18,
+      "elapsed_sec": 448.1,
+      "total_grad_steps": 148,
+      "weighted_ce_loss": 0.0927,
+      "verifier_bce_loss": 0.429,
+      "pure_neural_sample_hits_of_24": 7,
+      "hard_examples_mined": 17,
+      "dag_hash": "e01b0d9d08e1",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 19,
+      "elapsed_sec": 463.1,
+      "total_grad_steps": 156,
+      "weighted_ce_loss": 0.0946,
+      "verifier_bce_loss": 0.4374,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "f111d9426949",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 20,
+      "elapsed_sec": 477.5,
+      "total_grad_steps": 164,
+      "weighted_ce_loss": 0.1112,
+      "verifier_bce_loss": 0.4383,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "a947fdd35541",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 21,
+      "elapsed_sec": 498.1,
+      "total_grad_steps": 172,
+      "weighted_ce_loss": 0.1373,
+      "verifier_bce_loss": 0.4377,
+      "pure_neural_sample_hits_of_24": 3,
+      "hard_examples_mined": 21,
+      "dag_hash": "507f162341f3",
+      "council_note": "Okay, so I'm trying to figure out how to solve this equation: \\(a x^2 + c = v\\). Hmm, let "
+    },
+    {
+      "cycle": 22,
+      "elapsed_sec": 512.8,
+      "total_grad_steps": 180,
+      "weighted_ce_loss": 0.122,
+      "verifier_bce_loss": 0.4355,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "09b11b296f46",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 23,
+      "elapsed_sec": 528.0,
+      "total_grad_steps": 188,
+      "weighted_ce_loss": 0.143,
+      "verifier_bce_loss": 0.4352,
+      "pure_neural_sample_hits_of_24": 4,
+      "hard_examples_mined": 20,
+      "dag_hash": "a56b72c2d361",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 24,
+      "elapsed_sec": 542.7,
+      "total_grad_steps": 196,
+      "weighted_ce_loss": 0.135,
+      "verifier_bce_loss": 0.436,
+      "pure_neural_sample_hits_of_24": 5,
+      "hard_examples_mined": 19,
+      "dag_hash": "ece76ae0b5bd",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 25,
+      "elapsed_sec": 558.8,
+      "total_grad_steps": 205,
+      "weighted_ce_loss": 0.1453,
+      "verifier_bce_loss": 0.473,
+      "pure_neural_sample_hits_of_24": 2,
+      "hard_examples_mined": 22,
+      "dag_hash": "8036ce9d46f0",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 26,
+      "elapsed_sec": 575.2,
+      "total_grad_steps": 213,
+      "weighted_ce_loss": 0.1369,
+      "verifier_bce_loss": 0.4346,
+      "pure_neural_sample_hits_of_24": 7,
+      "hard_examples_mined": 17,
+      "dag_hash": "faca23f9e5b3",
+      "council_note": "Replay+HardMining"
+    },
+    {
+      "cycle": 27,
+      "elapsed_sec": 584.8,
+      "total_grad_steps": 213,
+      "weighted_ce_loss": 0.0,
+      "verifier_bce_loss": 0.0,
+      "pure_neural_sample_hits_of_24": 3,
+      "hard_examples_mined": 21,
+      "dag_hash": "2835f5ddc4fd",
+      "council_note": "Replay+HardMining"
+    }
+  ],
+  "checkpoint_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v7_10min.safetensors"
+}
