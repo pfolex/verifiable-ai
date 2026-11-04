@@ -34,6 +34,7 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
     sys.path.insert(0, str(REPO_ROOT / sub / "src"))
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+from aix_zero.knowledge_is_power import CodexRetriever
 from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
@@ -42,11 +43,15 @@ from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
 def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
     v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
     v8_ckpt = ckpt_dir / "aix_zero_v8.safetensors"
     v7_ckpt = ckpt_dir / "aix_zero_v7_10min.safetensors"
 
-    active_ckpt = v9_ckpt if v9_ckpt.exists() else (v8_ckpt if v8_ckpt.exists() else v7_ckpt)
+    for cand in (v10_ckpt, v9_ckpt, v8_ckpt, v7_ckpt):
+        if cand.exists():
+            active_ckpt = cand
+            break
     state = load_file(str(active_ckpt))
     ckpt_vocab = state["token_emb.weight"].shape[0]
 
@@ -96,8 +101,10 @@ def run_query(model: AIXZeroModel, tokenizer: AIXZeroTokenizer, prompt: str) -> 
     if "<think>" in decoded and "</think>" in decoded:
         think_part = decoded.split("<think>", 1)[1].split("</think>", 1)[0]
     steps_count = len(think_part.split(";")) if think_part else 0
+    codex_meta = CodexRetriever().lookup(prompt)
 
     print(f"  Prompt        : {prompt}")
+    print(f"  Codex Lookup  : [{codex_meta['domain']}] {codex_meta['title']} | Law: `{codex_meta['formula']}`")
     print(f"  Full Trace    : {decoded}")
     print(f"  Answer        : {ans}  ({steps_count}-step chain)")
     print(

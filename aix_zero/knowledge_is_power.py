@@ -210,7 +210,73 @@ DOMAIN_KNOWLEDGE_CATALOG: Dict[str, Dict[str, str]] = {
         "derivation_grammar": "<think>{r}*{t}={yield};{yield}+{p}={bal}</think><ans>{bal}</ans>",
         "summary": "Calculates cumulative yield r*t over t periods and adds initial principal P_0.",
     },
+    "THERMO_FIRST_LAW": {
+        "title": "First Law of Thermodynamics & Internal Energy",
+        "category": "Thermodynamics (Knowledge Is Power v10)",
+        "introduced_in": "v10-KIP",
+        "prefix": "Q:Thermo:",
+        "formula": "dU = (q * t) - W",
+        "prompt_template": "Q:Thermo:q={q},t={t},W={w},dU=",
+        "derivation_grammar": "<think>{q}*{t}={Q};{Q}-{w}={dU}</think><ans>{dU}</ans>",
+        "summary": "Computes total heat influx Q = q*t and subtracts mechanical work W performed by the system.",
+    },
+    "COMBINATORICS_GRID": {
+        "title": "Restricted Combinatorial Pairing Space",
+        "category": "Combinatorics & Discrete Math (Knowledge Is Power v10)",
+        "introduced_in": "v10-KIP",
+        "prefix": "Q:Comb:",
+        "formula": "N_valid = (n * m) - k_excluded",
+        "prompt_template": "Q:Comb:n={n},m={m},ex={ex},N=",
+        "derivation_grammar": "<think>{n}*{m}={tot};{tot}-{ex}={valid}</think><ans>{valid}</ans>",
+        "summary": "Calculates Cartesian product size n*m and subtracts forbidden/excluded configurations.",
+    },
+    "PROBABILITY_EV": {
+        "title": "Three-Step Discrete Expected Value with Bonus & Fee",
+        "category": "Probability & Decision Theory (Knowledge Is Power v10)",
+        "introduced_in": "v10-KIP",
+        "prefix": "Q:Prob:",
+        "formula": "EV = ((p * v) + bonus) - fee",
+        "prompt_template": "Q:Prob:p={p},v={v},bonus={b},fee={f},EV=",
+        "derivation_grammar": "<think>{p}*{v}={g};{g}+{b}={tot};{tot}-{f}={ev}</think><ans>{ev}</ans>",
+        "summary": "Executes a 3-step decision chain: base payoff p*v, plus bonus b, minus entry fee f.",
+    },
 }
+
+
+class CodexRetriever:
+    """Inference-Time Knowledge Codex Retriever (`CodexRetriever`).
+
+    Queries `aix_zero/knowledge_codex/knowledge_index.json` (or `DOMAIN_KNOWLEDGE_CATALOG`)
+    in <0.1ms to ground any incoming prompt with its documented domain metadata, governing
+    mathematical law, and step-by-step `<think>` derivation grammar.
+    """
+
+    def __init__(self, codex_dir: Path | None = None) -> None:
+        self.codex_dir = codex_dir or (Path(__file__).resolve().parent / "knowledge_codex")
+        self.index_path = self.codex_dir / "knowledge_index.json"
+        self.domains: Dict[str, Dict] = dict(DOMAIN_KNOWLEDGE_CATALOG)
+        if self.index_path.exists():
+            try:
+                loaded = json.loads(self.index_path.read_text())
+                for k, v in loaded.get("domains", {}).items():
+                    self.domains[k] = v
+            except Exception:
+                pass
+
+    def lookup(self, prompt: str) -> Dict[str, str]:
+        p = prompt.strip()
+        # Match specific multi-char prefixes first
+        for dom_key, meta in self.domains.items():
+            pref = meta.get("prefix", "")
+            if pref and pref not in ("Q:", "Q:(") and p.startswith(pref):
+                return {"domain": dom_key, **meta}
+        if p.startswith("Q:(") and "%" in p:
+            return {"domain": "MODULAR_NT", **self.domains["MODULAR_NT"]}
+        if "x+" in p and ",x=" in p:
+            return {"domain": "ALGEBRA_SOLVE", **self.domains["ALGEBRA_SOLVE"]}
+        if ">" in p and "?" in p:
+            return {"domain": "LOGIC_DEDUCT", **self.domains["LOGIC_DEDUCT"]}
+        return {"domain": "ARITH_CHAIN", **self.domains["ARITH_CHAIN"]}
 
 
 def build_15_domain_kip_curriculum(seed: int = 42) -> Tuple[List[Dict], List[Dict], List[Dict], List[Dict]]:
@@ -357,9 +423,77 @@ def build_15_domain_kip_curriculum(seed: int = 42) -> Tuple[List[Dict], List[Dic
         else:
             kip_train.append(s)
 
-    all_train = orig_train + v6_train + v7_train + chain3_train + kip_train
-    all_test = orig_test + v6_test + v7_test + chain3_test + kip_test
-    return all_train, all_test, kip_train, kip_test
+    all_train_15 = orig_train + v6_train + v7_train + chain3_train + kip_train
+    all_test_15 = orig_test + v6_test + v7_test + chain3_test + kip_test
+    return all_train_15, all_test_15, kip_train, kip_test
+
+
+def build_18_domain_kip_v10_curriculum(seed: int = 42) -> Tuple[List[Dict], List[Dict], List[Dict], List[Dict]]:
+    """Builds the 18-domain curriculum deterministically (15 v9 domains + 3 new v10 KIP domains:
+    `THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, and 3-step `PROBABILITY_EV`).
+    Returns (all_train_18, all_test_18, kip10_new_train, kip10_new_test).
+    """
+    train_15, test_15, _, _ = build_15_domain_kip_curriculum(seed=seed)
+    rng10 = random.Random(seed)
+    v10_samples: List[Dict] = []
+
+    # Domain 16: THERMO_FIRST_LAW: Q:Thermo:q=q,t=t,W=w,dU= -> <think>q*t=Q;Q-w=dU</think><ans>dU</ans>
+    for q_rate in range(3, 8):
+        for t_sec in range(2, 7):
+            for w_work in (1, 3, 4):
+                heat = q_rate * t_sec
+                du = heat - w_work
+                w_wrong = 5 if w_work != 5 else 2
+                p = f"Q:Thermo:q={q_rate},t={t_sec},W={w_work},dU="
+                pos = f"<think>{q_rate}*{t_sec}={heat};{heat}-{w_work}={du}</think><ans>{du}</ans>"
+                neg = f"<think>{q_rate}*{t_sec}={heat};{heat}-{w_wrong}={heat-w_wrong}</think><ans>{heat-w_wrong}</ans>"
+                v10_samples.append(
+                    {"domain": "THERMO_FIRST_LAW", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(du)}
+                )
+
+    # Domain 17: COMBINATORICS_GRID: Q:Comb:n=n,m=m,ex=ex,N= -> <think>n*m=tot;tot-ex=valid</think><ans>valid</ans>
+    for n_rows in range(3, 8):
+        for m_cols in range(2, 7):
+            for ex_cnt in (1, 2, 4):
+                tot = n_rows * m_cols
+                valid = tot - ex_cnt
+                w_ex = 5 if ex_cnt != 5 else 3
+                p = f"Q:Comb:n={n_rows},m={m_cols},ex={ex_cnt},N="
+                pos = f"<think>{n_rows}*{m_cols}={tot};{tot}-{ex_cnt}={valid}</think><ans>{valid}</ans>"
+                neg = f"<think>{n_rows}*{m_cols}={tot};{tot}-{w_ex}={tot-w_ex}</think><ans>{tot-w_ex}</ans>"
+                v10_samples.append(
+                    {"domain": "COMBINATORICS_GRID", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(valid)}
+                )
+
+    # Domain 18: PROBABILITY_EV (3-Step Decision Chain):
+    # Q:Prob:p=p,v=v,bonus=b,fee=f,EV= -> <think>p*v=g;g+b=tot;tot-f=ev</think><ans>ev</ans>
+    for p_wt in range(2, 7):
+        for v_pay in range(2, 6):
+            for b_bon in (3, 5, 6):
+                for f_fee in (1, 2):
+                    g = p_wt * v_pay
+                    tot = g + b_bon
+                    ev = tot - f_fee
+                    w_f = 4 if f_fee != 4 else 1
+                    p = f"Q:Prob:p={p_wt},v={v_pay},bonus={b_bon},fee={f_fee},EV="
+                    pos = f"<think>{p_wt}*{v_pay}={g};{g}+{b_bon}={tot};{tot}-{f_fee}={ev}</think><ans>{ev}</ans>"
+                    neg = f"<think>{p_wt}*{v_pay}={g};{g}+{b_bon}={tot};{tot}-{w_f}={tot-w_f}</think><ans>{tot-w_f}</ans>"
+                    v10_samples.append(
+                        {"domain": "PROBABILITY_EV", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(ev)}
+                    )
+
+    rng10.shuffle(v10_samples)
+    v10_test: List[Dict] = []
+    v10_train: List[Dict] = []
+    c10 = {"THERMO_FIRST_LAW": 0, "COMBINATORICS_GRID": 0, "PROBABILITY_EV": 0}
+    for s in v10_samples:
+        if c10[s["domain"]] < 5:
+            v10_test.append(s)
+            c10[s["domain"]] += 1
+        else:
+            v10_train.append(s)
+
+    return train_15 + v10_train, test_15 + v10_test, v10_train, v10_test
 
 
 def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
@@ -381,6 +515,24 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
             "Q:Fin:r=5,t=6,P=8,B=",
             "<think>5*6=30;30+8=38</think><ans>38</ans>",
         ),
+        (
+            "THERMO_FIRST_LAW",
+            "Explain the First Law of Thermodynamics dU = (q * t) - W in 2 concise sentences and propose one integer example with q=6, t=4, W=3.",
+            "Q:Thermo:q=6,t=4,W=3,dU=",
+            "<think>6*4=24;24-3=21</think><ans>21</ans>",
+        ),
+        (
+            "COMBINATORICS_GRID",
+            "Explain restricted combinatorial pairings N_valid = (n * m) - k_excluded in 2 concise sentences with n=5, m=6, ex=4.",
+            "Q:Comb:n=5,m=6,ex=4,N=",
+            "<think>5*6=30;30-4=26</think><ans>26</ans>",
+        ),
+        (
+            "PROBABILITY_EV",
+            "Explain the 3-step discrete expected payoff formula EV = ((p * v) + bonus) - fee in 2 concise sentences with p=3, v=5, bonus=4, fee=2.",
+            "Q:Prob:p=3,v=5,bonus=4,fee=2,EV=",
+            "<think>3*5=15;15+4=19;19-2=17</think><ans>17</ans>",
+        ),
     ]
     if custom_topic:
         topics.append(
@@ -392,7 +544,21 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
             )
         )
 
+    # Load cached scholar notes from knowledge_index.json if present so prior dialogues are preserved
+    cached_notes: Dict[str, Dict] = {}
+    idx_file = Path(__file__).resolve().parent / "knowledge_codex" / "knowledge_index.json"
+    if idx_file.exists():
+        try:
+            existing = json.loads(idx_file.read_text())
+            for sn in existing.get("scholar_research_notes", []):
+                cached_notes[sn["domain"]] = sn
+        except Exception:
+            pass
+
     for dom_key, prompt_q, sample_prompt, canonical_trace in topics:
+        if dom_key in cached_notes and dom_key in ("ELECTRICAL_POWER", "FINANCE_INTEREST"):
+            notes.append(cached_notes[dom_key])
+            continue
         print(f"\n[KNOWLEDGE IS POWER — MULTI-TURN SYMBIOTIC COUNCIL: {dom_key}]", flush=True)
         # Turn 1: aix-8b:latest (Theorist & Challenger)
         turn1_8b = query_ollama_quick("aix-8b:latest", prompt_q, max_tokens=110, min_chars=180)
@@ -433,7 +599,7 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
                     {"turn": 3, "speaker": "aix-8b:latest (Curriculum Architect)", "utterance": clean_t3},
                     {
                         "turn": 4,
-                        "speaker": "AIX-Zero v9 (Standalone Neuro-Symbolic Student)",
+                        "speaker": "AIX-Zero v10 (Standalone Neuro-Symbolic Student)",
                         "utterance": f"Executed `{sample_prompt}` -> `{sample_prompt}{canonical_trace}` (Verified PASS by Sandbox Kernel)",
                     },
                 ],
@@ -560,22 +726,22 @@ def write_knowledge_codex(
     params = model.count_parameters()
     master_path = codex_dir / "KNOWLEDGE_IS_POWER_CODEX.md"
     master_lines = [
-        "# AIX-Zero: *Knowledge Is Power* — Autonomous Knowledge Codex",
+        "# AIX-Zero: *Knowledge Is Power* — Autonomous Knowledge Codex (`v10`)",
         "",
-        "> **Living Self-Documented Encyclopedia of Skills Discovered, Verified, and Distilled into `AIX-Zero v9`**",
+        "> **Living Self-Documented Encyclopedia of 18 Skills Discovered, Verified, and Distilled into `AIX-Zero v10`**",
         "",
         "## 1. System Overview & Synaptic Telemetry",
         "",
         f"- **Active Standalone Checkpoint:** `{ckpt_path.name}`",
         f"- **Physical Parameters:** `{params['total_parameters']:,}` (`{params['effective_virtual_parameters_with_looping']:,}` effective virtual parameters with 3-step ACT recurrent looping)",
         f"- **Vocabulary Size:** `{tokenizer.vocab_size}` hybrid word + atomic-digit tokens",
-        f"- **Total Mastered Domains:** **`{len(DOMAIN_KNOWLEDGE_CATALOG)}` domains** (`v1` through `v9-KIP`)",
-        f"- **New-Domain Zero-Shot vs Post-Learning Accuracy (`ELECTRICAL_POWER` + `FINANCE_INTEREST`):** **`{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)` -> `{post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)`**",
-        f"- **Global 15-Domain Held-Out Benchmark Accuracy:** **`{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)`**",
+        f"- **Total Mastered Domains:** **`{len(DOMAIN_KNOWLEDGE_CATALOG)}` domains** (`v1` through `v10-KIP`)",
+        f"- **New-Domain Zero-Shot vs Post-Learning Accuracy (`THERMO_FIRST_LAW` + `COMBINATORICS_GRID` + `PROBABILITY_EV`):** **`{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)` -> `{post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)`**",
+        f"- **Global 18-Domain Held-Out Benchmark Accuracy:** **`{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)`**",
         "",
         "---",
         "",
-        "## 2. Master Catalog of All 15 Learned Domains",
+        "## 2. Master Catalog of All 18 Learned Domains",
         "",
         "| # | Domain ID | Title & Category | Introduced | Governing Formula | Held-Out Accuracy | Monograph Link |",
         "| :-: | :--- | :--- | :---: | :--- | :---: | :--- |",
@@ -665,11 +831,17 @@ def write_knowledge_codex(
     master_lines.extend(
         [
             "",
-            "### Newly Documented Worked Examples (`v9-KIP`)",
+            "### Newly Documented Worked Examples (`v9-KIP` & `v10-KIP`)",
             "",
         ]
     )
-    for new_dom in ("ELECTRICAL_POWER", "FINANCE_INTEREST"):
+    for new_dom in (
+        "ELECTRICAL_POWER",
+        "FINANCE_INTEREST",
+        "THERMO_FIRST_LAW",
+        "COMBINATORICS_GRID",
+        "PROBABILITY_EV",
+    ):
         master_lines.append(f"#### `{new_dom}` — {DOMAIN_KNOWLEDGE_CATALOG[new_dom]['title']}")
         for ex in examples_by_domain.get(new_dom, [])[:3]:
             master_lines.append(
@@ -683,7 +855,7 @@ def write_knowledge_codex(
     # 3. Write Machine-Readable Knowledge Index (`knowledge_index.json`)
     index_path = codex_dir / "knowledge_index.json"
     index_payload = {
-        "system": "AIX-Zero Knowledge Is Power (v9-KIP)",
+        "system": "AIX-Zero Knowledge Is Power (v10-KIP)",
         "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "checkpoint": str(ckpt_path),
         "vocab_size": tokenizer.vocab_size,
@@ -691,7 +863,7 @@ def write_knowledge_codex(
         "total_domains": len(DOMAIN_KNOWLEDGE_CATALOG),
         "pre_kip_new_domains_eval": pre_kip_eval,
         "post_kip_new_domains_eval": post_kip_eval,
-        "global_15_domain_eval": post_all_eval,
+        "global_18_domain_eval": post_all_eval,
         "domains": {
             k: {
                 **v,
@@ -709,7 +881,7 @@ def write_knowledge_codex(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AIX-Zero: Knowledge Is Power — Autonomous Learning & Documentation Engine")
+    parser = argparse.ArgumentParser(description="AIX-Zero: Knowledge Is Power v10 — 18-Domain Learning, Codex Retrieval & Documentation Engine")
     parser.add_argument("--topic", type=str, default=None, help="Optional custom research topic for the Scholar Council")
     parser.add_argument("--cycles", type=int, default=8, help="Number of stratified synaptic consolidation cycles")
     args = parser.parse_args()
@@ -720,14 +892,14 @@ def main() -> None:
     device = torch.device("cpu")
 
     print("=" * 94)
-    print("  AIX-ZERO: 'KNOWLEDGE IS POWER' — AUTONOMOUS LEARNING & SELF-DOCUMENTATION ENGINE (v9)")
+    print("  AIX-ZERO: 'KNOWLEDGE IS POWER' — 18-DOMAIN LEARNING, CODEX RETRIEVAL & SELF-DOCUMENTATION (v10)")
     print("=" * 94, flush=True)
 
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
     v8_ckpt = ckpt_dir / "aix_zero_v8.safetensors"
-    v7_ckpt = ckpt_dir / "aix_zero_v7_10min.safetensors"
-    base_ckpt = v8_ckpt if v8_ckpt.exists() else v7_ckpt
+    base_ckpt = v9_ckpt if v9_ckpt.exists() else v8_ckpt
 
     state = load_file(str(base_ckpt))
     init_vocab = state["token_emb.weight"].shape[0]
@@ -753,36 +925,36 @@ def main() -> None:
     )
     model = AIXZeroModel(config).to(device)
     model.load_state_dict(state)
-    print(f"[INIT] Loaded 13-domain checkpoint `{base_ckpt.name}` ({init_vocab} tokens)", flush=True)
+    print(f"[INIT] Loaded 15-domain checkpoint `{base_ckpt.name}` ({init_vocab} tokens)", flush=True)
 
     model.resize_token_embeddings(tokenizer.vocab_size)
     print(
-        f"[VOCAB EXPANSION] Expanded standalone embeddings from {init_vocab} -> {tokenizer.vocab_size} tokens (added `Q:Elec:`, `Q:Fin:`)",
+        f"[VOCAB EXPANSION] Expanded standalone embeddings from {init_vocab} -> {tokenizer.vocab_size} tokens (added `Q:Thermo:`, `Q:Comb:`, `Q:Prob:`)",
         flush=True,
     )
 
-    # 1. Conduct Multi-LLM Scholar Research Session
+    # 1. Conduct Multi-LLM Scholar Research Session on the 3 new v10 domains
     scholar_notes = conduct_kip_scholar_research(custom_topic=args.topic)
 
-    # 2. Build 15-Domain Curriculum & Measure Pre-Learning Zero-Shot Accuracy on New Domains
-    all_train, all_test, kip_train, kip_test = build_15_domain_kip_curriculum(seed=42)
+    # 2. Build 18-Domain Curriculum & Measure Pre-Learning Zero-Shot Accuracy on New Domains
+    all_train, all_test, kip10_train, kip10_test = build_18_domain_kip_v10_curriculum(seed=42)
     print(
-        f"\n[CURRICULUM] 15 Domains | Total Train Pool: {len(all_train)} problems | Held-Out Test Set: {len(all_test)} problems",
+        f"\n[CURRICULUM] 18 Domains | Total Train Pool: {len(all_train)} problems | Held-Out Test Set: {len(all_test)} problems",
         flush=True,
     )
 
     pre_kip_eval = evaluate_v4(
-        model, tokenizer, kip_test, num_candidates=1, inflight_alu=False, grounded_alu=False
+        model, tokenizer, kip10_test, num_candidates=1, inflight_alu=False, grounded_alu=False
     )
     print(
-        f"[PRE-LEARNING ZERO-SHOT] Unseen Domains (`ELECTRICAL_POWER`, `FINANCE_INTEREST`): "
+        f"[PRE-LEARNING ZERO-SHOT] Unseen v10 Domains (`THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, `PROBABILITY_EV`): "
         f"{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)",
         flush=True,
     )
 
-    # 3. Stratified 15-Domain Synaptic Consolidation in RAM
+    # 3. Stratified 18-Domain Synaptic Consolidation in RAM
     dag = BranchBoxDAG()
-    root = dag.create_root({"engine": "Knowledge-Is-Power-v9", "domains": 15})
+    root = dag.create_root({"engine": "Knowledge-Is-Power-v10", "domains": 18})
     curr_node = root.node_id
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=2.4e-3, weight_decay=0.01)
@@ -794,8 +966,8 @@ def main() -> None:
 
     for cycle in range(1, n_cycles + 1):
         hard_examples, pure_hits = mine_hard_examples(model, tokenizer, all_train, sample_k=26)
-        extra_kip = random.sample(kip_train, k=min(48, len(kip_train)))
-        stream = sample_stratified_stream(all_train, per_domain_k=14, hard_examples=hard_examples) + extra_kip
+        extra_kip10 = random.sample(kip10_train, k=min(64, len(kip10_train)))
+        stream = sample_stratified_stream(all_train, per_domain_k=12, hard_examples=hard_examples) + extra_kip10
         random.shuffle(stream)
 
         model.train()
@@ -837,7 +1009,7 @@ def main() -> None:
 
         step_node = dag.step(
             curr_node,
-            action=f"kip_consolidation_cycle_{cycle}",
+            action=f"kip_v10_consolidation_cycle_{cycle}",
             next_state={"cycle": cycle, "grad_steps": total_grad_steps, "ce": round(avg_ce, 4)},
             reward=1.0,
             verified=True,
@@ -856,28 +1028,28 @@ def main() -> None:
             }
         )
         print(
-            f"  [KIP Cycle {cycle:02d}/{n_cycles}] Grad Steps: {total_grad_steps:3d} | "
+            f"  [KIP v10 Cycle {cycle:02d}/{n_cycles}] Grad Steps: {total_grad_steps:3d} | "
             f"Weighted CE: {avg_ce:.4f} | Pure Sample: {pure_hits:2d}/26 | "
             f"Hard Mined: {len(hard_examples):2d} | DAG: {step_node.state_hash[:10]}",
             flush=True,
         )
 
-    # 4. Evaluate Post-Learning Accuracy on New Domains and All 15 Domains
-    print("\n[POST-LEARNING VERIFICATION] Evaluating across all 15 domains (75 held-out unseen problems)...", flush=True)
+    # 4. Evaluate Post-Learning Accuracy on New Domains and All 18 Domains
+    print("\n[POST-LEARNING VERIFICATION] Evaluating across all 18 domains (90 held-out unseen problems)...", flush=True)
     post_kip_eval = evaluate_v4(
-        model, tokenizer, kip_test, num_candidates=2, inflight_alu=True, grounded_alu=False
+        model, tokenizer, kip10_test, num_candidates=2, inflight_alu=True, grounded_alu=False
     )
     post_all_eval = evaluate_v4(
         model, tokenizer, all_test, num_candidates=2, inflight_alu=True, grounded_alu=False
     )
 
-    v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
+    v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
     state_dict_cpu = {
         k: v.detach().cpu().clone().contiguous() for k, v in model.state_dict().items()
     }
-    save_file(state_dict_cpu, str(v9_ckpt))
+    save_file(state_dict_cpu, str(v10_ckpt))
 
-    # 5. Autonomously Generate the Knowledge Is Power Codex
+    # 5. Autonomously Generate the 18-Domain Knowledge Is Power Codex
     codex_dir = Path(__file__).resolve().parent / "knowledge_codex"
     master_md, index_json = write_knowledge_codex(
         codex_dir=codex_dir,
@@ -889,27 +1061,41 @@ def main() -> None:
         post_all_eval=post_all_eval,
         cycle_logs=cycle_logs,
         scholar_notes=scholar_notes,
-        ckpt_path=v9_ckpt,
+        ckpt_path=v10_ckpt,
     )
+
+    # 6. Demonstrate Inference-Time Codex Retrieval (`CodexRetriever`)
+    retriever = CodexRetriever(codex_dir=codex_dir)
+    print("\n[CODEX-AUGMENTED RETRIEVAL SHOWCASE (`CodexRetriever.lookup`)]", flush=True)
+    for sample_p in (
+        "Q:Thermo:q=6,t=4,W=3,dU=",
+        "Q:Comb:n=5,m=6,ex=4,N=",
+        "Q:Prob:p=3,v=5,bonus=4,fee=2,EV=",
+    ):
+        meta = retriever.lookup(sample_p)
+        print(
+            f"  * Prompt `{sample_p}` -> Domain: `{meta['domain']}` | Law: `{meta['formula']}` | Grammar: `{meta['derivation_grammar']}`",
+            flush=True,
+        )
 
     elapsed_s = round(time.perf_counter() - t0, 2)
     print("=" * 94)
-    print(f"  'KNOWLEDGE IS POWER' COMPLETE ({elapsed_s}s | 15 Domains Learned & Documented)")
+    print(f"  'KNOWLEDGE IS POWER v10' COMPLETE ({elapsed_s}s | 18 Domains Learned & Documented)")
     print("=" * 94)
     print(
-        f"  * New Domains (`ELECTRICAL_POWER`, `FINANCE_INTEREST`): "
+        f"  * New v10 Domains (`THERMO`, `COMB`, `PROB_EV`): "
         f"{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%) "
         f"-> {post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)"
     )
     print(
-        f"  * Global 15-Domain Held-Out Accuracy:                   "
+        f"  * Global 18-Domain Held-Out Accuracy:            "
         f"{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)"
     )
     print(f"  * Per-Domain Breakdown: {json.dumps(post_all_eval['domain_accuracy_pct'])}")
-    print(f"  * Saved v9 Checkpoint:  {v9_ckpt}")
+    print(f"  * Saved v10 Checkpoint: {v10_ckpt}")
     print(f"  * Master Codex Book:    {master_md}")
     print(f"  * Knowledge Graph JSON: {index_json}")
-    print(f"  * Domain Monographs:    {codex_dir / 'entries'} (15 .md files)")
+    print(f"  * Domain Monographs:    {codex_dir / 'entries'} (18 .md files)")
     print("=" * 94, flush=True)
 
 

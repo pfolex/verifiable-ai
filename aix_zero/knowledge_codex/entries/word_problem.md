@@ -19,8 +19,8 @@ Reasoning Grammar  : <think>{a}*{b}={p};{p}+{c}={tot}</think><ans>{tot}</ans>
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Word:Sam has 5 packs of 5 and buys 2 total=` | `Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>` | `27` (PASS) | `0.8249` | `1.0` | `151.95ms` |
-| `Q:Word:Mia has 2 packs of 4 and buys 4 total=` | `Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8321` | `1.0` | `180.53ms` |
-| `Q:Word:Mia has 4 packs of 4 and buys 4 total=` | `Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>` | `20` (PASS) | `0.8297` | `1.0` | `182.33ms` |
-| `Q:Word:Mia has 4 packs of 5 and buys 5 total=` | `Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>` | `25` (PASS) | `0.8292` | `1.0` | `156.48ms` |
-| `Q:Word:Mia has 5 packs of 6 and buys 2 total=` | `Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>` | `32` (PASS) | `0.8286` | `1.0` | `184.33ms` |
+| `Q:Word:Sam has 5 packs of 5 and buys 2 total=` | `Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>` | `27` (PASS) | `0.8212` | `1.0` | `144.12ms` |
+| `Q:Word:Mia has 2 packs of 4 and buys 4 total=` | `Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8496` | `1.0` | `111.42ms` |
+| `Q:Word:Mia has 4 packs of 4 and buys 4 total=` | `Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>` | `20` (PASS) | `0.8455` | `1.0` | `161.22ms` |
+| `Q:Word:Mia has 4 packs of 5 and buys 5 total=` | `Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>` | `25` (PASS) | `0.8314` | `1.0` | `126.88ms` |
+| `Q:Word:Mia has 5 packs of 6 and buys 2 total=` | `Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>` | `32` (PASS) | `0.8318` | `1.0` | `106.81ms` |

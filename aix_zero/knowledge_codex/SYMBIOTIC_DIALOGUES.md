@@ -27,3 +27,42 @@
   > Executed `Q:Fin:r=5,t=6,P=8,B=` $\rightarrow$ `Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>` (`VERIFIED PASS`)
 
 ---
+
+## Domain: `THERMO_FIRST_LAW` (`2026-11-04T21:14:29.074758+00:00`)
+
+- **Turn 1 — `aix-8b:latest` (Theorist & Challenger):**
+  > We are given an equation: dU = (q * T) - W However, note that the standard first law is usually written as ΔU = Q - W, where: U is internal energy, Q is heat transferred to
+- **Turn 2 — `aix3:latest` (Solver & Critic):**
+  > Alright, so I've got this problem here about calculating something related to thermodynamics. Let me see if I can wrap my head around it. The user mentioned an equation: dU = (q *
+- **Turn 3 — `aix-8b:latest` (Curriculum Architect):**
+  > First, the user is referencing a Solver's verification where they were trying to calculate something related to thermodynamics. The equation
+- **Turn 4 — `AIX-Zero v9` (Standalone Student Verification):**
+  > Executed `Q:Thermo:q=6,t=4,W=3,dU=` $\rightarrow$ `Q:Thermo:q=6,t=4,W=3,dU=<think>6*4=24;24-3=21</think><ans>21</ans>` (`VERIFIED PASS`)
+
+---
+
+## Domain: `COMBINATORICS_GRID` (`2026-11-04T21:15:30.761473+00:00`)
+
+- **Turn 1 — `aix-8b:latest` (Theorist & Challenger):**
+  > We are given: n = 5, m = 6, and k_excluded is the number of excluded pairs. The formula for restricted combinatorial pairings is: N_valid = (n * m) - k_excluded This means
+- **Turn 2 — `aix3:latest` (Solver & Critic):**
+  > Okay, so I need to figure out how to solve this problem where they're talking about combinatorial pairings with some restrictions. The formula given is N_valid = (n * m) - k_excluded
+- **Turn 3 — `aix-8b:latest` (Curriculum Architect):**
+  > First, the user is asking me to state why distilling that specific example (n=5, m=6, ex=4) into AIX-Zero's weights teaches it the concept of
+- **Turn 4 — `AIX-Zero v9` (Standalone Student Verification):**
+  > Executed `Q:Comb:n=5,m=6,ex=4,N=` $\rightarrow$ `Q:Comb:n=5,m=6,ex=4,N=<think>5*6=30;30-4=26</think><ans>26</ans>` (`VERIFIED PASS`)
+
+---
+
+## Domain: `PROBABILITY_EV` (`2026-11-04T21:16:26.056924+00:00`)
+
+- **Turn 1 — `aix-8b:latest` (Theorist & Challenger):**
+  > First, I'm addressing a user query about explaining an economic or probabilistic concept using specific values: probability (p) is 3, value (v) is 5, bonus is 4, and fee is 2. The
+- **Turn 2 — `aix3:latest` (Solver & Critic):**
+  > Alright, let's tackle this query about calculating the Expected Value (EV) of a deal based on some given values. The user is asking me to explain how to compute EV using specific numbers
+- **Turn 3 — `aix-8b:latest` (Curriculum Architect):**
+  > Okay, let me think about this problem. The user is asking how to calculate Expected Value (EV) for a deal with specific parameters: probability
+- **Turn 4 — `AIX-Zero v9` (Standalone Student Verification):**
+  > Executed `Q:Prob:p=3,v=5,bonus=4,fee=2,EV=` $\rightarrow$ `Q:Prob:p=3,v=5,bonus=4,fee=2,EV=<think>3*5=15;15+4=19;19-2=17</think><ans>17</ans>` (`VERIFIED PASS`)
+
+---

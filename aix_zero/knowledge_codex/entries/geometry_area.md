@@ -19,8 +19,8 @@ Reasoning Grammar  : <think>{w}*{h}={area};{area}+{p}={tot}</think><ans>{tot}</a
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Geom:w=2,h=2,p=5,A=` | `Q:Geom:w=2,h=2,p=5,A=<think>2*2=4;4+5=9</think><ans>9</ans>` | `9` (PASS) | `0.8318` | `1.0` | `200.64ms` |
-| `Q:Geom:w=2,h=6,p=5,A=` | `Q:Geom:w=2,h=6,p=5,A=<think>2*6=12;12+5=17</think><ans>17</ans>` | `17` (PASS) | `0.8443` | `1.0` | `192.15ms` |
-| `Q:Geom:w=4,h=2,p=1,A=` | `Q:Geom:w=4,h=2,p=1,A=<think>4*2=8;8+1=9</think><ans>9</ans>` | `9` (PASS) | `0.8363` | `1.0` | `107.28ms` |
-| `Q:Geom:w=2,h=6,p=3,A=` | `Q:Geom:w=2,h=6,p=3,A=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8414` | `1.0` | `144.52ms` |
-| `Q:Geom:w=2,h=7,p=1,A=` | `Q:Geom:w=2,h=7,p=1,A=<think>2*7=14;14+1=15</think><ans>15</ans>` | `15` (PASS) | `0.8428` | `1.0` | `179.86ms` |
+| `Q:Geom:w=2,h=2,p=5,A=` | `Q:Geom:w=2,h=2,p=5,A=<think>2*2=4;4+5=9</think><ans>9</ans>` | `9` (PASS) | `0.8428` | `1.0` | `134.36ms` |
+| `Q:Geom:w=2,h=6,p=5,A=` | `Q:Geom:w=2,h=6,p=5,A=<think>2*6=12;12+5=17</think><ans>17</ans>` | `17` (PASS) | `0.8476` | `1.0` | `132.57ms` |
+| `Q:Geom:w=4,h=2,p=1,A=` | `Q:Geom:w=4,h=2,p=1,A=<think>4*2=8;8+1=9</think><ans>9</ans>` | `9` (PASS) | `0.8436` | `1.0` | `153.02ms` |
+| `Q:Geom:w=2,h=6,p=3,A=` | `Q:Geom:w=2,h=6,p=3,A=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8492` | `1.0` | `357.68ms` |
+| `Q:Geom:w=2,h=7,p=1,A=` | `Q:Geom:w=2,h=7,p=1,A=<think>2*7=14;14+1=15</think><ans>15</ans>` | `15` (PASS) | `0.8522` | `1.0` | `178.81ms` |

@@ -27,8 +27,8 @@ Reasoning Grammar  : <think>{r}*{t}={yield};{yield}+{p}={bal}</think><ans>{bal}<
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Fin:r=5,t=6,P=8,B=` | `Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>` | `38` (PASS) | `0.8432` | `1.0` | `152.2ms` |
-| `Q:Fin:r=4,t=3,P=8,B=` | `Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>` | `20` (PASS) | `0.8416` | `1.0` | `154.04ms` |
-| `Q:Fin:r=5,t=6,P=10,B=` | `Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>` | `40` (PASS) | `0.8471` | `1.0` | `181.95ms` |
-| `Q:Fin:r=2,t=2,P=5,B=` | `Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>` | `9` (PASS) | `0.8375` | `1.0` | `186.73ms` |
-| `Q:Fin:r=5,t=5,P=8,B=` | `Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>` | `33` (PASS) | `0.845` | `1.0` | `182.46ms` |
+| `Q:Fin:r=5,t=6,P=8,B=` | `Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>` | `38` (PASS) | `0.8389` | `1.0` | `157.39ms` |
+| `Q:Fin:r=4,t=3,P=8,B=` | `Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>` | `20` (PASS) | `0.8469` | `1.0` | `165.16ms` |
+| `Q:Fin:r=5,t=6,P=10,B=` | `Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>` | `40` (PASS) | `0.8344` | `1.0` | `195.71ms` |
+| `Q:Fin:r=2,t=2,P=5,B=` | `Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>` | `9` (PASS) | `0.8455` | `1.0` | `179.57ms` |
+| `Q:Fin:r=5,t=5,P=8,B=` | `Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>` | `33` (PASS) | `0.8448` | `1.0` | `155.37ms` |

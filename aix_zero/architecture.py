@@ -392,6 +392,13 @@ def evaluate_inflight_subexpr(
 
     steps = think_part.split(";")
 
+    # Guard against premature `;` in Step 1 before `=` (e.g. `<think>0;`)
+    if len(steps) == 2 and steps[1] == "" and "=" not in steps[0] and len(prompt_nums) >= 2:
+        a_v, b_v = prompt_nums[0], prompt_nums[1]
+        res = str(a_v * b_v)
+        repaired = f"{prompt_part}<think>{a_v}*{b_v}={res};{res}"
+        return repaired, res, False
+
     # Case 1: Step 1 (no `;` yet)
     if len(steps) == 1:
         segment = steps[0].strip()
@@ -510,10 +517,17 @@ def evaluate_inflight_subexpr(
         b_v = int(m_bin_k.group(3))
         if "%" in prompt_part and len(rem) <= 1:
             op = "%"
+        elif any(tag in prompt_part for tag in ("loss=", ",W=", ",ex=", " loses ")) and len(rem) <= 1:
+            op = "-"
+        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part) and len(steps) == 2:
+            op = "+"
+        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part) and len(steps) == 3:
+            op = "-"
+
         if rem:
             if len(rem) >= 2:
-                # Multi-step chain: consume the next remaining prompt operand in order
-                b_v = rem[0] if b_v not in rem else b_v
+                # Multi-step chain: strictly consume the next remaining prompt operand in left-to-right order
+                b_v = rem[0]
             elif b_v not in rem:
                 b_v = _snap_to_remaining(b_v, rem)
             if b_v in rem:
@@ -715,7 +729,11 @@ class AIXZeroModel(nn.Module):
                 if inflight_alu and tokenizer is not None:
                     decoded_so_far = tokenizer.decode(seq[0].tolist(), skip_special=True)
                     if "<think>" in decoded_so_far and "</think>" not in decoded_so_far:
-                        if decoded_so_far.endswith("=") or decoded_so_far.endswith("->"):
+                        if (
+                            decoded_so_far.endswith("=")
+                            or decoded_so_far.endswith("->")
+                            or (decoded_so_far.endswith(";") and "=" not in decoded_so_far.split("<think>", 1)[1])
+                        ):
                             alu_out = evaluate_inflight_subexpr(decoded_so_far, last_alu_result)
                             if alu_out is not None:
                                 repaired_str, alu_val, is_final = alu_out

@@ -1,244 +1,346 @@
 {
-  "system": "AIX-Zero Knowledge Is Power (v9-KIP)",
-  "updated_at": "2026-11-04T20:32:42.753764+00:00",
-  "checkpoint": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v9_kip.safetensors",
-  "vocab_size": 128,
+  "system": "AIX-Zero Knowledge Is Power (v10-KIP)",
+  "updated_at": "2026-11-04T21:22:21.740228+00:00",
+  "checkpoint": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v10_kip.safetensors",
+  "vocab_size": 131,
   "parameters": {
-    "total_parameters": 815874,
+    "total_parameters": 816642,
     "latent_recurrent_core_parameters": 479105,
     "value_verifier_parameters": 8449,
-    "effective_virtual_parameters_with_looping": 1774084
+    "effective_virtual_parameters_with_looping": 1774852
   },
-  "total_domains": 15,
+  "total_domains": 18,
   "pre_kip_new_domains_eval": {
     "correct": 0,
-    "total": 10,
+    "total": 15,
     "accuracy_pct": 0.0,
     "domain_accuracy_pct": {
-      "ELECTRICAL_POWER": 0.0,
-      "FINANCE_INTEREST": 0.0
+      "COMBINATORICS_GRID": 0.0,
+      "THERMO_FIRST_LAW": 0.0,
+      "PROBABILITY_EV": 0.0
     },
-    "mean_ponder_steps": 1.054,
-    "mean_verifier_confidence": 0.8398,
+    "mean_ponder_steps": 1.013,
+    "mean_verifier_confidence": 0.8373,
     "sample_outputs": [
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
-        "generated": "Q:Elec:V=7,I=3,loss=1,P=<think>3*1=12;12+1=13</think><ans>13</ans>",
-        "predicted": "13",
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=7,m=3,ex=1,N=",
+        "generated": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=30;30+1=10</think><ans>10</ans>",
+        "predicted": "10",
         "gold": "20",
         "correct": false,
-        "verifier_confidence": 0.8551,
-        "latent_ponder_steps": 1.051
+        "verifier_confidence": 0.8383,
+        "latent_ponder_steps": 1.013
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=6,P=8,B=",
-        "generated": "Q:Fin:r=5,t=6,P=8,B=<think>5*8=4;4+4=12</think><ans>12</ans>",
-        "predicted": "12",
-        "gold": "38",
-        "correct": false,
-        "verifier_confidence": 0.8317,
-        "latent_ponder_steps": 1.059
-      },
-      {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=4,t=3,P=8,B=",
-        "generated": "Q:Fin:r=4,t=3,P=8,B=<think>4*8=12;12+4=13</think><ans>13</ans>",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=6,t=3,W=1,dU=",
+        "generated": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=12;12+1=13</think><ans>13</ans>",
         "predicted": "13",
-        "gold": "20",
+        "gold": "17",
         "correct": false,
-        "verifier_confidence": 0.8392,
-        "latent_ponder_steps": 1.056
+        "verifier_confidence": 0.8371,
+        "latent_ponder_steps": 1.025
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=6,P=10,B=",
-        "generated": "Q:Fin:r=5,t=6,P=10,B=<think>5*4=20;20+1=13</think><ans>13</ans>",
-        "predicted": "13",
-        "gold": "40",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
+        "generated": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=20;20+10=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "27",
         "correct": false,
-        "verifier_confidence": 0.8345,
-        "latent_ponder_steps": 1.054
+        "verifier_confidence": 0.8414,
+        "latent_ponder_steps": 1.003
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=2,t=2,P=5,B=",
-        "generated": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=12;12+5=19</think><ans>19</ans>",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=",
+        "generated": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=4</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "13",
+        "correct": false,
+        "verifier_confidence": 0.8395,
+        "latent_ponder_steps": 1.013
+      },
+      {
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
+        "generated": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=2</think><ans>22-3=</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "10",
+        "correct": false,
+        "verifier_confidence": 0.8306,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
+        "generated": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=12;12+3=14</think><ans>14</ans>",
+        "predicted": "14",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.8375,
+        "latent_ponder_steps": 1.019
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
+        "generated": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12+2=19</think><ans>19</ans>",
         "predicted": "19",
-        "gold": "9",
+        "gold": "10",
         "correct": false,
-        "verifier_confidence": 0.8339,
-        "latent_ponder_steps": 1.056
+        "verifier_confidence": 0.835,
+        "latent_ponder_steps": 1.02
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
-        "generated": "Q:Elec:V=7,I=2,loss=2,P=<think>2*2=12;12+1=13</think><ans>13</ans>",
-        "predicted": "13",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
+        "generated": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=2</think><ans>25</ans>",
+        "predicted": "25",
         "gold": "12",
         "correct": false,
-        "verifier_confidence": 0.8443,
-        "latent_ponder_steps": 1.051
+        "verifier_confidence": 0.8409,
+        "latent_ponder_steps": 1.006
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=5,P=8,B=",
-        "generated": "Q:Fin:r=5,t=5,P=8,B=<think>5*8=30;30+8=13</think><ans>13</ans>",
-        "predicted": "13",
-        "gold": "33",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
+        "generated": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=10;10+1=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "14",
         "correct": false,
-        "verifier_confidence": 0.8319,
-        "latent_ponder_steps": 1.056
+        "verifier_confidence": 0.8376,
+        "latent_ponder_steps": 1.008
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
-        "generated": "Q:Elec:V=5,I=5,loss=1,P=<think>5*1=12;12+1=13</think><ans>13</ans>",
-        "predicted": "13",
-        "gold": "24",
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
+        "generated": "Q:Comb:n=4,m=6,ex=4,N=<think>4*4=12;12+4=16</think><ans>16</ans>",
+        "predicted": "16",
+        "gold": "20",
         "correct": false,
-        "verifier_confidence": 0.8453,
-        "latent_ponder_steps": 1.051
+        "verifier_confidence": 0.8432,
+        "latent_ponder_steps": 1.001
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
-        "generated": "Q:Elec:V=5,I=5,loss=2,P=<think>5*2=12;12+2=13</think><ans>13</ans>",
-        "predicted": "13",
-        "gold": "23",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
+        "generated": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=4</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "17",
         "correct": false,
-        "verifier_confidence": 0.8457,
-        "latent_ponder_steps": 1.051
+        "verifier_confidence": 0.8372,
+        "latent_ponder_steps": 1.023
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
-        "generated": "Q:Elec:V=5,I=4,loss=4,P=<think>4*4=12;12+4=17</think><ans>17</ans>",
-        "predicted": "17",
-        "gold": "16",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
+        "generated": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=2</think><ans>22-3=</think><ans>4</ans>",
+        "predicted": "4",
+        "gold": "8",
         "correct": false,
-        "verifier_confidence": 0.8364,
-        "latent_ponder_steps": 1.051
+        "verifier_confidence": 0.8323,
+        "latent_ponder_steps": 1.005
+      },
+      {
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
+        "generated": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=12;12+4=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "5",
+        "correct": false,
+        "verifier_confidence": 0.8354,
+        "latent_ponder_steps": 1.028
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
+        "generated": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=30;30+4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "8",
+        "correct": false,
+        "verifier_confidence": 0.8345,
+        "latent_ponder_steps": 1.02
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
+        "generated": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=30;30+1=10</think><ans>10</ans>",
+        "predicted": "10",
+        "gold": "17",
+        "correct": false,
+        "verifier_confidence": 0.8389,
+        "latent_ponder_steps": 1.01
       }
     ]
   },
   "post_kip_new_domains_eval": {
-    "correct": 10,
-    "total": 10,
+    "correct": 15,
+    "total": 15,
     "accuracy_pct": 100.0,
     "domain_accuracy_pct": {
-      "ELECTRICAL_POWER": 100.0,
-      "FINANCE_INTEREST": 100.0
+      "COMBINATORICS_GRID": 100.0,
+      "THERMO_FIRST_LAW": 100.0,
+      "PROBABILITY_EV": 100.0
     },
-    "mean_ponder_steps": 1.0,
-    "mean_verifier_confidence": 0.8438,
+    "mean_ponder_steps": 1.001,
+    "mean_verifier_confidence": 0.8483,
     "sample_outputs": [
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
-        "generated": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>",
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=7,m=3,ex=1,N=",
+        "generated": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=21;21-1=20</think><ans>20</ans>",
         "predicted": "20",
         "gold": "20",
-        "correct": true,
-        "verifier_confidence": 0.8425,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=6,P=8,B=",
-        "generated": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>",
-        "predicted": "38",
-        "gold": "38",
         "correct": true,
         "verifier_confidence": 0.8432,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=4,t=3,P=8,B=",
-        "generated": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>",
-        "predicted": "20",
-        "gold": "20",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=6,t=3,W=1,dU=",
+        "generated": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=18;18-1=17</think><ans>17</ans>",
+        "predicted": "17",
+        "gold": "17",
         "correct": true,
-        "verifier_confidence": 0.8416,
+        "verifier_confidence": 0.8427,
+        "latent_ponder_steps": 1.001
+      },
+      {
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
+        "generated": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=28;28-1=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
+        "correct": true,
+        "verifier_confidence": 0.8517,
+        "latent_ponder_steps": 1.002
+      },
+      {
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=",
+        "generated": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*2=10;10+5=15;15-2=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "13",
+        "correct": true,
+        "verifier_confidence": 0.8548,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=6,P=10,B=",
-        "generated": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>",
-        "predicted": "40",
-        "gold": "40",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
+        "generated": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=9;9+3=12;12-2=10</think><ans>10</ans>",
+        "predicted": "10",
+        "gold": "10",
         "correct": true,
-        "verifier_confidence": 0.8471,
+        "verifier_confidence": 0.8504,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=2,t=2,P=5,B=",
-        "generated": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>",
-        "predicted": "9",
-        "gold": "9",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
+        "generated": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=14;14-3=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "11",
         "correct": true,
-        "verifier_confidence": 0.8375,
+        "verifier_confidence": 0.8583,
+        "latent_ponder_steps": 1.002
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
+        "generated": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=10</think><ans>10</ans>",
+        "predicted": "10",
+        "gold": "10",
+        "correct": true,
+        "verifier_confidence": 0.8479,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
-        "generated": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
+        "generated": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
         "predicted": "12",
         "gold": "12",
         "correct": true,
-        "verifier_confidence": 0.8408,
+        "verifier_confidence": 0.8622,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "FINANCE_INTEREST",
-        "prompt": "Q:Fin:r=5,t=5,P=8,B=",
-        "generated": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>",
-        "predicted": "33",
-        "gold": "33",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
+        "generated": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15;15-1=14</think><ans>14</ans>",
+        "predicted": "14",
+        "gold": "14",
         "correct": true,
-        "verifier_confidence": 0.845,
+        "verifier_confidence": 0.8387,
+        "latent_ponder_steps": 1.006
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
+        "generated": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=24;24-4=20</think><ans>20</ans>",
+        "predicted": "20",
+        "gold": "20",
+        "correct": true,
+        "verifier_confidence": 0.8458,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
-        "generated": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>",
-        "predicted": "24",
-        "gold": "24",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
+        "generated": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=16;16+3=19;19-2=17</think><ans>17</ans>",
+        "predicted": "17",
+        "gold": "17",
         "correct": true,
-        "verifier_confidence": 0.8491,
+        "verifier_confidence": 0.8529,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
-        "generated": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>",
-        "predicted": "23",
-        "gold": "23",
+        "domain": "PROBABILITY_EV",
+        "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
+        "generated": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*3=6;6+3=9;9-1=8</think><ans>8</ans>",
+        "predicted": "8",
+        "gold": "8",
         "correct": true,
-        "verifier_confidence": 0.8444,
+        "verifier_confidence": 0.8496,
         "latent_ponder_steps": 1.0
       },
       {
-        "domain": "ELECTRICAL_POWER",
-        "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
-        "generated": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>",
-        "predicted": "16",
-        "gold": "16",
+        "domain": "THERMO_FIRST_LAW",
+        "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
+        "generated": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=9;9-4=5</think><ans>5</ans>",
+        "predicted": "5",
+        "gold": "5",
         "correct": true,
-        "verifier_confidence": 0.8469,
+        "verifier_confidence": 0.8442,
+        "latent_ponder_steps": 1.006
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
+        "generated": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=8</think><ans>8</ans>",
+        "predicted": "8",
+        "gold": "8",
+        "correct": true,
+        "verifier_confidence": 0.8447,
+        "latent_ponder_steps": 1.0
+      },
+      {
+        "domain": "COMBINATORICS_GRID",
+        "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
+        "generated": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=18;18-1=17</think><ans>17</ans>",
+        "predicted": "17",
+        "gold": "17",
+        "correct": true,
+        "verifier_confidence": 0.8381,
         "latent_ponder_steps": 1.0
       }
     ]
   },
-  "global_15_domain_eval": {
-    "correct": 75,
-    "total": 75,
+  "global_18_domain_eval": {
+    "correct": 90,
+    "total": 90,
     "accuracy_pct": 100.0,
     "domain_accuracy_pct": {
       "ALGEBRA_SOLVE": 100.0,
@@ -255,10 +357,13 @@
       "NUMBER_SEQ": 100.0,
       "MULTI_STEP_3": 100.0,
       "ELECTRICAL_POWER": 100.0,
-      "FINANCE_INTEREST": 100.0
+      "FINANCE_INTEREST": 100.0,
+      "COMBINATORICS_GRID": 100.0,
+      "THERMO_FIRST_LAW": 100.0,
+      "PROBABILITY_EV": 100.0
     },
-    "mean_ponder_steps": 1.008,
-    "mean_verifier_confidence": 0.8386,
+    "mean_ponder_steps": 1.013,
+    "mean_verifier_confidence": 0.8398,
     "sample_outputs": [
       {
         "domain": "ALGEBRA_SOLVE",
@@ -267,7 +372,7 @@
         "predicted": "4",
         "gold": "4",
         "correct": true,
-        "verifier_confidence": 0.8524,
+        "verifier_confidence": 0.8492,
         "latent_ponder_steps": 1.0
       },
       {
@@ -277,7 +382,7 @@
         "predicted": "11",
         "gold": "11",
         "correct": true,
-        "verifier_confidence": 0.8493,
+        "verifier_confidence": 0.8456,
         "latent_ponder_steps": 1.0
       },
       {
@@ -287,7 +392,7 @@
         "predicted": "27",
         "gold": "27",
         "correct": true,
-        "verifier_confidence": 0.8249,
+        "verifier_confidence": 0.8212,
         "latent_ponder_steps": 1.0
       },
       {
@@ -297,7 +402,7 @@
         "predicted": "12",
         "gold": "12",
         "correct": true,
-        "verifier_confidence": 0.8321,
+        "verifier_confidence": 0.8496,
         "latent_ponder_steps": 1.0
       },
       {
@@ -307,8 +412,8 @@
         "predicted": "9",
         "gold": "9",
         "correct": true,
-        "verifier_confidence": 0.8466,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8433,
+        "latent_ponder_steps": 1.056
       },
       {
         "domain": "CALCULUS_DERIV",
@@ -317,7 +422,7 @@
         "predicted": "19",
         "gold": "19",
         "correct": true,
-        "verifier_confidence": 0.8227,
+        "verifier_confidence": 0.8444,
         "latent_ponder_steps": 1.0
       },
       {
@@ -327,7 +432,7 @@
         "predicted": "15",
         "gold": "15",
         "correct": true,
-        "verifier_confidence": 0.8515,
+        "verifier_confidence": 0.8559,
         "latent_ponder_steps": 1.0
       },
       {
@@ -337,7 +442,7 @@
         "predicted": "20",
         "gold": "20",
         "correct": true,
-        "verifier_confidence": 0.8297,
+        "verifier_confidence": 0.8455,
         "latent_ponder_steps": 1.0
       },
       {
@@ -347,7 +452,7 @@
         "predicted": "3",
         "gold": "3",
         "correct": true,
-        "verifier_confidence": 0.8519,
+        "verifier_confidence": 0.8425,
         "latent_ponder_steps": 1.0
       },
       {
@@ -357,7 +462,7 @@
         "predicted": "22",
         "gold": "22",
         "correct": true,
-        "verifier_confidence": 0.83,
+        "verifier_confidence": 0.8411,
         "latent_ponder_steps": 1.0
       },
       {
@@ -367,7 +472,7 @@
         "predicted": "0",
         "gold": "0",
         "correct": true,
-        "verifier_confidence": 0.8394,
+        "verifier_confidence": 0.8112,
         "latent_ponder_steps": 1.1
       },
       {
@@ -377,7 +482,7 @@
         "predicted": "36",
         "gold": "36",
         "correct": true,
-        "verifier_confidence": 0.831,
+        "verifier_confidence": 0.8253,
         "latent_ponder_steps": 1.0
       },
       {
@@ -387,7 +492,7 @@
         "predicted": "45",
         "gold": "45",
         "correct": true,
-        "verifier_confidence": 0.8316,
+        "verifier_confidence": 0.8322,
         "latent_ponder_steps": 1.0
       },
       {
@@ -397,7 +502,7 @@
         "predicted": "25",
         "gold": "25",
         "correct": true,
-        "verifier_confidence": 0.8292,
+        "verifier_confidence": 0.8314,
         "latent_ponder_steps": 1.0
       },
       {
@@ -407,8 +512,8 @@
         "predicted": "1",
         "gold": "1",
         "correct": true,
-        "verifier_confidence": 0.8276,
-        "latent_ponder_steps": 1.05
+        "verifier_confidence": 0.8172,
+        "latent_ponder_steps": 1.087
       },
       {
         "domain": "WORD_PROBLEM",
@@ -417,7 +522,7 @@
         "predicted": "32",
         "gold": "32",
         "correct": true,
-        "verifier_confidence": 0.8286,
+        "verifier_confidence": 0.8318,
         "latent_ponder_steps": 1.0
       }
     ]
@@ -441,9 +546,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8515,
+          "verifier_confidence": 0.8559,
           "ponder_steps": 1.0,
-          "latency_ms": 198.58
+          "latency_ms": 152.52
         },
         {
           "prompt": "Q:(7*7)+1=",
@@ -451,9 +556,9 @@
           "predicted": "50",
           "gold": "50",
           "verified": true,
-          "verifier_confidence": 0.8186,
+          "verifier_confidence": 0.8307,
           "ponder_steps": 1.0,
-          "latency_ms": 156.53
+          "latency_ms": 146.78
         },
         {
           "prompt": "Q:(6*3)+1=",
@@ -461,9 +566,9 @@
           "predicted": "19",
           "gold": "19",
           "verified": true,
-          "verifier_confidence": 0.8363,
+          "verifier_confidence": 0.8419,
           "ponder_steps": 1.0,
-          "latency_ms": 108.54
+          "latency_ms": 152.29
         },
         {
           "prompt": "Q:(6*6)+3=",
@@ -471,9 +576,9 @@
           "predicted": "39",
           "gold": "39",
           "verified": true,
-          "verifier_confidence": 0.8393,
+          "verifier_confidence": 0.8357,
           "ponder_steps": 1.0,
-          "latency_ms": 158.89
+          "latency_ms": 109.84
         },
         {
           "prompt": "Q:(4*2)+1=",
@@ -481,9 +586,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8443,
+          "verifier_confidence": 0.8501,
           "ponder_steps": 1.0,
-          "latency_ms": 212.24
+          "latency_ms": 137.44
         }
       ]
     },
@@ -505,9 +610,9 @@
           "predicted": "4",
           "gold": "4",
           "verified": true,
-          "verifier_confidence": 0.8524,
+          "verifier_confidence": 0.8492,
           "ponder_steps": 1.0,
-          "latency_ms": 961.75
+          "latency_ms": 191.82
         },
         {
           "prompt": "Q:5x+1=16,x=",
@@ -515,9 +620,9 @@
           "predicted": "3",
           "gold": "3",
           "verified": true,
-          "verifier_confidence": 0.8519,
+          "verifier_confidence": 0.8425,
           "ponder_steps": 1.0,
-          "latency_ms": 186.82
+          "latency_ms": 168.95
         },
         {
           "prompt": "Q:4x+2=18,x=",
@@ -525,9 +630,9 @@
           "predicted": "4",
           "gold": "4",
           "verified": true,
-          "verifier_confidence": 0.8477,
+          "verifier_confidence": 0.832,
           "ponder_steps": 1.0,
-          "latency_ms": 191.37
+          "latency_ms": 104.45
         },
         {
           "prompt": "Q:2x+2=12,x=",
@@ -535,9 +640,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8466,
+          "verifier_confidence": 0.8381,
           "ponder_steps": 1.0,
-          "latency_ms": 181.92
+          "latency_ms": 125.06
         },
         {
           "prompt": "Q:6x+4=34,x=",
@@ -545,9 +650,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8539,
+          "verifier_confidence": 0.8501,
           "ponder_steps": 1.0,
-          "latency_ms": 184.7
+          "latency_ms": 110.59
         }
       ]
     },
@@ -569,9 +674,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8276,
-          "ponder_steps": 1.05,
-          "latency_ms": 151.48
+          "verifier_confidence": 0.8172,
+          "ponder_steps": 1.087,
+          "latency_ms": 108.91
         },
         {
           "prompt": "Q:(7+5)%4=",
@@ -579,9 +684,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8242,
-          "ponder_steps": 1.033,
-          "latency_ms": 179.77
+          "verifier_confidence": 0.8285,
+          "ponder_steps": 1.087,
+          "latency_ms": 161.0
         },
         {
           "prompt": "Q:(8+5)%4=",
@@ -589,9 +694,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8312,
-          "ponder_steps": 1.034,
-          "latency_ms": 189.0
+          "verifier_confidence": 0.81,
+          "ponder_steps": 1.087,
+          "latency_ms": 168.54
         },
         {
           "prompt": "Q:(11+2)%3=",
@@ -599,9 +704,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8566,
-          "ponder_steps": 1.033,
-          "latency_ms": 167.33
+          "verifier_confidence": 0.8436,
+          "ponder_steps": 1.08,
+          "latency_ms": 183.18
         },
         {
           "prompt": "Q:(5+7)%4=",
@@ -609,9 +714,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8265,
-          "ponder_steps": 1.055,
-          "latency_ms": 198.29
+          "verifier_confidence": 0.827,
+          "ponder_steps": 1.087,
+          "latency_ms": 109.12
         }
       ]
     },
@@ -633,9 +738,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8394,
+          "verifier_confidence": 0.8112,
           "ponder_steps": 1.1,
-          "latency_ms": 182.24
+          "latency_ms": 183.92
         },
         {
           "prompt": "Q:2*4>2?",
@@ -643,9 +748,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8537,
+          "verifier_confidence": 0.8433,
           "ponder_steps": 1.1,
-          "latency_ms": 146.03
+          "latency_ms": 152.38
         },
         {
           "prompt": "Q:2*4>1?",
@@ -653,9 +758,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8565,
+          "verifier_confidence": 0.8425,
           "ponder_steps": 1.1,
-          "latency_ms": 188.62
+          "latency_ms": 115.12
         },
         {
           "prompt": "Q:2*8>8?",
@@ -663,9 +768,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8182,
-          "ponder_steps": 1.046,
-          "latency_ms": 160.44
+          "verifier_confidence": 0.8018,
+          "ponder_steps": 1.091,
+          "latency_ms": 221.31
         },
         {
           "prompt": "Q:2*7>7?",
@@ -673,9 +778,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8401,
-          "ponder_steps": 1.046,
-          "latency_ms": 173.35
+          "verifier_confidence": 0.8314,
+          "ponder_steps": 1.091,
+          "latency_ms": 173.86
         }
       ]
     },
@@ -697,9 +802,9 @@
           "predicted": "27",
           "gold": "27",
           "verified": true,
-          "verifier_confidence": 0.8249,
+          "verifier_confidence": 0.8212,
           "ponder_steps": 1.0,
-          "latency_ms": 151.95
+          "latency_ms": 144.12
         },
         {
           "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
@@ -707,9 +812,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8321,
+          "verifier_confidence": 0.8496,
           "ponder_steps": 1.0,
-          "latency_ms": 180.53
+          "latency_ms": 111.42
         },
         {
           "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
@@ -717,9 +822,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8297,
+          "verifier_confidence": 0.8455,
           "ponder_steps": 1.0,
-          "latency_ms": 182.33
+          "latency_ms": 161.22
         },
         {
           "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
@@ -727,9 +832,9 @@
           "predicted": "25",
           "gold": "25",
           "verified": true,
-          "verifier_confidence": 0.8292,
+          "verifier_confidence": 0.8314,
           "ponder_steps": 1.0,
-          "latency_ms": 156.48
+          "latency_ms": 126.88
         },
         {
           "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
@@ -737,9 +842,9 @@
           "predicted": "32",
           "gold": "32",
           "verified": true,
-          "verifier_confidence": 0.8286,
+          "verifier_confidence": 0.8318,
           "ponder_steps": 1.0,
-          "latency_ms": 184.33
+          "latency_ms": 106.81
         }
       ]
     },
@@ -761,9 +866,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8493,
+          "verifier_confidence": 0.8456,
           "ponder_steps": 1.0,
-          "latency_ms": 240.68
+          "latency_ms": 197.43
         },
         {
           "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
@@ -771,9 +876,9 @@
           "predicted": "19",
           "gold": "19",
           "verified": true,
-          "verifier_confidence": 0.8227,
+          "verifier_confidence": 0.8444,
           "ponder_steps": 1.0,
-          "latency_ms": 231.98
+          "latency_ms": 148.18
         },
         {
           "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
@@ -781,9 +886,9 @@
           "predicted": "45",
           "gold": "45",
           "verified": true,
-          "verifier_confidence": 0.8316,
+          "verifier_confidence": 0.8322,
           "ponder_steps": 1.0,
-          "latency_ms": 194.38
+          "latency_ms": 210.72
         },
         {
           "prompt": "Q:Calc:d/dx(4x^2+5x)@x=2=",
@@ -791,9 +896,9 @@
           "predicted": "21",
           "gold": "21",
           "verified": true,
-          "verifier_confidence": 0.8273,
+          "verifier_confidence": 0.8404,
           "ponder_steps": 1.0,
-          "latency_ms": 271.78
+          "latency_ms": 226.5
         },
         {
           "prompt": "Q:Calc:d/dx(3x^2+5x)@x=1=",
@@ -801,9 +906,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8238,
+          "verifier_confidence": 0.8323,
           "ponder_steps": 1.0,
-          "latency_ms": 154.27
+          "latency_ms": 214.11
         }
       ]
     },
@@ -825,9 +930,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8466,
-          "ponder_steps": 1.0,
-          "latency_ms": 195.76
+          "verifier_confidence": 0.8433,
+          "ponder_steps": 1.056,
+          "latency_ms": 119.97
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=8,x=",
@@ -835,9 +940,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8393,
-          "ponder_steps": 1.0,
-          "latency_ms": 199.35
+          "verifier_confidence": 0.827,
+          "ponder_steps": 1.057,
+          "latency_ms": 107.7
         },
         {
           "prompt": "Q:Sys:x+y=11,x-y=5,x=",
@@ -845,9 +950,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.8533,
-          "ponder_steps": 1.0,
-          "latency_ms": 137.15
+          "verifier_confidence": 0.8513,
+          "ponder_steps": 1.058,
+          "latency_ms": 215.8
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=4,x=",
@@ -855,9 +960,9 @@
           "predicted": "7",
           "gold": "7",
           "verified": true,
-          "verifier_confidence": 0.8527,
-          "ponder_steps": 1.0,
-          "latency_ms": 202.48
+          "verifier_confidence": 0.85,
+          "ponder_steps": 1.057,
+          "latency_ms": 152.21
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=6,x=",
@@ -865,9 +970,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.8462,
-          "ponder_steps": 1.0,
-          "latency_ms": 230.22
+          "verifier_confidence": 0.8346,
+          "ponder_steps": 1.057,
+          "latency_ms": 135.82
         }
       ]
     },
@@ -889,9 +994,9 @@
           "predicted": "22",
           "gold": "22",
           "verified": true,
-          "verifier_confidence": 0.83,
+          "verifier_confidence": 0.8411,
           "ponder_steps": 1.0,
-          "latency_ms": 180.62
+          "latency_ms": 172.06
         },
         {
           "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
@@ -899,9 +1004,9 @@
           "predicted": "36",
           "gold": "36",
           "verified": true,
-          "verifier_confidence": 0.831,
+          "verifier_confidence": 0.8253,
           "ponder_steps": 1.0,
-          "latency_ms": 174.11
+          "latency_ms": 174.78
         },
         {
           "prompt": "Q:Code:def f(x):return 6*x+1;f(2)=",
@@ -909,9 +1014,9 @@
           "predicted": "13",
           "gold": "13",
           "verified": true,
-          "verifier_confidence": 0.8439,
+          "verifier_confidence": 0.846,
           "ponder_steps": 1.0,
-          "latency_ms": 180.11
+          "latency_ms": 165.89
         },
         {
           "prompt": "Q:Code:def f(x):return 5*x+4;f(4)=",
@@ -919,9 +1024,9 @@
           "predicted": "24",
           "gold": "24",
           "verified": true,
-          "verifier_confidence": 0.8328,
+          "verifier_confidence": 0.8357,
           "ponder_steps": 1.0,
-          "latency_ms": 130.29
+          "latency_ms": 160.6
         },
         {
           "prompt": "Q:Code:def f(x):return 2*x+4;f(5)=",
@@ -929,9 +1034,9 @@
           "predicted": "14",
           "gold": "14",
           "verified": true,
-          "verifier_confidence": 0.8368,
+          "verifier_confidence": 0.8416,
           "ponder_steps": 1.0,
-          "latency_ms": 120.65
+          "latency_ms": 168.31
         }
       ]
     },
@@ -953,9 +1058,9 @@
           "predicted": "51",
           "gold": "51",
           "verified": true,
-          "verifier_confidence": 0.841,
+          "verifier_confidence": 0.8363,
           "ponder_steps": 1.0,
-          "latency_ms": 258.55
+          "latency_ms": 173.52
         },
         {
           "prompt": "Q:Quad:3x^2+3@x=3=",
@@ -963,9 +1068,9 @@
           "predicted": "30",
           "gold": "30",
           "verified": true,
-          "verifier_confidence": 0.8225,
+          "verifier_confidence": 0.8317,
           "ponder_steps": 1.0,
-          "latency_ms": 156.82
+          "latency_ms": 205.49
         },
         {
           "prompt": "Q:Quad:3x^2+1@x=5=",
@@ -973,9 +1078,9 @@
           "predicted": "76",
           "gold": "76",
           "verified": true,
-          "verifier_confidence": 0.8344,
+          "verifier_confidence": 0.8259,
           "ponder_steps": 1.0,
-          "latency_ms": 153.15
+          "latency_ms": 188.95
         },
         {
           "prompt": "Q:Quad:4x^2+1@x=4=",
@@ -983,9 +1088,9 @@
           "predicted": "65",
           "gold": "65",
           "verified": true,
-          "verifier_confidence": 0.8367,
+          "verifier_confidence": 0.8413,
           "ponder_steps": 1.0,
-          "latency_ms": 211.99
+          "latency_ms": 189.78
         },
         {
           "prompt": "Q:Quad:4x^2+5@x=4=",
@@ -993,9 +1098,9 @@
           "predicted": "69",
           "gold": "69",
           "verified": true,
-          "verifier_confidence": 0.8329,
+          "verifier_confidence": 0.832,
           "ponder_steps": 1.0,
-          "latency_ms": 233.51
+          "latency_ms": 187.72
         }
       ]
     },
@@ -1017,9 +1122,9 @@
           "predicted": "21",
           "gold": "21",
           "verified": true,
-          "verifier_confidence": 0.8506,
+          "verifier_confidence": 0.8516,
           "ponder_steps": 1.0,
-          "latency_ms": 213.29
+          "latency_ms": 146.44
         },
         {
           "prompt": "Q:Phys:a=5,t=3,u=2,v=",
@@ -1027,9 +1132,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8446,
+          "verifier_confidence": 0.8471,
           "ponder_steps": 1.0,
-          "latency_ms": 205.1
+          "latency_ms": 169.77
         },
         {
           "prompt": "Q:Phys:a=3,t=5,u=2,v=",
@@ -1037,9 +1142,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8431,
+          "verifier_confidence": 0.8492,
           "ponder_steps": 1.0,
-          "latency_ms": 147.77
+          "latency_ms": 184.07
         },
         {
           "prompt": "Q:Phys:a=3,t=2,u=4,v=",
@@ -1047,9 +1152,9 @@
           "predicted": "10",
           "gold": "10",
           "verified": true,
-          "verifier_confidence": 0.843,
+          "verifier_confidence": 0.8533,
           "ponder_steps": 1.0,
-          "latency_ms": 140.04
+          "latency_ms": 178.59
         },
         {
           "prompt": "Q:Phys:a=4,t=6,u=1,v=",
@@ -1057,9 +1162,9 @@
           "predicted": "25",
           "gold": "25",
           "verified": true,
-          "verifier_confidence": 0.845,
+          "verifier_confidence": 0.856,
           "ponder_steps": 1.0,
-          "latency_ms": 112.68
+          "latency_ms": 168.48
         }
       ]
     },
@@ -1081,9 +1186,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8318,
+          "verifier_confidence": 0.8428,
           "ponder_steps": 1.0,
-          "latency_ms": 200.64
+          "latency_ms": 134.36
         },
         {
           "prompt": "Q:Geom:w=2,h=6,p=5,A=",
@@ -1091,9 +1196,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8443,
+          "verifier_confidence": 0.8476,
           "ponder_steps": 1.0,
-          "latency_ms": 192.15
+          "latency_ms": 132.57
         },
         {
           "prompt": "Q:Geom:w=4,h=2,p=1,A=",
@@ -1101,9 +1206,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8363,
+          "verifier_confidence": 0.8436,
           "ponder_steps": 1.0,
-          "latency_ms": 107.28
+          "latency_ms": 153.02
         },
         {
           "prompt": "Q:Geom:w=2,h=6,p=3,A=",
@@ -1111,9 +1216,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8414,
+          "verifier_confidence": 0.8492,
           "ponder_steps": 1.0,
-          "latency_ms": 144.52
+          "latency_ms": 357.68
         },
         {
           "prompt": "Q:Geom:w=2,h=7,p=1,A=",
@@ -1121,9 +1226,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8428,
+          "verifier_confidence": 0.8522,
           "ponder_steps": 1.0,
-          "latency_ms": 179.86
+          "latency_ms": 178.81
         }
       ]
     },
@@ -1145,9 +1250,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8269,
+          "verifier_confidence": 0.8387,
           "ponder_steps": 1.0,
-          "latency_ms": 163.86
+          "latency_ms": 138.86
         },
         {
           "prompt": "Q:Seq:d=4,n=4,a0=1,an=",
@@ -1155,9 +1260,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8301,
-          "ponder_steps": 1.001,
-          "latency_ms": 177.63
+          "verifier_confidence": 0.8436,
+          "ponder_steps": 1.0,
+          "latency_ms": 149.43
         },
         {
           "prompt": "Q:Seq:d=2,n=4,a0=4,an=",
@@ -1165,9 +1270,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8284,
+          "verifier_confidence": 0.8492,
           "ponder_steps": 1.0,
-          "latency_ms": 138.22
+          "latency_ms": 154.32
         },
         {
           "prompt": "Q:Seq:d=5,n=3,a0=3,an=",
@@ -1175,9 +1280,9 @@
           "predicted": "18",
           "gold": "18",
           "verified": true,
-          "verifier_confidence": 0.8351,
+          "verifier_confidence": 0.8307,
           "ponder_steps": 1.0,
-          "latency_ms": 125.72
+          "latency_ms": 160.55
         },
         {
           "prompt": "Q:Seq:d=2,n=3,a0=1,an=",
@@ -1185,9 +1290,9 @@
           "predicted": "7",
           "gold": "7",
           "verified": true,
-          "verifier_confidence": 0.8151,
+          "verifier_confidence": 0.8304,
           "ponder_steps": 1.0,
-          "latency_ms": 142.65
+          "latency_ms": 154.02
         }
       ]
     },
@@ -1209,9 +1314,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8358,
+          "verifier_confidence": 0.829,
           "ponder_steps": 1.0,
-          "latency_ms": 262.38
+          "latency_ms": 191.35
         },
         {
           "prompt": "Q:Chain3:5*4+3-1=",
@@ -1219,9 +1324,9 @@
           "predicted": "22",
           "gold": "22",
           "verified": true,
-          "verifier_confidence": 0.8416,
-          "ponder_steps": 1.034,
-          "latency_ms": 254.73
+          "verifier_confidence": 0.8287,
+          "ponder_steps": 1.0,
+          "latency_ms": 179.68
         },
         {
           "prompt": "Q:Chain3:5*5+7-2=",
@@ -1229,9 +1334,9 @@
           "predicted": "30",
           "gold": "30",
           "verified": true,
-          "verifier_confidence": 0.8414,
+          "verifier_confidence": 0.8281,
           "ponder_steps": 1.0,
-          "latency_ms": 220.1
+          "latency_ms": 158.65
         },
         {
           "prompt": "Q:Chain3:6*5+3-1=",
@@ -1239,9 +1344,9 @@
           "predicted": "32",
           "gold": "32",
           "verified": true,
-          "verifier_confidence": 0.8408,
+          "verifier_confidence": 0.833,
           "ponder_steps": 1.0,
-          "latency_ms": 217.22
+          "latency_ms": 143.88
         },
         {
           "prompt": "Q:Chain3:5*5+5-1=",
@@ -1249,9 +1354,9 @@
           "predicted": "29",
           "gold": "29",
           "verified": true,
-          "verifier_confidence": 0.84,
+          "verifier_confidence": 0.8213,
           "ponder_steps": 1.0,
-          "latency_ms": 207.41
+          "latency_ms": 172.42
         }
       ]
     },
@@ -1273,9 +1378,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8425,
+          "verifier_confidence": 0.838,
           "ponder_steps": 1.0,
-          "latency_ms": 156.65
+          "latency_ms": 159.66
         },
         {
           "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
@@ -1283,9 +1388,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8408,
+          "verifier_confidence": 0.8449,
           "ponder_steps": 1.0,
-          "latency_ms": 168.25
+          "latency_ms": 179.7
         },
         {
           "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
@@ -1293,9 +1398,9 @@
           "predicted": "24",
           "gold": "24",
           "verified": true,
-          "verifier_confidence": 0.8491,
+          "verifier_confidence": 0.832,
           "ponder_steps": 1.0,
-          "latency_ms": 174.55
+          "latency_ms": 118.12
         },
         {
           "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
@@ -1303,9 +1408,9 @@
           "predicted": "23",
           "gold": "23",
           "verified": true,
-          "verifier_confidence": 0.8444,
+          "verifier_confidence": 0.8378,
           "ponder_steps": 1.0,
-          "latency_ms": 178.61
+          "latency_ms": 108.27
         },
         {
           "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
@@ -1313,9 +1418,9 @@
           "predicted": "16",
           "gold": "16",
           "verified": true,
-          "verifier_confidence": 0.8469,
+          "verifier_confidence": 0.8444,
           "ponder_steps": 1.0,
-          "latency_ms": 175.99
+          "latency_ms": 111.15
         }
       ]
     },
@@ -1337,9 +1442,9 @@
           "predicted": "38",
           "gold": "38",
           "verified": true,
-          "verifier_confidence": 0.8432,
+          "verifier_confidence": 0.8389,
           "ponder_steps": 1.0,
-          "latency_ms": 152.2
+          "latency_ms": 157.39
         },
         {
           "prompt": "Q:Fin:r=4,t=3,P=8,B=",
@@ -1347,9 +1452,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8416,
+          "verifier_confidence": 0.8469,
           "ponder_steps": 1.0,
-          "latency_ms": 154.04
+          "latency_ms": 165.16
         },
         {
           "prompt": "Q:Fin:r=5,t=6,P=10,B=",
@@ -1357,9 +1462,9 @@
           "predicted": "40",
           "gold": "40",
           "verified": true,
-          "verifier_confidence": 0.8471,
+          "verifier_confidence": 0.8344,
           "ponder_steps": 1.0,
-          "latency_ms": 181.95
+          "latency_ms": 195.71
         },
         {
           "prompt": "Q:Fin:r=2,t=2,P=5,B=",
@@ -1367,9 +1472,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8375,
+          "verifier_confidence": 0.8455,
           "ponder_steps": 1.0,
-          "latency_ms": 186.73
+          "latency_ms": 179.57
         },
         {
           "prompt": "Q:Fin:r=5,t=5,P=8,B=",
@@ -1377,9 +1482,201 @@
           "predicted": "33",
           "gold": "33",
           "verified": true,
-          "verifier_confidence": 0.845,
+          "verifier_confidence": 0.8448,
           "ponder_steps": 1.0,
-          "latency_ms": 182.46
+          "latency_ms": 155.37
+        }
+      ]
+    },
+    "THERMO_FIRST_LAW": {
+      "title": "First Law of Thermodynamics & Internal Energy",
+      "category": "Thermodynamics (Knowledge Is Power v10)",
+      "introduced_in": "v10-KIP",
+      "prefix": "Q:Thermo:",
+      "formula": "dU = (q * t) - W",
+      "prompt_template": "Q:Thermo:q={q},t={t},W={w},dU=",
+      "derivation_grammar": "<think>{q}*{t}={Q};{Q}-{w}={dU}</think><ans>{dU}</ans>",
+      "summary": "Computes total heat influx Q = q*t and subtracts mechanical work W performed by the system.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/thermo_first_law.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Thermo:q=6,t=3,W=1,dU=",
+          "trace": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=18;18-1=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8427,
+          "ponder_steps": 1.001,
+          "latency_ms": 109.11
+        },
+        {
+          "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
+          "trace": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=28;28-1=27</think><ans>27</ans>",
+          "predicted": "27",
+          "gold": "27",
+          "verified": true,
+          "verifier_confidence": 0.8517,
+          "ponder_steps": 1.002,
+          "latency_ms": 154.36
+        },
+        {
+          "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
+          "trace": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=14;14-3=11</think><ans>11</ans>",
+          "predicted": "11",
+          "gold": "11",
+          "verified": true,
+          "verifier_confidence": 0.8583,
+          "ponder_steps": 1.002,
+          "latency_ms": 177.08
+        },
+        {
+          "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
+          "trace": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15;15-1=14</think><ans>14</ans>",
+          "predicted": "14",
+          "gold": "14",
+          "verified": true,
+          "verifier_confidence": 0.8387,
+          "ponder_steps": 1.006,
+          "latency_ms": 126.53
+        },
+        {
+          "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
+          "trace": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=9;9-4=5</think><ans>5</ans>",
+          "predicted": "5",
+          "gold": "5",
+          "verified": true,
+          "verifier_confidence": 0.8442,
+          "ponder_steps": 1.006,
+          "latency_ms": 105.92
+        }
+      ]
+    },
+    "COMBINATORICS_GRID": {
+      "title": "Restricted Combinatorial Pairing Space",
+      "category": "Combinatorics & Discrete Math (Knowledge Is Power v10)",
+      "introduced_in": "v10-KIP",
+      "prefix": "Q:Comb:",
+      "formula": "N_valid = (n * m) - k_excluded",
+      "prompt_template": "Q:Comb:n={n},m={m},ex={ex},N=",
+      "derivation_grammar": "<think>{n}*{m}={tot};{tot}-{ex}={valid}</think><ans>{valid}</ans>",
+      "summary": "Calculates Cartesian product size n*m and subtracts forbidden/excluded configurations.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/combinatorics_grid.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Comb:n=7,m=3,ex=1,N=",
+          "trace": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=21;21-1=20</think><ans>20</ans>",
+          "predicted": "20",
+          "gold": "20",
+          "verified": true,
+          "verifier_confidence": 0.8432,
+          "ponder_steps": 1.0,
+          "latency_ms": 98.2
+        },
+        {
+          "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
+          "trace": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=10</think><ans>10</ans>",
+          "predicted": "10",
+          "gold": "10",
+          "verified": true,
+          "verifier_confidence": 0.8479,
+          "ponder_steps": 1.0,
+          "latency_ms": 181.04
+        },
+        {
+          "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
+          "trace": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=24;24-4=20</think><ans>20</ans>",
+          "predicted": "20",
+          "gold": "20",
+          "verified": true,
+          "verifier_confidence": 0.8458,
+          "ponder_steps": 1.0,
+          "latency_ms": 109.1
+        },
+        {
+          "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
+          "trace": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=8</think><ans>8</ans>",
+          "predicted": "8",
+          "gold": "8",
+          "verified": true,
+          "verifier_confidence": 0.8447,
+          "ponder_steps": 1.0,
+          "latency_ms": 159.39
+        },
+        {
+          "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
+          "trace": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=18;18-1=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8381,
+          "ponder_steps": 1.0,
+          "latency_ms": 173.52
+        }
+      ]
+    },
+    "PROBABILITY_EV": {
+      "title": "Three-Step Discrete Expected Value with Bonus & Fee",
+      "category": "Probability & Decision Theory (Knowledge Is Power v10)",
+      "introduced_in": "v10-KIP",
+      "prefix": "Q:Prob:",
+      "formula": "EV = ((p * v) + bonus) - fee",
+      "prompt_template": "Q:Prob:p={p},v={v},bonus={b},fee={f},EV=",
+      "derivation_grammar": "<think>{p}*{v}={g};{g}+{b}={tot};{tot}-{f}={ev}</think><ans>{ev}</ans>",
+      "summary": "Executes a 3-step decision chain: base payoff p*v, plus bonus b, minus entry fee f.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/probability_ev.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=",
+          "trace": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*2=10;10+5=15;15-2=13</think><ans>13</ans>",
+          "predicted": "13",
+          "gold": "13",
+          "verified": true,
+          "verifier_confidence": 0.8548,
+          "ponder_steps": 1.0,
+          "latency_ms": 236.43
+        },
+        {
+          "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
+          "trace": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=9;9+3=12;12-2=10</think><ans>10</ans>",
+          "predicted": "10",
+          "gold": "10",
+          "verified": true,
+          "verifier_confidence": 0.8504,
+          "ponder_steps": 1.0,
+          "latency_ms": 247.69
+        },
+        {
+          "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
+          "trace": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
+          "predicted": "12",
+          "gold": "12",
+          "verified": true,
+          "verifier_confidence": 0.8622,
+          "ponder_steps": 1.0,
+          "latency_ms": 235.59
+        },
+        {
+          "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
+          "trace": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=16;16+3=19;19-2=17</think><ans>17</ans>",
+          "predicted": "17",
+          "gold": "17",
+          "verified": true,
+          "verifier_confidence": 0.8529,
+          "ponder_steps": 1.0,
+          "latency_ms": 154.91
+        },
+        {
+          "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
+          "trace": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*3=6;6+3=9;9-1=8</think><ans>8</ans>",
+          "predicted": "8",
+          "gold": "8",
+          "verified": true,
+          "verifier_confidence": 0.8496,
+          "ponder_steps": 1.0,
+          "latency_ms": 151.3
         }
       ]
     }
@@ -1450,80 +1747,179 @@
         }
       ],
       "timestamp": "2026-11-04T20:32:28.370172+00:00"
+    },
+    {
+      "domain": "THERMO_FIRST_LAW",
+      "sample_prompt": "Q:Thermo:q=6,t=4,W=3,dU=",
+      "canonical_trace": "<think>6*4=24;24-3=21</think><ans>21</ans>",
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "We are given an equation: dU = (q * T) - W However, note that the standard first law is usually written as \u0394U = Q - W, where: U is internal energy, Q is heat transferred to",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Alright, so I've got this problem here about calculating something related to thermodynamics. Let me see if I can wrap my head around it. The user mentioned an equation: dU = (q *",
+      "consensus_note": "First, the user is referencing a Solver's verification where they were trying to calculate something related to thermodynamics. The equation",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "We are given an equation: dU = (q * T) - W However, note that the standard first law is usually written as \u0394U = Q - W, where: U is internal energy, Q is heat transferred to"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Alright, so I've got this problem here about calculating something related to thermodynamics. Let me see if I can wrap my head around it. The user mentioned an equation: dU = (q *"
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "First, the user is referencing a Solver's verification where they were trying to calculate something related to thermodynamics. The equation"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v10 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Thermo:q=6,t=4,W=3,dU=` -> `Q:Thermo:q=6,t=4,W=3,dU=<think>6*4=24;24-3=21</think><ans>21</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-04T21:14:29.074758+00:00"
+    },
+    {
+      "domain": "COMBINATORICS_GRID",
+      "sample_prompt": "Q:Comb:n=5,m=6,ex=4,N=",
+      "canonical_trace": "<think>5*6=30;30-4=26</think><ans>26</ans>",
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "We are given: n = 5, m = 6, and k_excluded is the number of excluded pairs. The formula for restricted combinatorial pairings is: N_valid = (n * m) - k_excluded This means",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Okay, so I need to figure out how to solve this problem where they're talking about combinatorial pairings with some restrictions. The formula given is N_valid = (n * m) - k_excluded",
+      "consensus_note": "First, the user is asking me to state why distilling that specific example (n=5, m=6, ex=4) into AIX-Zero's weights teaches it the concept of",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "We are given: n = 5, m = 6, and k_excluded is the number of excluded pairs. The formula for restricted combinatorial pairings is: N_valid = (n * m) - k_excluded This means"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Okay, so I need to figure out how to solve this problem where they're talking about combinatorial pairings with some restrictions. The formula given is N_valid = (n * m) - k_excluded"
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "First, the user is asking me to state why distilling that specific example (n=5, m=6, ex=4) into AIX-Zero's weights teaches it the concept of"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v10 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Comb:n=5,m=6,ex=4,N=` -> `Q:Comb:n=5,m=6,ex=4,N=<think>5*6=30;30-4=26</think><ans>26</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-04T21:15:30.761473+00:00"
+    },
+    {
+      "domain": "PROBABILITY_EV",
+      "sample_prompt": "Q:Prob:p=3,v=5,bonus=4,fee=2,EV=",
+      "canonical_trace": "<think>3*5=15;15+4=19;19-2=17</think><ans>17</ans>",
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "First, I'm addressing a user query about explaining an economic or probabilistic concept using specific values: probability (p) is 3, value (v) is 5, bonus is 4, and fee is 2. The",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Alright, let's tackle this query about calculating the Expected Value (EV) of a deal based on some given values. The user is asking me to explain how to compute EV using specific numbers",
+      "consensus_note": "Okay, let me think about this problem. The user is asking how to calculate Expected Value (EV) for a deal with specific parameters: probability",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "First, I'm addressing a user query about explaining an economic or probabilistic concept using specific values: probability (p) is 3, value (v) is 5, bonus is 4, and fee is 2. The"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Alright, let's tackle this query about calculating the Expected Value (EV) of a deal based on some given values. The user is asking me to explain how to compute EV using specific numbers"
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "Okay, let me think about this problem. The user is asking how to calculate Expected Value (EV) for a deal with specific parameters: probability"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v10 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Prob:p=3,v=5,bonus=4,fee=2,EV=` -> `Q:Prob:p=3,v=5,bonus=4,fee=2,EV=<think>3*5=15;15+4=19;19-2=17</think><ans>17</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-04T21:16:26.056924+00:00"
     }
   ],
   "training_cycles": [
     {
       "cycle": 1,
       "total_grad_steps": 11,
-      "weighted_ce_loss": 0.3281,
-      "verifier_bce_loss": 0.4419,
-      "pure_sample_hits": 4,
-      "hard_mined": 22,
-      "dag_hash": "5e19b6e160de"
+      "weighted_ce_loss": 0.4017,
+      "verifier_bce_loss": 0.4391,
+      "pure_sample_hits": 6,
+      "hard_mined": 20,
+      "dag_hash": "fa24e0a62b0a"
     },
     {
       "cycle": 2,
       "total_grad_steps": 22,
-      "weighted_ce_loss": 0.2564,
-      "verifier_bce_loss": 0.436,
+      "weighted_ce_loss": 0.2358,
+      "verifier_bce_loss": 0.4349,
       "pure_sample_hits": 2,
       "hard_mined": 24,
-      "dag_hash": "ab4df05ad500"
+      "dag_hash": "d3e0e98154b6"
     },
     {
       "cycle": 3,
       "total_grad_steps": 33,
-      "weighted_ce_loss": 0.2035,
-      "verifier_bce_loss": 0.4473,
-      "pure_sample_hits": 4,
-      "hard_mined": 22,
-      "dag_hash": "6d966e78883c"
+      "weighted_ce_loss": 0.2,
+      "verifier_bce_loss": 0.4364,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "1c39b9667a76"
     },
     {
       "cycle": 4,
       "total_grad_steps": 44,
-      "weighted_ce_loss": 0.1677,
-      "verifier_bce_loss": 0.4295,
-      "pure_sample_hits": 3,
-      "hard_mined": 23,
-      "dag_hash": "3632df7745de"
+      "weighted_ce_loss": 0.1784,
+      "verifier_bce_loss": 0.4329,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "842be35e97a3"
     },
     {
       "cycle": 5,
       "total_grad_steps": 55,
-      "weighted_ce_loss": 0.1581,
-      "verifier_bce_loss": 0.4362,
-      "pure_sample_hits": 2,
-      "hard_mined": 24,
-      "dag_hash": "54dc60d848da"
+      "weighted_ce_loss": 0.1593,
+      "verifier_bce_loss": 0.4365,
+      "pure_sample_hits": 3,
+      "hard_mined": 23,
+      "dag_hash": "80dcf541686b"
     },
     {
       "cycle": 6,
       "total_grad_steps": 66,
-      "weighted_ce_loss": 0.1395,
-      "verifier_bce_loss": 0.4399,
+      "weighted_ce_loss": 0.1529,
+      "verifier_bce_loss": 0.4335,
       "pure_sample_hits": 2,
       "hard_mined": 24,
-      "dag_hash": "6f9eded0855f"
+      "dag_hash": "8984c4dbbfb4"
     },
     {
       "cycle": 7,
-      "total_grad_steps": 76,
-      "weighted_ce_loss": 0.1236,
-      "verifier_bce_loss": 0.4369,
-      "pure_sample_hits": 6,
-      "hard_mined": 20,
-      "dag_hash": "51de2d7b963a"
+      "total_grad_steps": 77,
+      "weighted_ce_loss": 0.139,
+      "verifier_bce_loss": 0.4361,
+      "pure_sample_hits": 3,
+      "hard_mined": 23,
+      "dag_hash": "33dd698ff737"
     },
     {
       "cycle": 8,
-      "total_grad_steps": 87,
-      "weighted_ce_loss": 0.1229,
-      "verifier_bce_loss": 0.437,
-      "pure_sample_hits": 2,
-      "hard_mined": 24,
-      "dag_hash": "1849fa8a1949"
+      "total_grad_steps": 88,
+      "weighted_ce_loss": 0.133,
+      "verifier_bce_loss": 0.4356,
+      "pure_sample_hits": 4,
+      "hard_mined": 22,
+      "dag_hash": "064bd5996c33"
     }
   ]
 }

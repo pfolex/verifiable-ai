@@ -27,8 +27,8 @@ Reasoning Grammar  : <think>{v}*{i}={gross};{gross}-{l}={net}</think><ans>{net}<
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Elec:V=7,I=3,loss=1,P=` | `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` | `20` (PASS) | `0.8425` | `1.0` | `156.65ms` |
-| `Q:Elec:V=7,I=2,loss=2,P=` | `Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>` | `12` (PASS) | `0.8408` | `1.0` | `168.25ms` |
-| `Q:Elec:V=5,I=5,loss=1,P=` | `Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>` | `24` (PASS) | `0.8491` | `1.0` | `174.55ms` |
-| `Q:Elec:V=5,I=5,loss=2,P=` | `Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>` | `23` (PASS) | `0.8444` | `1.0` | `178.61ms` |
-| `Q:Elec:V=5,I=4,loss=4,P=` | `Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>` | `16` (PASS) | `0.8469` | `1.0` | `175.99ms` |
+| `Q:Elec:V=7,I=3,loss=1,P=` | `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` | `20` (PASS) | `0.838` | `1.0` | `159.66ms` |
+| `Q:Elec:V=7,I=2,loss=2,P=` | `Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>` | `12` (PASS) | `0.8449` | `1.0` | `179.7ms` |
+| `Q:Elec:V=5,I=5,loss=1,P=` | `Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>` | `24` (PASS) | `0.832` | `1.0` | `118.12ms` |
+| `Q:Elec:V=5,I=5,loss=2,P=` | `Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>` | `23` (PASS) | `0.8378` | `1.0` | `108.27ms` |
+| `Q:Elec:V=5,I=4,loss=4,P=` | `Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>` | `16` (PASS) | `0.8444` | `1.0` | `111.15ms` |
