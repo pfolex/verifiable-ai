@@ -59,6 +59,18 @@ Together, they solve a foundational problem in open-source AI: **allowing anyone
 
 ---
 
+## AIX-Zero (`v1 -> v10`) & *Knowledge Is Power* (`aix_zero/`)
+
+[**`aix_zero/`**](aix_zero/README.md) contains **`AIX-Zero`**—our 100% from-scratch neuro-symbolic reasoning model (`816,642` physical parameters / `1,774,852` effective virtual parameters with 3-step ACT recurrent looping, `131` hybrid word + atomic-digit tokens)—and **`Knowledge Is Power`** ([`aix_zero/knowledge_is_power.py`](aix_zero/knowledge_is_power.py)), an autonomous Multi-LLM Symbiotic Council (`aix-8b:latest` $\leftrightarrow$ `aix3:latest`) that researches new quantitative/scientific domains, distills them into [`aix_zero_v10_kip.safetensors`](aix_zero/checkpoints/aix_zero_v10_kip.safetensors), and documents every learned skill in the **[Knowledge Is Power Codex](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)**.
+
+- **Global 18-Domain Held-Out Accuracy:** **`90/90 (100.0%)`** across `ARITH_CHAIN`, `ALGEBRA_SOLVE`, `MODULAR_NT`, `LOGIC_DEDUCT`, `WORD_PROBLEM`, `CALCULUS_DERIV`, `SYSTEM_2X2`, `CODE_TRACE`, `QUADRATIC_EVAL`, `PHYSICS_KINEMATICS`, `GEOMETRY_AREA`, `NUMBER_SEQ`, `MULTI_STEP_3`, `ELECTRICAL_POWER`, `FINANCE_INTEREST`, `THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, and `PROBABILITY_EV`.
+- **Documentation & Dialogues:**
+  - [`aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md`](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)
+  - [`aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md`](aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md)
+  - [`aix_zero/knowledge_codex/entries/`](aix_zero/knowledge_codex/entries/) (18 domain monographs)
+
+---
+
 ## Quickstart: Clone & Run the Full "Parameter Pull Request" Loop
 
 ```bash
