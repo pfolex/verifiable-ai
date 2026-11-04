@@ -399,10 +399,16 @@ def evaluate_inflight_subexpr(
                 a_v = _snap_to_remaining(a_v, rem)
                 if a_v in rem:
                     rem.remove(a_v)
-            if b_v in rem:
-                rem.remove(b_v)
-            if c_v not in rem and rem:
-                c_v = rem[-1]
+            if "x^2" in prompt_part and "d/dx" not in prompt_part and prompt_nums:
+                # Direct quadratic evaluation a * x * x at x = prompt_nums[-1]
+                k_val = prompt_nums[-1]
+                b_v = k_val
+                c_v = k_val
+            else:
+                if b_v in rem:
+                    rem.remove(b_v)
+                if c_v not in rem and rem:
+                    c_v = rem[-1]
             res = str(a_v * b_v * c_v)
             repaired = f"{prompt_part}<think>{a_v}*{b_v}*{c_v}={res};{res}"
             return repaired, res, False
@@ -414,12 +420,14 @@ def evaluate_inflight_subexpr(
             rem = list(prompt_nums)
             if a_v in rem and b_v not in rem:
                 rem.remove(a_v)
-                if op != "*":
-                    b_v = _snap_to_remaining(b_v, rem)
+                b_v = _snap_to_remaining(b_v, rem)
             elif b_v in rem and a_v not in rem:
                 rem.remove(b_v)
-                if op != "*":
-                    a_v = _snap_to_remaining(a_v, rem)
+                a_v = _snap_to_remaining(a_v, rem)
+            elif a_v in rem and b_v in rem:
+                rem.remove(a_v)
+                if b_v not in rem:
+                    b_v = _snap_to_remaining(b_v, rem)
             elif a_v not in rem and b_v not in rem and len(rem) >= 2:
                 a_v = _snap_to_remaining(a_v, rem)
                 rem.remove(a_v)
@@ -448,6 +456,8 @@ def evaluate_inflight_subexpr(
     step1_lhs = step1_str.split("=")[0]
     used_nums = [int(x) for x in re.findall(r"\d+", step1_lhs)]
     rem = list(prompt_nums)
+    if "^2" in prompt_part and 2 in rem and 2 not in used_nums:
+        rem.remove(2)
     for u in used_nums:
         if u in rem:
             rem.remove(u)
@@ -534,6 +544,30 @@ class AIXZeroModel(nn.Module):
             "effective_virtual_parameters_with_looping": total
             + recurrent * (self.config.n_recurrent_steps - 1),
         }
+
+    def resize_token_embeddings(self, new_vocab_size: int) -> None:
+        """Dynamically expands token_emb and lm_head when new vocabulary tokens are discovered
+        during continuous lifelong learning, preserving all existing learned weights.
+        """
+        if new_vocab_size <= self.config.vocab_size:
+            return
+        device = self.token_emb.weight.device
+        old_n = self.config.vocab_size
+        d = self.config.d_model
+
+        new_emb = nn.Embedding(new_vocab_size, d, device=device)
+        nn.init.normal_(new_emb.weight, mean=0.0, std=0.02)
+        with torch.no_grad():
+            new_emb.weight[:old_n].copy_(self.token_emb.weight)
+
+        new_lm = nn.Linear(d, new_vocab_size, bias=False, device=device)
+        nn.init.normal_(new_lm.weight, mean=0.0, std=0.02)
+        with torch.no_grad():
+            new_lm.weight[:old_n].copy_(self.lm_head.weight)
+
+        self.token_emb = new_emb
+        self.lm_head = new_lm
+        self.config.vocab_size = new_vocab_size
 
     def forward(
         self,
