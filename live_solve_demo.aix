@@ -1,0 +1,51 @@
+// ============================================================================
+// live_solve_demo.aix — Live `solve_with` Neuro-Symbolic Synthesis & Plasticity
+// ============================================================================
+
+synapse live_coder_synapse(rank=16, layer=27, lr=0.005);
+
+task LiveSynthesizeTokenBucket(kind="code") {
+    prompt: "Write `clamp_and_deduct(tokens: int, cap: int, add: int, cost: int) -> tuple[bool, int]` where refilled `t = min(cap, tokens + add)`, and if `t >= cost` return `(True, t - cost)` else `(False, t)`."
+    solve_with aix3(escalate_to="aix8b", temperature=0.2);
+    verified_branch: """
+def clamp_and_deduct(tokens: int, cap: int, add: int, cost: int) -> tuple[bool, int]:
+    t = min(cap, tokens + add)
+    if t >= cost:
+        return True, t - cost
+    return False, t
+"""
+    trap_branch: """
+def clamp_and_deduct(tokens: int, cap: int, add: int, cost: int) -> tuple[bool, int]:
+    t = tokens + add
+    return False, t - cost
+"""
+    verify {
+        assert clamp_and_deduct(8, 10, 5, 4) == (True, 6);
+        assert clamp_and_deduct(2, 10, 1, 5) == (False, 3);
+        assert clamp_and_deduct(0, 5, 5, 5) == (True, 0);
+    }
+    plasticity live_coder_synapse(steps=16, scale=0.008);
+}
+
+task LiveSymbioticRetryPolicy(kind="policy_code") {
+    prompt: "Write `compute_backoff_ms(attempt: int, base_ms: int, cap_ms: int) -> int` using exponential backoff `min(cap_ms, base_ms * (2 ** attempt))`."
+    human_assist "When attempt >= 4, should compute_backoff_ms cap at cap_ms or return -1 to abort?" [
+        option "Option A (Cap at cap_ms): Always return min(cap_ms, base_ms * (2 ** attempt))",
+        option "Option B (Abort): Return -1 when attempt >= 4"
+    ] select=0
+    solve_with aix3(escalate_to="aix8b", temperature=0.2);
+    verified_branch: """
+def compute_backoff_ms(attempt: int, base_ms: int, cap_ms: int) -> int:
+    return min(cap_ms, base_ms * (2 ** attempt))
+"""
+    trap_branch: """
+def compute_backoff_ms(attempt: int, base_ms: int, cap_ms: int) -> int:
+    return base_ms * attempt
+"""
+    verify {
+        assert compute_backoff_ms(0, 100, 1000) == 100;
+        assert compute_backoff_ms(3, 100, 1000) == 800;
+        assert compute_backoff_ms(5, 100, 1000) == 1000;
+    }
+    plasticity live_coder_synapse(steps=20, scale=0.008);
+}

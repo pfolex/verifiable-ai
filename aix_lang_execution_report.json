@@ -1,56 +1,42 @@
 {
-  "language": "AIX-Lang v1.0",
+  "language": "AIX-Lang v1.1",
   "tasks": [
     {
-      "task": "VerifyClusterHeadroom",
-      "kind": "math",
-      "assertions_passed": 2,
-      "human_assisted": false,
-      "human_choice": "None (Autonomous)",
-      "dag_state_hash": "ffc85bdf21e27979",
-      "plasticity": {
-        "pre_margin": -0.3034,
-        "post_margin": 26.321,
-        "margin_gain": 26.6244,
-        "pre_win_prob": 22.9,
-        "post_win_prob": 100.0,
-        "plasticity_latency_ms": 820.4
-      }
-    },
-    {
-      "task": "SlidingWindowRateLimiter",
+      "task": "LiveSynthesizeTokenBucket",
       "kind": "code",
+      "synthesized_by": "live:aix3:latest (560 tok, 86.9s)",
       "assertions_passed": 3,
       "human_assisted": false,
       "human_choice": "None (Autonomous)",
-      "dag_state_hash": "ccc5fb259d062b01",
+      "dag_state_hash": "4169baf4ad3250d7",
       "plasticity": {
-        "pre_margin": -0.781,
-        "post_margin": 4.0054,
-        "margin_gain": 4.7864,
-        "pre_win_prob": 4.2,
+        "pre_margin": -0.481,
+        "post_margin": 17.1188,
+        "margin_gain": 17.5999,
+        "pre_win_prob": 12.7,
         "post_win_prob": 100.0,
-        "plasticity_latency_ms": 428.4
+        "plasticity_latency_ms": 596.4
       }
     },
     {
-      "task": "SymbioticFailoverPolicy",
+      "task": "LiveSymbioticRetryPolicy",
       "kind": "policy_code",
-      "assertions_passed": 4,
+      "synthesized_by": "live:aix3:latest (560 tok, 83.6s)",
+      "assertions_passed": 3,
       "human_assisted": true,
-      "human_choice": "Option A (Speculative Hedge): Return 'HEDGE_1.5B_AND_8B' for critical tier==1, and 'DOWNGRADE_1.5B' for tier>1",
-      "dag_state_hash": "6d1dd159e075c4be",
+      "human_choice": "Option A (Cap at cap_ms): Always return min(cap_ms, base_ms * (2 ** attempt))",
+      "dag_state_hash": "608684ce67b1d94e",
       "plasticity": {
-        "pre_margin": 0.2464,
-        "post_margin": 2.4729,
-        "margin_gain": 2.2266,
-        "pre_win_prob": 72.8,
+        "pre_margin": 7.5969,
+        "post_margin": 8.5236,
+        "margin_gain": 0.9267,
+        "pre_win_prob": 100.0,
         "post_win_prob": 100.0,
-        "plasticity_latency_ms": 501.2
+        "plasticity_latency_ms": 819.4
       }
     }
   ],
   "saved_synapses": [
-    "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix_live_synapse/core_reasoner_synapse.safetensors"
+    "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix_live_synapse/live_coder_synapse_synapse.safetensors"
   ]
 }
