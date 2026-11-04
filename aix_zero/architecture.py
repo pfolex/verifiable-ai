@@ -1,21 +1,17 @@
-"""AIX-Zero v3 Neural Network Architecture written 100% from scratch in PyTorch.
+"""AIX-Zero v4 Neural Network Architecture written 100% from scratch in PyTorch.
 
 Core architectural modules:
 1. RMSNorm + 2D Rotary Position Embeddings (RoPE) + Grouped-Query Attention (GQA) + SwiGLU FFN.
-2. RecurrentReasoningBlock (Latent Ponder Core with Entropy-Driven ACT Supervision):
-   Iterates K steps in continuous latent space with step-indexed embeddings and an Adaptive
-   Halting Gate p_halt = sigmoid(W_halt(h_t)) supervised by latent update complexity so hard
-   reasoning states ponder deeper while simple syntax tokens exit early.
-3. Shared-Expert + Routed-Expert MixtureOfReasoningExperts (MoRE):
-   Combines 1 Always-On Shared SwiGLU Expert (preserving universal <think>step1;step2</think>
-   syntax) with N Top-K Routed SwiGLU Experts (specializing in arithmetic, algebra, calculus,
-   modular number theory, and word problems).
-4. DifferentiableMemoryBank (Working-Memory Registers):
-   A bank of M persistent working-memory slots accessed via cross-attention + gated residual.
-5. In-Flight Symbolic ALU Co-Execution (`generate_with_inflight_alu`):
-   Intercepts `=` and `->` tokens mid-generation inside `<think>...</think>`, evaluates the
-   current sub-expression deterministically, and injects the exact intermediate digits into the
-   active KV/token stream before the model generates the next reasoning step.
+2. PromptPointerAttention (Sharp Induction/Copy Cross-Attention Head):
+   Dedicated low-temperature (tau=0.25) RoPE attention mechanism inside the recurrent reasoning
+   core that attends back over the sequence with a sharp induction gate so operand digits in the
+   prompt (`@x=3`, `buys 2`, `%4`) are copied with high fidelity into `<think>...</think>`.
+3. RecurrentReasoningBlock (Latent Ponder Core with Velocity-Aware ACT Supervision).
+4. Shared-Expert + Routed-Expert MixtureOfReasoningExperts (MoRE).
+5. DifferentiableMemoryBank (Working-Memory Registers).
+6. Operand-Weighted Cross-Entropy Loss (`token_weights`):
+   Focuses 5.0x gradient weight on the left-hand-side algebraic setup & operand-copy tokens
+   while the In-Flight Symbolic ALU handles deterministic arithmetic evaluation after `=`.
 """
 
 from __future__ import annotations
@@ -31,7 +27,7 @@ import torch.nn.functional as F
 
 @dataclass
 class AIXZeroConfig:
-    vocab_size: int = 119
+    vocab_size: int = 121
     d_model: int = 128
     n_heads: int = 4
     n_kv_heads: int = 2
@@ -49,6 +45,8 @@ class AIXZeroConfig:
     moe_top_k: int = 2
     use_memory_bank: bool = False
     n_memory_slots: int = 8
+    use_prompt_pointer: bool = False
+    pointer_temperature: float = 0.35
 
 
 class RMSNorm(nn.Module):
@@ -127,6 +125,45 @@ class GroupedQueryAttention(nn.Module):
         return self.o_proj(attn_out)
 
 
+class PromptPointerAttention(nn.Module):
+    """Sharp Induction / Prompt-Pointer Attention Head for exact operand copying.
+
+    Uses low-temperature (tau=0.35) causal attention over Anchor/Prompt Embeddings h_anchor
+    so `<think>` reasoning steps can point directly to the exact digit tokens in the prompt
+    (`@x=3`, `buys 2`, `%4`, `f(5)`) without blurring across neighboring digits.
+    """
+
+    def __init__(self, config: AIXZeroConfig) -> None:
+        super().__init__()
+        self.n_heads = config.n_heads
+        self.head_dim = config.d_model // config.n_heads
+        self.temperature = config.pointer_temperature
+        self.norm_q = RMSNorm(config.d_model, config.rms_eps)
+        self.norm_kv = RMSNorm(config.d_model, config.rms_eps)
+        self.q_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.k_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.v_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.out_proj = nn.Linear(config.d_model, config.d_model, bias=False)
+        self.copy_gate = nn.Linear(config.d_model, config.d_model, bias=True)
+        nn.init.constant_(self.copy_gate.bias, -1.0)
+        self.rope = RotaryEmbedding(self.head_dim, config.max_seq_len, config.rope_theta)
+
+    def forward(self, h: torch.Tensor, h_anchor: torch.Tensor) -> torch.Tensor:
+        B, T, D = h.shape
+        q = self.q_proj(self.norm_q(h)).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
+        kv_in = self.norm_kv(h_anchor)
+        k = self.k_proj(kv_in).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
+        v = self.v_proj(kv_in).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
+
+        q = self.rope.apply_rotary(q) / self.temperature
+        k = self.rope.apply_rotary(k)
+
+        copied = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        copied = copied.transpose(1, 2).contiguous().view(B, T, D)
+        gate = torch.sigmoid(self.copy_gate(h))
+        return h + gate * self.out_proj(copied)
+
+
 class SwiGLUFFN(nn.Module):
     """SwiGLU Feed-Forward Network: W_down(SiLU(W_gate(x)) * W_up(x))."""
 
@@ -142,13 +179,7 @@ class SwiGLUFFN(nn.Module):
 
 
 class MixtureOfReasoningExperts(nn.Module):
-    """Shared-Expert + Top-K Routed Mixture-of-Reasoning-Experts (MoRE).
-
-    When `use_shared_expert=True` (AIX-Zero v3), an always-on dense SwiGLU expert processes
-    every token (locking in universal <think>step1;step2</think> syntax) while Top-K routed
-    experts add specialized capacity for domain-specific arithmetic/algebra/calculus rules:
-      y = SharedExpert(x) + 0.5 * sum_{i in TopK(p)} p_i * RoutedExpert_i(x)
-    """
+    """Shared-Expert + Top-K Routed Mixture-of-Reasoning-Experts (MoRE)."""
 
     def __init__(self, config: AIXZeroConfig) -> None:
         super().__init__()
@@ -198,7 +229,6 @@ class DifferentiableMemoryBank(nn.Module):
         self.q_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.out_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.gate = nn.Linear(config.d_model, config.d_model, bias=True)
-        # Initialize gate bias negatively so memory starts as a clean identity pass-through
         nn.init.constant_(self.gate.bias, -2.0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -239,22 +269,25 @@ class TransformerBlock(nn.Module):
 
 
 class RecurrentReasoningBlock(nn.Module):
-    """Latent-Recurrent Reasoning Core with Complexity-Adaptive Halting Gate (ACT)."""
+    """Latent-Recurrent Reasoning Core with PromptPointerAttention & ACT Halting Gate."""
 
     def __init__(self, config: AIXZeroConfig) -> None:
         super().__init__()
         self.n_steps = config.n_recurrent_steps
         self.use_memory_bank = config.use_memory_bank
+        self.use_prompt_pointer = config.use_prompt_pointer
         self.step_embeddings = nn.Embedding(config.n_recurrent_steps, config.d_model)
         self.core_block = TransformerBlock(config, use_moe=config.use_moe)
+        if config.use_prompt_pointer:
+            self.prompt_pointer = PromptPointerAttention(config)
         if config.use_memory_bank:
             self.memory_bank = DifferentiableMemoryBank(config)
         self.halt_gate = nn.Linear(config.d_model, 1, bias=True)
-        # Initialize halt_gate bias to -0.5 so multi-step pondering is encouraged early
         nn.init.constant_(self.halt_gate.bias, -0.5)
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         B, T, D = x.shape
+        h_anchor = x  # Clean encoder representation of prompt & tokens prior to recurrent looping
         h = x
         accumulated_state = torch.zeros_like(x)
         remaining_prob = torch.ones((B, T, 1), device=x.device, dtype=x.dtype)
@@ -266,14 +299,14 @@ class RecurrentReasoningBlock(nn.Module):
             step_emb = self.step_embeddings.weight[step_idx].view(1, 1, D)
             h, aux_loss = self.core_block(h + step_emb)
             total_aux_loss = total_aux_loss + aux_loss
+            if self.use_prompt_pointer:
+                h = self.prompt_pointer(h, h_anchor)
             if self.use_memory_bank:
                 h = self.memory_bank(h)
 
             if step_idx == self.n_steps - 1:
                 p_halt = remaining_prob
             else:
-                # Measure relative latent state velocity ||h - prev_h|| / ||h||:
-                # high velocity means the latent state is still actively transforming
                 rel_velocity = (
                     (h - prev_h).detach().norm(dim=-1, keepdim=True)
                     / (h.detach().norm(dim=-1, keepdim=True) + 1e-6)
@@ -285,8 +318,6 @@ class RecurrentReasoningBlock(nn.Module):
             remaining_prob = remaining_prob - p_halt
             ponder_steps = ponder_steps + (step_idx + 1) * p_halt
 
-        # Regularize average ponder depth toward ~1.8 steps when n_steps > 1 so it neither
-        # collapses to 1.0 nor wastes compute on trivial tokens
         mean_ponder = ponder_steps.mean()
         if self.n_steps > 1:
             ponder_reg = (mean_ponder - 1.85) ** 2
@@ -312,15 +343,7 @@ class ValueVerificationHead(nn.Module):
 
 
 def evaluate_inflight_subexpr(expr_str: str) -> Optional[str]:
-    """Deterministic In-Flight Symbolic ALU for mid-generation step evaluation.
-
-    Evaluates the latest sub-expression immediately after the neural network emits `=` or `->`
-    inside `<think>...</think>`, e.g.:
-      - `7*3=` -> `21`
-      - `21+5=` -> `26`
-      - `14>5->` -> `1`
-    """
-    # Take the segment after the last `<think>` or `;`
+    """Deterministic In-Flight Symbolic ALU for mid-generation step evaluation."""
     segment = expr_str.split("<think>")[-1].split(";")[-1].strip()
 
     # Relational check: A>B->
@@ -354,7 +377,7 @@ def evaluate_inflight_subexpr(expr_str: str) -> Optional[str]:
 
 
 class AIXZeroModel(nn.Module):
-    """Complete From-Scratch AIX-Zero v3 Latent-Recurrent Verifiable Model."""
+    """Complete From-Scratch AIX-Zero v4 Latent-Recurrent Verifiable Model."""
 
     def __init__(self, config: AIXZeroConfig) -> None:
         super().__init__()
@@ -372,10 +395,11 @@ class AIXZeroModel(nn.Module):
         self.value_head = ValueVerificationHead(config)
 
         self.apply(self._init_weights)
-        # Re-apply specialized gate biases after generic _init_weights
         nn.init.constant_(self.latent_reasoning_core.halt_gate.bias, -0.5)
         if config.use_memory_bank:
             nn.init.constant_(self.latent_reasoning_core.memory_bank.gate.bias, -2.0)
+        if config.use_prompt_pointer:
+            nn.init.constant_(self.latent_reasoning_core.prompt_pointer.copy_gate.bias, -1.0)
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
@@ -402,6 +426,7 @@ class AIXZeroModel(nn.Module):
         input_ids: torch.Tensor,
         labels: Optional[torch.Tensor] = None,
         verify_targets: Optional[torch.Tensor] = None,
+        token_weights: Optional[torch.Tensor] = None,
     ) -> Dict[str, torch.Tensor]:
         h = self.token_emb(input_ids)
         for layer in self.encoder_layers:
@@ -426,11 +451,25 @@ class AIXZeroModel(nn.Module):
         if labels is not None:
             shift_logits = logits[:, :-1, :].contiguous()
             shift_labels = labels[:, 1:].contiguous()
-            ce_loss = F.cross_entropy(
-                shift_logits.view(-1, self.config.vocab_size),
-                shift_labels.view(-1),
-                ignore_index=0,
-            )
+            if token_weights is not None:
+                shift_weights = token_weights[:, 1:].contiguous()
+                raw_ce = F.cross_entropy(
+                    shift_logits.view(-1, self.config.vocab_size),
+                    shift_labels.view(-1),
+                    ignore_index=0,
+                    reduction="none",
+                ).view(shift_labels.shape)
+                active_mask = (shift_labels != 0).float()
+                weighted_ce = (raw_ce * shift_weights * active_mask).sum()
+                denom = (shift_weights * active_mask).sum().clamp(min=1.0)
+                ce_loss = weighted_ce / denom
+            else:
+                ce_loss = F.cross_entropy(
+                    shift_logits.view(-1, self.config.vocab_size),
+                    shift_labels.view(-1),
+                    ignore_index=0,
+                )
+
             total_loss = ce_loss + 0.02 * moe_aux_loss
             out["ce_loss"] = ce_loss
 
@@ -483,7 +522,6 @@ class AIXZeroModel(nn.Module):
                 if tok_id == eos_id:
                     break
 
-                # In-Flight ALU Interception inside <think>...</think> and <ans>...</ans>
                 if inflight_alu and tokenizer is not None:
                     decoded_so_far = tokenizer.decode(seq[0].tolist(), skip_special=True)
                     if "<think>" in decoded_so_far and "</think>" not in decoded_so_far:

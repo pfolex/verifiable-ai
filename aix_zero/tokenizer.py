@@ -1,12 +1,13 @@
-"""From-scratch Hybrid Word + Atomic-Digit Tokenizer for AIX-Zero v3.
+"""From-scratch Hybrid Word + Atomic-Digit Tokenizer for AIX-Zero v4.
 
 Design:
 1. Dedicated structural reasoning tags:
    <pad>, <bos>, <eos>, <think>, </think>, <verify>, </verify>, <ans>, </ans>
 2. Atomic single-character tokens for all digits (0-9), operators (+-*/=%^><), and ASCII characters
    so multi-digit numbers and algebraic expressions never split inconsistently.
-3. Whole-word tokens (WORD_VOCAB) for English math word problems and symbolic calculus keywords
-   so natural-language prompts compress into short token sequences while keeping numbers atomic.
+3. Whole-word tokens (WORD_VOCAB) for English math word problems, symbolic calculus, 2x2 systems,
+   and Python code execution prompts so natural-language/code prompts compress into short token
+   sequences while keeping numbers atomic.
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ CHAR_VOCAB: List[str] = list(
     " \n\t"
 )
 
-# Whole-word tokens for English math word problems & calculus prompts
+# Whole-word tokens for English math word problems, calculus, 2x2 systems & Python code traces
 WORD_VOCAB: List[str] = [
     "Q:Word:",
     "Q:Calc:",
@@ -51,6 +52,9 @@ WORD_VOCAB: List[str] = [
     "Mia ",
     "Leo ",
     "has ",
+    "Q:Sys:",
+    "Q:Code:",
+    "def f(x):return ",
 ]
 
 

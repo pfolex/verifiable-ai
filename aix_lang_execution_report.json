@@ -2,41 +2,75 @@
   "language": "AIX-Lang v1.1",
   "tasks": [
     {
-      "task": "LiveSynthesizeTokenBucket",
-      "kind": "code",
-      "synthesized_by": "live:aix3:latest (560 tok, 86.9s)",
-      "assertions_passed": 3,
+      "task": "CalculusDerivativeEval",
+      "kind": "math",
+      "synthesized_by": "tier0:aix_zero_v4 (trace=Q:Calc:d/dx(5x^2+7x)@x=3=<think>5*2*3=30;30+7=37</think><ans>37</ans>, ponder=1.058, conf=0.8, 254.9ms)",
+      "assertions_passed": 1,
       "human_assisted": false,
       "human_choice": "None (Autonomous)",
-      "dag_state_hash": "4169baf4ad3250d7",
+      "dag_state_hash": "ec8063104c1b5969",
       "plasticity": {
-        "pre_margin": -0.481,
-        "post_margin": 17.1188,
-        "margin_gain": 17.5999,
-        "pre_win_prob": 12.7,
+        "pre_margin": 0.2783,
+        "post_margin": 15.4176,
+        "margin_gain": 15.1393,
+        "pre_win_prob": 75.3,
         "post_win_prob": 100.0,
-        "plasticity_latency_ms": 596.4
+        "plasticity_latency_ms": 209.5
       }
     },
     {
-      "task": "LiveSymbioticRetryPolicy",
-      "kind": "policy_code",
-      "synthesized_by": "live:aix3:latest (560 tok, 83.6s)",
-      "assertions_passed": 3,
-      "human_assisted": true,
-      "human_choice": "Option A (Cap at cap_ms): Always return min(cap_ms, base_ms * (2 ** attempt))",
-      "dag_state_hash": "608684ce67b1d94e",
+      "task": "SimultaneousLinearSystem2x2",
+      "kind": "math",
+      "synthesized_by": "tier0:aix_zero_v4 (trace=Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>, ponder=1.061, conf=0.7848, 270.7ms)",
+      "assertions_passed": 1,
+      "human_assisted": false,
+      "human_choice": "None (Autonomous)",
+      "dag_state_hash": "2194f3c70f4139ec",
       "plasticity": {
-        "pre_margin": 7.5969,
-        "post_margin": 8.5236,
-        "margin_gain": 0.9267,
+        "pre_margin": 6.9623,
+        "post_margin": 7.7992,
+        "margin_gain": 0.8369,
         "pre_win_prob": 100.0,
         "post_win_prob": 100.0,
-        "plasticity_latency_ms": 819.4
+        "plasticity_latency_ms": 243.9
+      }
+    },
+    {
+      "task": "PythonFunctionCodeTrace",
+      "kind": "code",
+      "synthesized_by": "tier0:aix_zero_v4 (trace=Q:Code:def f(x):return 6*x+4;f(5)=<think>6*5=30;30+4=34</think><ans>34</ans>, ponder=1.133, conf=0.7906, 265.4ms)",
+      "assertions_passed": 1,
+      "human_assisted": false,
+      "human_choice": "None (Autonomous)",
+      "dag_state_hash": "4950e7fa9aa91080",
+      "plasticity": {
+        "pre_margin": 12.949,
+        "post_margin": 12.4564,
+        "margin_gain": -0.4926,
+        "pre_win_prob": 100.0,
+        "post_win_prob": 100.0,
+        "plasticity_latency_ms": 293.6
+      }
+    },
+    {
+      "task": "EnglishMathWordProblem",
+      "kind": "math",
+      "synthesized_by": "tier0:aix_zero_v4 (trace=Q:Word:Mia has 6 packs of 5 and buys 4 total=<think>6*5=30;30+4=34</think><ans>34</ans>, ponder=1.059, conf=0.796, 249.3ms)",
+      "assertions_passed": 1,
+      "human_assisted": false,
+      "human_choice": "None (Autonomous)",
+      "dag_state_hash": "38ff5f1e7e59c502",
+      "plasticity": {
+        "pre_margin": 12.0915,
+        "post_margin": 10.1229,
+        "margin_gain": -1.9686,
+        "pre_win_prob": 100.0,
+        "post_win_prob": 100.0,
+        "plasticity_latency_ms": 364.3
       }
     }
   ],
   "saved_synapses": [
-    "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix_live_synapse/live_coder_synapse_synapse.safetensors"
+    "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix_live_synapse/tier0_core_synapse.safetensors"
   ]
 }

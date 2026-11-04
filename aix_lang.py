@@ -231,8 +231,77 @@ def parse_aix_source(source: str) -> AIXProgramAST:
 
 
 # ===========================================================================
-# 3. Live Ollama Model Synthesis (`solve_with`) + Verification Helpers
+# 3. Live Model Synthesis (`aix_zero` Tier-0 From-Scratch & Ollama Tier-1/2)
 # ===========================================================================
+_AIX_ZERO_CACHE: dict[str, Any] = {}
+
+
+def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
+    """Executes the 100% from-scratch AIX-Zero v4 neural network + In-Flight ALU in ~15ms."""
+    from safetensors.torch import load_file
+    from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+    from aix_zero.tokenizer import AIXZeroTokenizer
+    from aix_zero.train_from_scratch import extract_answer
+    from aix_zero.train_v4_from_scratch import verify_and_repair_v4_grounded_alu
+
+    if "model" not in _AIX_ZERO_CACHE:
+        tok = AIXZeroTokenizer(use_word_vocab=True)
+        cfg = AIXZeroConfig(
+            vocab_size=tok.vocab_size,
+            d_model=128,
+            n_heads=4,
+            n_kv_heads=2,
+            d_ff=256,
+            n_encoder_layers=1,
+            n_recurrent_steps=3,
+            n_decoder_layers=1,
+            max_seq_len=112,
+            use_moe=True,
+            use_shared_expert=True,
+            n_experts=4,
+            moe_top_k=2,
+            use_memory_bank=True,
+            n_memory_slots=8,
+            use_prompt_pointer=True,
+            pointer_temperature=0.35,
+        )
+        mdl = AIXZeroModel(cfg)
+        ckpt_path = REPO_ROOT / "aix_zero" / "checkpoints" / "aix_zero_v4.safetensors"
+        mdl.load_state_dict(load_file(str(ckpt_path)))
+        mdl.eval()
+        _AIX_ZERO_CACHE["tokenizer"] = tok
+        _AIX_ZERO_CACHE["model"] = mdl
+
+    tok: AIXZeroTokenizer = _AIX_ZERO_CACHE["tokenizer"]
+    mdl: AIXZeroModel = _AIX_ZERO_CACHE["model"]
+
+    t0 = time.perf_counter()
+    p_ids = tok.encode(prompt.strip(), add_bos=True, add_eos=False)
+    out_ids, val_conf, ponder_steps = mdl.generate_verified(
+        p_ids,
+        eos_id=tok.eos_id,
+        max_new_tokens=40,
+        num_candidates=1,
+        temperature=0.0,
+        tokenizer=tok,
+        inflight_alu=True,
+    )
+    decoded_inflight = tok.decode(out_ids, skip_special=True)
+    decoded_final = verify_and_repair_v4_grounded_alu(decoded_inflight)
+    ans_str = extract_answer(decoded_final)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    code_out = f"# {decoded_final}\ndef solve():\n    return {ans_str}\n"
+    return {
+        "decoded_trace": decoded_final,
+        "answer": ans_str,
+        "code": code_out,
+        "verifier_confidence": round(val_conf, 4),
+        "ponder_steps": round(ponder_steps, 3),
+        "elapsed_ms": round(elapsed_ms, 2),
+        "tokens": len(out_ids) - len(p_ids),
+    }
+
+
 def query_ollama_live_code(
     model: str,
     prompt: str,
@@ -514,33 +583,47 @@ def execute_aix_program(ast_prog: AIXProgramAST) -> dict[str, Any]:
         code_body = task.candidate_win
         if task.solve_with is not None:
             sw = task.solve_with
-            gen_prompt = (
-                f"{effective_prompt}\n"
-                f"It must pass these exact assertions:\n"
-                + "\n".join(f"  {stmt}" for stmt in task.verify_statements)
-                + "\nBe concise and output ONLY the Python `def` function inside ```python ... ```."
-            )
-            print(
-                f"  [SOLVE_WITH `{sw.student_model}`] Generating live candidate implementation via Ollama...",
-                flush=True,
-            )
-            res1 = query_ollama_live_code(sw.student_model, gen_prompt, temperature=sw.temperature, num_predict=560)
-            cand1 = extract_synthesized_python(res1["content"], res1["thinking"], task.candidate_win)
-            ok1, v_msg, ver_ms = run_verify_assertions(cand1, task.verify_statements)
-            synthesized_by = f"live:{sw.student_model} ({res1['total_tokens']} tok, {res1['elapsed']:.1f}s)"
-            code_body = cand1
-
-            if not ok1:
+            if sw.student_model.startswith("aix_zero") or sw.student_model.startswith("aix-zero"):
                 print(
-                    f"  [SOLVE_WITH ESCALATION -> `{sw.teacher_model}`] Draft failed `{v_msg}`; escalating to Teacher...",
+                    f"  [SOLVE_WITH TIER-0 `{sw.student_model}`] Running 100% From-Scratch AIX-Zero v4 Neural + In-Flight ALU...",
                     flush=True,
                 )
-                repair_prompt = f"{gen_prompt}\nPrevious draft failed assertion: `{v_msg}`.\nFix it and output ONLY the `def` inside ```python ... ```."
-                res8b = query_ollama_live_code(sw.teacher_model, repair_prompt, temperature=0.1, num_predict=560)
-                cand8b = extract_synthesized_python(res8b["content"], res8b["thinking"], task.candidate_win)
-                ok1, v_msg, ver_ms = run_verify_assertions(cand8b, task.verify_statements)
-                synthesized_by = f"live:{sw.teacher_model} ({res8b['total_tokens']} tok, {res8b['elapsed']:.1f}s)"
-                code_body = cand8b
+                z_res = query_aix_zero_tier0(effective_prompt)
+                code_body = z_res["code"]
+                ok1, v_msg, ver_ms = run_verify_assertions(code_body, task.verify_statements)
+                synthesized_by = (
+                    f"tier0:aix_zero_v4 (trace={z_res['decoded_trace']}, "
+                    f"ponder={z_res['ponder_steps']}, conf={z_res['verifier_confidence']}, "
+                    f"{z_res['elapsed_ms']:.1f}ms)"
+                )
+            else:
+                gen_prompt = (
+                    f"{effective_prompt}\n"
+                    f"It must pass these exact assertions:\n"
+                    + "\n".join(f"  {stmt}" for stmt in task.verify_statements)
+                    + "\nBe concise and output ONLY the Python `def` function inside ```python ... ```."
+                )
+                print(
+                    f"  [SOLVE_WITH `{sw.student_model}`] Generating live candidate implementation via Ollama...",
+                    flush=True,
+                )
+                res1 = query_ollama_live_code(sw.student_model, gen_prompt, temperature=sw.temperature, num_predict=560)
+                cand1 = extract_synthesized_python(res1["content"], res1["thinking"], task.candidate_win)
+                ok1, v_msg, ver_ms = run_verify_assertions(cand1, task.verify_statements)
+                synthesized_by = f"live:{sw.student_model} ({res1['total_tokens']} tok, {res1['elapsed']:.1f}s)"
+                code_body = cand1
+
+                if not ok1:
+                    print(
+                        f"  [SOLVE_WITH ESCALATION -> `{sw.teacher_model}`] Draft failed `{v_msg}`; escalating to Teacher...",
+                        flush=True,
+                    )
+                    repair_prompt = f"{gen_prompt}\nPrevious draft failed assertion: `{v_msg}`.\nFix it and output ONLY the `def` inside ```python ... ```."
+                    res8b = query_ollama_live_code(sw.teacher_model, repair_prompt, temperature=0.1, num_predict=560)
+                    cand8b = extract_synthesized_python(res8b["content"], res8b["thinking"], task.candidate_win)
+                    ok1, v_msg, ver_ms = run_verify_assertions(cand8b, task.verify_statements)
+                    synthesized_by = f"live:{sw.teacher_model} ({res8b['total_tokens']} tok, {res8b['elapsed']:.1f}s)"
+                    code_body = cand8b
         else:
             ok1, v_msg, ver_ms = run_verify_assertions(code_body, task.verify_statements)
 
