@@ -1,0 +1,424 @@
+{
+  "model_name": "AIX-Zero-v1 (100% From-Scratch Latent-Recurrent Verifiable Model)",
+  "pretrained_weights_used": "NONE (Initialized from N(0, 0.02^2) Gaussian noise)",
+  "architecture": {
+    "d_model": 128,
+    "n_heads": 4,
+    "n_kv_heads": 2,
+    "d_ff": 256,
+    "n_encoder_layers": 1,
+    "n_recurrent_steps": 3,
+    "n_decoder_layers": 1,
+    "parameters": {
+      "total_parameters": 478594,
+      "latent_recurrent_core_parameters": 148225,
+      "value_verifier_parameters": 8449,
+      "effective_virtual_parameters_with_looping": 775044
+    }
+  },
+  "loss_history": [
+    {
+      "epoch": 1,
+      "ce_loss": 3.2687,
+      "verifier_bce_loss": 0.50431
+    },
+    {
+      "epoch": 5,
+      "ce_loss": 0.93711,
+      "verifier_bce_loss": 0.43484
+    },
+    {
+      "epoch": 10,
+      "ce_loss": 0.54553,
+      "verifier_bce_loss": 0.43336
+    },
+    {
+      "epoch": 15,
+      "ce_loss": 0.32607,
+      "verifier_bce_loss": 0.43156
+    },
+    {
+      "epoch": 25,
+      "ce_loss": 0.15519,
+      "verifier_bce_loss": 0.43256
+    },
+    {
+      "epoch": 35,
+      "ce_loss": 0.08013,
+      "verifier_bce_loss": 0.43155
+    }
+  ],
+  "stage0_random_init_eval": {
+    "total": 20,
+    "correct": 0,
+    "accuracy_pct": 0.0,
+    "domain_accuracy_pct": {
+      "ARITH_CHAIN": 0.0,
+      "LOGIC_DEDUCT": 0.0,
+      "MODULAR_NT": 0.0,
+      "ALGEBRA_SOLVE": 0.0
+    },
+    "sample_outputs": [
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(7*3)+5=",
+        "generated": "Q:(7*3)+5=DfDfDfDfDfDfDfDfDfDfDfDfDfffffffffff",
+        "predicted": "",
+        "gold": "26",
+        "correct": false,
+        "verifier_confidence": 0.497,
+        "latent_ponder_steps": 1.753
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*7>5?",
+        "generated": "Q:2*7>5?mfmffffmfffffmffffffffffmfffffffffff",
+        "predicted": "",
+        "gold": "1",
+        "correct": false,
+        "verifier_confidence": 0.5003,
+        "latent_ponder_steps": 1.76
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(6+7)%4=",
+        "generated": "Q:(6+7)%4=D<verify><verify><verify><verify><verify><verify><verify><verify><verify>DDDDDDDDDDDDDDDDDDDDfDfDfD",
+        "predicted": "",
+        "gold": "1",
+        "correct": false,
+        "verifier_confidence": 0.4983,
+        "latent_ponder_steps": 1.751
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*3>12?",
+        "generated": "Q:2*3>12?mfmfmfmfmfmfmfmfmfmfmfmfmfmfmfmfmfmf",
+        "predicted": "",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.5014,
+        "latent_ponder_steps": 1.756
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(2*4)+3=",
+        "generated": "Q:(2*4)+3=DmDfmDfDfDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+        "predicted": "",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.4982,
+        "latent_ponder_steps": 1.75
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(13+7)%5=",
+        "generated": "Q:(13+7)%5=DDDDDDDDDDDDDDDDDfDfDfDfDfDfDfDfDfDf",
+        "predicted": "",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.4971,
+        "latent_ponder_steps": 1.749
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(3*5)+3=",
+        "generated": "Q:(3*5)+3=mff^f^f^f^f^ffffffffffffffffffffffff",
+        "predicted": "",
+        "gold": "18",
+        "correct": false,
+        "verifier_confidence": 0.4975,
+        "latent_ponder_steps": 1.756
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:2x+1=7,x=",
+        "generated": "Q:2x+1=7,x=Dfffffffffffffffffffffffffffffffffff",
+        "predicted": "",
+        "gold": "3",
+        "correct": false,
+        "verifier_confidence": 0.499,
+        "latent_ponder_steps": 1.76
+      }
+    ]
+  },
+  "stage1_pure_neural_eval": {
+    "total": 20,
+    "correct": 7,
+    "accuracy_pct": 35.0,
+    "domain_accuracy_pct": {
+      "ARITH_CHAIN": 20.0,
+      "LOGIC_DEDUCT": 80.0,
+      "MODULAR_NT": 0.0,
+      "ALGEBRA_SOLVE": 40.0
+    },
+    "sample_outputs": [
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(7*3)+5=",
+        "generated": "Q:(7*3)+5=<think>7*3=21;21+5=24</think><ans>23</ans>",
+        "predicted": "23",
+        "gold": "26",
+        "correct": false,
+        "verifier_confidence": 0.8428,
+        "latent_ponder_steps": 1.053
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*7>5?",
+        "generated": "Q:2*7>5?<think>2*7=14;14>5->1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.8363,
+        "latent_ponder_steps": 1.073
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(6+7)%4=",
+        "generated": "Q:(6+7)%4=<think>6+7=13;13%4=2</think><ans>2</ans>",
+        "predicted": "2",
+        "gold": "1",
+        "correct": false,
+        "verifier_confidence": 0.8446,
+        "latent_ponder_steps": 1.013
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*3>12?",
+        "generated": "Q:2*3>12?<think>2*3=6;6>12->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.8374,
+        "latent_ponder_steps": 1.002
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(2*4)+3=",
+        "generated": "Q:(2*4)+3=<think>2*4=8;8+6=16-</think><ans>6</ans>",
+        "predicted": "6",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.8375,
+        "latent_ponder_steps": 1.013
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(13+7)%5=",
+        "generated": "Q:(13+7)%5=<think>13+7=20;20%5=2</think><ans>2</ans>",
+        "predicted": "2",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.8469,
+        "latent_ponder_steps": 1.002
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(3*5)+3=",
+        "generated": "Q:(3*5)+3=<think>3*5=15;15+3=17</think><ans>17</ans>",
+        "predicted": "17",
+        "gold": "18",
+        "correct": false,
+        "verifier_confidence": 0.8451,
+        "latent_ponder_steps": 1.012
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:2x+1=7,x=",
+        "generated": "Q:2x+1=7,x=<think>7-1=6;6/2=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "3",
+        "correct": false,
+        "verifier_confidence": 0.8567,
+        "latent_ponder_steps": 1.011
+      }
+    ]
+  },
+  "stage2_pure_neural_eval": {
+    "total": 20,
+    "correct": 4,
+    "accuracy_pct": 20.0,
+    "domain_accuracy_pct": {
+      "ARITH_CHAIN": 0.0,
+      "LOGIC_DEDUCT": 80.0,
+      "MODULAR_NT": 0.0,
+      "ALGEBRA_SOLVE": 0.0
+    },
+    "sample_outputs": [
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(7*3)+5=",
+        "generated": "Q:(7*3)+5=<think>7*3=21;21+5=24</think><ans>23</ans>",
+        "predicted": "23",
+        "gold": "26",
+        "correct": false,
+        "verifier_confidence": 0.9408,
+        "latent_ponder_steps": 1.088
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*7>5?",
+        "generated": "Q:2*7>5?<think>2*7=14;14>5->1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.9366,
+        "latent_ponder_steps": 1.077
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(6+7)%4=",
+        "generated": "Q:(6+7)%4=<think>6+7=12;12%4=0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "1",
+        "correct": false,
+        "verifier_confidence": 0.9432,
+        "latent_ponder_steps": 1.027
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*3>12?",
+        "generated": "Q:2*3>12?<think>2*3=6;6>12->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.9426,
+        "latent_ponder_steps": 1.001
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(2*4)+3=",
+        "generated": "Q:(2*4)+3=<think>2*4=8;8+7->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.9409,
+        "latent_ponder_steps": 1.016
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(13+7)%5=",
+        "generated": "Q:(13+7)%5=<think>13+7=20;20%5=2</think><ans>2</ans>",
+        "predicted": "2",
+        "gold": "0",
+        "correct": false,
+        "verifier_confidence": 0.9455,
+        "latent_ponder_steps": 1.013
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(3*5)+3=",
+        "generated": "Q:(3*5)+3=<think>3*5=13;16+3=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "18",
+        "correct": false,
+        "verifier_confidence": 0.9477,
+        "latent_ponder_steps": 1.027
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:2x+1=7,x=",
+        "generated": "Q:2x+1=7,x=<think>7-1=4;4/2=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "3",
+        "correct": false,
+        "verifier_confidence": 0.9467,
+        "latent_ponder_steps": 1.011
+      }
+    ]
+  },
+  "stage2_neuro_symbolic_eval": {
+    "total": 20,
+    "correct": 17,
+    "accuracy_pct": 85.0,
+    "domain_accuracy_pct": {
+      "ARITH_CHAIN": 80.0,
+      "LOGIC_DEDUCT": 100.0,
+      "MODULAR_NT": 100.0,
+      "ALGEBRA_SOLVE": 60.0
+    },
+    "sample_outputs": [
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(7*3)+5=",
+        "generated": "Q:(7*3)+5=<think>7*3=21;21+5=26</think><ans>26</ans>",
+        "predicted": "26",
+        "gold": "26",
+        "correct": true,
+        "verifier_confidence": 0.9408,
+        "latent_ponder_steps": 1.088
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*7>5?",
+        "generated": "Q:2*7>5?<think>2*7=14;14>5->1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.9366,
+        "latent_ponder_steps": 1.077
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(6+7)%4=",
+        "generated": "Q:(6+7)%4=<think>6+7=13;13%4=1</think><ans>1</ans>",
+        "predicted": "1",
+        "gold": "1",
+        "correct": true,
+        "verifier_confidence": 0.9445,
+        "latent_ponder_steps": 1.028
+      },
+      {
+        "domain": "LOGIC_DEDUCT",
+        "prompt": "Q:2*3>12?",
+        "generated": "Q:2*3>12?<think>2*3=6;6>12->0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.9426,
+        "latent_ponder_steps": 1.001
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(2*4)+3=",
+        "generated": "Q:(2*4)+3=<think>2*4=8;6+7-->0</think><ans>8</ans>",
+        "predicted": "8",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.9427,
+        "latent_ponder_steps": 1.002
+      },
+      {
+        "domain": "MODULAR_NT",
+        "prompt": "Q:(13+7)%5=",
+        "generated": "Q:(13+7)%5=<think>13+7=20;20%5=0</think><ans>0</ans>",
+        "predicted": "0",
+        "gold": "0",
+        "correct": true,
+        "verifier_confidence": 0.9455,
+        "latent_ponder_steps": 1.013
+      },
+      {
+        "domain": "ARITH_CHAIN",
+        "prompt": "Q:(3*5)+3=",
+        "generated": "Q:(3*5)+3=<think>3*5=15;15+3=18</think><ans>18</ans>",
+        "predicted": "18",
+        "gold": "18",
+        "correct": true,
+        "verifier_confidence": 0.9477,
+        "latent_ponder_steps": 1.027
+      },
+      {
+        "domain": "ALGEBRA_SOLVE",
+        "prompt": "Q:2x+1=7,x=",
+        "generated": "Q:2x+1=7,x=<think>7-1=6;6/2=3</think><ans>3</ans>",
+        "predicted": "3",
+        "gold": "3",
+        "correct": true,
+        "verifier_confidence": 0.9467,
+        "latent_ponder_steps": 1.011
+      }
+    ]
+  },
+  "checkpoint_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v1.safetensors"
+}
