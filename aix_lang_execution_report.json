@@ -9,12 +9,12 @@
       "human_choice": "None (Autonomous)",
       "dag_state_hash": "ffc85bdf21e27979",
       "plasticity": {
-        "pre_margin": NaN,
-        "post_margin": NaN,
-        "margin_gain": NaN,
-        "pre_win_prob": NaN,
-        "post_win_prob": NaN,
-        "plasticity_latency_ms": 292.2
+        "pre_margin": -0.3034,
+        "post_margin": 26.321,
+        "margin_gain": 26.6244,
+        "pre_win_prob": 22.9,
+        "post_win_prob": 100.0,
+        "plasticity_latency_ms": 820.4
       }
     },
     {
@@ -25,12 +25,12 @@
       "human_choice": "None (Autonomous)",
       "dag_state_hash": "ccc5fb259d062b01",
       "plasticity": {
-        "pre_margin": NaN,
-        "post_margin": NaN,
-        "margin_gain": NaN,
-        "pre_win_prob": NaN,
-        "post_win_prob": NaN,
-        "plasticity_latency_ms": 437.5
+        "pre_margin": -0.781,
+        "post_margin": 4.0054,
+        "margin_gain": 4.7864,
+        "pre_win_prob": 4.2,
+        "post_win_prob": 100.0,
+        "plasticity_latency_ms": 428.4
       }
     },
     {
@@ -41,12 +41,12 @@
       "human_choice": "Option A (Speculative Hedge): Return 'HEDGE_1.5B_AND_8B' for critical tier==1, and 'DOWNGRADE_1.5B' for tier>1",
       "dag_state_hash": "6d1dd159e075c4be",
       "plasticity": {
-        "pre_margin": NaN,
-        "post_margin": NaN,
-        "margin_gain": NaN,
-        "pre_win_prob": NaN,
-        "post_win_prob": NaN,
-        "plasticity_latency_ms": 554.9
+        "pre_margin": 0.2464,
+        "post_margin": 2.4729,
+        "margin_gain": 2.2266,
+        "pre_win_prob": 72.8,
+        "post_win_prob": 100.0,
+        "plasticity_latency_ms": 501.2
       }
     }
   ],

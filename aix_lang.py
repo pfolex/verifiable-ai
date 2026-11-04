@@ -252,6 +252,10 @@ class LiveSynapseRuntime:
         l_ids = [t for t in self.tokenizer.encode(trap_text, add_special_tokens=False).ids if t < VOCAB_SIZE]
         w_diff = sorted(set(w_ids) - set(l_ids))
         l_diff = sorted(set(l_ids) - set(w_ids))
+        if not w_diff:
+            w_diff = w_ids[:8]
+        if not l_diff:
+            l_diff = l_ids[:8]
 
         h_ctx = F.layer_norm(self.embed_w[torch.tensor(p_ids, dtype=torch.long)].mean(dim=0), (self.d_model,))
         h_attn = F.silu(h_ctx @ self.q_proj_w.T)
@@ -261,7 +265,7 @@ class LiveSynapseRuntime:
         n_w = len(w_diff)
 
         with torch.no_grad():
-            eff_w = self._spherical_effective_weight()
+            eff_w = self.o_proj_w + (self.lora_B @ self.lora_A)
             h_out = F.layer_norm(h_attn @ eff_w.T, (self.d_model,))
             lp = F.log_softmax(h_out @ sub_lm.T, dim=-1)
             win_lp = float(lp[:n_w].mean().item())
