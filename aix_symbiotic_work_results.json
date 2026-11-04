@@ -1,0 +1,66 @@
+{
+  "project": "Autonomous Inference SLA Router",
+  "nodes_completed": 3,
+  "total_nodes": 3,
+  "results": [
+    {
+      "node_id": "WORK-NODE-01",
+      "title": "Throughput & Latency Budget Capacity Sizing",
+      "status": "VERIFIED_DONE",
+      "resolved_by_tier": "Tier-1: aix3:latest (1.5B)",
+      "output_artifact": "\\boxed{180}",
+      "verification_detail": "TIR Sandbox Match (180)",
+      "human_assist_used": false,
+      "human_decision_applied": "None (Autonomous)",
+      "tokens": 511,
+      "elapsed_s": 92.31,
+      "dag_state_hash": "18deb27ea0b250de"
+    },
+    {
+      "node_id": "WORK-NODE-02",
+      "title": "Priority SLA Queue Dispatcher Implementation",
+      "status": "VERIFIED_DONE",
+      "resolved_by_tier": "Tier-1: aix3:latest (1.5B)",
+      "output_artifact": "def dispatch_priority_batch(jobs: list[tuple[int, str]], max_batch: int) -> list[str]:\n    if max_batch <= 0 or not jobs:\n        return []\n    ordered = sorted(jobs, key=lambda x: (-x[0], x[1]))\n    return [jid for _, jid in ordered[:max_batch]]\n",
+      "verification_detail": "ALL_TESTS_PASSED",
+      "human_assist_used": false,
+      "human_decision_applied": "None (Autonomous)",
+      "tokens": 639,
+      "elapsed_s": 109.86,
+      "dag_state_hash": "a5592db5b479dfb0"
+    },
+    {
+      "node_id": "WORK-NODE-03",
+      "title": "Overload Circuit-Breaker Policy (Ambiguous Spec -> Human Assist)",
+      "status": "VERIFIED_DONE",
+      "resolved_by_tier": "Tier-3: Human-Assist + aix-8b:latest (8B Teacher)",
+      "output_artifact": "def evaluate_overload_policy(utilization_pct: float, priority: int) -> str:\n    if utilization_pct >= 100.0:\n        return 'REJECT_429'\n    elif utilization_pct > 95.0 and priority < 5:\n        return 'ROUTE_1.5B'\n    else:\n        return 'ROUTE_DEFAULT'",
+      "verification_detail": "ALL_TESTS_PASSED",
+      "human_assist_used": true,
+      "human_decision_applied": "Option A (Graceful Degrade \u2014 Recommended): Route low-priority requests to fast 1.5B tier (`return 'ROUTE_1.5B'`) instead of dropping them, and only return `'REJECT_429'` when utilization >= 100%.",
+      "tokens": 822,
+      "elapsed_s": 258.59,
+      "dag_state_hash": "70e65c30381e7e3a"
+    }
+  ],
+  "continual_learning": {
+    "adapter_path": "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix4_symbiotic_adapter/adapter_model.safetensors",
+    "node_gains": {
+      "WORK-NODE-01": {
+        "pre_margin": 0.4205,
+        "post_margin": 8.5062,
+        "gain": 8.0857
+      },
+      "WORK-NODE-02": {
+        "pre_margin": 0.1079,
+        "post_margin": 12.3837,
+        "gain": 12.2757
+      },
+      "WORK-NODE-03": {
+        "pre_margin": 0.4009,
+        "post_margin": 7.6099,
+        "gain": 7.2089
+      }
+    }
+  }
+}
