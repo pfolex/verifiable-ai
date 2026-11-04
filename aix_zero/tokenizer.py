@@ -1,9 +1,12 @@
-"""From-scratch symbolic & character-level tokenizer for AIX-Zero.
+"""From-scratch Hybrid Word + Atomic-Digit Tokenizer for AIX-Zero v3.
 
-Unlike BPE tokenizers that merge arbitrary multi-digit numbers into inconsistent chunks,
-AIXZeroTokenizer assigns dedicated atomic token IDs to structural reasoning tags
-(<bos>, <eos>, <pad>, <think>, </think>, <verify>, </verify>, <ans>, </ans>)
-and single-character tokens to every digit, operator, variable, and ASCII symbol.
+Design:
+1. Dedicated structural reasoning tags:
+   <pad>, <bos>, <eos>, <think>, </think>, <verify>, </verify>, <ans>, </ans>
+2. Atomic single-character tokens for all digits (0-9), operators (+-*/=%^><), and ASCII characters
+   so multi-digit numbers and algebraic expressions never split inconsistently.
+3. Whole-word tokens (WORD_VOCAB) for English math word problems and symbolic calculus keywords
+   so natural-language prompts compress into short token sequences while keeping numbers atomic.
 """
 
 from __future__ import annotations
@@ -23,7 +26,6 @@ SPECIAL_TOKENS: List[str] = [
     "</ans>",
 ]
 
-# Atomic printable vocabulary: digits, math operators, letters, punctuation, whitespace
 CHAR_VOCAB: List[str] = list(
     "0123456789"
     "+-*/=%()[]{}<>!=^&|~_.,:;?@#$"
@@ -32,13 +34,37 @@ CHAR_VOCAB: List[str] = list(
     " \n\t"
 )
 
+# Whole-word tokens for English math word problems & calculus prompts
+WORD_VOCAB: List[str] = [
+    "Q:Word:",
+    "Q:Calc:",
+    "d/dx",
+    " packs ",
+    " of ",
+    " and ",
+    " buys ",
+    " loses ",
+    " more ",
+    " left=",
+    " total=",
+    "Sam ",
+    "Mia ",
+    "Leo ",
+    "has ",
+]
+
 
 class AIXZeroTokenizer:
-    """Deterministic atomic tokenizer built from first principles."""
+    """Deterministic hybrid word + atomic-character tokenizer built from first principles."""
 
-    def __init__(self) -> None:
-        self.id_to_token: List[str] = list(SPECIAL_TOKENS) + list(CHAR_VOCAB)
+    def __init__(self, use_word_vocab: bool = True) -> None:
+        base_tokens = list(SPECIAL_TOKENS) + list(CHAR_VOCAB)
+        if use_word_vocab:
+            base_tokens.extend(WORD_VOCAB)
+        self.id_to_token: List[str] = base_tokens
         self.token_to_id = {tok: idx for idx, tok in enumerate(self.id_to_token)}
+        self.use_word_vocab = use_word_vocab
+
         self.pad_id = self.token_to_id["<pad>"]
         self.bos_id = self.token_to_id["<bos>"]
         self.eos_id = self.token_to_id["<eos>"]
@@ -64,15 +90,22 @@ class AIXZeroTokenizer:
         i = 0
         n = len(text)
         while i < n:
-            matched_special = False
+            matched = False
             if text[i] == "<":
                 for sp in SPECIAL_TOKENS:
                     if text.startswith(sp, i):
                         ids.append(self.token_to_id[sp])
                         i += len(sp)
-                        matched_special = True
+                        matched = True
                         break
-            if not matched_special:
+            if not matched and self.use_word_vocab:
+                for w in WORD_VOCAB:
+                    if text.startswith(w, i):
+                        ids.append(self.token_to_id[w])
+                        i += len(w)
+                        matched = True
+                        break
+            if not matched:
                 ch = text[i]
                 if ch in self.token_to_id:
                     ids.append(self.token_to_id[ch])
