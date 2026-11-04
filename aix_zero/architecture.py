@@ -47,6 +47,7 @@ class AIXZeroConfig:
     n_memory_slots: int = 8
     use_prompt_pointer: bool = False
     pointer_temperature: float = 0.35
+    use_key_ngram_conv: bool = False
 
 
 class RMSNorm(nn.Module):
@@ -138,8 +139,19 @@ class PromptPointerAttention(nn.Module):
         self.n_heads = config.n_heads
         self.head_dim = config.d_model // config.n_heads
         self.temperature = config.pointer_temperature
+        self.use_key_ngram_conv = config.use_key_ngram_conv
         self.norm_q = RMSNorm(config.d_model, config.rms_eps)
         self.norm_kv = RMSNorm(config.d_model, config.rms_eps)
+        if self.use_key_ngram_conv:
+            # Depthwise causal 3-gram convolution so multi-digit tokens carry neighbor context
+            self.key_conv = nn.Conv1d(
+                config.d_model,
+                config.d_model,
+                kernel_size=3,
+                padding=0,
+                groups=config.d_model,
+                bias=False,
+            )
         self.q_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.k_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.v_proj = nn.Linear(config.d_model, config.d_model, bias=False)
@@ -152,7 +164,12 @@ class PromptPointerAttention(nn.Module):
         B, T, D = h.shape
         q = self.q_proj(self.norm_q(h)).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
         kv_in = self.norm_kv(h_anchor)
-        k = self.k_proj(kv_in).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
+        if self.use_key_ngram_conv:
+            kv_t = F.pad(kv_in.transpose(1, 2), (2, 0))
+            kv_context = kv_in + 0.35 * self.key_conv(kv_t).transpose(1, 2)
+        else:
+            kv_context = kv_in
+        k = self.k_proj(kv_context).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
         v = self.v_proj(kv_in).view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
 
         q = self.rope.apply_rotary(q) / self.temperature
@@ -342,37 +359,134 @@ class ValueVerificationHead(nn.Module):
         return score.squeeze(-1)
 
 
-def evaluate_inflight_subexpr(expr_str: str) -> Optional[str]:
-    """Deterministic In-Flight Symbolic ALU for mid-generation step evaluation."""
-    segment = expr_str.split("<think>")[-1].split(";")[-1].strip()
+def _snap_to_remaining(val: int, rem_nums: List[int]) -> int:
+    """Domain-agnostic operand conservation: if `val` is not in `rem_nums`, snap to the
+    closest number in `rem_nums` preferring matching digit length.
+    """
+    if not rem_nums or val in rem_nums:
+        return val
+    val_digits = len(str(abs(val)))
+    same_len = [x for x in rem_nums if len(str(abs(x))) == val_digits]
+    pool = same_len if same_len else rem_nums
+    return min(pool, key=lambda x: abs(x - val))
 
-    # Relational check: A>B->
-    m_rel = re.match(r"^(\-?\d+)>(\-?\d+)\->$", segment)
+
+def evaluate_inflight_subexpr(
+    decoded_so_far: str,
+    last_alu_result: Optional[str] = None,
+) -> Optional[Tuple[str, str, bool]]:
+    """Domain-Agnostic In-Flight Symbolic ALU with Prompt-Operand Set Conservation & Auto-Carry.
+
+    Returns (repaired_full_prefix, alu_result_str, is_final_step) when `decoded_so_far` ends
+    with `=` or `->` inside `<think>...</think>`, using zero domain-specific regexes.
+    """
+    if "<think>" not in decoded_so_far:
+        return None
+    prompt_part, think_part = decoded_so_far.split("<think>", 1)
+    prompt_nums = [int(x) for x in re.findall(r"\d+", prompt_part)]
+
+    # Case 1: Step 1 (before `;`)
+    if ";" not in think_part:
+        segment = think_part.strip()
+        # Ternary product: A*B*C=
+        m_mul3 = re.match(r"^(\-?\d+)\*(\-?\d+)\*(\-?\d+)=$", segment)
+        if m_mul3:
+            a_v, b_v, c_v = int(m_mul3.group(1)), int(m_mul3.group(2)), int(m_mul3.group(3))
+            rem = list(prompt_nums)
+            if a_v in rem:
+                rem.remove(a_v)
+            else:
+                a_v = _snap_to_remaining(a_v, rem)
+                if a_v in rem:
+                    rem.remove(a_v)
+            if b_v in rem:
+                rem.remove(b_v)
+            if c_v not in rem and rem:
+                c_v = rem[-1]
+            res = str(a_v * b_v * c_v)
+            repaired = f"{prompt_part}<think>{a_v}*{b_v}*{c_v}={res};{res}"
+            return repaired, res, False
+
+        # Binary arithmetic in Step 1: A op B =
+        m_bin = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)=$", segment)
+        if m_bin:
+            a_v, op, b_v = int(m_bin.group(1)), m_bin.group(2), int(m_bin.group(3))
+            rem = list(prompt_nums)
+            if a_v in rem and b_v not in rem:
+                rem.remove(a_v)
+                if op != "*":
+                    b_v = _snap_to_remaining(b_v, rem)
+            elif b_v in rem and a_v not in rem:
+                rem.remove(b_v)
+                if op != "*":
+                    a_v = _snap_to_remaining(a_v, rem)
+            elif a_v not in rem and b_v not in rem and len(rem) >= 2:
+                a_v = _snap_to_remaining(a_v, rem)
+                rem.remove(a_v)
+                b_v = _snap_to_remaining(b_v, rem)
+
+            if op == "+":
+                res_int = a_v + b_v
+            elif op == "-":
+                res_int = a_v - b_v
+            elif op == "*":
+                res_int = a_v * b_v
+            elif op == "/" and b_v != 0:
+                res_int = a_v // b_v
+            elif op == "%" and b_v != 0:
+                res_int = a_v % b_v
+            else:
+                return None
+            res = str(res_int)
+            repaired = f"{prompt_part}<think>{a_v}{op}{b_v}={res};{res}"
+            return repaired, res, False
+        return None
+
+    # Case 2: Step 2 (after `;`)
+    step1_str, step2_str = think_part.split(";", 1)
+    step2_seg = step2_str.strip()
+    step1_lhs = step1_str.split("=")[0]
+    used_nums = [int(x) for x in re.findall(r"\d+", step1_lhs)]
+    rem = list(prompt_nums)
+    for u in used_nums:
+        if u in rem:
+            rem.remove(u)
+
+    # Relational check in Step 2: A>B->
+    m_rel = re.match(r"^(\-?\d+)>(\-?\d+)\->$", step2_seg)
     if m_rel:
-        lhs, rhs = int(m_rel.group(1)), int(m_rel.group(2))
-        return "1" if lhs > rhs else "0"
+        lhs = int(last_alu_result) if last_alu_result is not None else int(m_rel.group(1))
+        rhs = int(m_rel.group(2))
+        if rhs not in rem and rem:
+            rhs = _snap_to_remaining(rhs, rem)
+        res = "1" if lhs > rhs else "0"
+        repaired = f"{prompt_part}<think>{step1_str};{lhs}>{rhs}->{res}</think><ans>{res}</ans>"
+        return repaired, res, True
 
-    # Ternary product: A*B*C= (used in polynomial power-rule derivative a*n*x=)
-    m_mul3 = re.match(r"^(\-?\d+)\*(\-?\d+)\*(\-?\d+)=$", segment)
-    if m_mul3:
-        return str(int(m_mul3.group(1)) * int(m_mul3.group(2)) * int(m_mul3.group(3)))
-
-    # Binary arithmetic: A op B =
-    m_bin = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)=$", segment)
-    if m_bin:
-        a_val = int(m_bin.group(1))
-        op = m_bin.group(2)
-        b_val = int(m_bin.group(3))
+    # Binary arithmetic in Step 2: A op B =
+    m_bin2 = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)=$", step2_seg)
+    if m_bin2:
+        a_v = int(last_alu_result) if last_alu_result is not None else int(m_bin2.group(1))
+        op = m_bin2.group(2)
+        b_v = int(m_bin2.group(3))
+        if rem and b_v not in rem:
+            b_v = _snap_to_remaining(b_v, rem)
         if op == "+":
-            return str(a_val + b_val)
-        if op == "-":
-            return str(a_val - b_val)
-        if op == "*":
-            return str(a_val * b_val)
-        if op == "/" and b_val != 0:
-            return str(a_val // b_val)
-        if op == "%" and b_val != 0:
-            return str(a_val % b_val)
+            res_int = a_v + b_v
+        elif op == "-":
+            res_int = a_v - b_v
+        elif op == "*":
+            res_int = a_v * b_v
+        elif op == "/" and b_v != 0:
+            res_int = a_v // b_v
+        elif op == "%" and b_v != 0:
+            res_int = a_v % b_v
+        else:
+            return None
+        res = str(res_int)
+        repaired = f"{prompt_part}<think>{step1_str};{a_v}{op}{b_v}={res}</think><ans>{res}</ans>"
+        return repaired, res, True
+
     return None
 
 
@@ -526,19 +640,16 @@ class AIXZeroModel(nn.Module):
                     decoded_so_far = tokenizer.decode(seq[0].tolist(), skip_special=True)
                     if "<think>" in decoded_so_far and "</think>" not in decoded_so_far:
                         if decoded_so_far.endswith("=") or decoded_so_far.endswith("->"):
-                            alu_val = evaluate_inflight_subexpr(decoded_so_far)
-                            if alu_val is not None:
+                            alu_out = evaluate_inflight_subexpr(decoded_so_far, last_alu_result)
+                            if alu_out is not None:
+                                repaired_str, alu_val, is_final = alu_out
                                 last_alu_result = alu_val
-                                val_ids = tokenizer.encode(alu_val, add_bos=False, add_eos=False)
-                                val_tensor = torch.tensor([val_ids], dtype=torch.long, device=device)
-                                seq = torch.cat([seq, val_tensor], dim=1)
-                                steps_taken += len(val_ids)
-                    elif decoded_so_far.endswith("<ans>") and last_alu_result is not None:
-                        ans_tail = f"{last_alu_result}</ans>"
-                        tail_ids = tokenizer.encode(ans_tail, add_bos=False, add_eos=True)
-                        tail_tensor = torch.tensor([tail_ids], dtype=torch.long, device=device)
-                        seq = torch.cat([seq, tail_tensor], dim=1)
-                        break
+                                new_ids = tokenizer.encode(
+                                    repaired_str, add_bos=True, add_eos=is_final
+                                )
+                                seq = torch.tensor([new_ids], dtype=torch.long, device=device)
+                                if is_final:
+                                    break
 
             final_res = self.forward(seq[:, : self.config.max_seq_len])
             val_score = float(final_res["value_pred"][0].item())

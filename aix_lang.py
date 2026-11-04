@@ -242,7 +242,6 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
     from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
     from aix_zero.tokenizer import AIXZeroTokenizer
     from aix_zero.train_from_scratch import extract_answer
-    from aix_zero.train_v4_from_scratch import verify_and_repair_v4_grounded_alu
 
     if "model" not in _AIX_ZERO_CACHE:
         tok = AIXZeroTokenizer(use_word_vocab=True)
@@ -286,8 +285,7 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
         tokenizer=tok,
         inflight_alu=True,
     )
-    decoded_inflight = tok.decode(out_ids, skip_special=True)
-    decoded_final = verify_and_repair_v4_grounded_alu(decoded_inflight)
+    decoded_final = tok.decode(out_ids, skip_special=True)
     ans_str = extract_answer(decoded_final)
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
     code_out = f"# {decoded_final}\ndef solve():\n    return {ans_str}\n"
