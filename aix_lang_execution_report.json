@@ -1,0 +1,56 @@
+{
+  "language": "AIX-Lang v1.0",
+  "tasks": [
+    {
+      "task": "VerifyClusterHeadroom",
+      "kind": "math",
+      "assertions_passed": 2,
+      "human_assisted": false,
+      "human_choice": "None (Autonomous)",
+      "dag_state_hash": "ffc85bdf21e27979",
+      "plasticity": {
+        "pre_margin": NaN,
+        "post_margin": NaN,
+        "margin_gain": NaN,
+        "pre_win_prob": NaN,
+        "post_win_prob": NaN,
+        "plasticity_latency_ms": 292.2
+      }
+    },
+    {
+      "task": "SlidingWindowRateLimiter",
+      "kind": "code",
+      "assertions_passed": 3,
+      "human_assisted": false,
+      "human_choice": "None (Autonomous)",
+      "dag_state_hash": "ccc5fb259d062b01",
+      "plasticity": {
+        "pre_margin": NaN,
+        "post_margin": NaN,
+        "margin_gain": NaN,
+        "pre_win_prob": NaN,
+        "post_win_prob": NaN,
+        "plasticity_latency_ms": 437.5
+      }
+    },
+    {
+      "task": "SymbioticFailoverPolicy",
+      "kind": "policy_code",
+      "assertions_passed": 4,
+      "human_assisted": true,
+      "human_choice": "Option A (Speculative Hedge): Return 'HEDGE_1.5B_AND_8B' for critical tier==1, and 'DOWNGRADE_1.5B' for tier>1",
+      "dag_state_hash": "6d1dd159e075c4be",
+      "plasticity": {
+        "pre_margin": NaN,
+        "post_margin": NaN,
+        "margin_gain": NaN,
+        "pre_win_prob": NaN,
+        "post_win_prob": NaN,
+        "plasticity_latency_ms": 554.9
+      }
+    }
+  ],
+  "saved_synapses": [
+    "/Users/alexpfeil/.gemini/antigravity/scratch/model_merging/aix_live_synapse/core_reasoner_synapse.safetensors"
+  ]
+}

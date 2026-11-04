@@ -1,0 +1,77 @@
+// ============================================================================
+// demo_router.aix — Native AIX-Lang v1.0 Program
+// Demonstrates first-class `synapse`, `task`, `verify`, `human_assist`, and
+// millisecond-level `plasticity` weight updates in RAM.
+// ============================================================================
+
+synapse core_reasoner(rank=16, layer=27, lr=0.005);
+
+task VerifyClusterHeadroom(kind="math") {
+    prompt: "A 4-node AI cluster handles 240 req/min per node (total 960 req/min) under an incoming load of 620 req/min. Compute exact spare headroom in req/min."
+    verified_branch: """
+def compute_headroom(nodes: int, cap_per_node: int, load: int) -> int:
+    return nodes * cap_per_node - load
+"""
+    trap_branch: """
+def compute_headroom(nodes: int, cap_per_node: int, load: int) -> int:
+    return load - cap_per_node
+"""
+    verify {
+        assert compute_headroom(4, 240, 620) == 340;
+        assert compute_headroom(3, 180, 360) == 180;
+    }
+    plasticity core_reasoner(steps=16, scale=0.008);
+}
+
+task SlidingWindowRateLimiter(kind="code") {
+    prompt: "Implement sliding_window_allow(timestamps, now_s, window_s, limit) so expired timestamps <= now_s - window_s are evicted before checking len < limit."
+    verified_branch: """
+def sliding_window_allow(timestamps: list[float], now_s: float, window_s: float, limit: int) -> tuple[bool, list[float]]:
+    active = [t for t in timestamps if t > now_s - window_s]
+    if len(active) < limit:
+        active.append(now_s)
+        return True, active
+    return False, active
+"""
+    trap_branch: """
+def sliding_window_allow(timestamps: list[float], now_s: float, window_s: float, limit: int) -> tuple[bool, list[float]]:
+    if len(timestamps) < limit:
+        return True, timestamps + [now_s]
+    return False, timestamps
+"""
+    verify {
+        assert sliding_window_allow([1.0, 2.0], 12.0, 10.0, 2) == (True, [12.0]);
+        assert sliding_window_allow([5.0, 6.0], 10.0, 10.0, 2) == (False, [5.0, 6.0]);
+        assert sliding_window_allow([], 1.0, 5.0, 1) == (True, [1.0]);
+    }
+    plasticity core_reasoner(steps=16, scale=0.008);
+}
+
+task SymbioticFailoverPolicy(kind="policy_code") {
+    prompt: "Implement failover_route(primary_healthy, latency_ms, budget_ms, tier) with confirmed human architectural policy on latency spikes."
+    human_assist "When primary_healthy is True but latency_ms > budget_ms, how should AIX route the request?" [
+        option "Option A (Speculative Hedge): Return 'HEDGE_1.5B_AND_8B' for critical tier==1, and 'DOWNGRADE_1.5B' for tier>1",
+        option "Option B (Hard Failover): Mark primary unhealthy and drop to 'OFFLINE_QUEUE' for all tiers"
+    ] select=0
+    verified_branch: """
+def failover_route(primary_healthy: bool, latency_ms: float, budget_ms: float, tier: int) -> str:
+    if not primary_healthy:
+        return 'FAILOVER_REPLICA'
+    if latency_ms > budget_ms:
+        return 'HEDGE_1.5B_AND_8B' if tier == 1 else 'DOWNGRADE_1.5B'
+    return 'PRIMARY_DIRECT'
+"""
+    trap_branch: """
+def failover_route(primary_healthy: bool, latency_ms: float, budget_ms: float, tier: int) -> str:
+    if latency_ms > budget_ms:
+        return 'OFFLINE_QUEUE'
+    return 'PRIMARY_DIRECT'
+"""
+    verify {
+        assert failover_route(False, 50.0, 100.0, 1) == 'FAILOVER_REPLICA';
+        assert failover_route(True, 150.0, 100.0, 1) == 'HEDGE_1.5B_AND_8B';
+        assert failover_route(True, 150.0, 100.0, 2) == 'DOWNGRADE_1.5B';
+        assert failover_route(True, 40.0, 100.0, 1) == 'PRIMARY_DIRECT';
+    }
+    plasticity core_reasoner(steps=20, scale=0.008);
+}
