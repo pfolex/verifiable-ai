@@ -237,7 +237,7 @@ _AIX_ZERO_CACHE: dict[str, Any] = {}
 
 
 def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
-    """Executes the 100% from-scratch AIX-Zero v4 neural network + In-Flight ALU in ~15ms."""
+    """Executes the 100% from-scratch AIX-Zero v8 neural network + K-Step In-Flight ALU in ~15ms."""
     from safetensors.torch import load_file
     from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
     from aix_zero.tokenizer import AIXZeroTokenizer
@@ -245,8 +245,16 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
 
     if "model" not in _AIX_ZERO_CACHE:
         tok = AIXZeroTokenizer(use_word_vocab=True)
+        ckpt_dir = REPO_ROOT / "aix_zero" / "checkpoints"
+        for cand_name in ("aix_zero_v8.safetensors", "aix_zero_v7_10min.safetensors", "aix_zero_v4.safetensors"):
+            cand_path = ckpt_dir / cand_name
+            if cand_path.exists():
+                ckpt_path = cand_path
+                break
+        state = load_file(str(ckpt_path))
+        ckpt_vocab = state["token_emb.weight"].shape[0]
         cfg = AIXZeroConfig(
-            vocab_size=tok.vocab_size,
+            vocab_size=ckpt_vocab,
             d_model=128,
             n_heads=4,
             n_kv_heads=2,
@@ -265,8 +273,9 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
             pointer_temperature=0.35,
         )
         mdl = AIXZeroModel(cfg)
-        ckpt_path = REPO_ROOT / "aix_zero" / "checkpoints" / "aix_zero_v4.safetensors"
-        mdl.load_state_dict(load_file(str(ckpt_path)))
+        mdl.load_state_dict(state)
+        if tok.vocab_size > ckpt_vocab:
+            mdl.resize_token_embeddings(tok.vocab_size)
         mdl.eval()
         _AIX_ZERO_CACHE["tokenizer"] = tok
         _AIX_ZERO_CACHE["model"] = mdl
@@ -279,7 +288,7 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
     out_ids, val_conf, ponder_steps = mdl.generate_verified(
         p_ids,
         eos_id=tok.eos_id,
-        max_new_tokens=40,
+        max_new_tokens=48,
         num_candidates=1,
         temperature=0.0,
         tokenizer=tok,

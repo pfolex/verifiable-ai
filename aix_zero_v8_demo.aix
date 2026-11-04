@@ -1,0 +1,73 @@
+// ============================================================================
+// AIX-Lang v1.1: AIX-Zero v8 Tier-0 13-Domain + 3-Step Chain Showcase
+// ============================================================================
+
+synapse v8_multi_step_adapter(rank=16, layer=27, lr=0.005);
+
+task ModularNumberTheory(kind="math") {
+    prompt: "Q:(11+2)%3="
+    solve_with aix_zero:v8(temperature=0.0);
+    verified_branch: """
+def solve():
+    return 1
+"""
+    trap_branch: """
+def solve():
+    return 2
+"""
+    verify {
+        assert solve() == 1;
+    }
+    plasticity v8_multi_step_adapter(steps=8, scale=0.006);
+}
+
+task GeometryPaddedArea(kind="math") {
+    prompt: "Q:Geom:w=2,h=6,p=5,A="
+    solve_with aix_zero:v8(temperature=0.0);
+    verified_branch: """
+def solve():
+    return 17
+"""
+    trap_branch: """
+def solve():
+    return 16
+"""
+    verify {
+        assert solve() == 17;
+    }
+    plasticity v8_multi_step_adapter(steps=8, scale=0.006);
+}
+
+task PhysicsKinematics(kind="math") {
+    prompt: "Q:Phys:a=4,t=6,u=5,v="
+    solve_with aix_zero:v8(temperature=0.0);
+    verified_branch: """
+def solve():
+    return 29
+"""
+    trap_branch: """
+def solve():
+    return 25
+"""
+    verify {
+        assert solve() == 29;
+    }
+    plasticity v8_multi_step_adapter(steps=8, scale=0.006);
+}
+
+task ThreeStepReasoningChain(kind="math") {
+    prompt: "Q:Chain3:4*5+7-2="
+    solve_with aix_zero:v8(temperature=0.0);
+    verified_branch: """
+def solve():
+    return 25
+"""
+    trap_branch: """
+def solve():
+    return 27
+"""
+    verify {
+        assert solve() == 25;
+    }
+    plasticity v8_multi_step_adapter(steps=8, scale=0.006);
+}

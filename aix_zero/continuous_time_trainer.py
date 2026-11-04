@@ -264,8 +264,14 @@ def main() -> None:
             )
             council_note = utterance[:90].replace("\n", " ")
 
-        # 3. Build cycle training stream: sample 192 problems + 3x upweighted hard examples
-        stream = random.sample(all_train, k=min(192, len(all_train))) + (hard_examples * 3)
+        # 3. Build cycle training stream: stratified per-domain sampling (16 per domain) + 3x upweighted hard examples
+        by_dom: Dict[str, List[Dict]] = {}
+        for item in all_train:
+            by_dom.setdefault(item["domain"], []).append(item)
+        stream: List[Dict] = []
+        for dom_items in by_dom.values():
+            stream.extend(random.sample(dom_items, k=min(16, len(dom_items))))
+        stream.extend(hard_examples * 3)
         random.shuffle(stream)
 
         model.train()

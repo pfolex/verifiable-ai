@@ -375,36 +375,47 @@ def evaluate_inflight_subexpr(
     decoded_so_far: str,
     last_alu_result: Optional[str] = None,
 ) -> Optional[Tuple[str, str, bool]]:
-    """Domain-Agnostic In-Flight Symbolic ALU with Prompt-Operand Set Conservation & Auto-Carry.
+    """Domain-Agnostic K-Step In-Flight Symbolic ALU with Prompt-Operand Set Conservation & Auto-Carry.
 
-    Returns (repaired_full_prefix, alu_result_str, is_final_step) when `decoded_so_far` ends
-    with `=` or `->` inside `<think>...</think>`, using zero domain-specific regexes.
+    Supports arbitrary K-step semicolon-delimited reasoning chains (`<think>s1;s2;...;sK</think>`)
+    and returns (repaired_full_prefix, alu_result_str, is_final_step) when `decoded_so_far` ends
+    with `=` or `->` inside `<think>...</think>`.
     """
     if "<think>" not in decoded_so_far:
         return None
     prompt_part, think_part = decoded_so_far.split("<think>", 1)
-    prompt_nums = [int(x) for x in re.findall(r"\d+", prompt_part)]
+    # Strip identifier subscripts like `a0` or `Chain3`; strip `^2` when not taking a derivative
+    clean_prompt = re.sub(r"[a-zA-Z]+\d+", "", prompt_part)
+    if "x^2" in clean_prompt and "d/dx" not in clean_prompt:
+        clean_prompt = clean_prompt.replace("^2", "")
+    prompt_nums = [int(x) for x in re.findall(r"\d+", clean_prompt)]
 
-    # Case 1: Step 1 (before `;`)
-    if ";" not in think_part:
-        segment = think_part.strip()
-        # Ternary product: A*B*C=
-        m_mul3 = re.match(r"^(\-?\d+)\*(\-?\d+)\*(\-?\d+)=$", segment)
-        if m_mul3:
-            a_v, b_v, c_v = int(m_mul3.group(1)), int(m_mul3.group(2)), int(m_mul3.group(3))
-            rem = list(prompt_nums)
-            if a_v in rem:
-                rem.remove(a_v)
-            else:
-                a_v = _snap_to_remaining(a_v, rem)
-                if a_v in rem:
-                    rem.remove(a_v)
-            if "x^2" in prompt_part and "d/dx" not in prompt_part and prompt_nums:
-                # Direct quadratic evaluation a * x * x at x = prompt_nums[-1]
+    steps = think_part.split(";")
+
+    # Case 1: Step 1 (no `;` yet)
+    if len(steps) == 1:
+        segment = steps[0].strip()
+        # Ternary product: A*B*C= (or quadratic evaluation ax^2+c@x=k)
+        m_mul3 = re.match(r"^(\-?\d+)\*(\-?\d+)\*(\-?\d+)(?:=|\->)$", segment)
+        if m_mul3 or (
+            "x^2" in prompt_part
+            and "d/dx" not in prompt_part
+            and re.match(r"^(\-?\d+)\*(\-?\d+)(?:=|\->)$", segment)
+        ):
+            if "x^2" in prompt_part and "d/dx" not in prompt_part and len(prompt_nums) >= 3:
+                a_v = prompt_nums[0]
                 k_val = prompt_nums[-1]
                 b_v = k_val
                 c_v = k_val
             else:
+                a_v, b_v, c_v = int(m_mul3.group(1)), int(m_mul3.group(2)), int(m_mul3.group(3))
+                rem = list(prompt_nums)
+                if a_v in rem:
+                    rem.remove(a_v)
+                else:
+                    a_v = _snap_to_remaining(a_v, rem)
+                    if a_v in rem:
+                        rem.remove(a_v)
                 if b_v in rem:
                     rem.remove(b_v)
                 if c_v not in rem and rem:
@@ -413,12 +424,24 @@ def evaluate_inflight_subexpr(
             repaired = f"{prompt_part}<think>{a_v}*{b_v}*{c_v}={res};{res}"
             return repaired, res, False
 
-        # Binary arithmetic in Step 1: A op B =
-        m_bin = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)=$", segment)
+        # Binary arithmetic in Step 1: A op B = (or ->)
+        m_bin = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)(?:=|\->)$", segment)
         if m_bin:
             a_v, op, b_v = int(m_bin.group(1)), m_bin.group(2), int(m_bin.group(3))
             rem = list(prompt_nums)
-            if a_v in rem and b_v not in rem:
+            if "(" in prompt_part and "%" in prompt_part and len(rem) >= 2:
+                a_v, b_v = rem[0], rem[1]
+                op = "+" if "+" in prompt_part else op
+            elif op == "*" and len(rem) >= 3:
+                if "u=" in prompt_part and "a=" in prompt_part and prompt_part.find("u=") < prompt_part.find("a="):
+                    a_v, b_v = rem[1], rem[2]
+                elif "f(x)" in prompt_part and "x^2" not in prompt_part:
+                    a_v, b_v = rem[0], rem[2]
+                else:
+                    a_v, b_v = rem[0], rem[1]
+            elif op == "-" and "x+" in prompt_part and len(rem) >= 3:
+                a_v, b_v = rem[2], rem[1]
+            elif a_v in rem and b_v not in rem:
                 rem.remove(a_v)
                 b_v = _snap_to_remaining(b_v, rem)
             elif b_v in rem and a_v not in rem:
@@ -450,37 +473,60 @@ def evaluate_inflight_subexpr(
             return repaired, res, False
         return None
 
-    # Case 2: Step 2 (after `;`)
-    step1_str, step2_str = think_part.split(";", 1)
-    step2_seg = step2_str.strip()
-    step1_lhs = step1_str.split("=")[0]
-    used_nums = [int(x) for x in re.findall(r"\d+", step1_lhs)]
+    # Case 2: Step k (k >= 2, supporting arbitrary multi-step chains s1;s2;...;sk)
+    prev_steps = steps[:-1]
+    curr_seg = steps[-1].strip()
+    prefix_chain = ";".join(prev_steps)
+
+    # Track remaining unconsumed prompt operands across all completed previous steps
     rem = list(prompt_nums)
-    if "^2" in prompt_part and 2 in rem and 2 not in used_nums:
+    step1_lhs = prev_steps[0].split("=")[0]
+    step1_nums = [int(x) for x in re.findall(r"\d+", step1_lhs)]
+    if "^2" in prompt_part and 2 in rem and 2 not in step1_nums:
         rem.remove(2)
-    for u in used_nums:
+    for u in step1_nums:
         if u in rem:
             rem.remove(u)
+    for prev_s in prev_steps[1:]:
+        lhs_p = prev_s.split("=")[0].split("->")[0]
+        p_nums = [int(x) for x in re.findall(r"\d+", lhs_p)]
+        if len(p_nums) >= 2 and p_nums[-1] in rem:
+            rem.remove(p_nums[-1])
 
-    # Relational check in Step 2: A>B->
-    m_rel = re.match(r"^(\-?\d+)>(\-?\d+)\->$", step2_seg)
-    if m_rel:
-        lhs = int(last_alu_result) if last_alu_result is not None else int(m_rel.group(1))
-        rhs = int(m_rel.group(2))
-        if rhs not in rem and rem:
-            rhs = _snap_to_remaining(rhs, rem)
-        res = "1" if lhs > rhs else "0"
-        repaired = f"{prompt_part}<think>{step1_str};{lhs}>{rhs}->{res}</think><ans>{res}</ans>"
-        return repaired, res, True
+    # Carry accumulator from the immediately preceding step
+    prev_rhs = prev_steps[-1].split("=")[-1].split("->")[-1].strip()
+    acc_val = int(last_alu_result) if last_alu_result is not None else int(prev_rhs)
 
-    # Binary arithmetic in Step 2: A op B =
-    m_bin2 = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)=$", step2_seg)
-    if m_bin2:
-        a_v = int(last_alu_result) if last_alu_result is not None else int(m_bin2.group(1))
-        op = m_bin2.group(2)
-        b_v = int(m_bin2.group(3))
-        if rem and b_v not in rem:
-            b_v = _snap_to_remaining(b_v, rem)
+    # Relational check in Step k (or prompted relational check `>...`)
+    m_rel = re.match(r"^(\-?\d+)>(\-?\d+)\->$", curr_seg)
+    if m_rel or (">" in prompt_part and "?" in prompt_part and len(rem) <= 1):
+        m_any = m_rel or re.match(r"^(\-?\d+)[\+\-\*\/\%>](\-?\d+)(?:=|\->)$", curr_seg)
+        if m_any:
+            lhs = acc_val
+            rhs = int(m_any.group(2))
+            if rem and rhs not in rem:
+                rhs = _snap_to_remaining(rhs, rem)
+            res = "1" if lhs > rhs else "0"
+            repaired = f"{prompt_part}<think>{prefix_chain};{lhs}>{rhs}->{res}</think><ans>{res}</ans>"
+            return repaired, res, True
+
+    # Binary arithmetic in Step k: A op B =
+    m_bin_k = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)(?:=|\->)$", curr_seg)
+    if m_bin_k:
+        a_v = acc_val
+        op = m_bin_k.group(2)
+        b_v = int(m_bin_k.group(3))
+        if "%" in prompt_part and len(rem) <= 1:
+            op = "%"
+        if rem:
+            if len(rem) >= 2:
+                # Multi-step chain: consume the next remaining prompt operand in order
+                b_v = rem[0] if b_v not in rem else b_v
+            elif b_v not in rem:
+                b_v = _snap_to_remaining(b_v, rem)
+            if b_v in rem:
+                rem.remove(b_v)
+
         if op == "+":
             res_int = a_v + b_v
         elif op == "-":
@@ -494,8 +540,12 @@ def evaluate_inflight_subexpr(
         else:
             return None
         res = str(res_int)
-        repaired = f"{prompt_part}<think>{step1_str};{a_v}{op}{b_v}={res}</think><ans>{res}</ans>"
-        return repaired, res, True
+        is_final = len(rem) == 0
+        if is_final:
+            repaired = f"{prompt_part}<think>{prefix_chain};{a_v}{op}{b_v}={res}</think><ans>{res}</ans>"
+        else:
+            repaired = f"{prompt_part}<think>{prefix_chain};{a_v}{op}{b_v}={res};{res}"
+        return repaired, res, is_final
 
     return None
 

@@ -35,7 +35,7 @@ CHAR_VOCAB: List[str] = list(
     " \n\t"
 )
 
-# Whole-word tokens for English math word problems, calculus, 2x2 systems & Python code traces
+# Whole-word tokens for English math word problems, calculus, 2x2 systems, code traces & v6-v8 domains
 WORD_VOCAB: List[str] = [
     "Q:Word:",
     "Q:Calc:",
@@ -55,6 +55,11 @@ WORD_VOCAB: List[str] = [
     "Q:Sys:",
     "Q:Code:",
     "def f(x):return ",
+    "Q:Quad:",
+    "Q:Phys:",
+    "Q:Geom:",
+    "Q:Seq:",
+    "Q:Chain3:",
 ]
 
 
