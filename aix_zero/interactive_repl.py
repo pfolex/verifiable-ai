@@ -34,7 +34,7 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
     sys.path.insert(0, str(REPO_ROOT / sub / "src"))
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
-from aix_zero.knowledge_is_power import CodexRetriever
+from aix_zero.knowledge_is_power import CodexRetriever, WebKnowledgeFetcher
 from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
@@ -43,12 +43,14 @@ from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
 def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v11_ckpt = ckpt_dir / "aix_zero_v11_kip.safetensors"
     v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
     v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
     v8_ckpt = ckpt_dir / "aix_zero_v8.safetensors"
     v7_ckpt = ckpt_dir / "aix_zero_v7_10min.safetensors"
 
-    for cand in (v10_ckpt, v9_ckpt, v8_ckpt, v7_ckpt):
+    active_ckpt = v8_ckpt
+    for cand in (v11_ckpt, v10_ckpt, v9_ckpt, v8_ckpt, v7_ckpt):
         if cand.exists():
             active_ckpt = cand
             break
@@ -79,7 +81,7 @@ def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer,
     if tokenizer.vocab_size > ckpt_vocab:
         model.resize_token_embeddings(tokenizer.vocab_size)
     model.eval()
-    return model, tokenizer, v8_ckpt
+    return model, tokenizer, active_ckpt
 
 
 def run_query(model: AIXZeroModel, tokenizer: AIXZeroTokenizer, prompt: str) -> None:
@@ -197,25 +199,27 @@ def main() -> None:
             "Q:Calc:d/dx(4x^2+3x)@x=5=",
             "Q:Seq:d=5,n=6,a0=3,an=",
             "Q:Chain3:4*5+7-2=",
-            "Q:Chain3:6*3+5-1=",
+            "Q:BridgeET:V=4,I=3,t=2,loss=5,E=",
+            "Q:BridgeKW:F=5,d=4,K0=7,loss=3,E=",
+            "Q:Chain4:3*4+5-2+6=",
         ]
         for p in demo_prompts:
             run_query(model, tokenizer, p)
 
-        print("  [DEMO LIVE TEACHING] Teaching a 3-step chain live in RAM:")
+        print("  [DEMO LIVE TEACHING] Teaching a 4-step chain live in RAM:")
         run_live_teach(
             model,
             tokenizer,
             device,
-            "Q:Chain3:5*4+6-3= => <think>5*4=20;20+6=26;26-3=23</think><ans>23</ans>",
+            "Q:Chain4:4*3+6-2+5= => <think>4*3=12;12+6=18;18-2=16;16+5=21</think><ans>21</ans>",
         )
         return
 
     while True:
         try:
-            line = input("aix-zero:v8> ").strip()
+            line = input("aix-zero:v11> ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nExiting AIX-Zero v8 REPL.")
+            print("\nExiting AIX-Zero REPL.")
             break
         if not line:
             continue
@@ -232,6 +236,12 @@ def main() -> None:
             }
             save_file(state_dict_cpu, str(ckpt_path))
             print(f"  [SAVED] Wrote live weights to {ckpt_path}")
+            continue
+        if line.startswith("!web "):
+            topic = line[len("!web ") :].strip()
+            res = WebKnowledgeFetcher.research_topic(topic)
+            print(f"  [Wikipedia] {res['wikipedia']['title']} ({res['wikipedia']['url']}):\n    {res['wikipedia']['extract']}")
+            print(f"  [arXiv]     {res['arxiv']['title']} ({res['arxiv']['url']}):\n    {res['arxiv']['summary']}")
             continue
         if line.startswith("!teach "):
             run_live_teach(model, tokenizer, device, line[len("!teach ") :].strip())

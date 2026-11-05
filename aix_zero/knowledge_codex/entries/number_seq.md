@@ -15,12 +15,12 @@ Prompt Pattern     : Q:Seq:d={d},n={n},a0={a0},an=
 Reasoning Grammar  : <think>{d}*{n}={step};{step}+{a0}={an}</think><ans>{an}</ans>
 ```
 
-## 3. Formally Verified Worked Examples (Live `AIX-Zero v9` Traces)
+## 4. Formally Verified Worked Examples (Live `AIX-Zero v11` Traces)
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Seq:d=2,n=6,a0=3,an=` | `Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8387` | `1.0` | `138.86ms` |
-| `Q:Seq:d=4,n=4,a0=1,an=` | `Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>` | `17` (PASS) | `0.8436` | `1.0` | `149.43ms` |
-| `Q:Seq:d=2,n=4,a0=4,an=` | `Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8492` | `1.0` | `154.32ms` |
-| `Q:Seq:d=5,n=3,a0=3,an=` | `Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>` | `18` (PASS) | `0.8307` | `1.0` | `160.55ms` |
-| `Q:Seq:d=2,n=3,a0=1,an=` | `Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>` | `7` (PASS) | `0.8304` | `1.0` | `154.02ms` |
+| `Q:Seq:d=2,n=6,a0=3,an=` | `Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>` | `15` (PASS) | `0.8432` | `1.032` | `137.12ms` |
+| `Q:Seq:d=4,n=4,a0=1,an=` | `Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>` | `17` (PASS) | `0.8452` | `1.034` | `113.08ms` |
+| `Q:Seq:d=2,n=4,a0=4,an=` | `Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8474` | `1.034` | `114.03ms` |
+| `Q:Seq:d=5,n=3,a0=3,an=` | `Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>` | `18` (PASS) | `0.8291` | `1.035` | `118.95ms` |
+| `Q:Seq:d=2,n=3,a0=1,an=` | `Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>` | `7` (PASS) | `0.8315` | `1.034` | `171.42ms` |

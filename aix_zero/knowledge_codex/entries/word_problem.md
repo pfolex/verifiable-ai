@@ -15,12 +15,12 @@ Prompt Pattern     : Q:Word:Mia has {a} packs of {b} and buys {c} total=
 Reasoning Grammar  : <think>{a}*{b}={p};{p}+{c}={tot}</think><ans>{tot}</ans>
 ```
 
-## 3. Formally Verified Worked Examples (Live `AIX-Zero v9` Traces)
+## 4. Formally Verified Worked Examples (Live `AIX-Zero v11` Traces)
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Word:Sam has 5 packs of 5 and buys 2 total=` | `Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>` | `27` (PASS) | `0.8212` | `1.0` | `144.12ms` |
-| `Q:Word:Mia has 2 packs of 4 and buys 4 total=` | `Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8496` | `1.0` | `111.42ms` |
-| `Q:Word:Mia has 4 packs of 4 and buys 4 total=` | `Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>` | `20` (PASS) | `0.8455` | `1.0` | `161.22ms` |
-| `Q:Word:Mia has 4 packs of 5 and buys 5 total=` | `Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>` | `25` (PASS) | `0.8314` | `1.0` | `126.88ms` |
-| `Q:Word:Mia has 5 packs of 6 and buys 2 total=` | `Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>` | `32` (PASS) | `0.8318` | `1.0` | `106.81ms` |
+| `Q:Word:Sam has 5 packs of 5 and buys 2 total=` | `Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>` | `27` (PASS) | `0.8226` | `1.003` | `127.68ms` |
+| `Q:Word:Mia has 2 packs of 4 and buys 4 total=` | `Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>` | `12` (PASS) | `0.8564` | `1.0` | `171.39ms` |
+| `Q:Word:Mia has 4 packs of 4 and buys 4 total=` | `Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>` | `20` (PASS) | `0.844` | `1.0` | `183.67ms` |
+| `Q:Word:Mia has 4 packs of 5 and buys 5 total=` | `Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>` | `25` (PASS) | `0.8208` | `1.0` | `248.52ms` |
+| `Q:Word:Mia has 5 packs of 6 and buys 2 total=` | `Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>` | `32` (PASS) | `0.8323` | `1.0` | `199.34ms` |

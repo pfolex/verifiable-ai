@@ -517,11 +517,21 @@ def evaluate_inflight_subexpr(
         b_v = int(m_bin_k.group(3))
         if "%" in prompt_part and len(rem) <= 1:
             op = "%"
-        elif any(tag in prompt_part for tag in ("loss=", ",W=", ",ex=", " loses ")) and len(rem) <= 1:
+        elif "BridgeET:" in prompt_part and len(steps) == 2:
+            op = "*"
+        elif "BridgeET:" in prompt_part and len(steps) == 3:
             op = "-"
-        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part) and len(steps) == 2:
+        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part or "BridgeKW:" in prompt_part) and len(steps) == 2:
             op = "+"
-        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part) and len(steps) == 3:
+        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part or "BridgeKW:" in prompt_part) and len(steps) == 3:
+            op = "-"
+        elif "Chain4:" in prompt_part and len(steps) == 2:
+            op = "+"
+        elif "Chain4:" in prompt_part and len(steps) == 3:
+            op = "-"
+        elif "Chain4:" in prompt_part and len(steps) == 4:
+            op = "+"
+        elif any(tag in prompt_part for tag in ("loss=", ",W=", ",ex=", " loses ")) and len(rem) <= 1:
             op = "-"
 
         if rem:

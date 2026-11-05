@@ -247,6 +247,7 @@ def query_aix_zero_tier0(prompt: str) -> dict[str, Any]:
         tok = AIXZeroTokenizer(use_word_vocab=True)
         ckpt_dir = REPO_ROOT / "aix_zero" / "checkpoints"
         for cand_name in (
+            "aix_zero_v11_kip.safetensors",
             "aix_zero_v10_kip.safetensors",
             "aix_zero_v9_kip.safetensors",
             "aix_zero_v8.safetensors",

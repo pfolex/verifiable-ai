@@ -15,12 +15,12 @@ Prompt Pattern     : Q:{a}x+{b}={c},x=
 Reasoning Grammar  : <think>{c}-{b}={d};{d}/{a}={x}</think><ans>{x}</ans>
 ```
 
-## 3. Formally Verified Worked Examples (Live `AIX-Zero v9` Traces)
+## 4. Formally Verified Worked Examples (Live `AIX-Zero v11` Traces)
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:5x+1=21,x=` | `Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>` | `4` (PASS) | `0.8492` | `1.0` | `191.82ms` |
-| `Q:5x+1=16,x=` | `Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>` | `3` (PASS) | `0.8425` | `1.0` | `168.95ms` |
-| `Q:4x+2=18,x=` | `Q:4x+2=18,x=<think>18-2=16;16/4=4</think><ans>4</ans>` | `4` (PASS) | `0.832` | `1.0` | `104.45ms` |
-| `Q:2x+2=12,x=` | `Q:2x+2=12,x=<think>12-2=10;10/2=5</think><ans>5</ans>` | `5` (PASS) | `0.8381` | `1.0` | `125.06ms` |
-| `Q:6x+4=34,x=` | `Q:6x+4=34,x=<think>34-4=30;30/6=5</think><ans>5</ans>` | `5` (PASS) | `0.8501` | `1.0` | `110.59ms` |
+| `Q:5x+1=21,x=` | `Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>` | `4` (PASS) | `0.8633` | `1.077` | `116.61ms` |
+| `Q:5x+1=16,x=` | `Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>` | `3` (PASS) | `0.8558` | `1.0` | `176.16ms` |
+| `Q:4x+2=18,x=` | `Q:4x+2=18,x=<think>18-2=16;16/4=4</think><ans>4</ans>` | `4` (PASS) | `0.8767` | `1.081` | `166.13ms` |
+| `Q:2x+2=12,x=` | `Q:2x+2=12,x=<think>12-2=10;10/2=5</think><ans>5</ans>` | `5` (PASS) | `0.8704` | `1.122` | `202.67ms` |
+| `Q:6x+4=34,x=` | `Q:6x+4=34,x=<think>34-4=30;30/6=5</think><ans>5</ans>` | `5` (PASS) | `0.8763` | `1.161` | `195.75ms` |
