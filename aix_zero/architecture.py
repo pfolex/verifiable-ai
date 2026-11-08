@@ -204,6 +204,7 @@ class MixtureOfReasoningExperts(nn.Module):
             raise ValueError("Expert count and top-k must be positive")
         # Runtime execution policy; checkpoint keys and model configuration stay compatible.
         self.dispatch_mode = "dense"
+        self.forced_expert_index: Optional[int] = None
         self.n_experts = config.n_experts
         self.top_k = min(config.moe_top_k, config.n_experts)
         self.use_shared_expert = config.use_shared_expert
@@ -216,6 +217,14 @@ class MixtureOfReasoningExperts(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.forced_expert_index is not None:
+            index = self.forced_expert_index
+            if type(index) is not int or not 0 <= index < self.n_experts:
+                raise ValueError("Explicit expert index out of range")
+            routed = self.experts[index](x)
+            combined = self.shared_expert(x) + 0.5 * routed if self.use_shared_expert else routed
+            return combined, x.new_zeros(())
+
         router_logits = self.router(x)
         router_probs = F.softmax(router_logits, dim=-1)
         top_vals, top_idx = torch.topk(router_probs, k=self.top_k, dim=-1)
