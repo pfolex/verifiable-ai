@@ -7,3 +7,5 @@ On the existing 105 template-family held-out cases, the local baseline scored **
 The research baseline adds integrity-checked export/reload of existing routed expert snapshots, bounded CPU tensor caching, and explicit installation. Snapshots are not independently trained specialists and do not add learned capacity. Default MoE execution still computes every expert; automatic routing/offloading is not implemented here.
 
 See [setup, measurements, storage contracts, and reproduction](../docs/AIX-ZERO-EXPERT-STORAGE.md). Source checkpoint files are not changed by the offline baseline command. Legacy training, web/council, and generated-codex programs remain separate experimental tools; generated claims are not evaluation evidence.
+
+Opt-in selected-token dispatch and dense-reference comparisons are documented in [the dispatch study](../docs/AIX-ZERO-SPARSE-DISPATCH.md). All expert weights remain resident. Dense remains the default because the current four-expert model showed no full-response benefit.
