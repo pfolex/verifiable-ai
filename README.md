@@ -61,14 +61,11 @@ Together, they solve a foundational problem in open-source AI: **allowing anyone
 
 ## AIX-Zero (`v1 -> v11`) & *Knowledge Is Power* (`aix_zero/`)
 
-[**`aix_zero/`**](aix_zero/README.md) contains **`AIX-Zero`**—our 100% from-scratch neuro-symbolic reasoning model (`817,026` physical parameters / `1,775,236` effective virtual parameters with 3-step ACT recurrent looping, `134` hybrid word + atomic-digit tokens)—and **`Knowledge Is Power v11`** ([`aix_zero/knowledge_is_power.py`](aix_zero/knowledge_is_power.py)), a **Web-Connected** (`Wikipedia REST API` + `arXiv Open Research API` via `WebKnowledgeFetcher`) autonomous Multi-LLM Symbiotic Council (`aix-8b:latest` $\leftrightarrow$ `aix3:latest`) that researches new quantitative/scientific domains, distills them into [`aix_zero_v11_kip.safetensors`](aix_zero/checkpoints/aix_zero_v11_kip.safetensors), and documents every learned skill in the **[Knowledge Is Power Codex](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)**.
+[`aix_zero/`](aix_zero/README.md) contains the experimental v11 neuro-symbolic model and legacy research programs. The stored v11 checkpoint has **817,410 physical parameters** and a 134-token vocabulary. Reusing a recurrent block does not add independently learned parameters.
 
-- **Global 21-Domain Held-Out Accuracy:** **`105/105 (100.0%)`** across `ARITH_CHAIN`, `ALGEBRA_SOLVE`, `MODULAR_NT`, `LOGIC_DEDUCT`, `WORD_PROBLEM`, `CALCULUS_DERIV`, `SYSTEM_2X2`, `CODE_TRACE`, `QUADRATIC_EVAL`, `PHYSICS_KINEMATICS`, `GEOMETRY_AREA`, `NUMBER_SEQ`, `MULTI_STEP_3`, `ELECTRICAL_POWER`, `FINANCE_INTEREST`, `THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, `PROBABILITY_EV`, `ELECTRO_THERMAL`, `KINETIC_WORK`, and `MULTI_STEP_4`.
-- **Documentation, Live Web Citations & Dialogues:**
-  - [`aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md`](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)
-  - [`aix_zero/knowledge_codex/WEB_RESEARCH_LOG.md`](aix_zero/knowledge_codex/WEB_RESEARCH_LOG.md)
-  - [`aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md`](aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md)
-  - [`aix_zero/knowledge_codex/entries/`](aix_zero/knowledge_codex/entries/) (21 domain monographs)
+A local 105-case template-family evaluation measured **9/105 neural-only** and **105/105 with the in-flight arithmetic helper**. The helper can repair operands and operators and supply arithmetic results; this is not evidence of broad neural reasoning or frontier capability. Timing depends on the machine and settings; no <25 ms guarantee is established.
+
+See the [offline baseline and expert-storage guide](docs/AIX-ZERO-EXPERT-STORAGE.md) for installation, reproducible commands, measured evidence, and limitations. Expert snapshots copy existing weights; storing more copies adds no learned capacity. Legacy web/council and codex descriptions are experimental mechanisms, not independently validated capability claims.
 
 ---
 

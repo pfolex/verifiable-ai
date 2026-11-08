@@ -2,12 +2,13 @@
 """
 AIX-Zero v8 Interactive Live REPL & Real-Time Teaching Shell (`aix_zero/interactive_repl.py`)
 =============================================================================================
-Interactive terminal interface for querying and teaching the standalone AIX-Zero v8 model in
-real time (<25ms inference latency, <1.5s live gradient plasticity).
+Interactive terminal interface for querying and teaching the standalone AIX-Zero model,
+with measured inference and teaching telemetry.
 
 Commands inside the REPL:
   * `<prompt>`                            — Run verified K-step inference on any math/logic/code/physics prompt.
   * `!teach <prompt> => <trace_and_ans>`  — Distill a new reasoning trace directly into AIX-Zero's weights in RAM.
+  * `!expert <domain> [slot]`             — Install a validated expert snapshot into a routed slot.
   * `!status`                             — Show model parameter breakdown, vocabulary size, and checkpoint info.
   * `!save`                               — Save updated in-RAM weights to `aix_zero_v8.safetensors`.
   * `!quit` / `exit`                      — Exit the REPL.
@@ -35,9 +36,12 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
 from aix_zero.knowledge_is_power import CodexRetriever, WebKnowledgeFetcher
+from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
+
+_CARTRIDGE_BANK = SparseExpertCartridgeBank()
 
 
 def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
@@ -229,6 +233,17 @@ def main() -> None:
             print(f"  Active Checkpoint : {ckpt_path}")
             print(f"  Vocab Size        : {tokenizer.vocab_size}")
             print(f"  Parameters        : {params}")
+            print(f"  Expert cache      : {_CARTRIDGE_BANK.cache_info()}")
+            continue
+        if line.startswith("!expert "):
+            fields = line.split()
+            try:
+                if len(fields) not in (2, 3):
+                    raise ValueError("Usage: !expert <domain> [slot]")
+                slot = int(fields[2]) if len(fields) == 3 else None
+                print(_CARTRIDGE_BANK.install_cartridge(model, fields[1], slot=slot))
+            except (ValueError, KeyError, OSError) as exc:
+                print(f"  [EXPERT LOAD FAILED] {exc}")
             continue
         if line == "!save":
             state_dict_cpu = {
