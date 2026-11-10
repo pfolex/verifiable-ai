@@ -5,11 +5,13 @@
 ## 1. System Overview & Synaptic Telemetry
 
 - **Active Standalone Checkpoint:** `aix_zero_v11_kip.safetensors`
-- **Physical Parameters:** `817,410` (`1,775,620` effective virtual parameters with 3-step ACT recurrent looping)
+- **Physical Learned Parameters:** `817,410` (the recurrent core runs 3 passes reusing the same weights; recurrent reuse and stored expert snapshots do not add independently learned parameters)
 - **Vocabulary Size:** `134` hybrid word + atomic-digit tokens
-- **Total Mastered Domains:** **`21` domains** (`v1` through `v11-KIP-Web`)
-- **New v11 Web-Researched Cross-Domain & 4-Step Accuracy (`ELECTRO_THERMAL` + `KINETIC_WORK` + `MULTI_STEP_4`):** **`1/15 (6.67%)` -> `15/15 (100.0%)`**
-- **Global 21-Domain Held-Out Benchmark Accuracy:** **`105/105 (100.0%)`**
+- **Total Template Families:** **`21` domains** (`v1` through `v11-KIP-Web`)
+- **Measured 105-Case Held-Out Baseline ([`research/baseline/v11-local.json`](../../research/baseline/v11-local.json)):**
+  - **Neural-Only (Unassisted):** **`9/105 (8.57%)`**
+  - **With In-Flight Arithmetic Helper (`inflight_alu=True`):** **`105/105 (100.0%)`** (the helper can repair operands/operators and calculate arithmetic; see [`docs/AIX-ZERO-EXPERT-STORAGE.md`](../../docs/AIX-ZERO-EXPERT-STORAGE.md))
+- **New v11 Domains (`ELECTRO_THERMAL` + `KINETIC_WORK` + `MULTI_STEP_4`):** `1/15 (6.67%)` pre-training neural-only -> `15/15 (100.0%)` with the in-flight arithmetic helper
 - **Live Internet Citations Archive:** [`WEB_RESEARCH_LOG.md`](WEB_RESEARCH_LOG.md)
 
 ---
