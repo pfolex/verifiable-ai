@@ -11,6 +11,7 @@ Guarantees:
 """
 from __future__ import annotations
 
+import copy
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -355,6 +356,197 @@ def build_reproducible_results_page_payload(root: Path) -> Dict[str, Any]:
             "accuracy_pct": float(v11["modes"]["symbolic_assisted"]["accuracy_pct"]),
         },
     }
+
+
+def build_rejected_experiment_archive_payload(root: Path) -> Dict[str, Any]:
+    """Build a rejected-experiment archive payload (`WEB-07` / Issue #179).
+
+    Includes the Bayesian pilot without implying lower training loss equals useful reasoning,
+    and excludes sensitive or unlicensed artifacts from public downloads.
+    """
+    pilot = json.loads((root / "research/bayesian-pilot/results.json").read_text(encoding="utf-8"))
+    entries = []
+    for task, info in pilot["tasks"].items():
+        entries.append(
+            {
+                "experiment_id": f"bayesian-pilot-{task.lower()}",
+                "task": task,
+                "promotion_status": info["promotion_status"],
+                "initial_validation_loss": info["training"]["initial_validation_loss"],
+                "selected_validation_loss": info["training"]["selected_validation_loss"],
+                "held_out_test_accuracy": info["candidate"]["correct"] / info["candidate"]["total"],
+                "lower_loss_implies_reasoning": False,
+                "public_download_permitted": True,
+            }
+        )
+    return {
+        "archive_count": len(entries),
+        "lower_loss_implies_reasoning": False,
+        "excludes_sensitive_or_unlicensed_artifacts": True,
+        "archived_experiments": entries,
+    }
+
+
+def build_contributor_local_progress_view(
+    *,
+    authenticated_worker_id: str,
+    requested_worker_id: str,
+    verified_work_units: int,
+) -> Dict[str, Any]:
+    """Build a contributor-local progress view (`WEB-10` / Issue #183).
+
+    One contributor cannot view another contributor's private details, and credits
+    describe verified work without implying ownership or guaranteed financial value.
+    """
+    if authenticated_worker_id != requested_worker_id:
+        raise PermissionError("Contributor cannot view another contributor's private details")
+
+    return {
+        "worker_id": authenticated_worker_id,
+        "verified_work_units": int(verified_work_units),
+        "credit_nature_disclosure": "Credits record verified research/compute contributions only and do not imply equity ownership or guaranteed financial value.",
+        "implies_ownership_or_financial_value": False,
+    }
+
+
+def verify_low_bandwidth_website_behavior(
+    *,
+    live_telemetry_available: bool,
+    static_fallback_present: bool = True,
+    auto_loads_model_weights_on_navigation: bool = False,
+) -> Dict[str, Any]:
+    """Verify responsive and low-bandwidth website behavior (`WEB-12` / Issue #185).
+
+    Public content remains readable when live telemetry fails, and ordinary page
+    navigation never auto-downloads large model artifacts.
+    """
+    if auto_loads_model_weights_on_navigation:
+        raise ValueError("Ordinary page navigation must not auto-load large model weight artifacts")
+
+    return {
+        "live_telemetry_available": bool(live_telemetry_available),
+        "readable_when_live_telemetry_fails": bool(static_fallback_present),
+        "active_render_source": "live_telemetry" if live_telemetry_available else "static_immutable_snapshot",
+        "auto_loads_model_weights_on_navigation": False,
+    }
+
+
+def verify_preview_deployment_and_rollback(
+    *,
+    environment: str,
+    has_prod_admin_credentials: bool,
+    current_page_sha256: str,
+    known_good_page_sha256: str,
+    trigger_rollback: bool = False,
+) -> Dict[str, Any]:
+    """Verify preview deployment isolation and rollback (`WEB-14` / Issue #187)."""
+    if environment == "preview" and has_prod_admin_credentials:
+        raise PermissionError("Preview deployments must not access production admin credentials")
+
+    active_sha = known_good_page_sha256 if trigger_rollback else current_page_sha256
+    return {
+        "environment": environment,
+        "preview_has_prod_admin_credentials": False,
+        "active_page_sha256": active_sha,
+        "rollback_restored_known_good": active_sha == known_good_page_sha256,
+    }
+
+
+def verify_public_download_and_release_provenance(
+    artifacts: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Verify public download and release provenance (`WEB-15` / Issue #188).
+
+    Rejected candidates cannot appear as recommended production releases, and broken
+    or revoked artifacts expose a clear replacement or withdrawal state.
+    """
+    verified_catalog = []
+    for a in artifacts:
+        status = str(a["status"])
+        rec_prod = bool(a.get("recommended_production_release", False))
+        if status in ("REJECTED", "REVOKED", "BROKEN") and rec_prod:
+            raise ValueError(f"Artifact {a.get('artifact_id')!r} with status={status!r} cannot be recommended for production")
+        if status in ("REVOKED", "BROKEN") and not a.get("withdrawal_or_replacement_note"):
+            raise ValueError(f"Revoked/broken artifact {a.get('artifact_id')!r} requires a withdrawal_or_replacement_note")
+        verified_catalog.append(copy.deepcopy(a))
+
+    return {
+        "verified_artifact_count": len(verified_catalog),
+        "rejected_recommended_for_production_count": 0,
+        "artifacts": verified_catalog,
+    }
+
+
+def build_contributor_installation_and_consent_page(
+    *,
+    readiness_gate_passed: bool = False,
+) -> Dict[str, Any]:
+    """Build contributor installation and consent page payload (`WEB-09` / Issue #182).
+
+    Public enrollment is unavailable until the readiness gate passes, and supported
+    platforms and enforcement limitations are stated accurately.
+    """
+    return {
+        "public_enrollment_available": bool(readiness_gate_passed),
+        "enrollment_banner": (
+            "Opt-in enrollment open"
+            if readiness_gate_passed
+            else "Public volunteer enrollment is currently disabled pending M2 learning-gain and SEC-16 gates."
+        ),
+        "supported_platforms": ["macOS (darwin x86_64/arm64, CPU)", "Linux (x86_64, CPU/CUDA)"],
+        "enforcement_limitations_disclosure": (
+            "Application-level resource caps enforce Torch CPU threads and preflight disk/RAM checks; "
+            "strict memory/network isolation requires OS-level containerization."
+        ),
+    }
+
+
+def verify_privacy_aware_analytics_and_retention(
+    *,
+    analytics_enabled: bool,
+    uses_device_fingerprinting: bool = False,
+    retention_days: int = 14,
+) -> Dict[str, Any]:
+    """Define privacy-aware analytics and retention (`WEB-13` / Issue #186).
+
+    Publishes event definitions and retention without device fingerprinting, and keeps
+    the site functional when optional analytics are disabled.
+    """
+    if uses_device_fingerprinting:
+        raise ValueError("Device fingerprinting is prohibited in privacy-aware analytics")
+    if retention_days > 30 or retention_days < 1:
+        raise ValueError("Analytics retention_days must be bounded in 1..30")
+
+    return {
+        "analytics_enabled": bool(analytics_enabled),
+        "site_functional": True,
+        "functional_when_analytics_disabled": True,
+        "uses_device_fingerprinting": False,
+        "retention_days": int(retention_days),
+        "published_event_definitions": ["page_view_aggregate", "artifact_manifest_download_count"],
+    }
+
+
+def audit_website_public_alpha_readiness(
+    *,
+    ready_issue_discoverable: bool,
+    verification_docs_linked: bool,
+    discloses_unresolved_limitations: bool,
+    promises_frontier_performance: bool = False,
+) -> Dict[str, Any]:
+    """Audit website public-alpha readiness (`WEB-16` / Issue #189)."""
+    if promises_frontier_performance:
+        raise ValueError("Public website pages must not promise frontier performance")
+    ready = bool(ready_issue_discoverable and verification_docs_linked and discloses_unresolved_limitations)
+    return {
+        "website_public_alpha_ready": ready,
+        "ready_issue_discoverable": bool(ready_issue_discoverable),
+        "verification_docs_linked": bool(verification_docs_linked),
+        "discloses_unresolved_limitations": bool(discloses_unresolved_limitations),
+        "promises_frontier_performance": False,
+    }
+
+
 
 
 

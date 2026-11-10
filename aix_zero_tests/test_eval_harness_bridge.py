@@ -28,8 +28,10 @@ from aix_zero.eval_harness_bridge import (
     evaluate_bounded_test_time_search,
     evaluate_causal_identifiability_task,
     evaluate_compositional_belief_decision_task,
+    evaluate_compute_and_capability_investment_model,
     evaluate_cooperation_stability,
     evaluate_cross_task_family_generalization,
+    evaluate_frontier_comparison_milestone,
     evaluate_non_iid_evidence_task,
     evaluate_posterior_predictive_task,
     evaluate_probability_calibration,
@@ -43,6 +45,7 @@ from aix_zero.eval_harness_bridge import (
     group_clustered_paired_interval,
     measure_memory_and_cache_budget,
     prepare_reproducible_competitive_model_release,
+    publish_final_roadmap_scaling_decision,
     rational_scorer_metadata,
     run_aix_benchmark,
     run_independent_capability_red_team_audit,
@@ -661,6 +664,59 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(rel["confirmed_claim_count"], 1)
         self.assertEqual(rel["withdrawn_or_qualified_claim_count"], 1)
         self.assertTrue(rel["release_ready"])
+
+    def test_wave12_to_16_scale_01_15_and_16(self):
+        # SCALE-01 compute and capability investment model
+        with self.assertRaisesRegex(ValueError, "cannot assume donated hardware"):
+            evaluate_compute_and_capability_investment_model(
+                measured_step_ms=6.4,
+                measured_or_tdp_watts=35.0,
+                electricity_usd_per_kwh_range=(0.12, 0.25),
+                hardware_amortization_usd_per_hr=0.05,
+                assumes_zero_cost_volunteer_hardware_or_power=True,
+            )
+        inv = evaluate_compute_and_capability_investment_model(
+            measured_step_ms=6.4,
+            measured_or_tdp_watts=35.0,
+            electricity_usd_per_kwh_range=(0.12, 0.25),
+            hardware_amortization_usd_per_hr=0.05,
+        )
+        self.assertFalse(inv["assumes_zero_cost_volunteer_resources"])
+
+        # SCALE-15 frontier-comparison milestone
+        with self.assertRaisesRegex(ValueError, "overall best remains unproven"):
+            evaluate_frontier_comparison_milestone(
+                evaluation_date_iso="2026-11-10",
+                disclosed_budget={"cpu_threads": 1},
+                scoped_verified_strengths=["21-domain-symbolic-assisted"],
+                failed_dimensions=["neural_only_multi_step"],
+                uncertainty_interval_95=(0.95, 1.0),
+                claims_unscoped_overall_best=True,
+            )
+        ms = evaluate_frontier_comparison_milestone(
+            evaluation_date_iso="2026-11-10",
+            disclosed_budget={"cpu_threads": 1, "memory_mb": 42},
+            scoped_verified_strengths=["21-domain-symbolic-assisted"],
+            failed_dimensions=["neural_only_multi_step", "bayesian_single_expert_holdout"],
+            uncertainty_interval_95=(0.95, 1.0),
+        )
+        self.assertEqual(ms["overall_best_status"], "UNPROVEN")
+
+        # SCALE-16 final roadmap scaling decision
+        self.assertTrue((ROOT / "docs/ROADMAP-FINAL-SCALING-DECISION.md").is_file())
+        with self.assertRaisesRegex(ValueError, "Cannot promise world-leading intelligence"):
+            publish_final_roadmap_scaling_decision(
+                decision="REDIRECT_TO_JOINT_BACKBONE_AND_VERIFIED_TRACE_RESEARCH_BEFORE_VOLUNTEER_SCALING",
+                next_bounded_hypothesis="H-V12-JOINT",
+                evidence_summary={},
+                promises_inevitable_world_leading_intelligence=True,
+            )
+        final_dec = publish_final_roadmap_scaling_decision(
+            decision="REDIRECT_TO_JOINT_BACKBONE_AND_VERIFIED_TRACE_RESEARCH_BEFORE_VOLUNTEER_SCALING",
+            next_bounded_hypothesis="H-V12-JOINT-LATENT-CORE-AND-STEP-VERIFIER",
+            evidence_summary={"v11_neural_only": "9/105", "v11_symbolic_assisted": "105/105", "bayesian_pilot": "REJECTED"},
+        )
+        self.assertFalse(final_dec["promises_inevitable_world_leading_intelligence"])
 
 
 if __name__ == "__main__":

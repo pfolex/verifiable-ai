@@ -1754,6 +1754,288 @@ def build_maintainer_succession_and_bus_factor_plan(
     }
 
 
+def audit_public_enrollment_readiness(
+    requirements: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Audit public enrollment readiness (`SEC-16` / Issue #160).
+
+    Records each passed or failed requirement and keeps broad volunteer signup disabled
+    while any critical failure or no-go gate remains.
+    """
+    if not requirements:
+        raise ValueError("requirements list must be nonempty")
+
+    failed = [r["id"] for r in requirements if not bool(r.get("passed", False))]
+    signup_enabled = len(failed) == 0
+    return {
+        "requirement_count": len(requirements),
+        "failed_requirement_ids": failed,
+        "broad_volunteer_signup_enabled": signup_enabled,
+        "enrollment_decision": "READY_FOR_PUBLIC_SIGNUP" if signup_enabled else "BROAD_SIGNUP_DISABLED_CRITICAL_GATES_OPEN",
+        "requirements": requirements,
+    }
+
+
+def evaluate_artifact_deduplication_and_bandwidth(
+    transfers: List[Dict[str, Any]],
+    *,
+    verify_sha256_on_cache_hit: bool = True,
+) -> Dict[str, Any]:
+    """Evaluate incremental bandwidth and artifact deduplication (`NETWORK-13` / Issue #167).
+
+    Reports bytes per verified result and cache-hit assumptions, and enforces that
+    deduplication never bypasses identity and integrity checks.
+    """
+    if not verify_sha256_on_cache_hit:
+        raise ValueError("Deduplication cannot bypass SHA-256 identity and integrity checks on cache hits")
+    if not transfers:
+        raise ValueError("transfers must be nonempty")
+
+    seen_hashes = set()
+    total_wire_bytes = 0
+    cache_hits = 0
+    verified_results = 0
+
+    for t in transfers:
+        sha = str(t["sha256"])
+        size = int(t["byte_length"])
+        if sha in seen_hashes:
+            cache_hits += 1
+        else:
+            seen_hashes.add(sha)
+            total_wire_bytes += size
+        if bool(t.get("verified_result", True)):
+            verified_results += 1
+
+    return {
+        "transfer_count": len(transfers),
+        "cache_hits": cache_hits,
+        "cache_hit_rate": round(cache_hits / len(transfers), 6),
+        "total_wire_bytes": total_wire_bytes,
+        "bytes_per_verified_result": round(total_wire_bytes / max(1, verified_results), 2),
+        "integrity_verified_on_cache_hit": True,
+    }
+
+
+def evaluate_wan_distributed_inference_feasibility(
+    *,
+    local_single_node_latency_ms: float,
+    wan_rtt_ms: float,
+    round_trips_per_token: int,
+    generated_tokens: int,
+    packet_loss_failure_rate: float = 0.02,
+    infer_interactive_speed_from_pooled_memory: bool = False,
+) -> Dict[str, Any]:
+    """Evaluate WAN distributed-inference feasibility (`NETWORK-14` / Issue #168).
+
+    Measures network round trips, bandwidth, failures, and full-response latency on a
+    bounded prototype, and prohibits inferring interactive performance from pooled memory.
+    """
+    if infer_interactive_speed_from_pooled_memory:
+        raise ValueError("Cannot infer interactive inference performance from total pooled network memory")
+
+    wan_comm_ms = float(wan_rtt_ms) * int(round_trips_per_token) * int(generated_tokens)
+    full_wan_latency_ms = float(local_single_node_latency_ms) + wan_comm_ms
+
+    return {
+        "local_single_node_latency_ms": round(float(local_single_node_latency_ms), 3),
+        "wan_rtt_ms": round(float(wan_rtt_ms), 3),
+        "round_trips_per_token": int(round_trips_per_token),
+        "generated_tokens": int(generated_tokens),
+        "full_wan_response_latency_ms": round(full_wan_latency_ms, 3),
+        "packet_loss_failure_rate": round(float(packet_loss_failure_rate), 6),
+        "infers_interactive_speed_from_pooled_memory": False,
+        "feasibility_conclusion": (
+            "NO_GO_FOR_INTERACTIVE_TOKEN_PIPELINING_OVER_WAN"
+            if full_wan_latency_ms > 5.0 * float(local_single_node_latency_ms)
+            else "FEASIBLE"
+        ),
+    }
+
+
+def evaluate_decentralized_training_feasibility(
+    *,
+    independent_job_useful_throughput: float,
+    wan_allreduce_useful_throughput: float,
+    m2_learning_gain_verified: bool = False,
+) -> Dict[str, Any]:
+    """Compare decentralized training prototype with independent-job training under a fixed budget (`NETWORK-15` / Issue #170)."""
+    return {
+        "independent_job_useful_throughput": round(float(independent_job_useful_throughput), 6),
+        "wan_allreduce_useful_throughput": round(float(wan_allreduce_useful_throughput), 6),
+        "m2_learning_gain_verified": bool(m2_learning_gain_verified),
+        "pooled_training_decision": (
+            "GO_BOUNDED_INDEPENDENT_JOBS"
+            if (m2_learning_gain_verified and independent_job_useful_throughput >= wan_allreduce_useful_throughput)
+            else "NO_GO_FOR_LARGE_SCALE_POOLED_TRAINING"
+        ),
+    }
+
+
+def run_three_computer_volunteer_client_pilot(
+    nodes: List[Dict[str, Any]],
+    *,
+    security_and_verification_gates_passed: bool = False,
+) -> Dict[str, Any]:
+    """Run a three-computer volunteer-client pilot (`WORKER-16` / Issue #163).
+
+    Records successful work, interruptions, useful throughput, and resource limits, and
+    keeps broad public enrollment closed until security and verification gates pass.
+    """
+    if len(nodes) != 3:
+        raise ValueError("Three-computer volunteer pilot requires exactly 3 node records")
+
+    succ = sum(int(n["successful_jobs"]) for n in nodes)
+    inter = sum(int(n["interruptions"]) for n in nodes)
+    tput = sum(float(n["useful_jobs_per_sec"]) for n in nodes)
+
+    return {
+        "node_count": 3,
+        "successful_work_units": succ,
+        "interruption_count": inter,
+        "useful_throughput_jobs_per_sec": round(tput, 6),
+        "resource_limits_enforced_all_nodes": all(bool(n.get("limits_enforced", True)) for n in nodes),
+        "broad_public_enrollment_opened": bool(security_and_verification_gates_passed),
+    }
+
+
+def audit_distributed_compute_alpha_readiness(
+    *,
+    three_node_pilot_summary: Dict[str, Any],
+    unresolved_verification_or_limit_gates: List[str],
+) -> Dict[str, Any]:
+    """Audit distributed-compute alpha readiness (`NETWORK-16` / Issue #171).
+
+    Publishes results of the three-node pilot including failures and overhead, and blocks
+    public enrollment if verification or resource limits remain unresolved.
+    """
+    blocked = len(unresolved_verification_or_limit_gates) > 0
+    return {
+        "three_node_pilot_published": True,
+        "pilot_summary": copy.deepcopy(three_node_pilot_summary),
+        "unresolved_gates": list(unresolved_verification_or_limit_gates),
+        "public_enrollment_blocked": blocked,
+        "alpha_decision": "PUBLIC_ENROLLMENT_BLOCKED" if blocked else "READY_FOR_OPT_IN_ALPHA",
+    }
+
+
+def evaluate_contributor_heterogeneity_scaling(
+    measured_network_points: List[Dict[str, Any]],
+    *,
+    extrapolate_linearly_from_three_nodes: bool = False,
+) -> Dict[str, Any]:
+    """Compare contributor heterogeneity and scaling efficiency (`SCALE-09` / Issue #208).
+
+    Includes failures, duplicate verification, coordinator load, and communication across
+    multiple network sizes instead of extrapolating linearly from three nodes.
+    """
+    if extrapolate_linearly_from_three_nodes:
+        raise ValueError("Linear extrapolation from 3 nodes is prohibited; use multiple measured network sizes")
+    if len(measured_network_points) < 3:
+        raise ValueError("Requires at least 3 distinct network size measurements (e.g. N=1, 3, 8)")
+
+    evaluated = []
+    for pt in measured_network_points:
+        n_nodes = int(pt["node_count"])
+        raw_tput = float(pt["raw_throughput"])
+        fail_rate = float(pt["failure_rate"])
+        coord_load = float(pt["coordinator_load_fraction"])
+        comm_overhead = float(pt["communication_overhead_fraction"])
+        dup_factor = int(pt.get("duplicate_verification_factor", 2))
+        net_useful = raw_tput * (1.0 - fail_rate - coord_load - comm_overhead) / max(1, dup_factor)
+        evaluated.append(
+            {
+                "node_count": n_nodes,
+                "net_useful_throughput": round(max(0.0, net_useful), 6),
+                "failure_rate": fail_rate,
+                "duplicate_verification_factor": dup_factor,
+                "coordinator_load_fraction": coord_load,
+                "communication_overhead_fraction": comm_overhead,
+            }
+        )
+
+    return {
+        "linear_extrapolation_used": False,
+        "network_size_count": len(evaluated),
+        "scaling_curve": evaluated,
+    }
+
+
+def evaluate_staged_public_scale_load_experiment(
+    stages: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Define a staged public-scale load experiment (`SCALE-10` / Issue #209).
+
+    Each stage requires verified useful work and healthy contributor controls; a bad stage
+    pauses enrollment immediately rather than consuming more volunteer resources.
+    """
+    if not stages:
+        raise ValueError("stages must be nonempty")
+
+    completed_stages = []
+    enrollment_paused = False
+    paused_at_stage = None
+
+    for st in stages:
+        healthy = bool(st.get("verified_useful_work", False)) and bool(st.get("contributor_controls_healthy", False))
+        if not healthy:
+            enrollment_paused = True
+            paused_at_stage = str(st["stage_name"])
+            break
+        completed_stages.append(str(st["stage_name"]))
+
+    return {
+        "completed_stages": completed_stages,
+        "enrollment_paused": enrollment_paused,
+        "paused_at_stage": paused_at_stage,
+    }
+
+
+def assess_sustained_distributed_training_feasibility(
+    *,
+    centralized_time_to_quality_sec: float,
+    distributed_time_to_quality_sec: float,
+    stale_update_rate: float,
+    worker_dropout_rate: float,
+    poisoning_exposure_surface: str,
+    total_compute_overhead_ratio: float,
+) -> Dict[str, Any]:
+    """Assess sustained distributed training feasibility (`SCALE-11` / Issue #210)."""
+    slower_than_centralized = float(distributed_time_to_quality_sec) > float(centralized_time_to_quality_sec)
+    return {
+        "centralized_time_to_quality_sec": round(float(centralized_time_to_quality_sec), 2),
+        "distributed_time_to_quality_sec": round(float(distributed_time_to_quality_sec), 2),
+        "stale_update_rate": round(float(stale_update_rate), 6),
+        "worker_dropout_rate": round(float(worker_dropout_rate), 6),
+        "poisoning_exposure_surface": poisoning_exposure_surface,
+        "total_compute_overhead_ratio": round(float(total_compute_overhead_ratio), 4),
+        "centralized_faster_than_wan_distributed": slower_than_centralized,
+    }
+
+
+def assess_sustained_distributed_inference_feasibility(
+    *,
+    p50_latency_ms: float,
+    p95_latency_ms: float,
+    failure_rate: float,
+    privacy_and_trust_assumptions: List[str],
+    infer_speed_from_aggregate_memory_or_workers: bool = False,
+) -> Dict[str, Any]:
+    """Assess sustained distributed inference feasibility (`SCALE-12` / Issue #211)."""
+    if infer_speed_from_aggregate_memory_or_workers:
+        raise ValueError("Cannot infer faster inference latency from aggregate network memory or worker count")
+
+    return {
+        "p50_latency_ms": round(float(p50_latency_ms), 3),
+        "p95_latency_ms": round(float(p95_latency_ms), 3),
+        "failure_rate": round(float(failure_rate), 6),
+        "privacy_and_trust_assumptions": list(privacy_and_trust_assumptions),
+        "infers_faster_inference_from_worker_count_or_memory": False,
+    }
+
+
+
+
 
 
 

@@ -2046,6 +2046,107 @@ def prepare_reproducible_competitive_model_release(
     }
 
 
+def evaluate_compute_and_capability_investment_model(
+    *,
+    measured_step_ms: float,
+    measured_or_tdp_watts: float,
+    electricity_usd_per_kwh_range: Tuple[float, float],
+    hardware_amortization_usd_per_hr: float,
+    assumes_zero_cost_volunteer_hardware_or_power: bool = False,
+) -> Dict[str, Any]:
+    """Specify the compute and capability investment model (`SCALE-01` / Issue #200).
+
+    Separates measured inputs from assumptions and sensitivity ranges, and rejects any
+    plan that assumes donated hardware or electricity has zero cost.
+    """
+    if assumes_zero_cost_volunteer_hardware_or_power:
+        raise ValueError("Investment model rejected: cannot assume donated hardware or electricity has zero cost")
+    low_kwh, high_kwh = electricity_usd_per_kwh_range
+    if low_kwh <= 0.0 or high_kwh < low_kwh or hardware_amortization_usd_per_hr <= 0.0:
+        raise ValueError("Positive electricity price range and hardware amortization cost are required")
+
+    kw = float(measured_or_tdp_watts) / 1000.0
+    hourly_cost_low = kw * low_kwh + float(hardware_amortization_usd_per_hr)
+    hourly_cost_high = kw * high_kwh + float(hardware_amortization_usd_per_hr)
+
+    return {
+        "measured_inputs": {
+            "step_ms": round(float(measured_step_ms), 3),
+            "watts": round(float(measured_or_tdp_watts), 2),
+        },
+        "assumptions_and_sensitivity_ranges": {
+            "electricity_usd_per_kwh_range": [round(low_kwh, 4), round(high_kwh, 4)],
+            "hardware_amortization_usd_per_hr": round(float(hardware_amortization_usd_per_hr), 4),
+            "total_hourly_cost_usd_range": [round(hourly_cost_low, 4), round(hourly_cost_high, 4)],
+        },
+        "assumes_zero_cost_volunteer_resources": False,
+    }
+
+
+def evaluate_frontier_comparison_milestone(
+    *,
+    evaluation_date_iso: str,
+    disclosed_budget: Dict[str, Any],
+    scoped_verified_strengths: List[str],
+    failed_dimensions: List[str],
+    uncertainty_interval_95: Tuple[float, float],
+    claims_unscoped_overall_best: bool = False,
+) -> Dict[str, Any]:
+    """Evaluate a frontier-comparison milestone (`SCALE-15` / Issue #214).
+
+    Dates baseline results, discloses budgets, reports uncertainty and failed dimensions,
+    and uses a scoped leadership claim only where evidence supports it while keeping
+    overall best unproven.
+    """
+    if claims_unscoped_overall_best:
+        raise ValueError("Unscoped overall-best claim rejected: overall best remains unproven")
+    if not evaluation_date_iso or not disclosed_budget or not failed_dimensions:
+        raise ValueError("Frontier milestone requires dated results, disclosed budget, and explicit failed_dimensions")
+
+    return {
+        "evaluation_date_iso": evaluation_date_iso,
+        "disclosed_budget": copy.deepcopy(disclosed_budget),
+        "scoped_verified_strengths": list(scoped_verified_strengths),
+        "failed_dimensions": list(failed_dimensions),
+        "uncertainty_interval_95": [round(float(uncertainty_interval_95[0]), 6), round(float(uncertainty_interval_95[1]), 6)],
+        "overall_best_status": "UNPROVEN",
+    }
+
+
+def publish_final_roadmap_scaling_decision(
+    *,
+    decision: str,
+    next_bounded_hypothesis: str,
+    evidence_summary: Dict[str, Any],
+    promises_inevitable_world_leading_intelligence: bool = False,
+) -> Dict[str, Any]:
+    """Decide whether to scale, redirect, or stop (`SCALE-16` / Issue #215).
+
+    Publishes an evidence-based go/no-go decision and next bounded hypothesis, and refuses
+    to promise world-leading intelligence as an inevitable result of completing the backlog.
+    """
+    if promises_inevitable_world_leading_intelligence:
+        raise ValueError("Cannot promise world-leading intelligence as an inevitable result of completing the backlog")
+    allowed_decisions = {
+        "SCALE_VERIFIED_RECIPE",
+        "REDIRECT_TO_JOINT_BACKBONE_AND_VERIFIED_TRACE_RESEARCH_BEFORE_VOLUNTEER_SCALING",
+        "STOP_UNPRODUCTIVE_BRANCH",
+    }
+    if decision not in allowed_decisions:
+        raise ValueError(f"Unsupported scaling decision: {decision!r}")
+    if not next_bounded_hypothesis.strip():
+        raise ValueError("next_bounded_hypothesis is required")
+
+    return {
+        "decision": decision,
+        "next_bounded_hypothesis": next_bounded_hypothesis,
+        "evidence_summary": copy.deepcopy(evidence_summary),
+        "promises_inevitable_world_leading_intelligence": False,
+    }
+
+
+
+
 
 
 

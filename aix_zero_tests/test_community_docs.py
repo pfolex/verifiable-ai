@@ -1031,6 +1031,199 @@ class CommunityDocsTests(unittest.TestCase):
         )
         self.assertEqual(succ["honest_coverage_gap_count"], 1)
 
+    def test_wave12_to_15_sec_16_network_13_to_16_worker_16_web_07_to_16_and_scale_09_to_12(self):
+        from aix_zero.network_coordinator import (
+            assess_sustained_distributed_inference_feasibility,
+            assess_sustained_distributed_training_feasibility,
+            audit_distributed_compute_alpha_readiness,
+            audit_public_enrollment_readiness,
+            evaluate_artifact_deduplication_and_bandwidth,
+            evaluate_contributor_heterogeneity_scaling,
+            evaluate_decentralized_training_feasibility,
+            evaluate_staged_public_scale_load_experiment,
+            evaluate_wan_distributed_inference_feasibility,
+            run_three_computer_volunteer_client_pilot,
+        )
+        from aix_zero.website_data_builder import (
+            audit_website_public_alpha_readiness,
+            build_contributor_installation_and_consent_page,
+            build_contributor_local_progress_view,
+            build_rejected_experiment_archive_payload,
+            verify_low_bandwidth_website_behavior,
+            verify_preview_deployment_and_rollback,
+            verify_privacy_aware_analytics_and_retention,
+            verify_public_download_and_release_provenance,
+        )
+
+        for doc in (
+            "docs/PUBLIC-ENROLLMENT-SECURITY-AUDIT.md",
+            "docs/WAN-DISTRIBUTED-INFERENCE-AND-TRAINING-FEASIBILITY.md",
+            "docs/DISTRIBUTED-COMPUTE-ALPHA-READINESS-AUDIT.md",
+            "docs/WEBSITE-PUBLIC-ALPHA-READINESS-AUDIT.md",
+        ):
+            self.assertTrue((ROOT / doc).is_file(), doc)
+
+        # SEC-16 public enrollment readiness audit
+        enr = audit_public_enrollment_readiness(
+            [
+                {"id": "SEC-05", "passed": True},
+                {"id": "TRAIN-16", "passed": False},
+            ]
+        )
+        self.assertFalse(enr["broad_volunteer_signup_enabled"])
+        self.assertIn("TRAIN-16", enr["failed_requirement_ids"])
+
+        # NETWORK-13 artifact deduplication and bandwidth
+        dedup = evaluate_artifact_deduplication_and_bandwidth(
+            [
+                {"sha256": "a" * 64, "byte_length": 1000, "verified_result": True},
+                {"sha256": "a" * 64, "byte_length": 1000, "verified_result": True},
+            ]
+        )
+        self.assertEqual(dedup["cache_hits"], 1)
+        self.assertEqual(dedup["bytes_per_verified_result"], 500.0)
+        self.assertTrue(dedup["integrity_verified_on_cache_hit"])
+
+        # NETWORK-14 WAN distributed inference feasibility
+        wan_inf = evaluate_wan_distributed_inference_feasibility(
+            local_single_node_latency_ms=14.0,
+            wan_rtt_ms=40.0,
+            round_trips_per_token=3,
+            generated_tokens=40,
+        )
+        self.assertEqual(wan_inf["feasibility_conclusion"], "NO_GO_FOR_INTERACTIVE_TOKEN_PIPELINING_OVER_WAN")
+        self.assertFalse(wan_inf["infers_interactive_speed_from_pooled_memory"])
+
+        # NETWORK-15 decentralized training feasibility
+        dec_tr = evaluate_decentralized_training_feasibility(
+            independent_job_useful_throughput=10.0,
+            wan_allreduce_useful_throughput=1.5,
+            m2_learning_gain_verified=False,
+        )
+        self.assertEqual(dec_tr["pooled_training_decision"], "NO_GO_FOR_LARGE_SCALE_POOLED_TRAINING")
+
+        # WEB-07 rejected experiment archive
+        arch = build_rejected_experiment_archive_payload(ROOT)
+        self.assertEqual(arch["archive_count"], 2)
+        self.assertFalse(arch["lower_loss_implies_reasoning"])
+
+        # WEB-10 contributor-local progress view isolation
+        with self.assertRaisesRegex(PermissionError, "cannot view another contributor"):
+            build_contributor_local_progress_view(
+                authenticated_worker_id="w1", requested_worker_id="w2", verified_work_units=5
+            )
+        prog = build_contributor_local_progress_view(
+            authenticated_worker_id="w1", requested_worker_id="w1", verified_work_units=5
+        )
+        self.assertFalse(prog["implies_ownership_or_financial_value"])
+
+        # WEB-12 low-bandwidth website behavior
+        lb = verify_low_bandwidth_website_behavior(live_telemetry_available=False, static_fallback_present=True)
+        self.assertTrue(lb["readable_when_live_telemetry_fails"])
+        self.assertFalse(lb["auto_loads_model_weights_on_navigation"])
+
+        # WEB-14 preview deployments and rollback
+        prev = verify_preview_deployment_and_rollback(
+            environment="preview",
+            has_prod_admin_credentials=False,
+            current_page_sha256="bad",
+            known_good_page_sha256="good",
+            trigger_rollback=True,
+        )
+        self.assertTrue(prev["rollback_restored_known_good"])
+
+        # WEB-15 public download and release provenance
+        with self.assertRaisesRegex(ValueError, "cannot be recommended for production"):
+            verify_public_download_and_release_provenance(
+                [{"artifact_id": "bp-cand", "status": "REJECTED", "recommended_production_release": True}]
+            )
+        prov_ok = verify_public_download_and_release_provenance(
+            [
+                {"artifact_id": "v11", "status": "APPROVED", "recommended_production_release": True},
+                {"artifact_id": "bp-cand", "status": "REJECTED", "recommended_production_release": False},
+                {"artifact_id": "old-shard", "status": "REVOKED", "recommended_production_release": False, "withdrawal_or_replacement_note": "Replaced by v11"},
+            ]
+        )
+        self.assertEqual(prov_ok["rejected_recommended_for_production_count"], 0)
+
+        # WORKER-16 three-computer volunteer-client pilot
+        pilot3 = run_three_computer_volunteer_client_pilot(
+            [
+                {"node_id": "n1", "successful_jobs": 4, "interruptions": 0, "useful_jobs_per_sec": 4.2, "limits_enforced": True},
+                {"node_id": "n2", "successful_jobs": 4, "interruptions": 1, "useful_jobs_per_sec": 3.9, "limits_enforced": True},
+                {"node_id": "n3", "successful_jobs": 4, "interruptions": 0, "useful_jobs_per_sec": 4.08, "limits_enforced": True},
+            ],
+            security_and_verification_gates_passed=False,
+        )
+        self.assertFalse(pilot3["broad_public_enrollment_opened"])
+
+        # NETWORK-16 distributed-compute alpha readiness audit
+        net16 = audit_distributed_compute_alpha_readiness(
+            three_node_pilot_summary=pilot3,
+            unresolved_verification_or_limit_gates=["TRAIN-16_M2_HELD_OUT_GAIN"],
+        )
+        self.assertTrue(net16["public_enrollment_blocked"])
+
+        # WEB-09 contributor installation and consent page
+        consent_page = build_contributor_installation_and_consent_page(readiness_gate_passed=False)
+        self.assertFalse(consent_page["public_enrollment_available"])
+
+        # WEB-13 privacy-aware analytics and retention
+        an = verify_privacy_aware_analytics_and_retention(analytics_enabled=False, retention_days=14)
+        self.assertTrue(an["functional_when_analytics_disabled"])
+        self.assertFalse(an["uses_device_fingerprinting"])
+
+        # WEB-16 website public-alpha readiness audit
+        web16 = audit_website_public_alpha_readiness(
+            ready_issue_discoverable=True,
+            verification_docs_linked=True,
+            discloses_unresolved_limitations=True,
+        )
+        self.assertTrue(web16["website_public_alpha_ready"])
+        self.assertFalse(web16["promises_frontier_performance"])
+
+        # SCALE-09 contributor heterogeneity and scaling efficiency across N=1, 3, 8
+        sc09 = evaluate_contributor_heterogeneity_scaling(
+            [
+                {"node_count": 1, "raw_throughput": 10.0, "failure_rate": 0.0, "coordinator_load_fraction": 0.01, "communication_overhead_fraction": 0.01, "duplicate_verification_factor": 1},
+                {"node_count": 3, "raw_throughput": 28.0, "failure_rate": 0.05, "coordinator_load_fraction": 0.05, "communication_overhead_fraction": 0.03, "duplicate_verification_factor": 2},
+                {"node_count": 8, "raw_throughput": 68.0, "failure_rate": 0.08, "coordinator_load_fraction": 0.09, "communication_overhead_fraction": 0.06, "duplicate_verification_factor": 2},
+            ]
+        )
+        self.assertFalse(sc09["linear_extrapolation_used"])
+        self.assertEqual(sc09["network_size_count"], 3)
+
+        # SCALE-10 staged public-scale load experiment pauses on bad stage
+        sc10 = evaluate_staged_public_scale_load_experiment(
+            [
+                {"stage_name": "stage_1_local", "verified_useful_work": True, "contributor_controls_healthy": True},
+                {"stage_name": "stage_2_three_node", "verified_useful_work": False, "contributor_controls_healthy": True},
+                {"stage_name": "stage_3_public", "verified_useful_work": True, "contributor_controls_healthy": True},
+            ]
+        )
+        self.assertTrue(sc10["enrollment_paused"])
+        self.assertEqual(sc10["paused_at_stage"], "stage_2_three_node")
+
+        # SCALE-11 sustained distributed training feasibility
+        sc11 = assess_sustained_distributed_training_feasibility(
+            centralized_time_to_quality_sec=120.0,
+            distributed_time_to_quality_sec=480.0,
+            stale_update_rate=0.15,
+            worker_dropout_rate=0.10,
+            poisoning_exposure_surface="untrusted_wan_gradients",
+            total_compute_overhead_ratio=2.4,
+        )
+        self.assertTrue(sc11["centralized_faster_than_wan_distributed"])
+
+        # SCALE-12 sustained distributed inference feasibility
+        sc12 = assess_sustained_distributed_inference_feasibility(
+            p50_latency_ms=14.2,
+            p95_latency_ms=29.8,
+            failure_rate=0.01,
+            privacy_and_trust_assumptions=["local_cpu_only", "verified_safetensors_sha256"],
+        )
+        self.assertFalse(sc12["infers_faster_inference_from_worker_count_or_memory"])
+
 
 if __name__ == "__main__":
     unittest.main()
