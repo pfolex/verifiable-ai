@@ -241,6 +241,88 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertTrue(comp["independent_oracle_verified"])
         self.assertEqual(len(comp["cases"]), 3)
 
+    def test_wave6_data_16_and_train_03_04_05_06_08_09(self):
+        import torch
+        from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+        from aix_zero.validation_training_studies import (
+            ablate_frozen_backbone_adaptation_scopes,
+            compare_answer_only_vs_derivation_supervision,
+            compare_curriculum_order_vs_shuffled_control,
+            compare_rational_output_representations,
+            evaluate_frozen_verifier_head_ranking,
+            run_bounded_multiseed_study,
+        )
+
+        # DATA-16 M1 dataset readiness audit doc
+        self.assertTrue((ROOT / "docs/M1-DATASET-READINESS-AUDIT.md").is_file())
+
+        ds = build_dataset(seed=42)
+        bp_splits = ds["tasks"]["BP"]
+
+        # TRAIN-03 answer-only vs derivation supervision on validation
+        t03 = compare_answer_only_vs_derivation_supervision(bp_splits, steps=4)
+        self.assertFalse(t03["consumes_final_test_budget"])
+        self.assertTrue(t03["selected_on_validation_only"])
+
+        # TRAIN-04 rational output representations comparison
+        val_sub = bp_splits["validation"][:2]
+        t04 = compare_rational_output_representations(
+            val_sub,
+            {
+                "reduced_fraction": [str(val_sub[0]["gold"]), "5/4"],
+                "num_den_fields": [encode_rational_representation(str(val_sub[0]["gold"]), "num_den_fields"), "bad"],
+            },
+        )
+        self.assertEqual(t04["representations"]["reduced_fraction"]["exact_value_accuracy"], 0.5)
+        self.assertEqual(t04["representations"]["reduced_fraction"]["invalid_probability_rate"], 0.5)
+
+        # TRAIN-05 curriculum order vs shuffled control
+        t05 = compare_curriculum_order_vs_shuffled_control(bp_splits, steps=4, seed=42)
+        self.assertTrue(t05["identical_example_multiset"])
+        self.assertFalse(t05["consumes_final_test_budget"])
+
+        # TRAIN-06 frozen-backbone adaptation scope ablation
+        tiny_model = AIXZeroModel(
+            AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=2, moe_top_k=1)
+        )
+        ids = torch.tensor([[1, 2, 3, 4]], dtype=torch.long)
+        ab_exp = ablate_frozen_backbone_adaptation_scopes(tiny_model, ids, scope="single_routed_expert", target_expert_slot=0)
+        self.assertTrue(ab_exp["frozen_tensors_unchanged"])
+        self.assertTrue(ab_exp["attributes_improvement_to_expert_only"])
+        ab_head = ablate_frozen_backbone_adaptation_scopes(tiny_model, ids, scope="expert_plus_lm_head", target_expert_slot=0)
+        self.assertTrue(ab_head["frozen_tensors_unchanged"])
+        self.assertFalse(ab_head["attributes_improvement_to_expert_only"])
+
+        # TRAIN-08 frozen verifier head ranking & calibration
+        t08 = evaluate_frozen_verifier_head_ranking(
+            [
+                {
+                    "gold": "1/2",
+                    "candidates": [
+                        {"prediction": "1/3", "verifier_confidence": 0.2},
+                        {"prediction": "1/2", "verifier_confidence": 0.9},
+                    ],
+                }
+            ]
+        )
+        self.assertEqual(t08["greedy_accuracy"], 0.0)
+        self.assertEqual(t08["verifier_selected_accuracy"], 1.0)
+        self.assertTrue(t08["verifier_improves_over_greedy"])
+
+        # TRAIN-09 bounded multi-seed study with compute cap and failure tracking
+        with self.assertRaisesRegex(ValueError, "exceed declared max_total_steps_cap"):
+            run_bounded_multiseed_study(
+                seeds=[1, 2, 3], steps_per_seed=50, max_total_steps_cap=100, runner_fn=lambda s: {"validation_score": 0.5}
+            )
+        t09 = run_bounded_multiseed_study(
+            seeds=[42, 43, 44],
+            steps_per_seed=10,
+            max_total_steps_cap=30,
+            runner_fn=lambda s: (_ for _ in ()).throw(RuntimeError("seed failed")) if s == 44 else {"validation_score": 0.2 * (s - 40)},
+        )
+        self.assertEqual(t09["completed_seed_count"], 2)
+        self.assertEqual(t09["failed_seed_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

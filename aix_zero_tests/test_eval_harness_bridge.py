@@ -21,8 +21,11 @@ from aix_zero.eval_harness_bridge import (
     build_multidimensional_scorecard,
     compute_energy_and_useful_work,
     compute_exact_shapley_values,
+    enumerate_finite_scm_exact,
     evaluate_bayesian_edge_cases,
     evaluate_cooperation_stability,
+    evaluate_non_iid_evidence_task,
+    evaluate_posterior_predictive_task,
     evaluate_probability_calibration,
     evaluate_representation_robustness_suite,
     evaluate_scientific_reasoning_suite,
@@ -35,6 +38,7 @@ from aix_zero.eval_harness_bridge import (
     score_cooperative_game_task,
     score_epistemic_abstention_task,
     score_rational_or_probability,
+    validate_frontier_comparison_claim,
     verify_independent_reproduction,
 )
 
@@ -387,6 +391,53 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertTrue(pd["socially_optimal_joint_cooperate"])
         self.assertFalse(pd["cooperation_is_nash_stable"])
         self.assertEqual(pd["classification"], "UNSTABLE_HIGH_WELFARE_TRAP")
+
+    def test_wave6_eval_16_and_reason_03_04_07(self):
+        # EVAL-16 frontier comparison claim policy
+        with self.assertRaisesRegex(ValueError, "Prohibited frontier claim_scope"):
+            validate_frontier_comparison_claim({"claim_scope": "overall_world_best"})
+
+        valid_claim = validate_frontier_comparison_claim(
+            {
+                "claim_scope": "21-domain-symbolic-assisted-cpu-1thread",
+                "dated_open_weight_baselines": ["qwen2.5-0.5b-instruct-cpu"],
+                "paired_confidence_interval": {"lower": 0.1, "upper": 0.3},
+                "contamination_exclusion_review": "v12-semantic-disjoint",
+                "independent_reproduction_report": {"claim_status": "REPRODUCED_VERIFIED"},
+            }
+        )
+        self.assertTrue(valid_claim["claim_approved"])
+
+        # REASON-07 exhaustive finite SCM enumeration agrees with backdoor adjustment
+        scm = {
+            "edges": [("Z", "X"), ("Z", "Y"), ("X", "Y")],
+            "p_z1": "1/2",
+            "p_x1_given_z0": "1/4",
+            "p_x1_given_z1": "3/4",
+            "p_y1_given_z0_x0": "1/10",
+            "p_y1_given_z0_x1": "2/10",
+            "p_y1_given_z1_x0": "7/10",
+            "p_y1_given_z1_x1": "8/10",
+        }
+        enum_do = enumerate_finite_scm_exact(scm, query_kind="interventional_do_x", x_value=1)
+        self.assertTrue(enum_do["independent_backdoor_agreement"])
+        self.assertEqual(enum_do["exact_probability"], "1/2")
+
+        # REASON-03 non-IID dependent evidence invalidates naive IID solver
+        non_iid = evaluate_non_iid_evidence_task(
+            p="1/2", a1="2/3", b1="1/3", a2_given_e1_1="1", b2_given_e1_1="1", e="11"
+        )
+        self.assertTrue(non_iid["naive_iid_fails_negative_control"])
+        self.assertEqual(non_iid["exact_dependent_posterior"], "2/3")
+        self.assertEqual(non_iid["naive_iid_posterior"], "4/5")
+
+        # REASON-04 posterior predictive marginalization
+        pp = evaluate_posterior_predictive_task(
+            p="1/2", a_obs="2/3", b_obs="1/3", e_obs="1", a_next="3/4", b_next="1/4"
+        )
+        self.assertEqual(pp["latent_posterior_h1"], "2/3")
+        self.assertEqual(pp["posterior_predictive_e_next_1"], "7/12")
+        self.assertTrue(pp["posterior_differs_from_predictive"])
 
 
 if __name__ == "__main__":

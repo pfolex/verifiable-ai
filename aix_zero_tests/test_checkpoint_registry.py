@@ -580,6 +580,21 @@ class CheckpointRegistryAndSmokeTests(unittest.TestCase):
             pub_res = bank.publish_verified_catalog_atomic(manifest)
             self.assertTrue(pub_res["published"])
 
+            # EXPERT-05 deterministic explicit task router & EXPERT-14 safe shard cleanup
+            r_unpromoted = bank.route_explicit_task_schema("Q:DOM_0:x=1")
+            self.assertFalse(r_unpromoted["specialist_activated"])
+            self.assertEqual(r_unpromoted["route_target"], "BASE_MODEL_DEFAULT")
+            self.assertFalse(bank.route_explicit_task_schema("malformed_prompt")["specialist_activated"])
+
+            orphan_shard = bank.cartridge_dir / "expert_orphan_0000.safetensors"
+            orphan_shard.write_bytes(b"orphan")
+            gc_dry = bank.cleanup_unreferenced_shards(dry_run=True)
+            self.assertIn("expert_orphan_0000.safetensors", gc_dry["reclaimable_shards"])
+            self.assertEqual(len(gc_dry["protected_shards"]), 1)
+            gc_exec = bank.cleanup_unreferenced_shards(dry_run=False)
+            self.assertIn("expert_orphan_0000.safetensors", gc_exec["deleted_shards"])
+            self.assertFalse(orphan_shard.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

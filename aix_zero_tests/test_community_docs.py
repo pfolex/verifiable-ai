@@ -219,6 +219,146 @@ class CommunityDocsTests(unittest.TestCase):
         a11y = audit_html_accessibility_and_keyboard_nav(sample_html)
         self.assertTrue(a11y["automated_passed"])
 
+    def test_wave6_worker_02_13_network_03_and_sec_02_03_06_08(self):
+        import hashlib
+        import tempfile
+        from aix_zero.checkpoint_registry import make_network_job_contract
+        from aix_zero.network_coordinator import (
+            DurableExperimentQueue,
+            execute_allowlisted_local_job,
+            probe_worker_accelerator_capabilities,
+            sanitize_public_telemetry_and_logs,
+            sign_release_manifest,
+            validate_remote_artifact_stream,
+            verify_release_manifest_signature,
+            verify_worker_sandbox_isolation,
+        )
+
+        job = make_network_job_contract(
+            {
+                "schema_version": "1.0.0",
+                "job_id": "job-eval-v11-003",
+                "job_type": "OFFLINE_EVALUATION_JOB",
+                "experiment_config_sha256": "a" * 64,
+                "inputs": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "b" * 64,
+                    "dataset_id": "v11-kip-test",
+                    "dataset_sha256": "c" * 64,
+                    "seed": 42,
+                    "target_expert_slot": None,
+                },
+                "resource_budget": {
+                    "max_steps": 0,
+                    "max_wall_clock_seconds": 120,
+                    "max_memory_mb": 512,
+                    "device": "cpu",
+                },
+                "lease": {
+                    "lease_id": "lease-003",
+                    "worker_id": "worker-anon-01",
+                    "issued_at_utc": "2026-11-10T22:00:00Z",
+                    "expires_at_utc": "2026-11-10T22:30:00Z",
+                    "heartbeat_interval_seconds": 15,
+                    "attempt_number": 1,
+                },
+                "expected_outputs": {
+                    "requires_evaluation_result_json": True,
+                    "requires_candidate_safetensors": False,
+                    "requires_failure_record_on_abort": True,
+                },
+            }
+        )
+
+        # WORKER-02 allowlisted local job runner
+        run_res = execute_allowlisted_local_job(
+            job,
+            workspace_root=ROOT,
+            allowed_runners={"OFFLINE_EVALUATION_JOB": lambda inp: {"evaluated_seed": inp["seed"]}},
+        )
+        self.assertTrue(run_res["executed"])
+
+        # NETWORK-03 leases and idempotent job completion (preventing duplicate credit or split-brain winners)
+        with tempfile.TemporaryDirectory() as tmp:
+            tdir = Path(tmp)
+            q = DurableExperimentQueue(tdir / "q.json")
+            q.enqueue(job)
+            q.acquire_lease("job-eval-v11-003", worker_id="w1", lease_id="L1", expires_at_epoch=100, now_epoch=50)
+            # Lease L1 expires at t=100; w2 acquires lease L2 at t=110
+            q.acquire_lease("job-eval-v11-003", worker_id="w2", lease_id="L2", expires_at_epoch=200, now_epoch=110)
+
+            # Stale w1 tries to complete L1 -> rejected!
+            stale_res = q.complete_lease_idempotent(
+                "job-eval-v11-003", lease_id="L1", worker_id="w1", now_epoch=120, result_summary={"score": 1.0}
+            )
+            self.assertEqual(stale_res["outcome"], "REJECTED_STALE_OR_SUPERSEDED_LEASE")
+            self.assertFalse(stale_res["credit_granted"])
+
+            # Active w2 completes L2 -> accepted!
+            canon_res = q.complete_lease_idempotent(
+                "job-eval-v11-003", lease_id="L2", worker_id="w2", now_epoch=125, result_summary={"score": 1.0}
+            )
+            self.assertEqual(canon_res["outcome"], "ACCEPTED_CANONICAL_COMPLETION")
+            self.assertTrue(canon_res["credit_granted"])
+
+            # Duplicate upload of L2 -> idempotent no-op without duplicate credit!
+            dup_res = q.complete_lease_idempotent(
+                "job-eval-v11-003", lease_id="L2", worker_id="w2", now_epoch=126, result_summary={"score": 1.0}
+            )
+            self.assertEqual(dup_res["outcome"], "DUPLICATE_IGNORED_IDEMPOTENT")
+            self.assertFalse(dup_res["credit_granted"])
+
+            # SEC-03 remote artifact size, hash, and path traversal guard
+            payload = b"safetensors-mock-bytes"
+            sha = hashlib.sha256(payload).hexdigest()
+            self.assertTrue(
+                validate_remote_artifact_stream(payload, filename="shard.safetensors", target_dir=tdir, expected_sha256=sha)["verified"]
+            )
+            with self.assertRaisesRegex(ValueError, "Path traversal rejected"):
+                validate_remote_artifact_stream(payload, filename="../escape.safetensors", target_dir=tdir, expected_sha256=sha)
+
+            # SEC-02 sandbox isolation check
+            sb_ok = verify_worker_sandbox_isolation(tdir, attempted_path=tdir / "sub/file.json", allow_network=False)
+            self.assertTrue(sb_ok["sandbox_compliant"])
+            sb_escape = verify_worker_sandbox_isolation(tdir, attempted_path=Path("/etc/passwd"), allow_network=False)
+            self.assertFalse(sb_escape["sandbox_compliant"])
+
+        # SEC-08 release provenance, key rotation, and rollback protection
+        keyring = {
+            "key-2026-old": {"status": "ROTATED_REVOKED", "secret_key": "old-secret"},
+            "key-2026-active": {"status": "ACTIVE", "secret_key": "active-secret"},
+        }
+        signed = sign_release_manifest(
+            {"release_version": "1.2.0", "package_sha256": "a" * 64},
+            key_id="key-2026-active",
+            secret_key="active-secret",
+        )
+        self.assertTrue(
+            verify_release_manifest_signature(signed, trust_root_keyring=keyring, minimum_compatible_version=(1, 1, 0))["verified"]
+        )
+        with self.assertRaisesRegex(ValueError, "below minimum_compatible_version"):
+            verify_release_manifest_signature(signed, trust_root_keyring=keyring, minimum_compatible_version=(2, 0, 0))
+
+        # WORKER-13 GPU/accelerator capability probes
+        probe_ok = probe_worker_accelerator_capabilities(requested_device="cpu")
+        self.assertTrue(probe_ok["eligible_for_job_reservation"])
+        probe_bad = probe_worker_accelerator_capabilities(requested_device="cpu", inject_nonfinite_fault=True)
+        self.assertFalse(probe_bad["eligible_for_job_reservation"])
+
+        # SEC-06 log minimization & redaction
+        sanitized = sanitize_public_telemetry_and_logs(
+            {
+                "worker_ephemeral_id": "w-01",
+                "hostname": "secret-host",
+                "api_key": "sk-secret",
+                "log_message": "Loaded /Users/alice/private/ckpt from 192.168.1.50",
+            }
+        )
+        self.assertNotIn("hostname", sanitized)
+        self.assertNotIn("api_key", sanitized)
+        self.assertIn("<REDACTED_HOME_PATH>", sanitized["log_message"])
+        self.assertIn("<REDACTED_IP>", sanitized["log_message"])
+
 
 if __name__ == "__main__":
     unittest.main()

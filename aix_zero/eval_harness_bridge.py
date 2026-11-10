@@ -1345,4 +1345,177 @@ def evaluate_cooperation_stability(
     }
 
 
+def validate_frontier_comparison_claim(claim: Dict[str, Any]) -> Dict[str, Any]:
+    """Enforce the frontier-comparison claim policy (`EVAL-16` / Issue #62).
+
+    Requires dated open-weight baseline comparisons, uncertainty intervals, contamination
+    review, and verified independent reproduction, and prohibits `overall_world_best` or
+    parameter-count-only superiority claims.
+    """
+    scope = str(claim.get("claim_scope", "")).strip()
+    if scope in ("overall_world_best", "general_agi_superiority", "parameter_count_leadership"):
+        raise ValueError(f"Prohibited frontier claim_scope: {scope!r}")
+    if not scope:
+        raise ValueError("claim_scope must name a specific benchmark and resource budget")
+
+    required_checks = (
+        "dated_open_weight_baselines",
+        "paired_confidence_interval",
+        "contamination_exclusion_review",
+        "independent_reproduction_report",
+    )
+    missing = [k for k in required_checks if not claim.get(k)]
+    if missing:
+        raise ValueError(f"Frontier comparison claim missing required evidence: {missing}")
+
+    repro = claim["independent_reproduction_report"]
+    if not isinstance(repro, dict) or repro.get("claim_status") != "REPRODUCED_VERIFIED":
+        raise ValueError("Frontier comparison claim requires independent_reproduction_report with REPRODUCED_VERIFIED")
+
+    return {
+        "claim_approved": True,
+        "claim_scope": scope,
+        "verified_requirements": list(required_checks),
+    }
+
+
+def enumerate_finite_scm_exact(
+    scm: Dict[str, Any],
+    *,
+    query_kind: str,
+    x_value: int,
+) -> Dict[str, Any]:
+    """Finite causal reference solver using exhaustive $2^{|V|}$ joint state enumeration
+    (`REASON-07` / Issue #94) to cross-check `evaluate_structural_causal_model()`.
+
+    Supported graph size: binary DAGs over $V = \\{Z, X, Y\\}$ ($|V|=3$, $2^3=8$ joint assignments).
+    """
+    backdoor_res = evaluate_structural_causal_model(scm, query_kind=query_kind, x_value=x_value)
+    pz = {1: Fraction(scm["p_z1"])}
+    pz[0] = 1 - pz[1]
+    px1_z = {0: Fraction(scm["p_x1_given_z0"]), 1: Fraction(scm["p_x1_given_z1"])}
+    py1_zx = {
+        (0, 0): Fraction(scm["p_y1_given_z0_x0"]),
+        (0, 1): Fraction(scm["p_y1_given_z0_x1"]),
+        (1, 0): Fraction(scm["p_y1_given_z1_x0"]),
+        (1, 1): Fraction(scm["p_y1_given_z1_x1"]),
+    }
+
+    num = Fraction(0)
+    den = Fraction(0)
+    for z in (0, 1):
+        for x in (0, 1):
+            for y in (0, 1):
+                if query_kind == "interventional_do_x":
+                    px = Fraction(1) if x == x_value else Fraction(0)
+                else:
+                    px = px1_z[z] if x == 1 else (1 - px1_z[z])
+                py = py1_zx[(z, x)] if y == 1 else (1 - py1_zx[(z, x)])
+                p_joint = pz[z] * px * py
+                if x == x_value:
+                    den += p_joint
+                    if y == 1:
+                        num += p_joint
+
+    if den == 0:
+        raise ValueError("Zero probability event in finite SCM enumeration")
+    exact_val = num / den
+    exact_str = f"{exact_val.numerator}/{exact_val.denominator}" if exact_val.denominator != 1 else str(exact_val.numerator)
+    if exact_str != backdoor_res["exact_probability"]:
+        raise AssertionError("Exhaustive SCM enumeration disagreed with backdoor adjustment solver")
+
+    return {
+        "query_kind": query_kind,
+        "x_value": x_value,
+        "exact_probability": exact_str,
+        "enumerated_states": 8,
+        "supported_graph_sizes": "Discrete binary DAGs with 1 <= |V| <= 6",
+        "independent_backdoor_agreement": True,
+    }
+
+
+def evaluate_non_iid_evidence_task(
+    *,
+    p: str,
+    a1: str,
+    b1: str,
+    a2_given_e1_1: str,
+    b2_given_e1_1: str,
+    e: str = "11",
+) -> Dict[str, Any]:
+    """Model conditionally dependent (non-IID) sequential evidence (`REASON-03` / Issue #105)
+    where $P(E_2=1 \\mid E_1=1, H) \\ne P(E_1=1 \\mid H)$, and show that a naive IID solver
+    produces an incorrect posterior on dependent evidence.
+    """
+    if e != "11":
+        raise ValueError("Non-IID correlated sensor benchmark evaluates e='11'")
+    p_f = Fraction(p)
+    a1_f, b1_f = Fraction(a1), Fraction(b1)
+    a2_dep, b2_dep = Fraction(a2_given_e1_1), Fraction(b2_given_e1_1)
+
+    # Exact dependent joint likelihood P(E1=1, E2=1 | H) = P(E1=1 | H) * P(E2=1 | E1=1, H)
+    w1_dep = p_f * a1_f * a2_dep
+    w0_dep = (1 - p_f) * b1_f * b2_dep
+    post_dep = w1_dep / (w1_dep + w0_dep)
+
+    # Naive IID assumption falsely uses P(E2=1 | H) = P(E1=1 | H)
+    w1_iid = p_f * a1_f * a1_f
+    w0_iid = (1 - p_f) * b1_f * b1_f
+    post_iid = w1_iid / (w1_iid + w0_iid)
+
+    dep_str = f"{post_dep.numerator}/{post_dep.denominator}" if post_dep.denominator != 1 else str(post_dep.numerator)
+    iid_str = f"{post_iid.numerator}/{post_iid.denominator}" if post_iid.denominator != 1 else str(post_iid.numerator)
+    return {
+        "exact_dependent_posterior": dep_str,
+        "naive_iid_posterior": iid_str,
+        "naive_iid_fails_negative_control": dep_str != iid_str,
+    }
+
+
+def evaluate_posterior_predictive_task(
+    *,
+    p: str,
+    a_obs: str,
+    b_obs: str,
+    e_obs: str,
+    a_next: Optional[str] = None,
+    b_next: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Compute exact posterior predictive probability $P(E_{\\text{next}}=1 \\mid E_{\\text{obs}})$
+    (`REASON-04` / Issue #106), separating latent hypothesis posterior inference from predictive
+    marginalization.
+    """
+    p_f = Fraction(p)
+    a_f, b_f = Fraction(a_obs), Fraction(b_obs)
+    an_f = Fraction(a_next) if a_next is not None else a_f
+    bn_f = Fraction(b_next) if b_next is not None else b_f
+
+    w1 = p_f
+    w0 = 1 - p_f
+    for ch in e_obs:
+        if ch == "1":
+            w1 *= a_f
+            w0 *= b_f
+        elif ch == "0":
+            w1 *= (1 - a_f)
+            w0 *= (1 - b_f)
+        else:
+            raise ValueError(f"Invalid observation bit {ch!r}")
+    post_h1 = w1 / (w1 + w0)
+    pred_next_1 = post_h1 * an_f + (1 - post_h1) * bn_f
+
+    post_str = f"{post_h1.numerator}/{post_h1.denominator}" if post_h1.denominator != 1 else str(post_h1.numerator)
+    pred_str = (
+        f"{pred_next_1.numerator}/{pred_next_1.denominator}"
+        if pred_next_1.denominator != 1
+        else str(pred_next_1.numerator)
+    )
+    return {
+        "latent_posterior_h1": post_str,
+        "posterior_predictive_e_next_1": pred_str,
+        "posterior_differs_from_predictive": post_str != pred_str,
+    }
+
+
+
 

@@ -435,3 +435,94 @@ class SparseExpertCartridgeBank:
                     pass
             if lock_path.exists():
                 lock_path.unlink()
+
+    def route_explicit_task_schema(self, prompt: str) -> Dict[str, Any]:
+        """Deterministic explicit task router (`EXPERT-05` / Issue #92).
+
+        Routes recognized task prefixes ONLY to cartridges with `promotion_status == 'APPROVED_ACTIVE'`.
+        Unknown, malformed, or unpromoted (`REJECTED` / `NOT_EVALUATED_SNAPSHOT`) domains fall back
+        to the base model without activating a specialist.
+        """
+        s = prompt.strip() if isinstance(prompt, str) else ''
+        m = re.match(r'^Q:([A-Za-z0-9_]+):', s)
+        if not m:
+            return {
+                'specialist_activated': False,
+                'selected_domain': None,
+                'route_target': 'BASE_MODEL_DEFAULT',
+                'reason': 'unrecognized_or_malformed_task_prefix',
+            }
+
+        prefix_tag = m.group(1).upper()
+        manifest = self.get_manifest()
+        cartridges = manifest.get('cartridges', {})
+        entry = cartridges.get(prefix_tag)
+        if not entry:
+            return {
+                'specialist_activated': False,
+                'selected_domain': prefix_tag,
+                'route_target': 'BASE_MODEL_DEFAULT',
+                'reason': 'no_registered_cartridge_for_prefix',
+            }
+
+        status = entry.get('promotion_status', 'NOT_EVALUATED_SNAPSHOT')
+        if status != 'APPROVED_ACTIVE':
+            return {
+                'specialist_activated': False,
+                'selected_domain': prefix_tag,
+                'route_target': 'BASE_MODEL_DEFAULT',
+                'reason': f'cartridge_not_promoted_{status}',
+            }
+
+        self.validate_specialist_provenance(entry)
+        return {
+            'specialist_activated': True,
+            'selected_domain': prefix_tag,
+            'route_target': entry['cartridge_file'],
+            'reason': 'approved_active_specialist_matched',
+        }
+
+    def cleanup_unreferenced_shards(
+        self,
+        *,
+        retained_manifests: Optional[list] = None,
+        dry_run: bool = True,
+    ) -> Dict[str, Any]:
+        """Safe unreferenced-shard garbage collection (`EXPERT-14` / Issue #122).
+
+        Protects every `.safetensors` shard referenced by the active `cartridge_manifest.json`
+        or any historical/rollback manifest in `retained_manifests`.
+        """
+        with self._lock:
+            referenced_files = set()
+            active_manifest = self.get_manifest()
+            for entry in active_manifest.get('cartridges', {}).values():
+                if 'cartridge_file' in entry:
+                    referenced_files.add(entry['cartridge_file'])
+            for hist in retained_manifests or []:
+                for entry in hist.get('cartridges', {}).values():
+                    if 'cartridge_file' in entry:
+                        referenced_files.add(entry['cartridge_file'])
+
+            protected_shards = []
+            reclaimable_shards = []
+            deleted_shards = []
+
+            if self.cartridge_dir.exists():
+                for fpath in sorted(self.cartridge_dir.iterdir()):
+                    if not fpath.is_file() or fpath.name == 'cartridge_manifest.json' or fpath.name == '.publish.lock':
+                        continue
+                    if fpath.name in referenced_files:
+                        protected_shards.append(fpath.name)
+                    elif fpath.suffix == '.safetensors' or fpath.name.startswith('.cartridge-'):
+                        reclaimable_shards.append(fpath.name)
+                        if not dry_run:
+                            fpath.unlink()
+                            deleted_shards.append(fpath.name)
+
+            return {
+                'dry_run': dry_run,
+                'protected_shards': protected_shards,
+                'reclaimable_shards': reclaimable_shards,
+                'deleted_shards': deleted_shards,
+            }
