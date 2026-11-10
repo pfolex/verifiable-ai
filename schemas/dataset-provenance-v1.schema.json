@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pfolex/verifiable-ai/blob/main/schemas/dataset-provenance-v1.schema.json",
+  "title": "AIX Dataset Licensing and Provenance Catalog v1 (DATA-01)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_sha256",
+    "datasets"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "catalog_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dataset_id",
+          "version",
+          "source_type",
+          "generator_or_origin",
+          "license_spdx",
+          "redistribution_status",
+          "contains_personal_data",
+          "depends_on_restricted_teacher_output",
+          "public_volunteer_eligible",
+          "sha256",
+          "notes"
+        ],
+        "properties": {
+          "dataset_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_type": {
+            "enum": [
+              "procedural_generator",
+              "committed_research_capsule",
+              "external_web_or_teacher_log"
+            ]
+          },
+          "generator_or_origin": {
+            "type": "string",
+            "minLength": 1
+          },
+          "license_spdx": {
+            "type": "string",
+            "minLength": 1
+          },
+          "redistribution_status": {
+            "enum": [
+              "verified_permissive",
+              "restricted",
+              "unknown"
+            ]
+          },
+          "contains_personal_data": {
+            "type": "boolean"
+          },
+          "depends_on_restricted_teacher_output": {
+            "type": "boolean"
+          },
+          "public_volunteer_eligible": {
+            "type": "boolean"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

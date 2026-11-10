@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "datasets": [
+    {
+      "dataset_id": "rlvr-forge-procedural",
+      "version": "1.0.0",
+      "source_type": "procedural_generator",
+      "generator_or_origin": "rlvr_forge / verisci procedural task generators (logic, silicon, systems, matter)",
+      "license_spdx": "Apache-2.0",
+      "redistribution_status": "verified_permissive",
+      "contains_personal_data": false,
+      "depends_on_restricted_teacher_output": false,
+      "public_volunteer_eligible": true,
+      "sha256": "b068a9e41050c194bde3601e250aeefbd3a1dd36edf7b995fcc43bcfb58bba67",
+      "notes": "First-party deterministic procedural generators and formal verifiers authored in this repository."
+    },
+    {
+      "dataset_id": "aix-zero-v11-template-heldout",
+      "version": "11.0.0",
+      "source_type": "procedural_generator",
+      "generator_or_origin": "aix_zero.knowledge_is_power.build_21_domain_kip_v11_curriculum(seed=42)",
+      "license_spdx": "Apache-2.0",
+      "redistribution_status": "verified_permissive",
+      "contains_personal_data": false,
+      "depends_on_restricted_teacher_output": false,
+      "public_volunteer_eligible": true,
+      "sha256": "218574ba5c4f6f2766ef7dc6be36bbd2033eb392ea7bf91e588032c19fcc176b",
+      "notes": "First-party synthetic arithmetic and symbolic reasoning templates across 21 domains; no external text or teacher outputs in evaluation cases."
+    },
+    {
+      "dataset_id": "aix-zero-bayesian-pilot",
+      "version": "1.0.0",
+      "source_type": "committed_research_capsule",
+      "generator_or_origin": "aix_zero.bayesian_tasks.build_dataset(seed=42) -> research/bayesian-pilot/dataset.json",
+      "license_spdx": "Apache-2.0",
+      "redistribution_status": "verified_permissive",
+      "contains_personal_data": false,
+      "depends_on_restricted_teacher_output": false,
+      "public_volunteer_eligible": true,
+      "sha256": "974491fcec5035ad360dd613fe0d8068c6ec30d470bc4d91cf3c6a5b8094bf19",
+      "notes": "First-party exact rational binary Bayesian probability tasks (BP and BS) with enumerated joint distribution oracle."
+    },
+    {
+      "dataset_id": "aix-zero-kip-scholar-council-notes",
+      "version": "11.0.0",
+      "source_type": "external_web_or_teacher_log",
+      "generator_or_origin": "aix_zero/knowledge_codex/knowledge_index.json (Wikipedia CC-BY-SA-4.0 summaries + arXiv metadata + local Ollama teacher notes)",
+      "license_spdx": "CC-BY-SA-4.0 AND OTHER",
+      "redistribution_status": "restricted",
+      "contains_personal_data": false,
+      "depends_on_restricted_teacher_output": true,
+      "public_volunteer_eligible": false,
+      "sha256": "03b9608d7e24ee0c11f669036cd4f265f7f76338b59deee4fd22ee0eac2f90c3",
+      "notes": "Contains Wikipedia excerpts (CC-BY-SA) and unverified local LLM teacher dialogue (`aix-8b:latest`, `aix3:latest`). Excluded from public volunteer training jobs by default."
+    }
+  ],
+  "catalog_sha256": "df133af7562959dfe592d6ecf6ce660a27c35229c5b1cf340069495c5711deef"
+}

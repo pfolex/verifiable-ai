@@ -1,8 +1,8 @@
 # Offline v11 baseline and expert snapshot storage
 
-## Reproduce
+## Reproduce (Locked Minimal CPU Research Environment — BASE-02)
 
-Use Python 3.11 and install the minimal research dependencies in an isolated environment:
+Use Python 3.11 (or 3.12) on CPU and install the pinned research dependencies in an isolated environment. No GPU, web search, council call, or paid API credential is required:
 
 ```sh
 python3.11 -m venv .venv-training
@@ -10,13 +10,22 @@ python3.11 -m venv .venv-training
 # Import-only dependency used by the existing curriculum module:
 git clone https://github.com/pfolex/branchbox.git branchbox
 git -C branchbox checkout 49873a0662ad13de7943619bf8fd822d3d3458a9
+# Run offline unit tests and environment lock checks:
 .venv-training/bin/python -m unittest discover -s aix_zero_tests -v
+.venv-training/bin/python -m unittest discover -s tests -v
+# Run the full offline v11 baseline and cartridge export:
 .venv-training/bin/python -m aix_zero.benchmark_baseline \
   --output benchmark-results/v11-baseline.json \
   --export-dir benchmark-results/v11-cartridges
 ```
 
-The existing curriculum imports BranchBox; the offline baseline itself makes no web, council, or hosted-provider calls. Existing checkpoint files are not overwritten. The GitHub Actions research job runs the storage contracts and full offline baseline and uploads its own report.
+Pinned core dependency versions in `requirements-aix-zero.txt`:
+- `torch==2.2.2`
+- `numpy==1.26.4`
+- `safetensors==0.8.0`
+- `jsonschema[format]>=4.18,<5`
+
+The existing curriculum imports BranchBox (`49873a0662ad13de7943619bf8fd822d3d3458a9`); the offline baseline itself makes no web, council, or hosted-provider calls. Existing checkpoint files are not overwritten. The GitHub Actions research job (`aix-zero-research` in `.github/workflows/fishtest-ci.yml`) runs the storage contracts and full offline baseline on a clean runner and uploads its own report.
 
 The benchmark strictly loads v11 without randomly expanding embeddings. It records checkpoint/configuration/source identity, runtime versions, hardware, seed, dataset digest, per-case predictions, and per-domain results. Public checkpoint paths are repository-relative or a filename, not a contributor's home directory.
 

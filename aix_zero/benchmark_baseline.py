@@ -30,7 +30,7 @@ from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 
 
-def load_v11(checkpoint: Path):
+def load_v11(checkpoint: Path, *, expected_tokenizer_metadata=None):
     state = load_file(str(checkpoint))
     config = AIXZeroConfig(
         vocab_size=state['token_emb.weight'].shape[0], use_moe=True,
@@ -40,8 +40,11 @@ def load_v11(checkpoint: Path):
     model.eval()
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     # Existing IDs are append-only. Do not expand embeddings with random weights.
-    if tokenizer.vocab_size < config.vocab_size:
-        raise ValueError('Tokenizer is smaller than checkpoint vocabulary')
+    tokenizer.verify_checkpoint_compatibility(
+        config.vocab_size,
+        expected_tokenizer_metadata,
+        allow_append_only_superset=True,
+    )
     return model, tokenizer
 
 
@@ -83,6 +86,8 @@ def run_baseline(checkpoint: Path, *, repeats: int = 1, threads: int = 1,
         hardware=_hardware(), versions=dict(python=platform.python_version(), torch=torch.__version__,
                                          numpy=numpy.__version__, safetensors=safetensors.__version__),
         config=asdict(model.config), physical_parameters=model.count_parameters()['total_parameters'],
+        tokenizer=dict(vocab_size=tokenizer.vocab_size, vocab_sha256=tokenizer.vocab_sha256,
+                       checkpoint_prefix_sha256=tokenizer.prefix_sha256(model.config.vocab_size)),
         dataset=dict(name='v11 template-family held-out cases', seed=42, cases=len(cases),
                      sha256=hashlib.sha256(json.dumps(cases, sort_keys=True).encode()).hexdigest()),
         settings=dict(repeats=repeats, threads=threads, num_candidates=candidates,
