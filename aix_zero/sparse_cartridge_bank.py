@@ -93,15 +93,20 @@ class SparseExpertCartridgeBank:
 
     def __init__(self, cartridge_dir: Optional[Path] = None, *,
                  max_cached_bytes: int = 1024 * 1024, max_cached_experts: int = 2,
-                 max_shard_bytes: int = 16 * 1024 * 1024) -> None:
-        if max_cached_bytes < 0 or max_cached_experts < 0 or max_shard_bytes <= 0:
-            raise ValueError('Cache limits must be nonnegative; shard limit must be positive')
+                 max_shard_bytes: int = 16 * 1024 * 1024,
+                 max_manifest_bytes: int = 1024 * 1024,
+                 max_manifest_entries: int = 256) -> None:
+        if (max_cached_bytes < 0 or max_cached_experts < 0 or max_shard_bytes <= 0
+                or max_manifest_bytes <= 0 or max_manifest_entries <= 0):
+            raise ValueError('Cache limits must be nonnegative; shard and manifest limits must be positive')
         self.cartridge_dir = Path(cartridge_dir) if cartridge_dir is not None else (
             Path(__file__).resolve().parent / 'checkpoints' / 'cartridges')
         self.manifest_path = self.cartridge_dir / 'cartridge_manifest.json'
         self.max_cached_bytes = max_cached_bytes
         self.max_cached_experts = max_cached_experts
         self.max_shard_bytes = max_shard_bytes
+        self.max_manifest_bytes = max_manifest_bytes
+        self.max_manifest_entries = max_manifest_entries
         self._hot_cache = OrderedDict()
         self._lock = threading.RLock()
 
@@ -116,11 +121,29 @@ class SparseExpertCartridgeBank:
                         max_bytes=self.max_cached_bytes, max_experts=self.max_cached_experts)
 
     def get_manifest(self) -> Dict[str, Any]:
+        if self.manifest_path.is_symlink():
+            raise ValueError('Cartridge manifest path must not be a symlink')
         if not self.manifest_path.exists():
             return {}
-        manifest = json.loads(self.manifest_path.read_text())
-        if manifest.get('schema_version') != 1 or not isinstance(manifest.get('cartridges'), dict):
+        if self.manifest_path.stat().st_size > self.max_manifest_bytes:
+            raise ValueError('Cartridge manifest exceeds max_manifest_bytes limit')
+        raw_bytes = self.manifest_path.read_bytes()
+        if len(raw_bytes) > self.max_manifest_bytes:
+            raise ValueError('Cartridge manifest exceeds max_manifest_bytes limit')
+
+        def _no_duplicate_keys(pairs):
+            out = {}
+            for k, v in pairs:
+                if k in out:
+                    raise ValueError(f'Duplicate JSON key in cartridge manifest: {k!r}')
+                out[k] = v
+            return out
+
+        manifest = json.loads(raw_bytes.decode('utf-8'), object_pairs_hook=_no_duplicate_keys)
+        if not isinstance(manifest, dict) or manifest.get('schema_version') != 1 or not isinstance(manifest.get('cartridges'), dict):
             raise ValueError('Unsupported or malformed cartridge manifest')
+        if len(manifest['cartridges']) > self.max_manifest_entries:
+            raise ValueError('Cartridge manifest exceeds max_manifest_entries limit')
         return manifest
 
     def export_all_domain_cartridges(self, model: AIXZeroModel,
@@ -190,8 +213,11 @@ class SparseExpertCartridgeBank:
             raise KeyError(f'Unknown cartridge: {domain}')
         meta = manifest['cartridges'][domain]
         filename = meta['cartridge_file']
-        path = (self.cartridge_dir / filename).resolve()
-        if Path(filename).name != filename or path.parent != self.cartridge_dir.resolve():
+        raw_path = self.cartridge_dir / filename
+        if Path(filename).name != filename or raw_path.is_symlink():
+            raise ValueError('Cartridge path escapes bank directory or is a symlink')
+        path = raw_path.resolve()
+        if path.parent != self.cartridge_dir.resolve():
             raise ValueError('Cartridge path escapes bank directory')
         if not re.fullmatch(r'[0-9a-f]{64}', meta['sha256']):
             raise ValueError('Expected a full SHA-256 hash')
@@ -233,11 +259,15 @@ class SparseExpertCartridgeBank:
                         cartridge_file=meta['cartridge_file'], parameters_paged_in=meta['parameters'],
                         cache_hit=hit, latency_ms=(time.perf_counter() - start) * 1000)
 
-    def install_cartridge(self, model: AIXZeroModel, domain: str, *, slot: Optional[int] = None) -> Dict[str, Any]:
+    def install_cartridge(self, model: AIXZeroModel, domain: str, *,
+                          slot: Optional[int] = None,
+                          active_base_checkpoint_sha256: Optional[str] = None) -> Dict[str, Any]:
         """Copy a validated snapshot into one existing slot, preserving Parameter objects.
 
         Requires eval mode and exclusive model access. This is an explicit weight swap,
         not automatic routing; it does not change router weights or expert count.
+        When installing a `frozen_v11_single_expert_training_candidate`, enforces frozen-base
+        checkpoint SHA-256 identity (`EXPERT-02` / Issue #90).
         """
         with self._lock:
             if model.training:
@@ -245,6 +275,20 @@ class SparseExpertCartridgeBank:
             manifest, meta, tensors, hit = self._load(domain)
             if manifest['model_config'] != asdict(model.config):
                 raise ValueError('Cartridge model configuration mismatch')
+            prov = meta.get('provenance', 'existing_routed_expert_snapshot')
+            required_base_sha = meta.get('base_checkpoint_sha256') or manifest.get('base_checkpoint_sha256')
+            if prov == 'frozen_v11_single_expert_training_candidate':
+                self.validate_specialist_provenance(meta)
+                if not required_base_sha or not active_base_checkpoint_sha256:
+                    raise ValueError(
+                        'Installing a trained specialist requires both cartridge base_checkpoint_sha256 '
+                        'and active_base_checkpoint_sha256'
+                    )
+                if required_base_sha != active_base_checkpoint_sha256:
+                    raise ValueError('Trained specialist base_checkpoint_sha256 mismatch with active base model')
+            elif required_base_sha and active_base_checkpoint_sha256 and required_base_sha != active_base_checkpoint_sha256:
+                raise ValueError('Snapshot base_checkpoint_sha256 mismatch with active base model')
+
             moe = _moe(model)
             slot = meta['source_expert_index'] if slot is None else slot
             if type(slot) is not int or not 0 <= slot < len(moe.experts):

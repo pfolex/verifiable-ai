@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from fractions import Fraction
 import hashlib
+import json
 import re
 from typing import Any, Dict, Iterable, List, Set, Tuple
 
@@ -134,6 +135,8 @@ def verify_disjoint_splits(
     """
     split_hashes: Dict[str, Set[str]] = {}
     for split_name, items in splits.items():
+        if isinstance(items, (str, bytes)):
+            continue
         hashes = {semantic_identity_hash(item) for item in items}
         if not hashes:
             raise ValueError(f"Split {split_name!r} is empty")
@@ -348,5 +351,308 @@ def compute_difficulty_factors(item: Dict[str, Any] | str) -> Dict[str, Any]:
         "structure_type": structure,
         "difficulty_tier": tier,
     }
+
+
+def _independent_float_bayes_oracle(prompt: str) -> float:
+    """Independent floating-point joint-table oracle for `BP` and `BS` (`DATA-04` / Issue #55).
+
+    Instead of symbolic `Fraction` cancellation used by the generator, this oracle constructs
+    the explicit 2-state joint probability table `(w_h1, w_h0)` in IEEE-754 `float64` by
+    iterating over each observation character in `e`.
+    """
+    compact = re.sub(r"\s+", "", prompt)
+    m = re.fullmatch(r"Q:(BP|BS):([a-zA-Z0-9/=;]+);P=", compact)
+    if not m:
+        raise ValueError(f"Unsupported Bayesian prompt for independent oracle: {prompt!r}")
+    _, body = m.groups()
+    kv = dict(part.split("=", 1) for part in body.split(";") if "=" in part)
+
+    def _to_float(frac_str: str) -> float:
+        if "/" in frac_str:
+            n_s, d_s = frac_str.split("/", 1)
+            return float(int(n_s)) / float(int(d_s))
+        return float(frac_str)
+
+    p = _to_float(kv["p"])
+    a = _to_float(kv["a"])
+    b = _to_float(kv["b"])
+    e_seq = kv["e"]
+
+    w1 = p
+    w0 = 1.0 - p
+    for ch in e_seq:
+        if ch == "1":
+            w1 *= a
+            w0 *= b
+        elif ch == "0":
+            w1 *= (1.0 - a)
+            w0 *= (1.0 - b)
+        else:
+            raise ValueError(f"Invalid observation bit {ch!r}")
+    total = w1 + w0
+    if total <= 0.0:
+        raise ValueError("Zero marginal evidence probability in independent oracle")
+    return w1 / total
+
+
+def cross_check_generator_with_independent_oracle(
+    items: Iterable[Dict[str, Any]],
+    *,
+    abs_tol: float = 1e-12,
+) -> Dict[str, Any]:
+    """Cross-check generator-produced items against an independent reference oracle (`DATA-04` / Issue #55)
+    and detect any injected generator mistakes.
+    """
+    checked = 0
+    mismatches: List[Dict[str, Any]] = []
+    for idx, row in enumerate(items):
+        prompt = str(row["prompt"])
+        gold_str = str(row["gold"])
+        oracle_val = _independent_float_bayes_oracle(prompt)
+        try:
+            gold_val = float(Fraction(gold_str))
+            in_bounds = 0.0 <= gold_val <= 1.0
+            reduced = (
+                f"{Fraction(gold_str).numerator}/{Fraction(gold_str).denominator}" == gold_str
+                if "/" in gold_str
+                else str(Fraction(gold_str).numerator) == gold_str
+            )
+        except Exception:
+            gold_val = float("nan")
+            in_bounds = False
+            reduced = False
+
+        checked += 1
+        if (not in_bounds) or (not reduced) or abs(oracle_val - gold_val) > abs_tol:
+            mismatches.append(
+                {
+                    "index": idx,
+                    "prompt": prompt,
+                    "generator_gold": gold_str,
+                    "oracle_float": round(oracle_val, 12),
+                }
+            )
+
+    return {
+        "checked_count": checked,
+        "mismatch_count": len(mismatches),
+        "all_verified": len(mismatches) == 0,
+        "mismatches": mismatches,
+        "shared_untested_assumptions": [
+            "Both generator and independent oracle assume binary hypothesis space H in {0, 1}.",
+            "Both assume conditional independence of sequential observations given H in BS tasks.",
+        ],
+    }
+
+
+def classify_generalization_category(item: Dict[str, Any]) -> str:
+    """Classify each problem into an explicit generalization category (`DATA-06` / Issue #57):
+    - `in_distribution_template`: canonical field order (`p;a;b;e`) and standard sequence length (`<=2`),
+    - `representation_or_layout_novelty`: reordered field grammar (`e;b;p;a` or `novel` layout),
+    - `compositional_depth_novelty`: longer sequential observation chain (`len(e) >= 3` or `longer_sequence`),
+    - `parameter_extrapolation`: held-out `(p, a, b)` parameter triple in canonical layout.
+    """
+    layout = str(item.get("layout", ""))
+    prompt = str(item.get("prompt", ""))
+    diff = compute_difficulty_factors(item)
+    if layout == "longer_sequence" or diff["operation_depth"] >= 3:
+        return "compositional_depth_novelty"
+    if layout == "novel" or prompt.startswith("Q:BP:e=") or prompt.startswith("Q:BS:e="):
+        return "representation_or_layout_novelty"
+    if item.get("split") in ("validation", "test"):
+        return "parameter_extrapolation"
+    return "in_distribution_template"
+
+
+def generate_generalization_taxonomy_manifest(
+    splits: Dict[str, List[Dict[str, Any]]],
+) -> Dict[str, Any]:
+    """Build a generalization-category manifest across splits (`DATA-06` / Issue #57)
+    and enforce that held-out grammars (`representation_or_layout_novelty`,
+    `compositional_depth_novelty`) are never present in `train`.
+    """
+    summary: Dict[str, Dict[str, int]] = {}
+    tagged_cases: Dict[str, List[Dict[str, Any]]] = {}
+
+    for split_name, rows in splits.items():
+        if not isinstance(rows, list):
+            continue
+        counts: Dict[str, int] = {}
+        tagged_rows: List[Dict[str, Any]] = []
+        for r in rows:
+            row_copy = dict(r, split=split_name)
+            cat = classify_generalization_category(row_copy)
+            if split_name == "train" and cat in ("representation_or_layout_novelty", "compositional_depth_novelty"):
+                raise ValueError(
+                    f"Held-out grammar category {cat!r} is prohibited in training split"
+                )
+            counts[cat] = counts.get(cat, 0) + 1
+            row_copy["generalization_category"] = cat
+            tagged_rows.append(row_copy)
+        summary[split_name] = counts
+        tagged_cases[split_name] = tagged_rows
+
+    return {
+        "schema_version": "1.0.0",
+        "split_category_counts": summary,
+        "tagged_splits": tagged_cases,
+    }
+
+
+def audit_answer_frequency_shortcuts(
+    train_items: List[Dict[str, Any]],
+    eval_items: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Measure constant-majority, prior-only (`P(H)=p`), and prompt-length-bucketed shortcut
+    baselines (`DATA-07` / Issue #64) so promotion gates cannot omit stronger trivial shortcuts.
+    """
+    if not train_items or not eval_items:
+        raise ValueError("train_items and eval_items must be nonempty")
+
+    from collections import Counter
+
+    train_golds = [str(r["gold"]) for r in train_items]
+    majority_ans = Counter(train_golds).most_common(1)[0][0]
+
+    by_len: Dict[int, List[str]] = {}
+    for r in train_items:
+        by_len.setdefault(len(str(r["prompt"])), []).append(str(r["gold"]))
+    len_lookup = {k: Counter(v).most_common(1)[0][0] for k, v in by_len.items()}
+
+    maj_hits = 0
+    prior_hits = 0
+    len_hits = 0
+    for r in eval_items:
+        gold = str(r["gold"])
+        prompt = str(r["prompt"])
+        if majority_ans == gold:
+            maj_hits += 1
+        m_p = re.search(r"(?:^|:|;)p=([0-9]+/[0-9]+)", prompt)
+        if m_p and m_p.group(1) == gold:
+            prior_hits += 1
+        pred_len = len_lookup.get(len(prompt), majority_ans)
+        if pred_len == gold:
+            len_hits += 1
+
+    n = len(eval_items)
+    shortcuts = {
+        "constant_majority": round(maj_hits / n, 6),
+        "prior_only_echo": round(prior_hits / n, 6),
+        "prompt_length_bucket": round(len_hits / n, 6),
+    }
+    strongest_name = max(shortcuts, key=shortcuts.get)
+    return {
+        "eval_sample_count": n,
+        "majority_answer": majority_ans,
+        "shortcut_accuracies": shortcuts,
+        "strongest_shortcut_name": strongest_name,
+        "strongest_shortcut_accuracy": shortcuts[strongest_name],
+    }
+
+
+def build_validation_curriculum_experiment_set(
+    splits: Dict[str, List[Dict[str, Any]]],
+    *,
+    partition_id: str,
+    max_tuning_trials: int,
+) -> Dict[str, Any]:
+    """Reserve a validation-only curriculum experiment set (`DATA-08` / Issue #65)
+    with an explicit tuning budget and zero final-test access.
+    """
+    if not partition_id.strip() or max_tuning_trials < 1:
+        raise ValueError("Valid partition_id and positive max_tuning_trials required")
+    verify_disjoint_splits(splits)
+    val_rows = export_training_split_safe(splits, requested_split="validation")
+    payload = [
+        {
+            "prompt": r["prompt"],
+            "gold": r["gold"],
+            "difficulty": compute_difficulty_factors(r),
+        }
+        for r in val_rows
+    ]
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
+    return {
+        "schema_version": "1.0.0",
+        "partition_id": partition_id,
+        "allowed_split": "validation",
+        "consumes_final_test_budget": False,
+        "max_tuning_trials": int(max_tuning_trials),
+        "sample_count": len(payload),
+        "partition_sha256": digest,
+        "samples": payload,
+    }
+
+
+def build_benchmark_exclusion_ledger(
+    *,
+    historical_dataset_id: str,
+    historical_dataset_sha256: str,
+    excluded_cases: List[Dict[str, str]],
+    replacement_partition_id: str,
+) -> Dict[str, Any]:
+    """Version benchmark exclusions and contamination findings (`DATA-13` / Issue #71)
+    while preserving historical dataset SHA-256 identities.
+    """
+    if not excluded_cases:
+        raise ValueError("excluded_cases must be nonempty")
+    for c in excluded_cases:
+        if not c.get("prompt") or not c.get("reason") or not c.get("semantic_identity_hash"):
+            raise ValueError("Each excluded case must include prompt, semantic_identity_hash, and reason")
+
+    return {
+        "schema_version": "1.0.0",
+        "historical_dataset_id": historical_dataset_id,
+        "historical_dataset_sha256": historical_dataset_sha256,
+        "historical_reports_retain_original_sha256": True,
+        "replacement_partition_id": replacement_partition_id,
+        "excluded_count": len(excluded_cases),
+        "excluded_cases": [dict(c) for c in excluded_cases],
+    }
+
+
+def analyze_bayesian_pilot_errors(pilot_results: Dict[str, Any]) -> Dict[str, Any]:
+    """Analyze the rejected Bayesian pilot candidates (`TRAIN-01` / Issue #76) from
+    `research/bayesian-pilot/results.json` without using the consumed test set to select new hyperparameters.
+    """
+    task_diagnostics: Dict[str, Any] = {}
+    for task_name, task_data in pilot_results.get("tasks", {}).items():
+        val_loss = float(task_data["training"]["selected_validation_loss"])
+        test_learned = task_data["candidate"]
+        test_prior = task_data["controls"]["prior_only"]
+        total = int(test_learned["total"])
+        correct = int(test_learned["correct"])
+        errors = total - correct
+        novel_acc = float(test_learned.get("novel_layout_accuracy", 0.0))
+
+        task_diagnostics[task_name] = {
+            "promotion_status": task_data["promotion_status"],
+            "selected_validation_loss": val_loss,
+            "test_total": total,
+            "test_correct": correct,
+            "test_errors": errors,
+            "prior_only_control_accuracy": float(test_prior["accuracy"]),
+            "learned_minus_prior_only": round(float(test_learned["accuracy"]) - float(test_prior["accuracy"]), 6),
+            "novel_layout_accuracy": novel_acc,
+            "root_cause_categories": {
+                "frozen_router_and_shared_backbone_bottleneck": (
+                    "Only 1 routed expert (49,152 params) was trained while encoder, router, shared expert, "
+                    "pointer head, and decoder remained frozen to v11 weights."
+                ),
+                "below_prior_only_shortcut": correct < int(test_prior["correct"]),
+                "representation_layout_collapse": novel_acc <= 0.03,
+            },
+        }
+
+    return {
+        "schema_version": "1.0.0",
+        "used_consumed_test_set_for_hyperparameter_selection": False,
+        "tasks": task_diagnostics,
+        "recommended_next_steps_on_validation_only": [
+            "Use validation-only curriculum partition (DATA-08) for any representation or multi-layer adapter ablation.",
+            "Compare candidate losses against prior-only and majority shortcuts on validation before touching held-out test slices.",
+        ],
+    }
+
 
 

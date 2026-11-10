@@ -67,6 +67,43 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertIn("Distributed coordinator: OFFLINE", web_doc.read_text(encoding="utf-8"))
         self.assertIn("Neural-Only Exact Match", pr_exp.read_text(encoding="utf-8"))
 
+    def test_wave4_web_02_03_and_comm_08_10_11(self):
+        from aix_zero.website_data_builder import build_project_overview_payload, build_roadmap_view_payload
+
+        overview = build_project_overview_payload()
+        self.assertEqual(overview["measured_capabilities"]["physical_learned_parameters"], 817410)
+        self.assertEqual(overview["measured_capabilities"]["neural_only_accuracy"]["correct"], 9)
+        self.assertEqual(overview["measured_capabilities"]["symbolic_assisted_accuracy"]["correct"], 105)
+        self.assertEqual(overview["rejected_and_negative_experiments"][0]["status"], "REJECTED")
+
+        # WEB-03 roadmap view & stale response handling
+        fresh_view = build_roadmap_view_payload(
+            [
+                {"number": 32, "title": "[AIX BASE-09] Recovery", "state": "OPEN", "labels": ["status:ready"]},
+                {"number": 24, "title": "[AIX BASE-01] Paths", "state": "CLOSED", "labels": []},
+            ],
+            fetched_at_utc="2026-11-10T22:00:00Z",
+            now_utc="2026-11-10T22:10:00Z",
+        )
+        self.assertFalse(fresh_view["is_stale"])
+        self.assertEqual(fresh_view["data_status"], "LIVE_FRESH")
+        self.assertEqual(len(fresh_view["ready_to_claim"]), 1)
+
+        stale_view = build_roadmap_view_payload(
+            None,
+            fetched_at_utc="2026-11-10T10:00:00Z",
+            now_utc="2026-11-10T22:10:00Z",
+        )
+        self.assertTrue(stale_view["is_stale"])
+        self.assertEqual(stale_view["data_status"], "UNAVAILABLE_FALLBACK")
+
+        comm_doc = ROOT / "docs/COMMUNITY-TEMPLATES-AND-ONBOARDING.md"
+        self.assertTrue(comm_doc.is_file())
+        comm_text = comm_doc.read_text(encoding="utf-8")
+        self.assertIn("Measured Progress-Update Template (`COMM-08`", comm_text)
+        self.assertIn("Evidence-Based Recruitment Announcement (`COMM-10`", comm_text)
+        self.assertIn("Three Well-Scoped Beginner Contribution Paths (`COMM-11`", comm_text)
+
 
 if __name__ == "__main__":
     unittest.main()

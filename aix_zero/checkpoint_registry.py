@@ -27,6 +27,7 @@ from aix_zero.tokenizer import AIXZeroTokenizer, build_v11_tokenizer
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY_SCHEMA = ROOT / "schemas/checkpoint-inventory-v1.schema.json"
 EXPERIMENT_CONFIG_SCHEMA = ROOT / "schemas/experiment-config-v1.schema.json"
+NETWORK_JOB_LEASE_SCHEMA = ROOT / "schemas/network-job-lease-v1.schema.json"
 DEFAULT_INVENTORY_PATH = ROOT / "research/checkpoint-inventory.json"
 
 CLI_COMMAND_CLASSIFICATION: Dict[str, Dict[str, str]] = {
@@ -311,4 +312,211 @@ def load_experiment_config(path: Path | str) -> Dict[str, Any]:
     cfg = json.loads(Path(path).read_text(encoding="utf-8"))
     validate_experiment_config(cfg)
     return cfg
+
+
+def save_training_recovery_bundle(
+    *,
+    bundle_dir: Path | str,
+    experiment_config: Dict[str, Any],
+    step: int,
+    data_cursor: int,
+    model: AIXZeroModel,
+    optimizer: torch.optim.Optimizer,
+    torch_rng_state: Optional[torch.Tensor] = None,
+) -> Dict[str, Any]:
+    """Save a verified interrupted-experiment recovery bundle (`BASE-09` / Issue #32).
+
+    Stores model weights in `.safetensors`, optimizer and RNG state in an integrity-checked
+    recovery state file, and binds the bundle to `config_sha256`, `base_checkpoint_sha256`,
+    and `dataset_sha256`.
+    """
+    validate_experiment_config(experiment_config)
+    if step < 0 or data_cursor < 0:
+        raise ValueError("step and data_cursor must be nonnegative")
+
+    out_dir = Path(bundle_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    weights_path = out_dir / "recovery_model.safetensors"
+    state_path = out_dir / "recovery_state.pt"
+    meta_path = out_dir / "recovery_manifest.json"
+
+    saved_weights = save_checkpoint_protected(
+        model,
+        weights_path,
+        allow_overwrite_source=True,
+    )
+    rng_tensor = (
+        torch_rng_state.detach().cpu().clone()
+        if torch_rng_state is not None
+        else torch.random.get_rng_state().detach().cpu().clone()
+    )
+    torch.save(
+        {
+            "optimizer_state_dict": optimizer.state_dict(),
+            "torch_rng_state": rng_tensor,
+            "step": int(step),
+            "data_cursor": int(data_cursor),
+        },
+        state_path,
+    )
+    state_sha = hashlib.sha256(state_path.read_bytes()).hexdigest()
+
+    manifest = {
+        "schema_version": "1.0.0",
+        "status": "INTERRUPTED_RECOVERABLE",
+        "is_validated_final_checkpoint": False,
+        "experiment_id": experiment_config["experiment_id"],
+        "config_sha256": experiment_config["config_sha256"],
+        "base_checkpoint_sha256": experiment_config["model_identity"]["base_checkpoint_sha256"],
+        "dataset_sha256": experiment_config["data_identity"]["dataset_sha256"],
+        "step": int(step),
+        "data_cursor": int(data_cursor),
+        "weights_file": weights_path.name,
+        "weights_sha256": saved_weights["sha256"],
+        "state_file": state_path.name,
+        "state_sha256": state_sha,
+    }
+    write_json(manifest, meta_path)
+    return manifest
+
+
+def resume_training_from_bundle(
+    *,
+    bundle_dir: Path | str,
+    expected_experiment_config: Dict[str, Any],
+    model: AIXZeroModel,
+    optimizer: torch.optim.Optimizer,
+    restore_rng_state: bool = True,
+) -> Dict[str, Any]:
+    """Resume an interrupted experiment only after verifying config, dataset, base checkpoint,
+    weights, and optimizer/RNG state digests (`BASE-09` / Issue #32).
+    """
+    validate_experiment_config(expected_experiment_config)
+    bdir = Path(bundle_dir)
+    meta_path = bdir / "recovery_manifest.json"
+    if not meta_path.is_file():
+        raise FileNotFoundError(f"Missing recovery_manifest.json in {bdir}")
+    manifest = json.loads(meta_path.read_text(encoding="utf-8"))
+
+    if manifest.get("config_sha256") != expected_experiment_config["config_sha256"]:
+        raise ValueError("Refusing to resume: experiment config_sha256 mismatch")
+    if manifest.get("base_checkpoint_sha256") != expected_experiment_config["model_identity"]["base_checkpoint_sha256"]:
+        raise ValueError("Refusing to resume: base_checkpoint_sha256 mismatch")
+    if manifest.get("dataset_sha256") != expected_experiment_config["data_identity"]["dataset_sha256"]:
+        raise ValueError("Refusing to resume: dataset_sha256 mismatch")
+
+    weights_path = bdir / manifest["weights_file"]
+    state_path = bdir / manifest["state_file"]
+    if hashlib.sha256(weights_path.read_bytes()).hexdigest() != manifest["weights_sha256"]:
+        raise ValueError("Refusing to resume: recovery_model.safetensors SHA-256 mismatch")
+    if hashlib.sha256(state_path.read_bytes()).hexdigest() != manifest["state_sha256"]:
+        raise ValueError("Refusing to resume: recovery_state.pt SHA-256 mismatch")
+
+    tensors = load_file(str(weights_path))
+    if any(not torch.isfinite(t).all() for t in tensors.values()):
+        raise ValueError("Refusing to resume: recovery weights contain non-finite values")
+    model.load_state_dict(tensors, strict=True)
+
+    payload = torch.load(state_path, map_location="cpu", weights_only=False)
+    optimizer.load_state_dict(payload["optimizer_state_dict"])
+    if restore_rng_state:
+        torch.random.set_rng_state(payload["torch_rng_state"])
+
+    return {
+        "resumed": True,
+        "step": int(payload["step"]),
+        "data_cursor": int(payload["data_cursor"]),
+        "config_sha256": manifest["config_sha256"],
+    }
+
+
+VALID_FAILURE_STATUSES = (
+    "FAILED_NONFINITE",
+    "ABORTED_INTERRUPTED",
+    "FAILED_INVALID_ARTIFACT",
+    "COMPLETED_BUT_REJECTED_BY_GATE",
+)
+
+
+def build_experiment_failure_record(
+    *,
+    experiment_id: str,
+    config_sha256: str,
+    status: str,
+    step_reached: int,
+    reason: str,
+    partial_artifact_paths: Optional[List[str]] = None,
+    diagnostics: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Create a structured experiment failure or partial-run record (`BASE-10` / Issue #33).
+
+    Explicitly marks `is_validated_checkpoint = False` and `eligible_for_promotion = False`
+    so partial or failed runs can never be mistaken for completed checkpoints.
+    """
+    if status not in VALID_FAILURE_STATUSES:
+        raise ValueError(f"Unsupported failure status: {status!r}; must be one of {VALID_FAILURE_STATUSES}")
+    if step_reached < 0 or not reason.strip():
+        raise ValueError("step_reached must be nonnegative and reason must be nonempty")
+
+    record = {
+        "schema_version": "1.0.0",
+        "record_type": "EXPERIMENT_FAILURE_OR_PARTIAL_RUN",
+        "experiment_id": experiment_id,
+        "config_sha256": config_sha256,
+        "status": status,
+        "is_validated_checkpoint": False,
+        "eligible_for_promotion": False,
+        "step_reached": int(step_reached),
+        "reason": reason.strip(),
+        "partial_artifact_paths": list(partial_artifact_paths or []),
+        "diagnostics": dict(diagnostics or {}),
+    }
+    record["record_sha256"] = hashlib.sha256(canonical_json(record).encode("utf-8")).hexdigest()
+    return record
+
+
+def save_experiment_failure_record(record: Dict[str, Any], path: Path | str) -> None:
+    if record.get("record_type") != "EXPERIMENT_FAILURE_OR_PARTIAL_RUN" or record.get("is_validated_checkpoint") is not False:
+        raise ValueError("Invalid experiment failure record")
+    write_json(record, path)
+
+
+def network_job_contract_digest(contract: Dict[str, Any]) -> str:
+    unsigned = {k: v for k, v in contract.items() if k != "contract_sha256"}
+    return hashlib.sha256(canonical_json(unsigned).encode("utf-8")).hexdigest()
+
+
+def validate_network_job_contract(contract: Dict[str, Any]) -> None:
+    """Validate an independent experiment job & lease contract (`NETWORK-01` / Issue #125)."""
+    canonical_json(contract)
+    schema = json.loads(NETWORK_JOB_LEASE_SCHEMA.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    Draft202012Validator(schema).validate(contract)
+
+    jtype = contract["job_type"]
+    out = contract["expected_outputs"]
+    if jtype == "OFFLINE_EVALUATION_JOB":
+        if contract["resource_budget"]["max_steps"] != 0:
+            raise ValueError("OFFLINE_EVALUATION_JOB must have max_steps == 0")
+        if out["requires_candidate_safetensors"]:
+            raise ValueError("OFFLINE_EVALUATION_JOB cannot require candidate_safetensors output")
+    elif jtype == "BOUNDED_SPECIALIST_TRAINING_JOB":
+        if contract["resource_budget"]["max_steps"] < 1:
+            raise ValueError("BOUNDED_SPECIALIST_TRAINING_JOB requires max_steps >= 1")
+        if contract["inputs"].get("target_expert_slot") is None:
+            raise ValueError("BOUNDED_SPECIALIST_TRAINING_JOB requires an explicit target_expert_slot")
+        if not out["requires_candidate_safetensors"]:
+            raise ValueError("BOUNDED_SPECIALIST_TRAINING_JOB must require candidate_safetensors output")
+
+    expected = network_job_contract_digest(contract)
+    if contract["contract_sha256"] != expected:
+        raise ValueError(f"Job contract_sha256 mismatch: expected {expected}, got {contract['contract_sha256']}")
+
+
+def make_network_job_contract(unsigned_contract: Dict[str, Any]) -> Dict[str, Any]:
+    c = copy.deepcopy(unsigned_contract)
+    c["contract_sha256"] = network_job_contract_digest(c)
+    validate_network_job_contract(c)
+    return c
+
 

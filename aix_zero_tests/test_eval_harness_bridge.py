@@ -12,6 +12,7 @@ from evaluation_result import validate_evaluation_result
 from aix_zero.benchmark_baseline import load_v11
 from aix_zero.eval_harness_bridge import (
     AIXZeroProvider,
+    EXTERNAL_CODING_BENCHMARK_COMPATIBILITY,
     OPEN_WEIGHT_BASELINE_REGISTRY,
     assess_aix_paired_results,
     assert_comparable_conditions,
@@ -20,10 +21,15 @@ from aix_zero.eval_harness_bridge import (
     build_multidimensional_scorecard,
     compute_energy_and_useful_work,
     evaluate_probability_calibration,
+    format_external_coding_fixture,
     group_clustered_paired_interval,
+    measure_memory_and_cache_budget,
     rational_scorer_metadata,
     run_aix_benchmark,
+    score_cooperative_game_task,
+    score_epistemic_abstention_task,
     score_rational_or_probability,
+    verify_independent_reproduction,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -226,6 +232,78 @@ class EvalHarnessBridgeTests(unittest.TestCase):
 
         self.assertGreaterEqual(len(OPEN_WEIGHT_BASELINE_REGISTRY), 3)
         self.assertEqual(OPEN_WEIGHT_BASELINE_REGISTRY[0]["baseline_id"], "qwen2.5-0.5b-instruct-cpu")
+
+    def test_wave4_eval_09_12_15_and_reason_05_10(self):
+        ckpt = ROOT / "aix_zero/checkpoints/aix_zero_v11_kip.safetensors"
+        model, _ = load_v11(ckpt)
+
+        # EVAL-09 memory and cache budget separation
+        mem_ok = measure_memory_and_cache_budget(
+            model,
+            cached_cartridge_bytes=200_000,
+            max_cached_cartridge_bytes=1024 * 1024,
+            temporary_activation_bytes=64_000,
+        )
+        self.assertEqual(mem_ok["status"], "WITHIN_BUDGET")
+        mem_exceeded = measure_memory_and_cache_budget(
+            model,
+            cached_cartridge_bytes=2 * 1024 * 1024,
+            max_cached_cartridge_bytes=1024 * 1024,
+        )
+        self.assertEqual(mem_exceeded["status"], "BUDGET_EXCEEDED")
+
+        # EVAL-12 external coding benchmark compatibility fixture
+        self.assertIn("swe-bench-verified", EXTERNAL_CODING_BENCHMARK_COMPATIBILITY)
+        fixture = format_external_coding_fixture(
+            "livecodebench-exec",
+            [{"prompt": "Q:Code:def f(x):return 2*x+1;f(3)=", "gold": "7"}],
+        )
+        self.assertFalse(fixture["is_full_leaderboard_run"])
+
+        # EVAL-15 independent reproduction gate
+        author_rep = {
+            "author_id": "alice-author",
+            "checkpoint_sha256": "a" * 64,
+            "dataset_sha256": "b" * 64,
+            "answer_source": "neural_only",
+            "mean_score": 9 / 105,
+            "environment": {"os": "macOS"},
+        }
+        repro_ok = {
+            "reproducer_id": "bob-reproducer",
+            "checkpoint_sha256": "a" * 64,
+            "dataset_sha256": "b" * 64,
+            "answer_source": "neural_only",
+            "mean_score": 9 / 105,
+            "environment": {"os": "linux"},
+        }
+        verified = verify_independent_reproduction(author_rep, repro_ok)
+        self.assertEqual(verified["claim_status"], "REPRODUCED_VERIFIED")
+        self.assertTrue(verified["eligible_for_release_claim"])
+
+        repro_disagree = dict(repro_ok, mean_score=20 / 105)
+        blocked = verify_independent_reproduction(author_rep, repro_disagree)
+        self.assertEqual(blocked["claim_status"], "BLOCKED_BY_DISAGREEMENT")
+        self.assertFalse(blocked["eligible_for_release_claim"])
+
+        # REASON-10 cooperative game verifier (surplus vs Shapley allocation)
+        surplus = score_cooperative_game_task("5", v_a=2, v_b=3, v_ab=10, query_type="grand_coalition_surplus")
+        self.assertEqual(surplus["score"], 1.0)
+        shap_a = score_cooperative_game_task("9/2", v_a=2, v_b=3, v_ab=10, query_type="shapley_player_a")
+        self.assertEqual(shap_a["score"], 1.0)
+        # Confusing total surplus (5) with Player A's Shapley value (9/2) scores 0.0
+        wrong_shap = score_cooperative_game_task("5", v_a=2, v_b=3, v_ab=10, query_type="shapley_player_a")
+        self.assertEqual(wrong_shap["score"], 0.0)
+
+        # REASON-05 epistemic abstention vs false certainty
+        useful_abs = score_epistemic_abstention_task("<ans>NON_IDENTIFIABLE</ans>", is_identifiable=False)
+        self.assertEqual(useful_abs["epistemic_outcome"], "USEFUL_ABSTENTION")
+        self.assertEqual(useful_abs["score"], 1.0)
+
+        false_cert = score_epistemic_abstention_task("<ans>1/2</ans>", is_identifiable=False)
+        self.assertEqual(false_cert["epistemic_outcome"], "FALSE_CERTAINTY")
+        self.assertTrue(false_cert["false_certainty"])
+        self.assertEqual(false_cert["score"], 0.0)
 
 
 if __name__ == "__main__":

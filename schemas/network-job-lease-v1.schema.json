@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pfolex/verifiable-ai/blob/main/schemas/network-job-lease-v1.schema.json",
+  "title": "AIX Independent Experiment Job and Lease Contract v1 (NETWORK-01)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "job_type",
+    "experiment_config_sha256",
+    "inputs",
+    "resource_budget",
+    "lease",
+    "expected_outputs",
+    "contract_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{3,63}$"
+    },
+    "job_type": {
+      "enum": [
+        "OFFLINE_EVALUATION_JOB",
+        "BOUNDED_SPECIALIST_TRAINING_JOB"
+      ]
+    },
+    "experiment_config_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_checkpoint_path",
+        "base_checkpoint_sha256",
+        "dataset_id",
+        "dataset_sha256",
+        "seed"
+      ],
+      "properties": {
+        "base_checkpoint_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_expert_slot": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "resource_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_steps",
+        "max_wall_clock_seconds",
+        "max_memory_mb",
+        "device"
+      ],
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_wall_clock_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_memory_mb": {
+          "type": "integer",
+          "minimum": 64
+        },
+        "device": {
+          "enum": [
+            "cpu"
+          ]
+        }
+      }
+    },
+    "lease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lease_id",
+        "worker_id",
+        "issued_at_utc",
+        "expires_at_utc",
+        "heartbeat_interval_seconds",
+        "attempt_number"
+      ],
+      "properties": {
+        "lease_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "worker_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at_utc": {
+          "type": "string",
+          "minLength": 10
+        },
+        "expires_at_utc": {
+          "type": "string",
+          "minLength": 10
+        },
+        "heartbeat_interval_seconds": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "attempt_number": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "expected_outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requires_evaluation_result_json",
+        "requires_candidate_safetensors",
+        "requires_failure_record_on_abort"
+      ],
+      "properties": {
+        "requires_evaluation_result_json": {
+          "type": "boolean"
+        },
+        "requires_candidate_safetensors": {
+          "type": "boolean"
+        },
+        "requires_failure_record_on_abort": {
+          "type": "boolean"
+        }
+      }
+    },
+    "contract_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

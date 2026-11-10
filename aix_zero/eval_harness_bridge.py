@@ -770,3 +770,262 @@ OPEN_WEIGHT_BASELINE_REGISTRY: List[Dict[str, Any]] = [
     },
 ]
 
+
+def measure_memory_and_cache_budget(
+    model: AIXZeroModel,
+    *,
+    cached_cartridge_bytes: int = 0,
+    max_cached_cartridge_bytes: int = 1024 * 1024,
+    temporary_activation_bytes: int = 0,
+    max_total_tensor_budget_bytes: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Measure and separate process RSS, model parameter bytes, retained LRU cartridge cache bytes,
+    and temporary activation/deserialization tensor allocations (`EVAL-09` / Issue #49).
+    """
+    import resource
+    import sys
+
+    if cached_cartridge_bytes < 0 or max_cached_cartridge_bytes < 0 or temporary_activation_bytes < 0:
+        raise ValueError("Byte counts must be nonnegative")
+
+    model_param_bytes = sum(p.numel() * p.element_size() for p in model.parameters())
+    model_buffer_bytes = sum(b.numel() * b.element_size() for b in model.buffers())
+    retained_tensor_bytes = model_param_bytes + model_buffer_bytes + cached_cartridge_bytes
+    peak_working_tensor_bytes = retained_tensor_bytes + temporary_activation_bytes
+
+    rusage = resource.getrusage(resource.RUSAGE_SELF)
+    # macOS reports ru_maxrss in bytes; Linux reports in KiB
+    rss_bytes = int(rusage.ru_maxrss) if sys.platform == "darwin" else int(rusage.ru_maxrss) * 1024
+
+    cache_within_limit = cached_cartridge_bytes <= max_cached_cartridge_bytes
+    total_within_limit = (
+        True
+        if max_total_tensor_budget_bytes is None
+        else peak_working_tensor_bytes <= max_total_tensor_budget_bytes
+    )
+    status = "WITHIN_BUDGET" if (cache_within_limit and total_within_limit) else "BUDGET_EXCEEDED"
+
+    return {
+        "status": status,
+        "model_parameter_bytes": int(model_param_bytes),
+        "model_buffer_bytes": int(model_buffer_bytes),
+        "retained_cartridge_cache_bytes": int(cached_cartridge_bytes),
+        "max_cached_cartridge_bytes": int(max_cached_cartridge_bytes),
+        "temporary_activation_bytes": int(temporary_activation_bytes),
+        "retained_tensor_bytes": int(retained_tensor_bytes),
+        "peak_working_tensor_bytes": int(peak_working_tensor_bytes),
+        "process_peak_rss_bytes": rss_bytes,
+        "cache_within_limit": cache_within_limit,
+        "total_within_limit": total_within_limit,
+    }
+
+
+EXTERNAL_CODING_BENCHMARK_COMPATIBILITY: Dict[str, Dict[str, Any]] = {
+    "swe-bench-verified": {
+        "benchmark_id": "swe-bench-verified",
+        "official_harness": "swebench.harness.run_evaluation",
+        "license_spdx": "MIT",
+        "applicability_to_v11": "NOT_APPLICABLE_AT_817K_VOCAB_134",
+        "reason": (
+            "AIX-Zero v11 has a 134-token domain-specific vocabulary and 112-token max_seq_len; "
+            "it cannot tokenize multi-file repository diffs or execute Dockerized pytest patches."
+        ),
+        "contamination_risk": "HIGH_FOR_WEB_PRETRAINED_MODELS_LOW_FOR_SYNTHETIC_V11",
+        "compute_requirements": "Docker engine + >=16 GB RAM + multi-core CPU for repository test containers",
+    },
+    "livecodebench-exec": {
+        "benchmark_id": "livecodebench-exec",
+        "official_harness": "lcb_runner.runner.main",
+        "license_spdx": "Apache-2.0",
+        "applicability_to_v11": "COMPATIBILITY_FIXTURE_ONLY_ON_TINY_ARITHMETIC_AST",
+        "reason": (
+            "Full LiveCodeBench requires full Python stdlib tokenization and long-context generation; "
+            "only tiny single-line function evaluation (`CODE_TRACE`) is representable in the 134-token v11 vocabulary."
+        ),
+        "contamination_risk": "TEMPORAL_CUTOFF_REQUIRED",
+        "compute_requirements": "Sandboxed Python subprocess execution with strict timeout",
+    },
+}
+
+
+def format_external_coding_fixture(
+    benchmark_id: str,
+    samples: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Validate an external coding benchmark compatibility fixture (`EVAL-12` / Issue #53)
+    while explicitly marking `is_full_leaderboard_run = False` so a small harness smoke test
+    can never masquerade as an official leaderboard result.
+    """
+    if benchmark_id not in EXTERNAL_CODING_BENCHMARK_COMPATIBILITY:
+        raise ValueError(f"Unsupported external coding benchmark: {benchmark_id!r}")
+    if not samples:
+        raise ValueError("Compatibility fixture requires at least one sample")
+
+    meta = EXTERNAL_CODING_BENCHMARK_COMPATIBILITY[benchmark_id]
+    return {
+        "benchmark_id": benchmark_id,
+        "official_harness": meta["official_harness"],
+        "license_spdx": meta["license_spdx"],
+        "is_full_leaderboard_run": False,
+        "fixture_only_disclaimer": (
+            "Small compatibility fixture only; does NOT represent an official full-benchmark leaderboard score."
+        ),
+        "sample_count": len(samples),
+        "samples": [dict(s) for s in samples],
+    }
+
+
+def verify_independent_reproduction(
+    author_report: Dict[str, Any],
+    reproducer_report: Dict[str, Any],
+    *,
+    accuracy_abs_tol: float = 0.0,
+) -> Dict[str, Any]:
+    """Verify an independent reproduction report against an author report (`EVAL-15` / Issue #61).
+
+    Requires distinct `author_id` and `reproducer_id`, records both environments and signed
+    report digests, and blocks release claims (`BLOCKED_BY_DISAGREEMENT`) if scores disagree
+    beyond `accuracy_abs_tol` rather than averaging them away.
+    """
+    author_id = str(author_report.get("author_id", "")).strip()
+    reproducer_id = str(reproducer_report.get("reproducer_id", "")).strip()
+    if not author_id or not reproducer_id:
+        raise ValueError("Both author_id and reproducer_id must be nonempty")
+    if author_id == reproducer_id:
+        raise ValueError("Independent reproduction requires reproducer_id != author_id")
+
+    if author_report.get("checkpoint_sha256") != reproducer_report.get("checkpoint_sha256"):
+        raise ValueError("Reproduction must evaluate the exact same checkpoint_sha256")
+    if author_report.get("dataset_sha256") != reproducer_report.get("dataset_sha256"):
+        raise ValueError("Reproduction must evaluate the exact same dataset_sha256")
+    if author_report.get("answer_source") != reproducer_report.get("answer_source"):
+        raise ValueError("Reproduction must use the same answer_source mode")
+
+    a_score = float(author_report["mean_score"])
+    r_score = float(reproducer_report["mean_score"])
+    diff = abs(a_score - r_score)
+
+    author_digest = hashlib.sha256(canonical_json(author_report).encode("utf-8")).hexdigest()
+    reproducer_digest = hashlib.sha256(canonical_json(reproducer_report).encode("utf-8")).hexdigest()
+
+    if diff <= accuracy_abs_tol:
+        claim_status = "REPRODUCED_VERIFIED"
+        eligible_for_release_claim = True
+    else:
+        claim_status = "BLOCKED_BY_DISAGREEMENT"
+        eligible_for_release_claim = False
+
+    return {
+        "claim_status": claim_status,
+        "eligible_for_release_claim": eligible_for_release_claim,
+        "author_id": author_id,
+        "reproducer_id": reproducer_id,
+        "author_environment": dict(author_report.get("environment", {})),
+        "reproducer_environment": dict(reproducer_report.get("environment", {})),
+        "author_report_sha256": author_digest,
+        "reproducer_report_sha256": reproducer_digest,
+        "author_mean_score": a_score,
+        "reproducer_mean_score": r_score,
+        "absolute_score_difference": round(diff, 8),
+    }
+
+
+def score_cooperative_game_task(
+    prediction: str,
+    *,
+    v_a: int,
+    v_b: int,
+    v_ab: int,
+    query_type: str = "shapley_player_a",
+) -> Dict[str, Any]:
+    """Exact verifier for finite 2-player cooperative transferable-utility games (`REASON-10` / Issue #95).
+
+    Strictly differentiates:
+    - `grand_coalition_surplus`: $v(\\{A, B\\}) - (v(\\{A\\}) + v(\\{B\\}))$,
+    - `shapley_player_a`: $\\phi_A(v) = v(\\{A\\}) + \\frac{1}{2}(v(\\{A, B\\}) - v(\\{A\\}) - v(\\{B\\}))$,
+    - `shapley_player_b`: $\\phi_B(v) = v(\\{B\\}) + \\frac{1}{2}(v(\\{A, B\\}) - v(\\{A\\}) - v(\\{B\\}))$,
+    - `core_nonempty`: `1` if $v(\\{A, B\\}) \\ge v(\\{A\\}) + v(\\{B\\})$ else `0`.
+    """
+    surplus = v_ab - (v_a + v_b)
+    if query_type == "grand_coalition_surplus":
+        gold = str(surplus)
+    elif query_type == "shapley_player_a":
+        val = Fraction(v_a) + Fraction(surplus, 2)
+        gold = f"{val.numerator}/{val.denominator}" if val.denominator != 1 else str(val.numerator)
+    elif query_type == "shapley_player_b":
+        val = Fraction(v_b) + Fraction(surplus, 2)
+        gold = f"{val.numerator}/{val.denominator}" if val.denominator != 1 else str(val.numerator)
+    elif query_type == "core_nonempty":
+        gold = "1" if surplus >= 0 else "0"
+    else:
+        raise ValueError(f"Unsupported cooperative game query_type: {query_type!r}")
+
+    scored = score_rational_or_probability(prediction, gold, is_probability=False, require_reduced=True)
+    return {
+        "query_type": query_type,
+        "gold": gold,
+        "score": scored["score"],
+        "status": scored["status"],
+        "parsed_fraction": scored["parsed_fraction"],
+    }
+
+
+ABSTENTION_TOKENS = {"ABSTAIN", "INSUFFICIENT_INFO", "NON_IDENTIFIABLE", "UNKNOWN"}
+
+
+def score_epistemic_abstention_task(
+    prediction: str,
+    *,
+    is_identifiable: bool,
+    gold_answer: Optional[str] = None,
+    is_probability: bool = True,
+) -> Dict[str, Any]:
+    """Score epistemic uncertainty and abstention tasks (`REASON-05` / Issue #107).
+
+    Separates:
+    - `USEFUL_ABSTENTION`: model abstains when `is_identifiable is False`,
+    - `FALSE_CERTAINTY`: model outputs a concrete numerical claim when `is_identifiable is False`,
+    - `UNNECESSARY_ABSTENTION`: model abstains when `is_identifiable is True`,
+    - `IDENTIFIABLE_EXACT_MATCH` / `IDENTIFIABLE_WRONG_ANSWER`: model answers when `is_identifiable is True`.
+    """
+    text = prediction.strip()
+    m = re.search(r"<ans>(.*?)</ans>", text, flags=re.DOTALL)
+    candidate = m.group(1).strip() if m else text.strip()
+    upper = candidate.upper()
+    abstained = upper in ABSTENTION_TOKENS
+
+    if not is_identifiable:
+        if abstained:
+            return {
+                "score": 1.0,
+                "epistemic_outcome": "USEFUL_ABSTENTION",
+                "false_certainty": False,
+                "useful_abstention": True,
+            }
+        return {
+            "score": 0.0,
+            "epistemic_outcome": "FALSE_CERTAINTY",
+            "false_certainty": True,
+            "useful_abstention": False,
+        }
+
+    if gold_answer is None:
+        raise ValueError("gold_answer is required when is_identifiable=True")
+    if abstained:
+        return {
+            "score": 0.0,
+            "epistemic_outcome": "UNNECESSARY_ABSTENTION",
+            "false_certainty": False,
+            "useful_abstention": False,
+        }
+
+    rational = score_rational_or_probability(candidate, gold_answer, is_probability=is_probability)
+    return {
+        "score": rational["score"],
+        "epistemic_outcome": "IDENTIFIABLE_EXACT_MATCH" if rational["score"] == 1.0 else "IDENTIFIABLE_WRONG_ANSWER",
+        "false_certainty": False,
+        "useful_abstention": False,
+        "rational_status": rational["status"],
+    }
+
+

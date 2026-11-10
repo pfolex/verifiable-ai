@@ -5,7 +5,7 @@ import unittest
 
 import torch
 
-from aix_zero.architecture import AIXZeroConfig, MixtureOfReasoningExperts
+from aix_zero.architecture import AIXZeroConfig, MixtureOfReasoningExperts, profile_moe_dispatch_breakdown
 from aix_zero.benchmark_baseline import load_v11
 
 
@@ -105,6 +105,17 @@ class SparseDispatchTests(unittest.TestCase):
         half_moe = MixtureOfReasoningExperts(AIXZeroConfig(d_model=16, d_ff=64, n_experts=4, moe_top_k=2)).half()
         with self.assertRaisesRegex(ValueError, "Unsupported precision dtype"):
             half_moe(torch.randn(2, 3, 16, dtype=torch.float16))
+
+    def test_expert_10_dispatch_profiling_separates_microkernel_from_full_forward(self):
+        checkpoint = Path(__file__).resolve().parents[1] / 'aix_zero/checkpoints/aix_zero_v11_kip.safetensors'
+        model, tokenizer = load_v11(checkpoint)
+        ids = torch.tensor([tokenizer.encode('Q:(3*4)+5=')])
+        prof = profile_moe_dispatch_breakdown(model, ids, warmup_runs=1, measured_runs=2)
+        self.assertEqual(prof['default_dispatch_mode'], 'dense')
+        self.assertIn('moe_layer_dense_ms', prof['microkernel_ms'])
+        self.assertIn('moe_layer_sparse_ms', prof['microkernel_ms'])
+        self.assertIn('dense_ms', prof['full_forward_ms'])
+        self.assertIn('sparse_ms', prof['full_forward_ms'])
 
 
 if __name__ == '__main__':

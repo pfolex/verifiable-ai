@@ -9,10 +9,16 @@ from aix_zero.bayesian_tasks import build_dataset
 from aix_zero.knowledge_is_power import build_21_domain_kip_v11_curriculum
 from aix_zero.semantic_splits import (
     SPLIT_ACCESS_POLICY,
+    analyze_bayesian_pilot_errors,
+    audit_answer_frequency_shortcuts,
+    build_benchmark_exclusion_ledger,
     build_rotating_test_partition,
+    build_validation_curriculum_experiment_set,
     canonical_problem_identity,
     compute_difficulty_factors,
+    cross_check_generator_with_independent_oracle,
     export_training_split_safe,
+    generate_generalization_taxonomy_manifest,
     partition_by_semantic_identity,
     semantic_identity_hash,
     verify_disjoint_splits,
@@ -113,6 +119,59 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertGreater(bs_hard["max_denominator"], bp_easy["max_denominator"])
         self.assertEqual(bp_easy["difficulty_tier"], "tier_1_basic")
         self.assertEqual(bs_hard["difficulty_tier"], "tier_3_compositional")
+
+    def test_wave4_data_04_06_07_08_13_and_train_01(self):
+        ds = build_dataset(seed=42)
+        bp_splits = ds["tasks"]["BP"]
+
+        # DATA-04 independent oracle cross-check + injected mistake detection
+        clean_check = cross_check_generator_with_independent_oracle(bp_splits["test"])
+        self.assertTrue(clean_check["all_verified"])
+        corrupted = [dict(bp_splits["test"][0], gold="99/100")]
+        bad_check = cross_check_generator_with_independent_oracle(corrupted)
+        self.assertFalse(bad_check["all_verified"])
+        self.assertEqual(bad_check["mismatch_count"], 1)
+
+        # DATA-06 generalization taxonomy & blocking held-out grammar in train
+        tax = generate_generalization_taxonomy_manifest(bp_splits)
+        self.assertIn("representation_or_layout_novelty", tax["split_category_counts"]["test"])
+        with self.assertRaisesRegex(ValueError, "Held-out grammar category"):
+            generate_generalization_taxonomy_manifest({"train": bp_splits["test"]})
+
+        # DATA-07 shortcut auditing
+        shortcuts = audit_answer_frequency_shortcuts(bp_splits["train"], bp_splits["test"])
+        self.assertAlmostEqual(shortcuts["shortcut_accuracies"]["prior_only_echo"], 12 / 96, places=5)
+
+        # DATA-08 validation-only curriculum experiment set
+        val_set = build_validation_curriculum_experiment_set(
+            bp_splits, partition_id="val-curriculum-v1", max_tuning_trials=5
+        )
+        self.assertFalse(val_set["consumes_final_test_budget"])
+        self.assertEqual(val_set["allowed_split"], "validation")
+
+        # DATA-13 benchmark exclusion ledger
+        ledger = build_benchmark_exclusion_ledger(
+            historical_dataset_id="aix-zero-v11-kip-21domain",
+            historical_dataset_sha256="a" * 64,
+            excluded_cases=[
+                {
+                    "prompt": "Q:Sam has 5 packs of 5 and buys 2. Total?=",
+                    "semantic_identity_hash": semantic_identity_hash(
+                        {"domain": "WORD_PROBLEM", "prompt": "Q:Sam has 5 packs of 5 and buys 2. Total?="}
+                    ),
+                    "reason": "Surface-name variant of Mia train prompt with identical (5, 5, 2) operands",
+                }
+            ],
+            replacement_partition_id="v12-semantic-disjoint-word-problem",
+        )
+        self.assertTrue(ledger["historical_reports_retain_original_sha256"])
+
+        # TRAIN-01 Bayesian pilot error analysis
+        pilot_json = json.loads((ROOT / "research/bayesian-pilot/results.json").read_text(encoding="utf-8"))
+        err_analysis = analyze_bayesian_pilot_errors(pilot_json)
+        self.assertFalse(err_analysis["used_consumed_test_set_for_hyperparameter_selection"])
+        self.assertTrue(err_analysis["tasks"]["BP"]["root_cause_categories"]["below_prior_only_shortcut"])
+        self.assertTrue((ROOT / "docs/BAYESIAN-PILOT-ERROR-ANALYSIS.md").is_file())
 
 
 if __name__ == "__main__":

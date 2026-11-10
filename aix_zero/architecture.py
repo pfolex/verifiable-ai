@@ -818,3 +818,86 @@ class AIXZeroModel(nn.Module):
                 best_ponder = ponder_last
 
         return best_ids, best_value, best_ponder
+
+
+@torch.no_grad()
+def profile_moe_dispatch_breakdown(
+    model: AIXZeroModel,
+    input_ids: torch.Tensor,
+    *,
+    warmup_runs: int = 1,
+    measured_runs: int = 3,
+) -> Dict[str, Any]:
+    """Profile MoE microkernel breakdown vs. full-model forward pass (`EXPERT-10` / Issue #118).
+
+    Separates:
+    - router projection + top-k selection (`router_and_topk_ms`),
+    - shared expert FFN (`shared_expert_ms`),
+    - routed expert scanning, gather/scatter, and GEMM (`routed_experts_dense_ms` vs `routed_experts_sparse_ms`),
+    - full-model forward pass (`full_forward_dense_ms` vs `full_forward_sparse_ms`),
+    and explains why `dense` remains the default for small CPU matrices (`n_experts=4, d_model=128`).
+    """
+    import time
+
+    if warmup_runs < 0 or measured_runs < 1:
+        raise ValueError("warmup_runs must be >= 0 and measured_runs must be >= 1")
+
+    model.eval()
+    moe = model.latent_reasoning_core.core_block.moe
+    B, T = input_ids.shape
+    h = model.token_emb(input_ids)
+    for layer in model.encoder_layers:
+        h, _ = layer(h)
+    x_norm = model.latent_reasoning_core.core_block.ffn_norm(h)
+    flat = x_norm.view(-1, model.config.d_model)
+
+    def _time_fn(fn) -> float:
+        for _ in range(warmup_runs):
+            fn()
+        t0 = time.perf_counter()
+        for _ in range(measured_runs):
+            fn()
+        return ((time.perf_counter() - t0) * 1000.0) / measured_runs
+
+    router_ms = _time_fn(lambda: torch.topk(F.softmax(moe.router(flat), dim=-1), k=moe.top_k, dim=-1))
+    shared_ms = _time_fn(lambda: moe.shared_expert(flat)) if moe.shared_expert is not None else 0.0
+
+    prev_mode = moe.dispatch_mode
+    try:
+        moe.dispatch_mode = "dense"
+        micro_dense_ms = _time_fn(lambda: moe(x_norm))
+        full_dense_ms = _time_fn(lambda: model(input_ids))
+
+        moe.dispatch_mode = "sparse"
+        micro_sparse_ms = _time_fn(lambda: moe(x_norm))
+        full_sparse_ms = _time_fn(lambda: model(input_ids))
+    finally:
+        moe.dispatch_mode = prev_mode
+
+    return {
+        "matrix_dimensions": {
+            "batch_size": int(B),
+            "seq_len": int(T),
+            "total_tokens": int(B * T),
+            "d_model": int(model.config.d_model),
+            "d_ff_routed": max(64, int(model.config.d_ff) // 2),
+            "n_experts": int(moe.n_experts),
+            "top_k": int(moe.top_k),
+        },
+        "microkernel_ms": {
+            "router_and_topk_ms": round(router_ms, 6),
+            "shared_expert_ms": round(shared_ms, 6),
+            "moe_layer_dense_ms": round(micro_dense_ms, 6),
+            "moe_layer_sparse_ms": round(micro_sparse_ms, 6),
+        },
+        "full_forward_ms": {
+            "dense_ms": round(full_dense_ms, 6),
+            "sparse_ms": round(full_sparse_ms, 6),
+        },
+        "default_dispatch_mode": "dense",
+        "recommendation": (
+            "Retain dense default for n_experts=4, d_model=128 on CPU because Python index_select/index_add_ "
+            "gather-scatter overhead offsets skipping 2 small 128x128 expert GEMMs."
+        ),
+    }
+

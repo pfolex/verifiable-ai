@@ -3,6 +3,7 @@ hardware numerical tolerances (`BASE-11`), and clean-checkout smoke round-trip (
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -14,12 +15,18 @@ import torch
 from aix_zero.checkpoint_registry import (
     CLI_COMMAND_CLASSIFICATION,
     DEFAULT_INVENTORY_PATH,
+    build_experiment_failure_record,
     load_checkpoint_inventory,
     load_checkpoint_strict,
     make_experiment_config,
+    make_network_job_contract,
+    resume_training_from_bundle,
     save_checkpoint_protected,
+    save_experiment_failure_record,
+    save_training_recovery_bundle,
     validate_checkpoint_inventory,
     validate_experiment_config,
+    validate_network_job_contract,
 )
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
@@ -218,6 +225,209 @@ class CheckpointRegistryAndSmokeTests(unittest.TestCase):
                     "empirical_gate": {"decision": "FAIL"},
                 }
             )
+
+    def test_base_09_interrupted_experiment_recovery_and_base_10_failure_records(self):
+        from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+
+        cfg = make_experiment_config(
+            {
+                "schema_version": "1.0.0",
+                "experiment_id": "exp-recovery-test",
+                "hypothesis": "Deterministic recovery matches uninterrupted control.",
+                "seed": 42,
+                "model_identity": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "a" * 64,
+                    "tokenizer_vocab_size": 32,
+                    "tokenizer_vocab_sha256": "b" * 64,
+                    "trainable_scope": "full_model",
+                    "trainable_parameters": 1024,
+                },
+                "data_identity": {
+                    "dataset_id": "toy-dataset",
+                    "dataset_sha256": "c" * 64,
+                    "train_split": "train",
+                    "validation_split": "validation",
+                    "test_split": "test",
+                },
+                "optimizer": {
+                    "name": "AdamW",
+                    "lr": 0.01,
+                    "weight_decay": 0.0,
+                    "max_grad_norm": 1.0,
+                    "batch_size": 2,
+                    "max_steps": 2,
+                },
+                "hardware_budget": {
+                    "device": "cpu",
+                    "dtype": "float32",
+                    "threads": 1,
+                    "max_wall_clock_seconds": 60,
+                },
+                "selection_and_stop_rule": {
+                    "checkpoint_selection_metric": "validation_loss",
+                    "controls": ["uninterrupted_control"],
+                    "promotion_gate": "paired_hoeffding_union_bound",
+                },
+            }
+        )
+        m_cfg = AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, n_experts=2, moe_top_k=1)
+        batches = [
+            torch.tensor([[1, 2, 3, 4], [2, 3, 4, 5]], dtype=torch.long),
+            torch.tensor([[3, 4, 5, 6], [4, 5, 6, 7]], dtype=torch.long),
+        ]
+
+        # Control: 2 uninterrupted steps
+        torch.manual_seed(99)
+        ctrl_model = AIXZeroModel(m_cfg)
+        ctrl_opt = torch.optim.AdamW(ctrl_model.parameters(), lr=0.01, weight_decay=0.0)
+        for step_idx, b in enumerate(batches):
+            ctrl_opt.zero_grad(set_to_none=True)
+            loss = ctrl_model(b, labels=b)["loss"]
+            loss.backward()
+            ctrl_opt.step()
+
+        # Interrupted after step 1, saved, then resumed for step 2
+        with tempfile.TemporaryDirectory() as tmp:
+            torch.manual_seed(99)
+            rec_model = AIXZeroModel(m_cfg)
+            rec_opt = torch.optim.AdamW(rec_model.parameters(), lr=0.01, weight_decay=0.0)
+            rec_opt.zero_grad(set_to_none=True)
+            rec_model(batches[0], labels=batches[0])["loss"].backward()
+            rec_opt.step()
+
+            bundle_dir = Path(tmp) / "bundle"
+            manifest = save_training_recovery_bundle(
+                bundle_dir=bundle_dir,
+                experiment_config=cfg,
+                step=1,
+                data_cursor=1,
+                model=rec_model,
+                optimizer=rec_opt,
+            )
+            self.assertFalse(manifest["is_validated_final_checkpoint"])
+
+            # Fresh model & optimizer resumed from bundle
+            resumed_model = AIXZeroModel(m_cfg)
+            resumed_opt = torch.optim.AdamW(resumed_model.parameters(), lr=0.01, weight_decay=0.0)
+            res_info = resume_training_from_bundle(
+                bundle_dir=bundle_dir,
+                expected_experiment_config=cfg,
+                model=resumed_model,
+                optimizer=resumed_opt,
+            )
+            self.assertEqual(res_info["step"], 1)
+            resumed_opt.zero_grad(set_to_none=True)
+            resumed_model(batches[1], labels=batches[1])["loss"].backward()
+            resumed_opt.step()
+
+            for (name, p_ctrl), (_, p_res) in zip(ctrl_model.named_parameters(), resumed_model.named_parameters()):
+                torch.testing.assert_close(p_res, p_ctrl, rtol=1e-5, atol=1e-6, msg=name)
+
+            # Mismatched dataset identity refuses resume without overwriting
+            bad_cfg = copy.deepcopy(cfg)
+            bad_cfg["data_identity"]["dataset_sha256"] = "d" * 64
+            bad_cfg = make_experiment_config({k: v for k, v in bad_cfg.items() if k != "config_sha256"})
+            with self.assertRaisesRegex(ValueError, "config_sha256 mismatch"):
+                resume_training_from_bundle(
+                    bundle_dir=bundle_dir,
+                    expected_experiment_config=bad_cfg,
+                    model=resumed_model,
+                    optimizer=resumed_opt,
+                )
+
+            # BASE-10 structured failure records
+            fail_rec = build_experiment_failure_record(
+                experiment_id="exp-recovery-test",
+                config_sha256=cfg["config_sha256"],
+                status="FAILED_NONFINITE",
+                step_reached=1,
+                reason="NaN loss encountered during step 2",
+            )
+            self.assertFalse(fail_rec["is_validated_checkpoint"])
+            self.assertFalse(fail_rec["eligible_for_promotion"])
+            fail_path = Path(tmp) / "failure.json"
+            save_experiment_failure_record(fail_rec, fail_path)
+            self.assertTrue(fail_path.is_file())
+
+    def test_base_16_audit_and_network_01_job_contracts_and_expert_02_03_hardening(self):
+        audit_doc = ROOT / "docs/M0-FOUNDATION-READINESS-AUDIT.md"
+        self.assertTrue(audit_doc.is_file())
+        self.assertIn("M0_FOUNDATION_READY", audit_doc.read_text(encoding="utf-8"))
+
+        # NETWORK-01 evaluation and specialist training job contracts
+        eval_job = make_network_job_contract(
+            {
+                "schema_version": "1.0.0",
+                "job_id": "job-eval-v11-001",
+                "job_type": "OFFLINE_EVALUATION_JOB",
+                "experiment_config_sha256": "a" * 64,
+                "inputs": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "b" * 64,
+                    "dataset_id": "v11-kip-test",
+                    "dataset_sha256": "c" * 64,
+                    "seed": 42,
+                    "target_expert_slot": None,
+                },
+                "resource_budget": {
+                    "max_steps": 0,
+                    "max_wall_clock_seconds": 120,
+                    "max_memory_mb": 512,
+                    "device": "cpu",
+                },
+                "lease": {
+                    "lease_id": "lease-001",
+                    "worker_id": "worker-local-01",
+                    "issued_at_utc": "2026-11-10T22:00:00Z",
+                    "expires_at_utc": "2026-11-10T22:30:00Z",
+                    "heartbeat_interval_seconds": 15,
+                    "attempt_number": 1,
+                },
+                "expected_outputs": {
+                    "requires_evaluation_result_json": True,
+                    "requires_candidate_safetensors": False,
+                    "requires_failure_record_on_abort": True,
+                },
+            }
+        )
+        validate_network_job_contract(eval_job)
+
+        bad_job = copy.deepcopy(eval_job)
+        bad_job["job_type"] = "UNKNOWN_SYNCHRONIZED_ALLREDUCE_JOB"
+        with self.assertRaises(Exception):
+            validate_network_job_contract(bad_job)
+
+        # EXPERT-02 & EXPERT-03 hardening tests
+        ckpt = ROOT / "aix_zero/checkpoints/aix_zero_v11_kip.safetensors"
+        model, _, info = load_checkpoint_strict(ckpt)
+        with tempfile.TemporaryDirectory() as tmp:
+            bdir = Path(tmp) / "bank"
+            bank = SparseExpertCartridgeBank(bdir)
+            bank.export_all_domain_cartridges(
+                model, {"DOM_A": {}}, {}, domain_expert_map={"DOM_A": 0}
+            )
+            # Duplicate JSON key in manifest is rejected (EXPERT-03)
+            raw_txt = bank.manifest_path.read_text(encoding="utf-8")
+            dup_txt = raw_txt.replace('"schema_version": 1,', '"schema_version": 1, "schema_version": 1,')
+            bank.manifest_path.write_text(dup_txt, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Duplicate JSON key"):
+                bank.get_manifest()
+            bank.manifest_path.write_text(raw_txt, encoding="utf-8")
+
+            # Trained specialist for another base checkpoint SHA-256 is rejected (EXPERT-02)
+            manifest = bank.get_manifest()
+            manifest["cartridges"]["DOM_A"]["provenance"] = "frozen_v11_single_expert_training_candidate"
+            manifest["cartridges"]["DOM_A"]["promotion_status"] = "APPROVED_ACTIVE"
+            manifest["cartridges"]["DOM_A"]["training"] = {"frozen_tensors_unchanged": True}
+            manifest["cartridges"]["DOM_A"]["empirical_gate"] = {"decision": "PASS"}
+            manifest["cartridges"]["DOM_A"]["base_checkpoint_sha256"] = "f" * 64
+            bank.manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "Trained specialist base_checkpoint_sha256 mismatch"):
+                bank.install_cartridge(
+                    model, "DOM_A", slot=0, active_base_checkpoint_sha256=info["sha256"]
+                )
 
 
 if __name__ == "__main__":
