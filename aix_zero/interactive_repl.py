@@ -35,6 +35,7 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
     sys.path.insert(0, str(REPO_ROOT / sub / "src"))
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+from aix_zero.checkpoint_registry import load_checkpoint_strict
 from aix_zero.knowledge_is_power import CodexRetriever, WebKnowledgeFetcher
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
@@ -44,8 +45,11 @@ from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
 _CARTRIDGE_BANK = SparseExpertCartridgeBank()
 
 
-def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
-    tokenizer = AIXZeroTokenizer(use_word_vocab=True)
+def load_v8_model(
+    device: torch.device,
+    *,
+    expand_to_tokenizer: bool = False,
+) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
     v11_ckpt = ckpt_dir / "aix_zero_v11_kip.safetensors"
     v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
@@ -58,31 +62,12 @@ def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer,
         if cand.exists():
             active_ckpt = cand
             break
-    state = load_file(str(active_ckpt))
-    ckpt_vocab = state["token_emb.weight"].shape[0]
-
-    config = AIXZeroConfig(
-        vocab_size=ckpt_vocab,
-        d_model=128,
-        n_heads=4,
-        n_kv_heads=2,
-        d_ff=256,
-        n_encoder_layers=1,
-        n_recurrent_steps=3,
-        n_decoder_layers=1,
-        max_seq_len=112,
-        use_moe=True,
-        use_shared_expert=True,
-        n_experts=4,
-        moe_top_k=2,
-        use_memory_bank=True,
-        n_memory_slots=8,
-        use_prompt_pointer=True,
-        pointer_temperature=0.35,
+    model, tokenizer, _ = load_checkpoint_strict(
+        active_ckpt,
+        device=device,
+        allow_append_only_superset=True,
     )
-    model = AIXZeroModel(config).to(device)
-    model.load_state_dict(state)
-    if tokenizer.vocab_size > ckpt_vocab:
+    if expand_to_tokenizer and tokenizer.vocab_size > model.config.vocab_size:
         model.resize_token_embeddings(tokenizer.vocab_size)
     model.eval()
     return model, tokenizer, active_ckpt

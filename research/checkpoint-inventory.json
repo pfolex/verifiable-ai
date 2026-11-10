@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0.0",
+  "checkpoints": [
+    {
+      "checkpoint_id": "aix-zero-v1",
+      "path": "aix_zero/checkpoints/aix_zero_v1.safetensors",
+      "sha256": "8f6c09af499ff63e6a7566d673933c0e15c0cfb10e7cee195d28444814385548",
+      "serialized_bytes": 1918296,
+      "physical_parameters": 478594,
+      "vocab_size": 103,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/train_from_scratch.py",
+      "base_checkpoint_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "verified_first_party_procedural",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Exact random seed state of intermediate training loop not stored inside .safetensors header."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v2-unified",
+      "path": "aix_zero/checkpoints/aix_zero_v2_unified.safetensors",
+      "sha256": "2a60921da689e137e11c4545ea460dc9167c0684375e2227ce97a115b94d379a",
+      "serialized_bytes": 1918296,
+      "physical_parameters": 478594,
+      "vocab_size": 103,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/ablate_architectures.py",
+      "base_checkpoint_sha256": "8f6c09af499ff63e6a7566d673933c0e15c0cfb10e7cee195d28444814385548",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "verified_first_party_procedural",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Exact random seed state of intermediate training loop not stored inside .safetensors header."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v3",
+      "path": "aix_zero/checkpoints/aix_zero_v3.safetensors",
+      "sha256": "cb1583651a04f4787e74f35286bd73d83beecf1ccc94788b65b46ca68cd69247",
+      "serialized_bytes": 2930512,
+      "physical_parameters": 731010,
+      "vocab_size": 118,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/train_v3_from_scratch.py",
+      "base_checkpoint_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "verified_first_party_procedural",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Trained on first-party procedural word/calculus/system templates; tokenizer prefix matches first 118 tokens of v11."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v4",
+      "path": "aix_zero/checkpoints/aix_zero_v4.safetensors",
+      "sha256": "00224b4b08528a3eaaa34ced79a53b8a0454d278eff097f45b3af0763415497f",
+      "serialized_bytes": 3263752,
+      "physical_parameters": 814082,
+      "vocab_size": 121,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/train_v4_from_scratch.py",
+      "base_checkpoint_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "verified_first_party_procedural",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Trained on first-party procedural 7-domain templates; tokenizer prefix matches first 121 tokens of v11."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v6-symbiont",
+      "path": "aix_zero/checkpoints/aix_zero_v6_symbiont.safetensors",
+      "sha256": "9158bebc66386150bbbf88878872df258b718e2ba50092aa67d4d0b7bf884607",
+      "serialized_bytes": 3265800,
+      "physical_parameters": 814594,
+      "vocab_size": 123,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/autonomous_symbiont.py",
+      "base_checkpoint_sha256": "00224b4b08528a3eaaa34ced79a53b8a0454d278eff097f45b3af0763415497f",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Training session invoked local Ollama teachers (aix-8b:latest, aix3:latest) whose upstream base-model weights and exact sampling state are external to this repo."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v7-10min",
+      "path": "aix_zero/checkpoints/aix_zero_v7_10min.safetensors",
+      "sha256": "7f465aa48b280e08e2ebf1e15fb460f5530eeb80afb1e5dc3aef632a6bb4ab87",
+      "serialized_bytes": 3267848,
+      "physical_parameters": 815106,
+      "vocab_size": 125,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/continuous_time_trainer.py",
+      "base_checkpoint_sha256": "9158bebc66386150bbbf88878872df258b718e2ba50092aa67d4d0b7bf884607",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Derived from v6_symbiont via wall-clock continuous training; wall-clock step count depends on host CPU speed."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v8",
+      "path": "aix_zero/checkpoints/aix_zero_v8.safetensors",
+      "sha256": "c4a49907197bd97ea3126cae0b3da0b724d6d1f5ecb8a0b07514ab40f7379473",
+      "serialized_bytes": 3268872,
+      "physical_parameters": 815362,
+      "vocab_size": 126,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/train_v8_stratified.py",
+      "base_checkpoint_sha256": "7f465aa48b280e08e2ebf1e15fb460f5530eeb80afb1e5dc3aef632a6bb4ab87",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Derived from v7_10min; inherits v6 teacher-assisted lineage."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v9-kip",
+      "path": "aix_zero/checkpoints/aix_zero_v9_kip.safetensors",
+      "sha256": "c90a681c2c0045ab0ac9233d88b4de2eb54af4d7ce4dbe5700f0885af65924e6",
+      "serialized_bytes": 3270920,
+      "physical_parameters": 815874,
+      "vocab_size": 128,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/knowledge_is_power.py",
+      "base_checkpoint_sha256": "c4a49907197bd97ea3126cae0b3da0b724d6d1f5ecb8a0b07514ab40f7379473",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Derived from v8 during Knowledge Is Power v9 session which queried local Ollama models for codex notes."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v10-kip",
+      "path": "aix_zero/checkpoints/aix_zero_v10_kip.safetensors",
+      "sha256": "1ba2ecaa7240d165e56e9ddaa3b77126833bbcda1db26e0b8277e6c54048ad78",
+      "serialized_bytes": 3273992,
+      "physical_parameters": 816642,
+      "vocab_size": 131,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/knowledge_is_power.py",
+      "base_checkpoint_sha256": "c90a681c2c0045ab0ac9233d88b4de2eb54af4d7ce4dbe5700f0885af65924e6",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "HISTORICAL_INTERMEDIATE",
+      "known_provenance_gaps": [
+        "Derived from v9_kip during Knowledge Is Power v10 session."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-v11-kip",
+      "path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+      "sha256": "3af801152922cd27c40c8e349bdb68b6a10efb87445716c3262b85daf5cb44cb",
+      "serialized_bytes": 3277064,
+      "physical_parameters": 817410,
+      "vocab_size": 134,
+      "artifact_kind": "full_model_checkpoint",
+      "training_script": "aix_zero/knowledge_is_power.py",
+      "base_checkpoint_sha256": "1ba2ecaa7240d165e56e9ddaa3b77126833bbcda1db26e0b8277e6c54048ad78",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "teacher_assisted_or_external_web_session",
+      "promotion_status": "ACTIVE_BASELINE",
+      "known_provenance_gaps": [
+        "Active 21-domain baseline (817,410 physical parameters; 9/105 neural-only, 105/105 symbolic-assisted). Derived from v10_kip during session that fetched Wikipedia/arXiv metadata and queried local Ollama models."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-bayesian-pilot-bp",
+      "path": "research/bayesian-pilot/candidates/BP/expert_bp_b6ba44e956318710feb10d1e79af1f87700fa0ac64676e198519ee461a66a44d.safetensors",
+      "sha256": "b6ba44e956318710feb10d1e79af1f87700fa0ac64676e198519ee461a66a44d",
+      "serialized_bytes": 196864,
+      "physical_parameters": 49152,
+      "vocab_size": null,
+      "artifact_kind": "single_expert_shard",
+      "training_script": "aix_zero/train_bayesian_pilot.py",
+      "base_checkpoint_sha256": "3af801152922cd27c40c8e349bdb68b6a10efb87445716c3262b85daf5cb44cb",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "rejected_research_candidate",
+      "promotion_status": "REJECTED",
+      "known_provenance_gaps": [
+        "Single-expert (49,152 params) candidate trained on frozen v11 backbone; scored 3/96 (3.125%) vs 10.42% prior-only control and was REJECTED by empirical gate."
+      ]
+    },
+    {
+      "checkpoint_id": "aix-zero-bayesian-pilot-bs",
+      "path": "research/bayesian-pilot/candidates/BS/expert_bs_ae43c07eca9837a4a832e9021e527640bbf8944aeb32e96a0be8c0955e5776d8.safetensors",
+      "sha256": "ae43c07eca9837a4a832e9021e527640bbf8944aeb32e96a0be8c0955e5776d8",
+      "serialized_bytes": 196864,
+      "physical_parameters": 49152,
+      "vocab_size": null,
+      "artifact_kind": "single_expert_shard",
+      "training_script": "aix_zero/train_bayesian_pilot.py",
+      "base_checkpoint_sha256": "3af801152922cd27c40c8e349bdb68b6a10efb87445716c3262b85daf5cb44cb",
+      "license_spdx": "Apache-2.0",
+      "provenance_status": "rejected_research_candidate",
+      "promotion_status": "REJECTED",
+      "known_provenance_gaps": [
+        "Single-expert (49,152 params) candidate trained on frozen v11 backbone; scored 1/144 (0.694%) vs 16.67% prior-only control and was REJECTED by empirical gate."
+      ]
+    }
+  ],
+  "inventory_sha256": "98330d06b1770dec3a325aa68a8457d7ac2675797131f6fc1f1d7cedceb87a79"
+}

@@ -25,24 +25,16 @@ from safetensors.torch import load_file
 import torch
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+from aix_zero.checkpoint_registry import load_checkpoint_strict
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank, _atomic_write
 from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 
 
 def load_v11(checkpoint: Path, *, expected_tokenizer_metadata=None):
-    state = load_file(str(checkpoint))
-    config = AIXZeroConfig(
-        vocab_size=state['token_emb.weight'].shape[0], use_moe=True,
-        use_shared_expert=True, use_memory_bank=True, use_prompt_pointer=True)
-    model = AIXZeroModel(config)
-    model.load_state_dict(state, strict=True)
-    model.eval()
-    tokenizer = AIXZeroTokenizer(use_word_vocab=True)
-    # Existing IDs are append-only. Do not expand embeddings with random weights.
-    tokenizer.verify_checkpoint_compatibility(
-        config.vocab_size,
-        expected_tokenizer_metadata,
+    model, tokenizer, _ = load_checkpoint_strict(
+        checkpoint,
+        expected_tokenizer_metadata=expected_tokenizer_metadata,
         allow_append_only_superset=True,
     )
     return model, tokenizer

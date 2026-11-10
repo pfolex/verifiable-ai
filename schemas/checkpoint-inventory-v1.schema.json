@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pfolex/verifiable-ai/blob/main/schemas/checkpoint-inventory-v1.schema.json",
+  "title": "AIX Checkpoint Inventory with Provenance and Licenses v1 (BASE-05)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inventory_sha256",
+    "checkpoints"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "inventory_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "checkpoint_id",
+          "path",
+          "sha256",
+          "serialized_bytes",
+          "physical_parameters",
+          "vocab_size",
+          "artifact_kind",
+          "training_script",
+          "base_checkpoint_sha256",
+          "license_spdx",
+          "provenance_status",
+          "promotion_status",
+          "known_provenance_gaps"
+        ],
+        "properties": {
+          "checkpoint_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "serialized_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "physical_parameters": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "vocab_size": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "artifact_kind": {
+            "enum": [
+              "full_model_checkpoint",
+              "single_expert_shard"
+            ]
+          },
+          "training_script": {
+            "type": "string",
+            "minLength": 1
+          },
+          "base_checkpoint_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "license_spdx": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provenance_status": {
+            "enum": [
+              "verified_first_party_procedural",
+              "teacher_assisted_or_external_web_session",
+              "rejected_research_candidate"
+            ]
+          },
+          "promotion_status": {
+            "enum": [
+              "ACTIVE_BASELINE",
+              "HISTORICAL_INTERMEDIATE",
+              "REJECTED"
+            ]
+          },
+          "known_provenance_gaps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

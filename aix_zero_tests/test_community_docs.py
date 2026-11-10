@@ -38,6 +38,18 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertIn("Path C: Datasets & Provenance", text)
         self.assertIn("Path D: Independent Reproduction & Documentation", text)
         self.assertIn("Path E: Opt-In Compute Contributions", text)
+        self.assertIn("Claim Proposal (`<TASK-CODE>`)", text)
+        self.assertIn("No Unconsented Assignment or Review Promises", text)
+
+    def test_license_and_provenance_policy_are_present(self):
+        lic_path = ROOT / "LICENSE"
+        pol_path = ROOT / "docs/LICENSE-AND-PROVENANCE-POLICY.md"
+        self.assertTrue(lic_path.is_file())
+        self.assertTrue(pol_path.is_file())
+        self.assertIn("Apache License", lic_path.read_text(encoding="utf-8"))
+        pol_text = pol_path.read_text(encoding="utf-8")
+        self.assertIn("Apache-2.0", pol_text)
+        self.assertIn("Explicit Exceptions: Datasets, Web Excerpts, and Checkpoints", pol_text)
 
 
 if __name__ == "__main__":

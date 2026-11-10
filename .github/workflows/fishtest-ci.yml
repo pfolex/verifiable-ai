@@ -29,13 +29,31 @@ jobs:
           python -m pip install -r requirements-aix-zero.txt
       - name: Run AIX-Zero research contracts
         run: python -m unittest discover -s aix_zero_tests -v
-      - name: Measure the unmodified v11 checkpoint offline
-        run: python -m aix_zero.benchmark_baseline --output benchmark-results/v11-baseline.json
+      - name: Measure the unmodified v11 checkpoint and Cartridge round-trip offline
+        run: |
+          python -m aix_zero.benchmark_baseline \
+            --output benchmark-results/v11-baseline.json \
+            --export-dir benchmark-results/v11-cartridges
+          python -c '
+          import hashlib, json
+          from pathlib import Path
+          from aix_zero.checkpoint_registry import load_checkpoint_strict
+          from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
+          report = json.loads(Path("benchmark-results/v11-baseline.json").read_text())
+          assert "source_sha256" in report and len(report["source_sha256"]) >= 10
+          assert "snapshot_export" in report and report["snapshot_export"]["registered_cartridges"] == 4
+          ckpt = Path("aix_zero/checkpoints/aix_zero_v11_kip.safetensors")
+          assert hashlib.sha256(ckpt.read_bytes()).hexdigest() == report["checkpoint_sha256"]
+          model, _, _ = load_checkpoint_strict(ckpt)
+          bank = SparseExpertCartridgeBank(Path("benchmark-results/v11-cartridges"))
+          res = bank.install_cartridge(model, "SOURCE_EXPERT_0")
+          assert res["installed"] is True
+          '
       - name: Preserve measured baseline evidence
         uses: actions/upload-artifact@v4
         with:
           name: aix-zero-v11-baseline
-          path: benchmark-results/v11-baseline.json
+          path: benchmark-results/*
           if-no-files-found: error
   aix-training-smoke:
     runs-on: ubuntu-latest

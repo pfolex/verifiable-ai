@@ -2,7 +2,7 @@
 
 AIX (`verifiable-ai`) is an experimental open research project building verifiable, falsifiable neuro-symbolic reasoning systems. Current baseline results (`817,410` physical parameters in `v11`; `9/105` neural-only vs. `105/105` symbolic-assisted on held-out template arithmetic) and limitations are documented in the [Community Research Roadmap (Issue #10)](https://github.com/pfolex/verifiable-ai/issues/10). World-leading AI is an aspiration, not a contributor promise.
 
-All participants must follow [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) and the opt-in governance rules in [`GOVERNANCE.md`](./GOVERNANCE.md).
+All participants must follow [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md), the opt-in governance rules in [`GOVERNANCE.md`](./GOVERNANCE.md), and the Apache-2.0 software licensing and provenance rules in [`LICENSE`](./LICENSE) and [`docs/LICENSE-AND-PROVENANCE-POLICY.md`](./docs/LICENSE-AND-PROVENANCE-POLICY.md).
 
 ---
 
@@ -73,14 +73,22 @@ Choose the path that matches your skills and available time:
 
 ---
 
-## 3. Finding and Claiming Work
+## 3. Finding and Claiming Work (`COMM-04` / Issue #100)
 
 1. Browse open issues labeled `aix:roadmap` and `status:ready` (see the master index in [Issue #10](https://github.com/pfolex/verifiable-ai/issues/10)).
-2. `status:blocked` means prerequisite tasks (identified by stable codes like `BASE-01`, `EVAL-01`, `DATA-01`) must be completed first.
-3. Comment on a single `status:ready` issue stating:
-   - The concrete scope you plan to implement,
-   - How you will validate completion (exact test commands and negative checks).
-4. Do not claim multiple large tasks simultaneously or assign other people without their explicit consent. No maintainer response-time SLA is implied.
+2. `status:blocked` means prerequisite tasks (identified by stable codes like `BASE-01`, `EVAL-01`, `DATA-01`) must be completed and accepted first. Do not begin substantial implementation on a `status:blocked` task unless your work is strictly to unblock its prerequisite.
+3. **One Active Owner + Optional Collaborators:** To claim a `status:ready` issue, post a structured public comment using the template below. Only one active primary owner should coordinate a task at a time; additional contributors may join as optional collaborators with the active owner's agreement.
+   ```markdown
+   ### Claim Proposal (`<TASK-CODE>`)
+   - **Active Owner:** @<your-github-handle>
+   - **Optional Collaborators:** (none or @handle with explicit opt-in)
+   - **Prerequisites Verified:** `<list closed prerequisite issue numbers and commit SHAs>`
+   - **Blockers / Open Questions:** `<none or specific technical blocker>`
+   - **Proposed Approach:** `<1-3 sentences describing files/modules to add or update>`
+   - **Closing Evidence Plan:** `<exact test commands, artifacts, and negative checks that will prove completion>`
+   ```
+4. **No Unconsented Assignment or Review Promises:** Never assign an issue to another person, list someone as a collaborator, or promise reviewer availability without their explicit written agreement. Maintainers confirm review coverage as capacity permits; no response-time SLA is implied.
+5. **Releasing a Claim:** If your availability changes, post a short comment releasing the issue so another contributor can pick it up.
 
 ---
 
