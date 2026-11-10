@@ -200,6 +200,11 @@ class MixtureOfReasoningExperts(nn.Module):
 
     def __init__(self, config: AIXZeroConfig) -> None:
         super().__init__()
+        if config.n_experts < 1 or config.moe_top_k < 1:
+            raise ValueError("Expert count and top-k must be positive")
+        # Runtime execution policy; checkpoint keys and model configuration stay compatible.
+        self.dispatch_mode = "dense"
+        self.forced_expert_index: Optional[int] = None
         self.n_experts = config.n_experts
         self.top_k = min(config.moe_top_k, config.n_experts)
         self.use_shared_expert = config.use_shared_expert
@@ -212,15 +217,28 @@ class MixtureOfReasoningExperts(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.forced_expert_index is not None:
+            index = self.forced_expert_index
+            if type(index) is not int or not 0 <= index < self.n_experts:
+                raise ValueError("Explicit expert index out of range")
+            routed = self.experts[index](x)
+            combined = self.shared_expert(x) + 0.5 * routed if self.use_shared_expert else routed
+            return combined, x.new_zeros(())
+
         router_logits = self.router(x)
         router_probs = F.softmax(router_logits, dim=-1)
         top_vals, top_idx = torch.topk(router_probs, k=self.top_k, dim=-1)
         top_vals = top_vals / (top_vals.sum(dim=-1, keepdim=True) + 1e-8)
 
-        expert_outs = torch.stack([exp(x) for exp in self.experts], dim=-2)
-        gather_idx = top_idx.unsqueeze(-1).expand(-1, -1, -1, x.shape[-1])
-        selected_outs = torch.gather(expert_outs, dim=-2, index=gather_idx)
-        routed_combined = (selected_outs * top_vals.unsqueeze(-1)).sum(dim=-2)
+        if self.dispatch_mode == "sparse":
+            routed_combined = self._dispatch_sparse(x, top_idx, top_vals)
+        elif self.dispatch_mode == "dense":
+            expert_outs = torch.stack([exp(x) for exp in self.experts], dim=-2)
+            gather_idx = top_idx.unsqueeze(-1).expand(-1, -1, -1, x.shape[-1])
+            selected_outs = torch.gather(expert_outs, dim=-2, index=gather_idx)
+            routed_combined = (selected_outs * top_vals.unsqueeze(-1)).sum(dim=-2)
+        else:
+            raise ValueError("dispatch_mode must be 'dense' or 'sparse'")
 
         if self.use_shared_expert:
             combined = self.shared_expert(x) + 0.5 * routed_combined
@@ -231,6 +249,30 @@ class MixtureOfReasoningExperts(nn.Module):
         target_uniform = 1.0 / self.n_experts
         aux_loss = ((mean_prob - target_uniform) ** 2).sum() * self.n_experts
         return combined, aux_loss
+
+    def _dispatch_sparse(self, x, top_idx, top_vals):
+        """Evaluate only assigned token/expert pairs, preserving top-k reduction order.
+
+        All expert weights remain resident. Dispatch still scans the expert list;
+        this implementation is intended for measured small-bank CPU experiments.
+        """
+        flat_x = x.reshape(-1, x.shape[-1])
+        assignments = top_idx.reshape(-1, self.top_k)
+        selected = x.new_zeros((flat_x.shape[0] * self.top_k, x.shape[-1]))
+        unused_dependency = x.new_zeros(())
+        for index, expert in enumerate(self.experts):
+            token_ids, ranks = torch.where(assignments == index)
+            if token_ids.numel():
+                values = expert(flat_x.index_select(0, token_ids))
+                selected = selected.index_copy(0, token_ids * self.top_k + ranks, values)
+            elif torch.is_grad_enabled():
+                # Dense dispatch gives unused experts zero gradients, not None. Preserve
+                # that behavior so AdamW weight decay and optimizer state are unchanged.
+                for parameter in expert.parameters():
+                    unused_dependency = unused_dependency + parameter.reshape(-1)[0] * 0
+        selected = selected.reshape(*x.shape[:-1], self.top_k, x.shape[-1])
+        return (selected * top_vals.unsqueeze(-1)).sum(dim=-2) + unused_dependency
+
 
 
 class DifferentiableMemoryBank(nn.Module):
@@ -509,8 +551,8 @@ def evaluate_inflight_subexpr(
             repaired = f"{prompt_part}<think>{prefix_chain};{lhs}>{rhs}->{res}</think><ans>{res}</ans>"
             return repaired, res, True
 
-    # Binary arithmetic in Step k: A op B =
-    m_bin_k = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)(?:=|\->)$", curr_seg)
+    # Binary arithmetic in Step k: A op B = (also tolerating extra spurious operator before =)
+    m_bin_k = re.match(r"^(\-?\d+)([\+\-\*\/\%])(\-?\d+)(?:[\+\-\*\/\%]\-?\d+)*(?:=|\->)$", curr_seg)
     if m_bin_k:
         a_v = acc_val
         op = m_bin_k.group(2)
@@ -521,9 +563,9 @@ def evaluate_inflight_subexpr(
             op = "*"
         elif "BridgeET:" in prompt_part and len(steps) == 3:
             op = "-"
-        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part or "BridgeKW:" in prompt_part) and len(steps) == 2:
+        elif any(tag in prompt_part for tag in ("Chain3:", "Prob:", "BridgeKW:", "Bayes:", "Causal:", "Symb:")) and len(steps) == 2:
             op = "+"
-        elif ("Chain3:" in prompt_part or "Prob:" in prompt_part or "BridgeKW:" in prompt_part) and len(steps) == 3:
+        elif any(tag in prompt_part for tag in ("Chain3:", "Prob:", "BridgeKW:", "Bayes:", "Causal:", "Symb:")) and len(steps) == 3:
             op = "-"
         elif "Chain4:" in prompt_part and len(steps) == 2:
             op = "+"
@@ -598,6 +640,14 @@ class AIXZeroModel(nn.Module):
                 nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
+
+    def set_expert_dispatch(self, mode: str) -> None:
+        """Select dense reference or sparse token dispatch without altering weights."""
+        if mode not in ("dense", "sparse"):
+            raise ValueError("Expert dispatch must be 'dense' or 'sparse'")
+        for module in self.modules():
+            if isinstance(module, MixtureOfReasoningExperts):
+                module.dispatch_mode = mode
 
     def count_parameters(self) -> Dict[str, int]:
         total = sum(p.numel() for p in self.parameters())

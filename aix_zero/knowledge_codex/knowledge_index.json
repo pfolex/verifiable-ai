@@ -1,176 +1,1169 @@
 {
-  "system": "AIX-Zero Knowledge Is Power (v11-KIP)",
-  "updated_at": "2026-11-05T07:31:17.254176+00:00",
-  "checkpoint": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
-  "vocab_size": 134,
+  "system": "AIX-Zero Knowledge Is Power (v12 arithmetic curriculum + expert snapshots)",
+  "updated_at": "2026-11-10T21:34:12.672654+00:00",
+  "checkpoint": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/checkpoints/aix_zero_v12_kip.safetensors",
+  "vocab_size": 137,
   "parameters": {
-    "total_parameters": 817410,
+    "total_parameters": 818178,
     "latent_recurrent_core_parameters": 479105,
     "value_verifier_parameters": 8449,
-    "effective_virtual_parameters_with_looping": 1775620
+    "effective_virtual_parameters_with_looping": 1776388
   },
-  "total_domains": 21,
+  "sparse_cartridge_bank": {
+    "schema_version": 1,
+    "architecture": "AIX-Zero routed expert snapshots",
+    "model_config": {
+      "vocab_size": 137,
+      "d_model": 128,
+      "n_heads": 4,
+      "n_kv_heads": 2,
+      "d_ff": 256,
+      "n_encoder_layers": 1,
+      "n_recurrent_steps": 3,
+      "n_decoder_layers": 1,
+      "max_seq_len": 112,
+      "rope_theta": 10000.0,
+      "rms_eps": 1e-06,
+      "dropout": 0.0,
+      "use_moe": true,
+      "use_shared_expert": true,
+      "n_experts": 4,
+      "moe_top_k": 2,
+      "use_memory_bank": true,
+      "n_memory_slots": 8,
+      "use_prompt_pointer": true,
+      "pointer_temperature": 0.35,
+      "use_key_ngram_conv": false
+    },
+    "active_core_physical_parameters": 818178,
+    "registered_cartridges": 24,
+    "total_cartridge_bank_parameters": 1179648,
+    "cartridges": {
+      "ARITH_CHAIN": {
+        "domain": "ARITH_CHAIN",
+        "title": "Two-Step Order-of-Operations Arithmetic",
+        "category": "Foundational Mathematics",
+        "prefix": "Q:",
+        "formula": "R = (a * b) +/- c",
+        "introduced_in": "v1",
+        "cartridge_file": "expert_arith_chain_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "ALGEBRA_SOLVE": {
+        "domain": "ALGEBRA_SOLVE",
+        "title": "Linear Single-Variable Algebraic Equations",
+        "category": "Symbolic Algebra",
+        "prefix": "Q:",
+        "formula": "a*x + b = c  ==>  x = (c - b) / a",
+        "introduced_in": "v1",
+        "cartridge_file": "expert_algebra_solve_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "MODULAR_NT": {
+        "domain": "MODULAR_NT",
+        "title": "Modular Number Theory & Congruence",
+        "category": "Number Theory",
+        "prefix": "Q:(",
+        "formula": "R = (a + b) mod m",
+        "introduced_in": "v1",
+        "cartridge_file": "expert_modular_nt_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "LOGIC_DEDUCT": {
+        "domain": "LOGIC_DEDUCT",
+        "title": "Relational Inequality & Boolean Deduction",
+        "category": "Formal Logic",
+        "prefix": "Q:",
+        "formula": "B = 1 if (a * b > c) else 0",
+        "introduced_in": "v1",
+        "cartridge_file": "expert_logic_deduct_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "WORD_PROBLEM": {
+        "domain": "WORD_PROBLEM",
+        "title": "Natural-Language Inventory & Counting Word Problems",
+        "category": "Applied Mathematics",
+        "prefix": "Q:Word:",
+        "formula": "Total = (packs * items_per_pack) +/- delta",
+        "introduced_in": "v3",
+        "cartridge_file": "expert_word_problem_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "CALCULUS_DERIV": {
+        "domain": "CALCULUS_DERIV",
+        "title": "Symbolic Polynomial Differentiation & Point Evaluation",
+        "category": "Differential Calculus",
+        "prefix": "Q:Calc:",
+        "formula": "d/dx(a*x^2 + b*x) |_{x=k} = 2*a*k + b",
+        "introduced_in": "v3",
+        "cartridge_file": "expert_calculus_deriv_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "SYSTEM_2X2": {
+        "domain": "SYSTEM_2X2",
+        "title": "Simultaneous 2x2 Linear Systems",
+        "category": "Linear Algebra",
+        "prefix": "Q:Sys:",
+        "formula": "{ x + y = S, x - y = D }  ==>  x = (S + D) / 2",
+        "introduced_in": "v4",
+        "cartridge_file": "expert_system_2x2_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "CODE_TRACE": {
+        "domain": "CODE_TRACE",
+        "title": "Python Function Execution Trace",
+        "category": "Program Verification",
+        "prefix": "Q:Code:",
+        "formula": "def f(x): return a*x + b; f(k) = a*k + b",
+        "introduced_in": "v4",
+        "cartridge_file": "expert_code_trace_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "QUADRATIC_EVAL": {
+        "domain": "QUADRATIC_EVAL",
+        "title": "Non-Linear Quadratic Polynomial Evaluation",
+        "category": "Polynomial Algebra",
+        "prefix": "Q:Quad:",
+        "formula": "f(k) = a * k^2 + c = (a * k * k) + c",
+        "introduced_in": "v6",
+        "cartridge_file": "expert_quadratic_eval_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "PHYSICS_KINEMATICS": {
+        "domain": "PHYSICS_KINEMATICS",
+        "title": "1D Constant-Acceleration Kinematics",
+        "category": "Classical Mechanics",
+        "prefix": "Q:Phys:",
+        "formula": "v = u + a * t",
+        "introduced_in": "v6",
+        "cartridge_file": "expert_physics_kinematics_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "GEOMETRY_AREA": {
+        "domain": "GEOMETRY_AREA",
+        "title": "2D Rectangular Area with Boundary Padding",
+        "category": "Euclidean Geometry",
+        "prefix": "Q:Geom:",
+        "formula": "A_total = (w * h) + p",
+        "introduced_in": "v7",
+        "cartridge_file": "expert_geometry_area_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "NUMBER_SEQ": {
+        "domain": "NUMBER_SEQ",
+        "title": "Arithmetic Progression n-th Term",
+        "category": "Discrete Mathematics",
+        "prefix": "Q:Seq:",
+        "formula": "a_n = a_0 + d * n",
+        "introduced_in": "v7",
+        "cartridge_file": "expert_number_seq_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "MULTI_STEP_3": {
+        "domain": "MULTI_STEP_3",
+        "title": "Three-Step Compositional Reasoning Chains",
+        "category": "Multi-Step Composition",
+        "prefix": "Q:Chain3:",
+        "formula": "R = ((a * b) + c) - d",
+        "introduced_in": "v8",
+        "cartridge_file": "expert_multi_step_3_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "ELECTRICAL_POWER": {
+        "domain": "ELECTRICAL_POWER",
+        "title": "Electrical Circuit Net Power & Thermal Loss",
+        "category": "Electrical Engineering (Knowledge Is Power v9)",
+        "prefix": "Q:Elec:",
+        "formula": "P_net = (V * I) - P_loss",
+        "introduced_in": "v9-KIP",
+        "cartridge_file": "expert_electrical_power_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "FINANCE_INTEREST": {
+        "domain": "FINANCE_INTEREST",
+        "title": "Financial Yield & Principal Accumulation",
+        "category": "Quantitative Finance (Knowledge Is Power v9)",
+        "prefix": "Q:Fin:",
+        "formula": "B = (r * t) + P_0",
+        "introduced_in": "v9-KIP",
+        "cartridge_file": "expert_finance_interest_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "THERMO_FIRST_LAW": {
+        "domain": "THERMO_FIRST_LAW",
+        "title": "First Law of Thermodynamics & Internal Energy",
+        "category": "Thermodynamics (Knowledge Is Power v10)",
+        "prefix": "Q:Thermo:",
+        "formula": "dU = (q * t) - W",
+        "introduced_in": "v10-KIP",
+        "cartridge_file": "expert_thermo_first_law_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "COMBINATORICS_GRID": {
+        "domain": "COMBINATORICS_GRID",
+        "title": "Restricted Combinatorial Pairing Space",
+        "category": "Combinatorics & Discrete Math (Knowledge Is Power v10)",
+        "prefix": "Q:Comb:",
+        "formula": "N_valid = (n * m) - k_excluded",
+        "introduced_in": "v10-KIP",
+        "cartridge_file": "expert_combinatorics_grid_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "PROBABILITY_EV": {
+        "domain": "PROBABILITY_EV",
+        "title": "Three-Step Discrete Expected Value with Bonus & Fee",
+        "category": "Probability & Decision Theory (Knowledge Is Power v10)",
+        "prefix": "Q:Prob:",
+        "formula": "EV = ((p * v) + bonus) - fee",
+        "introduced_in": "v10-KIP",
+        "cartridge_file": "expert_probability_ev_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "ELECTRO_THERMAL": {
+        "domain": "ELECTRO_THERMAL",
+        "title": "Cross-Domain Electro-Thermal Joule Heating & Internal Energy",
+        "category": "Multi-Physics Cross-Domain Synthesis (Knowledge Is Power v11 + Web)",
+        "prefix": "Q:BridgeET:",
+        "formula": "dU = ((V * I) * t) - W",
+        "introduced_in": "v11-KIP-Web",
+        "cartridge_file": "expert_electro_thermal_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "KINETIC_WORK": {
+        "domain": "KINETIC_WORK",
+        "title": "Cross-Domain Mechanical Work-Energy & Friction Conservation",
+        "category": "Multi-Physics Cross-Domain Synthesis (Knowledge Is Power v11 + Web)",
+        "prefix": "Q:BridgeKW:",
+        "formula": "E_final = ((F * d) + K_0) - L_friction",
+        "introduced_in": "v11-KIP-Web",
+        "cartridge_file": "expert_kinetic_work_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "MULTI_STEP_4": {
+        "domain": "MULTI_STEP_4",
+        "title": "Four-Step Compositional Reasoning Chains",
+        "category": "Deep Multi-Step Composition (Knowledge Is Power v11 + Web)",
+        "prefix": "Q:Chain4:",
+        "formula": "R = (((a * b) + c) - d) + e",
+        "introduced_in": "v11-KIP-Web",
+        "cartridge_file": "expert_multi_step_4_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+        "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+        "serialized_bytes": 196864,
+        "source_expert_index": 0,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "BAYES_EPISTEMIC": {
+        "domain": "BAYES_EPISTEMIC",
+        "title": "Bayesian Epistemic Log-Odds Belief Updating",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "prefix": "Q:Bayes:",
+        "formula": "B_post = ((w * E) + B_prior) - N_noise",
+        "introduced_in": "v12-KIP-Symbiont",
+        "cartridge_file": "expert_bayes_epistemic_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+        "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+        "serialized_bytes": 196864,
+        "source_expert_index": 1,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "CAUSAL_DO": {
+        "domain": "CAUSAL_DO",
+        "title": "Pearl Structural Causal Intervention (do-Calculus)",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "prefix": "Q:Causal:",
+        "formula": "Y_do = ((a * doX) + Z_med) - C_conf",
+        "introduced_in": "v12-KIP-Symbiont",
+        "cartridge_file": "expert_causal_do_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+        "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+        "serialized_bytes": 196864,
+        "source_expert_index": 2,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      },
+      "SYMBIOTIC_GAME": {
+        "domain": "SYMBIOTIC_GAME",
+        "title": "Positive-Sum Cooperative Game Theory & Coalition Surplus",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "prefix": "Q:Symb:",
+        "formula": "S_net = ((A * B) + G_syn) - C_coord",
+        "introduced_in": "v12-KIP-Symbiont",
+        "cartridge_file": "expert_symbiotic_game_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+        "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+        "serialized_bytes": 196864,
+        "source_expert_index": 3,
+        "parameters": 49152,
+        "tensors": {
+          "gate_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "up_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          },
+          "down_proj.weight": {
+            "shape": [
+              128,
+              128
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "base_model_accuracy_pct": 100.0,
+        "verified_accuracy_pct": null,
+        "sprt_gate": "NOT_EVALUATED",
+        "provenance": "existing_routed_expert_snapshot"
+      }
+    },
+    "limitations": "Snapshots duplicate existing experts; no added learned capacity or specialist validation."
+  },
+  "total_domains": 24,
   "pre_kip_new_domains_eval": {
     "correct": 1,
     "total": 15,
     "accuracy_pct": 6.67,
     "domain_accuracy_pct": {
-      "KINETIC_WORK": 0.0,
-      "MULTI_STEP_4": 20.0,
-      "ELECTRO_THERMAL": 0.0
+      "CAUSAL_DO": 20.0,
+      "BAYES_EPISTEMIC": 0.0,
+      "SYMBIOTIC_GAME": 0.0
     },
-    "mean_ponder_steps": 1.032,
-    "mean_verifier_confidence": 0.8454,
+    "mean_ponder_steps": 1.058,
+    "mean_verifier_confidence": 0.8397,
     "sample_outputs": [
       {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=",
-        "generated": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=*5*253+2=10</think><ans>10</ans>",
-        "predicted": "10",
-        "gold": "15",
-        "correct": false,
-        "verifier_confidence": 0.845,
-        "latent_ponder_steps": 1.05
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:3*4+3-1+6=",
-        "generated": "Q:Chain4:3*4+3-1+6=<think>3*3=12;12+3=12</think><ans>12</ans>",
-        "predicted": "12",
-        "gold": "20",
-        "correct": false,
-        "verifier_confidence": 0.8369,
-        "latent_ponder_steps": 1.062
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:2*2+3-2+6=",
-        "generated": "Q:Chain4:2*2+3-2+6=<think>3*2=12;12+5=15</think><ans>11</ans>",
-        "predicted": "11",
-        "gold": "11",
-        "correct": true,
-        "verifier_confidence": 0.8449,
-        "latent_ponder_steps": 1.062
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=",
-        "generated": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*5=12;12</ans>",
-        "predicted": "",
-        "gold": "12",
-        "correct": false,
-        "verifier_confidence": 0.8527,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=",
-        "generated": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>4*2=12;12-2=14</think><ans>14</ans>",
-        "predicted": "14",
-        "gold": "13",
-        "correct": false,
-        "verifier_confidence": 0.8515,
-        "latent_ponder_steps": 1.023
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=",
-        "generated": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=12;12-2=14</think><ans>14</ans>",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=",
+        "generated": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=<think>4*3=12;12+4=14</think><ans>14</ans>",
         "predicted": "14",
         "gold": "9",
         "correct": false,
-        "verifier_confidence": 0.853,
-        "latent_ponder_steps": 1.023
+        "verifier_confidence": 0.8526,
+        "latent_ponder_steps": 1.064
       },
       {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:3*3+3-2+6=",
-        "generated": "Q:Chain4:3*3+3-2+6=<think>3*3=12;12+3=10</think><ans>10</ans>",
-        "predicted": "10",
-        "gold": "16",
-        "correct": false,
-        "verifier_confidence": 0.8348,
-        "latent_ponder_steps": 1.062
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=",
-        "generated": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*2=12;12-2=13</think><ans>13</ans>",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=",
+        "generated": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=<think>4*3=12;12*3=15;15-3=13</think><ans>13</ans>",
         "predicted": "13",
-        "gold": "21",
-        "correct": false,
-        "verifier_confidence": 0.8487,
-        "latent_ponder_steps": 1.023
+        "gold": "13",
+        "correct": true,
+        "verifier_confidence": 0.8516,
+        "latent_ponder_steps": 1.055
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=",
-        "generated": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=5*3*4555=1*4*5=10</think><ans>10</ans>",
-        "predicted": "10",
-        "gold": "57",
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=",
+        "generated": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=<think>5*3=15;15+1=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "27",
         "correct": false,
-        "verifier_confidence": 0.8365,
-        "latent_ponder_steps": 1.046
+        "verifier_confidence": 0.8195,
+        "latent_ponder_steps": 1.057
       },
       {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:4*3+5-1+6=",
-        "generated": "Q:Chain4:4*3+5-1+6=<think>3*4=30;30+3=12</think><ans>12</ans>",
-        "predicted": "12",
-        "gold": "22",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=",
+        "generated": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=<think>4*4=12;12*2=10;10-1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "23",
         "correct": false,
-        "verifier_confidence": 0.8307,
-        "latent_ponder_steps": 1.062
+        "verifier_confidence": 0.8498,
+        "latent_ponder_steps": 1.066
       },
       {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:4*3+5-2+4=",
-        "generated": "Q:Chain4:4*3+5-2+4=<think>3*4=12;12+3=12</think><ans>12</ans>",
-        "predicted": "12",
-        "gold": "19",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=",
+        "generated": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=<think>5*4=12;12*2=14;14-1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "36",
         "correct": false,
-        "verifier_confidence": 0.8385,
-        "latent_ponder_steps": 1.062
+        "verifier_confidence": 0.8463,
+        "latent_ponder_steps": 1.054
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=",
-        "generated": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=2*4</think><ans>44</ans>",
-        "predicted": "44",
-        "gold": "31",
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=2,B=4,syn=3,cost=2,S=",
+        "generated": "Q:Symb:A=2,B=4,syn=3,cost=2,S=<think>2*3=12;12+3=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "9",
         "correct": false,
-        "verifier_confidence": 0.8487,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8429,
+        "latent_ponder_steps": 1.068
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=",
-        "generated": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=2*4*4*2*4*2<think>2*4=16;16-2=12</think><ans>12-1=16<ans>1111",
-        "predicted": "",
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=2,syn=3,cost=2,S=",
+        "generated": "Q:Symb:A=5,B=2,syn=3,cost=2,S=<think>2*5=12;12+3=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "11",
+        "correct": false,
+        "verifier_confidence": 0.8325,
+        "latent_ponder_steps": 1.068
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=",
+        "generated": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=<think>2*5=15;15-2=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "12",
+        "correct": false,
+        "verifier_confidence": 0.8406,
+        "latent_ponder_steps": 1.035
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=4,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=5,B=4,syn=8,cost=1,S=<think>5*5=12;12+8=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "27",
+        "correct": false,
+        "verifier_confidence": 0.8371,
+        "latent_ponder_steps": 1.068
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=",
+        "generated": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=<think>4*5=15;15+2=61</think><ans>61</ans>",
+        "predicted": "61",
+        "gold": "25",
+        "correct": false,
+        "verifier_confidence": 0.8291,
+        "latent_ponder_steps": 1.044
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=",
+        "generated": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=<think>4*5=15;15+2=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "24",
+        "correct": false,
+        "verifier_confidence": 0.8255,
+        "latent_ponder_steps": 1.059
+      },
+      {
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=",
+        "generated": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=<think>3*2=12;12-2=16</think><ans>16</ans>",
+        "predicted": "16",
         "gold": "13",
         "correct": false,
-        "verifier_confidence": 0.856,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8565,
+        "latent_ponder_steps": 1.045
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=",
-        "generated": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=2*4</think><ans>44</ans>",
-        "predicted": "44",
-        "gold": "47",
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=",
+        "generated": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=<think>4*5=15;15+2=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "15",
         "correct": false,
-        "verifier_confidence": 0.8469,
-        "latent_ponder_steps": 1.002
+        "verifier_confidence": 0.8361,
+        "latent_ponder_steps": 1.044
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=",
-        "generated": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=2*2*234*3*2<think>2*2=12;12+1=16</think><ans>165=1500=101",
-        "predicted": "",
-        "gold": "5",
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=3,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=5,B=3,syn=8,cost=1,S=<think>5*5=12;12+8=21</think><ans>21</ans>",
+        "predicted": "21",
+        "gold": "22",
         "correct": false,
-        "verifier_confidence": 0.8556,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8301,
+        "latent_ponder_steps": 1.069
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=4,B=2,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=4,B=2,syn=8,cost=1,S=<think>4*3=12;12-1=2</think><ans>2</ans>",
+        "predicted": "2",
+        "gold": "15",
+        "correct": false,
+        "verifier_confidence": 0.8451,
+        "latent_ponder_steps": 1.07
       }
     ]
   },
@@ -179,168 +1172,168 @@
     "total": 15,
     "accuracy_pct": 100.0,
     "domain_accuracy_pct": {
-      "KINETIC_WORK": 100.0,
-      "MULTI_STEP_4": 100.0,
-      "ELECTRO_THERMAL": 100.0
+      "CAUSAL_DO": 100.0,
+      "BAYES_EPISTEMIC": 100.0,
+      "SYMBIOTIC_GAME": 100.0
     },
-    "mean_ponder_steps": 1.012,
-    "mean_verifier_confidence": 0.8487,
+    "mean_ponder_steps": 1.043,
+    "mean_verifier_confidence": 0.8547,
     "sample_outputs": [
       {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=",
-        "generated": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=<think>4*3=12;12+5=17;17-2=15</think><ans>15</ans>",
-        "predicted": "15",
-        "gold": "15",
-        "correct": true,
-        "verifier_confidence": 0.8343,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:3*4+3-1+6=",
-        "generated": "Q:Chain4:3*4+3-1+6=<think>3*4=12;12+3=15;15-1=14;14+6=20</think><ans>20</ans>",
-        "predicted": "20",
-        "gold": "20",
-        "correct": true,
-        "verifier_confidence": 0.8585,
-        "latent_ponder_steps": 1.049
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:2*2+3-2+6=",
-        "generated": "Q:Chain4:2*2+3-2+6=<think>2*2=4;4+3=7;7-2=5;5+6=11</think><ans>11</ans>",
-        "predicted": "11",
-        "gold": "11",
-        "correct": true,
-        "verifier_confidence": 0.8515,
-        "latent_ponder_steps": 1.117
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=",
-        "generated": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
-        "predicted": "12",
-        "gold": "12",
-        "correct": true,
-        "verifier_confidence": 0.847,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=",
-        "generated": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>2*4=8;8+7=15;15-2=13</think><ans>13</ans>",
-        "predicted": "13",
-        "gold": "13",
-        "correct": true,
-        "verifier_confidence": 0.8442,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=",
-        "generated": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=8;8+3=11;11-2=9</think><ans>9</ans>",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=",
+        "generated": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=<think>4*2=8;8+4=12;12-3=9</think><ans>9</ans>",
         "predicted": "9",
         "gold": "9",
         "correct": true,
-        "verifier_confidence": 0.8459,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8421,
+        "latent_ponder_steps": 1.023
       },
       {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:3*3+3-2+6=",
-        "generated": "Q:Chain4:3*3+3-2+6=<think>3*3=9;9+3=12;12-2=10;10+6=16</think><ans>16</ans>",
-        "predicted": "16",
-        "gold": "16",
-        "correct": true,
-        "verifier_confidence": 0.8558,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "KINETIC_WORK",
-        "prompt": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=",
-        "generated": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*4=20;20+3=23;23-2=21</think><ans>21</ans>",
-        "predicted": "21",
-        "gold": "21",
-        "correct": true,
-        "verifier_confidence": 0.837,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=",
-        "generated": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=<think>5*3=15;15*4=60;60-3=57</think><ans>57</ans>",
-        "predicted": "57",
-        "gold": "57",
-        "correct": true,
-        "verifier_confidence": 0.835,
-        "latent_ponder_steps": 1.009
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:4*3+5-1+6=",
-        "generated": "Q:Chain4:4*3+5-1+6=<think>4*3=12;12+5=17;17-1=16;16+6=22</think><ans>22</ans>",
-        "predicted": "22",
-        "gold": "22",
-        "correct": true,
-        "verifier_confidence": 0.8577,
-        "latent_ponder_steps": 1.002
-      },
-      {
-        "domain": "MULTI_STEP_4",
-        "prompt": "Q:Chain4:4*3+5-2+4=",
-        "generated": "Q:Chain4:4*3+5-2+4=<think>4*3=12;12+5=17;17-2=15;15+4=19</think><ans>19</ans>",
-        "predicted": "19",
-        "gold": "19",
-        "correct": true,
-        "verifier_confidence": 0.8516,
-        "latent_ponder_steps": 1.002
-      },
-      {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=",
-        "generated": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=<think>4*4=16;16*2=32;32-1=31</think><ans>31</ans>",
-        "predicted": "31",
-        "gold": "31",
-        "correct": true,
-        "verifier_confidence": 0.852,
-        "latent_ponder_steps": 1.0
-      },
-      {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=",
-        "generated": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=<think>2*2=4;4*4=16;16-3=13</think><ans>13</ans>",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=",
+        "generated": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=<think>4*3=12;12+4=16;16-3=13</think><ans>13</ans>",
         "predicted": "13",
         "gold": "13",
         "correct": true,
-        "verifier_confidence": 0.8621,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8486,
+        "latent_ponder_steps": 1.022
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=",
-        "generated": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=<think>4*4=16;16*3=48;48-1=47</think><ans>47</ans>",
-        "predicted": "47",
-        "gold": "47",
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=",
+        "generated": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=<think>5*5=25;25+3=28;28-1=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
         "correct": true,
-        "verifier_confidence": 0.8488,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.848,
+        "latent_ponder_steps": 1.06
       },
       {
-        "domain": "ELECTRO_THERMAL",
-        "prompt": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=",
-        "generated": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=<think>2*2=4;4*2=8;8-3=5</think><ans>5</ans>",
-        "predicted": "5",
-        "gold": "5",
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=",
+        "generated": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=<think>4*5=20;20+4=24;24-1=23</think><ans>23</ans>",
+        "predicted": "23",
+        "gold": "23",
         "correct": true,
-        "verifier_confidence": 0.8489,
-        "latent_ponder_steps": 1.001
+        "verifier_confidence": 0.8527,
+        "latent_ponder_steps": 1.022
+      },
+      {
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=",
+        "generated": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=<think>6*5=30;30+7=37;37-1=36</think><ans>36</ans>",
+        "predicted": "36",
+        "gold": "36",
+        "correct": true,
+        "verifier_confidence": 0.8322,
+        "latent_ponder_steps": 1.022
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=2,B=4,syn=3,cost=2,S=",
+        "generated": "Q:Symb:A=2,B=4,syn=3,cost=2,S=<think>2*4=8;8+3=11;11-2=9</think><ans>9</ans>",
+        "predicted": "9",
+        "gold": "9",
+        "correct": true,
+        "verifier_confidence": 0.8609,
+        "latent_ponder_steps": 1.07
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=2,syn=3,cost=2,S=",
+        "generated": "Q:Symb:A=5,B=2,syn=3,cost=2,S=<think>5*2=10;10+3=13;13-2=11</think><ans>11</ans>",
+        "predicted": "11",
+        "gold": "11",
+        "correct": true,
+        "verifier_confidence": 0.8597,
+        "latent_ponder_steps": 1.046
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=",
+        "generated": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=<think>4*2=8;8+6=14;14-2=12</think><ans>12</ans>",
+        "predicted": "12",
+        "gold": "12",
+        "correct": true,
+        "verifier_confidence": 0.8808,
+        "latent_ponder_steps": 1.044
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=4,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=5,B=4,syn=8,cost=1,S=<think>5*4=20;20+8=28;28-1=27</think><ans>27</ans>",
+        "predicted": "27",
+        "gold": "27",
+        "correct": true,
+        "verifier_confidence": 0.8432,
+        "latent_ponder_steps": 1.045
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=",
+        "generated": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=<think>6*4=24;24+3=27;27-2=25</think><ans>25</ans>",
+        "predicted": "25",
+        "gold": "25",
+        "correct": true,
+        "verifier_confidence": 0.8628,
+        "latent_ponder_steps": 1.045
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=",
+        "generated": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=<think>5*4=20;20+6=26;26-2=24</think><ans>24</ans>",
+        "predicted": "24",
+        "gold": "24",
+        "correct": true,
+        "verifier_confidence": 0.8539,
+        "latent_ponder_steps": 1.052
+      },
+      {
+        "domain": "CAUSAL_DO",
+        "prompt": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=",
+        "generated": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=<think>3*4=12;12+2=14;14-1=13</think><ans>13</ans>",
+        "predicted": "13",
+        "gold": "13",
+        "correct": true,
+        "verifier_confidence": 0.8502,
+        "latent_ponder_steps": 1.017
+      },
+      {
+        "domain": "BAYES_EPISTEMIC",
+        "prompt": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=",
+        "generated": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=<think>6*2=12;12+5=17;17-2=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "15",
+        "correct": true,
+        "verifier_confidence": 0.8774,
+        "latent_ponder_steps": 1.059
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=5,B=3,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=5,B=3,syn=8,cost=1,S=<think>5*3=15;15+8=23;23-1=22</think><ans>22</ans>",
+        "predicted": "22",
+        "gold": "22",
+        "correct": true,
+        "verifier_confidence": 0.843,
+        "latent_ponder_steps": 1.045
+      },
+      {
+        "domain": "SYMBIOTIC_GAME",
+        "prompt": "Q:Symb:A=4,B=2,syn=8,cost=1,S=",
+        "generated": "Q:Symb:A=4,B=2,syn=8,cost=1,S=<think>4*2=8;8+8=16;16-1=15</think><ans>15</ans>",
+        "predicted": "15",
+        "gold": "15",
+        "correct": true,
+        "verifier_confidence": 0.8645,
+        "latent_ponder_steps": 1.07
       }
     ]
   },
-  "global_21_domain_eval": {
-    "correct": 105,
-    "total": 105,
+  "global_24_domain_eval": {
+    "correct": 120,
+    "total": 120,
     "accuracy_pct": 100.0,
     "domain_accuracy_pct": {
       "ALGEBRA_SOLVE": 100.0,
@@ -363,10 +1356,13 @@
       "PROBABILITY_EV": 100.0,
       "KINETIC_WORK": 100.0,
       "MULTI_STEP_4": 100.0,
-      "ELECTRO_THERMAL": 100.0
+      "ELECTRO_THERMAL": 100.0,
+      "CAUSAL_DO": 100.0,
+      "BAYES_EPISTEMIC": 100.0,
+      "SYMBIOTIC_GAME": 100.0
     },
-    "mean_ponder_steps": 1.052,
-    "mean_verifier_confidence": 0.8451,
+    "mean_ponder_steps": 1.033,
+    "mean_verifier_confidence": 0.8591,
     "sample_outputs": [
       {
         "domain": "ALGEBRA_SOLVE",
@@ -375,8 +1371,8 @@
         "predicted": "4",
         "gold": "4",
         "correct": true,
-        "verifier_confidence": 0.8633,
-        "latent_ponder_steps": 1.077
+        "verifier_confidence": 0.8871,
+        "latent_ponder_steps": 1.0
       },
       {
         "domain": "CALCULUS_DERIV",
@@ -385,7 +1381,7 @@
         "predicted": "11",
         "gold": "11",
         "correct": true,
-        "verifier_confidence": 0.8397,
+        "verifier_confidence": 0.8578,
         "latent_ponder_steps": 1.0
       },
       {
@@ -395,8 +1391,8 @@
         "predicted": "27",
         "gold": "27",
         "correct": true,
-        "verifier_confidence": 0.8226,
-        "latent_ponder_steps": 1.003
+        "verifier_confidence": 0.8353,
+        "latent_ponder_steps": 1.0
       },
       {
         "domain": "WORD_PROBLEM",
@@ -405,7 +1401,7 @@
         "predicted": "12",
         "gold": "12",
         "correct": true,
-        "verifier_confidence": 0.8564,
+        "verifier_confidence": 0.8745,
         "latent_ponder_steps": 1.0
       },
       {
@@ -415,8 +1411,8 @@
         "predicted": "9",
         "gold": "9",
         "correct": true,
-        "verifier_confidence": 0.8507,
-        "latent_ponder_steps": 1.172
+        "verifier_confidence": 0.8969,
+        "latent_ponder_steps": 1.0
       },
       {
         "domain": "CALCULUS_DERIV",
@@ -425,7 +1421,7 @@
         "predicted": "19",
         "gold": "19",
         "correct": true,
-        "verifier_confidence": 0.8463,
+        "verifier_confidence": 0.8563,
         "latent_ponder_steps": 1.0
       },
       {
@@ -435,8 +1431,8 @@
         "predicted": "15",
         "gold": "15",
         "correct": true,
-        "verifier_confidence": 0.8694,
-        "latent_ponder_steps": 1.096
+        "verifier_confidence": 0.8802,
+        "latent_ponder_steps": 1.0
       },
       {
         "domain": "WORD_PROBLEM",
@@ -445,7 +1441,7 @@
         "predicted": "20",
         "gold": "20",
         "correct": true,
-        "verifier_confidence": 0.844,
+        "verifier_confidence": 0.8341,
         "latent_ponder_steps": 1.0
       },
       {
@@ -455,8 +1451,8 @@
         "predicted": "3",
         "gold": "3",
         "correct": true,
-        "verifier_confidence": 0.8558,
-        "latent_ponder_steps": 1.0
+        "verifier_confidence": 0.8821,
+        "latent_ponder_steps": 1.001
       },
       {
         "domain": "CODE_TRACE",
@@ -465,8 +1461,8 @@
         "predicted": "22",
         "gold": "22",
         "correct": true,
-        "verifier_confidence": 0.8505,
-        "latent_ponder_steps": 1.047
+        "verifier_confidence": 0.8612,
+        "latent_ponder_steps": 1.003
       },
       {
         "domain": "LOGIC_DEDUCT",
@@ -475,8 +1471,8 @@
         "predicted": "0",
         "gold": "0",
         "correct": true,
-        "verifier_confidence": 0.8358,
-        "latent_ponder_steps": 1.202
+        "verifier_confidence": 0.8692,
+        "latent_ponder_steps": 1.199
       },
       {
         "domain": "CODE_TRACE",
@@ -485,8 +1481,8 @@
         "predicted": "36",
         "gold": "36",
         "correct": true,
-        "verifier_confidence": 0.8298,
-        "latent_ponder_steps": 1.081
+        "verifier_confidence": 0.8346,
+        "latent_ponder_steps": 1.0
       },
       {
         "domain": "CALCULUS_DERIV",
@@ -495,7 +1491,7 @@
         "predicted": "45",
         "gold": "45",
         "correct": true,
-        "verifier_confidence": 0.8269,
+        "verifier_confidence": 0.8066,
         "latent_ponder_steps": 1.0
       },
       {
@@ -505,7 +1501,7 @@
         "predicted": "25",
         "gold": "25",
         "correct": true,
-        "verifier_confidence": 0.8208,
+        "verifier_confidence": 0.8233,
         "latent_ponder_steps": 1.0
       },
       {
@@ -515,8 +1511,8 @@
         "predicted": "1",
         "gold": "1",
         "correct": true,
-        "verifier_confidence": 0.8469,
-        "latent_ponder_steps": 1.175
+        "verifier_confidence": 0.8713,
+        "latent_ponder_steps": 1.086
       },
       {
         "domain": "WORD_PROBLEM",
@@ -525,7 +1521,7 @@
         "predicted": "32",
         "gold": "32",
         "correct": true,
-        "verifier_confidence": 0.8323,
+        "verifier_confidence": 0.8422,
         "latent_ponder_steps": 1.0
       }
     ]
@@ -549,9 +1545,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8694,
-          "ponder_steps": 1.096,
-          "latency_ms": 173.69
+          "verifier_confidence": 0.8802,
+          "ponder_steps": 1.0,
+          "latency_ms": 88.27
         },
         {
           "prompt": "Q:(7*7)+1=",
@@ -559,9 +1555,9 @@
           "predicted": "50",
           "gold": "50",
           "verified": true,
-          "verifier_confidence": 0.8413,
-          "ponder_steps": 1.201,
-          "latency_ms": 149.47
+          "verifier_confidence": 0.8658,
+          "ponder_steps": 1.015,
+          "latency_ms": 79.81
         },
         {
           "prompt": "Q:(6*3)+1=",
@@ -569,9 +1565,9 @@
           "predicted": "19",
           "gold": "19",
           "verified": true,
-          "verifier_confidence": 0.8579,
-          "ponder_steps": 1.149,
-          "latency_ms": 194.45
+          "verifier_confidence": 0.875,
+          "ponder_steps": 1.0,
+          "latency_ms": 83.31
         },
         {
           "prompt": "Q:(6*6)+3=",
@@ -579,9 +1575,9 @@
           "predicted": "39",
           "gold": "39",
           "verified": true,
-          "verifier_confidence": 0.8559,
-          "ponder_steps": 1.094,
-          "latency_ms": 291.0
+          "verifier_confidence": 0.8499,
+          "ponder_steps": 1.0,
+          "latency_ms": 87.13
         },
         {
           "prompt": "Q:(4*2)+1=",
@@ -589,9 +1585,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8574,
-          "ponder_steps": 1.162,
-          "latency_ms": 144.73
+          "verifier_confidence": 0.8804,
+          "ponder_steps": 1.0,
+          "latency_ms": 83.66
         }
       ]
     },
@@ -613,9 +1609,9 @@
           "predicted": "4",
           "gold": "4",
           "verified": true,
-          "verifier_confidence": 0.8633,
-          "ponder_steps": 1.077,
-          "latency_ms": 116.61
+          "verifier_confidence": 0.8871,
+          "ponder_steps": 1.0,
+          "latency_ms": 95.29
         },
         {
           "prompt": "Q:5x+1=16,x=",
@@ -623,9 +1619,9 @@
           "predicted": "3",
           "gold": "3",
           "verified": true,
-          "verifier_confidence": 0.8558,
-          "ponder_steps": 1.0,
-          "latency_ms": 176.16
+          "verifier_confidence": 0.8821,
+          "ponder_steps": 1.001,
+          "latency_ms": 93.32
         },
         {
           "prompt": "Q:4x+2=18,x=",
@@ -633,9 +1629,9 @@
           "predicted": "4",
           "gold": "4",
           "verified": true,
-          "verifier_confidence": 0.8767,
-          "ponder_steps": 1.081,
-          "latency_ms": 166.13
+          "verifier_confidence": 0.879,
+          "ponder_steps": 1.0,
+          "latency_ms": 100.86
         },
         {
           "prompt": "Q:2x+2=12,x=",
@@ -643,9 +1639,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8704,
-          "ponder_steps": 1.122,
-          "latency_ms": 202.67
+          "verifier_confidence": 0.8954,
+          "ponder_steps": 1.0,
+          "latency_ms": 96.31
         },
         {
           "prompt": "Q:6x+4=34,x=",
@@ -653,9 +1649,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8763,
-          "ponder_steps": 1.161,
-          "latency_ms": 195.75
+          "verifier_confidence": 0.8657,
+          "ponder_steps": 1.0,
+          "latency_ms": 103.83
         }
       ]
     },
@@ -677,9 +1673,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8469,
-          "ponder_steps": 1.175,
-          "latency_ms": 273.82
+          "verifier_confidence": 0.8713,
+          "ponder_steps": 1.086,
+          "latency_ms": 85.87
         },
         {
           "prompt": "Q:(7+5)%4=",
@@ -687,9 +1683,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8431,
-          "ponder_steps": 1.174,
-          "latency_ms": 145.03
+          "verifier_confidence": 0.8546,
+          "ponder_steps": 1.079,
+          "latency_ms": 84.36
         },
         {
           "prompt": "Q:(8+5)%4=",
@@ -697,9 +1693,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8451,
-          "ponder_steps": 1.174,
-          "latency_ms": 135.63
+          "verifier_confidence": 0.8611,
+          "ponder_steps": 1.08,
+          "latency_ms": 79.17
         },
         {
           "prompt": "Q:(11+2)%3=",
@@ -707,9 +1703,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8635,
-          "ponder_steps": 1.204,
-          "latency_ms": 166.09
+          "verifier_confidence": 0.8908,
+          "ponder_steps": 1.08,
+          "latency_ms": 100.88
         },
         {
           "prompt": "Q:(5+7)%4=",
@@ -717,9 +1713,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8342,
-          "ponder_steps": 1.174,
-          "latency_ms": 345.06
+          "verifier_confidence": 0.8489,
+          "ponder_steps": 1.087,
+          "latency_ms": 83.97
         }
       ]
     },
@@ -741,9 +1737,9 @@
           "predicted": "0",
           "gold": "0",
           "verified": true,
-          "verifier_confidence": 0.8358,
-          "ponder_steps": 1.202,
-          "latency_ms": 124.3
+          "verifier_confidence": 0.8692,
+          "ponder_steps": 1.199,
+          "latency_ms": 96.47
         },
         {
           "prompt": "Q:2*4>2?",
@@ -751,9 +1747,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.863,
-          "ponder_steps": 1.122,
-          "latency_ms": 174.56
+          "verifier_confidence": 0.8949,
+          "ponder_steps": 1.3,
+          "latency_ms": 121.35
         },
         {
           "prompt": "Q:2*4>1?",
@@ -761,9 +1757,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8626,
-          "ponder_steps": 1.128,
-          "latency_ms": 218.47
+          "verifier_confidence": 0.8983,
+          "ponder_steps": 1.2,
+          "latency_ms": 92.65
         },
         {
           "prompt": "Q:2*8>8?",
@@ -771,9 +1767,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8254,
-          "ponder_steps": 1.303,
-          "latency_ms": 145.8
+          "verifier_confidence": 0.8718,
+          "ponder_steps": 1.364,
+          "latency_ms": 87.1
         },
         {
           "prompt": "Q:2*7>7?",
@@ -781,9 +1777,9 @@
           "predicted": "1",
           "gold": "1",
           "verified": true,
-          "verifier_confidence": 0.8417,
-          "ponder_steps": 1.366,
-          "latency_ms": 178.07
+          "verifier_confidence": 0.8802,
+          "ponder_steps": 1.272,
+          "latency_ms": 84.73
         }
       ]
     },
@@ -805,9 +1801,9 @@
           "predicted": "27",
           "gold": "27",
           "verified": true,
-          "verifier_confidence": 0.8226,
-          "ponder_steps": 1.003,
-          "latency_ms": 127.68
+          "verifier_confidence": 0.8353,
+          "ponder_steps": 1.0,
+          "latency_ms": 85.62
         },
         {
           "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
@@ -815,9 +1811,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8564,
+          "verifier_confidence": 0.8745,
           "ponder_steps": 1.0,
-          "latency_ms": 171.39
+          "latency_ms": 84.17
         },
         {
           "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
@@ -825,9 +1821,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.844,
+          "verifier_confidence": 0.8341,
           "ponder_steps": 1.0,
-          "latency_ms": 183.67
+          "latency_ms": 87.92
         },
         {
           "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
@@ -835,9 +1831,9 @@
           "predicted": "25",
           "gold": "25",
           "verified": true,
-          "verifier_confidence": 0.8208,
+          "verifier_confidence": 0.8233,
           "ponder_steps": 1.0,
-          "latency_ms": 248.52
+          "latency_ms": 90.14
         },
         {
           "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
@@ -845,9 +1841,9 @@
           "predicted": "32",
           "gold": "32",
           "verified": true,
-          "verifier_confidence": 0.8323,
+          "verifier_confidence": 0.8422,
           "ponder_steps": 1.0,
-          "latency_ms": 199.34
+          "latency_ms": 92.52
         }
       ]
     },
@@ -869,9 +1865,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8397,
+          "verifier_confidence": 0.8578,
           "ponder_steps": 1.0,
-          "latency_ms": 146.38
+          "latency_ms": 108.29
         },
         {
           "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
@@ -879,9 +1875,9 @@
           "predicted": "19",
           "gold": "19",
           "verified": true,
-          "verifier_confidence": 0.8463,
+          "verifier_confidence": 0.8563,
           "ponder_steps": 1.0,
-          "latency_ms": 216.84
+          "latency_ms": 103.92
         },
         {
           "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
@@ -889,9 +1885,9 @@
           "predicted": "45",
           "gold": "45",
           "verified": true,
-          "verifier_confidence": 0.8269,
+          "verifier_confidence": 0.8066,
           "ponder_steps": 1.0,
-          "latency_ms": 151.84
+          "latency_ms": 105.89
         },
         {
           "prompt": "Q:Calc:d/dx(4x^2+5x)@x=2=",
@@ -899,9 +1895,9 @@
           "predicted": "21",
           "gold": "21",
           "verified": true,
-          "verifier_confidence": 0.8297,
+          "verifier_confidence": 0.8287,
           "ponder_steps": 1.0,
-          "latency_ms": 172.38
+          "latency_ms": 102.86
         },
         {
           "prompt": "Q:Calc:d/dx(3x^2+5x)@x=1=",
@@ -909,9 +1905,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8188,
+          "verifier_confidence": 0.8307,
           "ponder_steps": 1.0,
-          "latency_ms": 205.13
+          "latency_ms": 104.54
         }
       ]
     },
@@ -933,9 +1929,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8507,
-          "ponder_steps": 1.172,
-          "latency_ms": 199.81
+          "verifier_confidence": 0.8969,
+          "ponder_steps": 1.0,
+          "latency_ms": 94.64
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=8,x=",
@@ -943,9 +1939,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.842,
-          "ponder_steps": 1.165,
-          "latency_ms": 165.72
+          "verifier_confidence": 0.8982,
+          "ponder_steps": 1.0,
+          "latency_ms": 96.88
         },
         {
           "prompt": "Q:Sys:x+y=11,x-y=5,x=",
@@ -953,9 +1949,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.8564,
-          "ponder_steps": 1.134,
-          "latency_ms": 247.11
+          "verifier_confidence": 0.9062,
+          "ponder_steps": 1.001,
+          "latency_ms": 97.75
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=4,x=",
@@ -963,9 +1959,9 @@
           "predicted": "7",
           "gold": "7",
           "verified": true,
-          "verifier_confidence": 0.8604,
-          "ponder_steps": 1.166,
-          "latency_ms": 241.15
+          "verifier_confidence": 0.8956,
+          "ponder_steps": 1.0,
+          "latency_ms": 87.39
         },
         {
           "prompt": "Q:Sys:x+y=10,x-y=6,x=",
@@ -973,9 +1969,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.8539,
-          "ponder_steps": 1.165,
-          "latency_ms": 209.88
+          "verifier_confidence": 0.8998,
+          "ponder_steps": 1.0,
+          "latency_ms": 91.06
         }
       ]
     },
@@ -997,9 +1993,9 @@
           "predicted": "22",
           "gold": "22",
           "verified": true,
-          "verifier_confidence": 0.8505,
-          "ponder_steps": 1.047,
-          "latency_ms": 163.78
+          "verifier_confidence": 0.8612,
+          "ponder_steps": 1.003,
+          "latency_ms": 97.26
         },
         {
           "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
@@ -1007,9 +2003,9 @@
           "predicted": "36",
           "gold": "36",
           "verified": true,
-          "verifier_confidence": 0.8298,
-          "ponder_steps": 1.081,
-          "latency_ms": 108.26
+          "verifier_confidence": 0.8346,
+          "ponder_steps": 1.0,
+          "latency_ms": 85.02
         },
         {
           "prompt": "Q:Code:def f(x):return 6*x+1;f(2)=",
@@ -1017,9 +2013,9 @@
           "predicted": "13",
           "gold": "13",
           "verified": true,
-          "verifier_confidence": 0.859,
-          "ponder_steps": 1.149,
-          "latency_ms": 136.35
+          "verifier_confidence": 0.8749,
+          "ponder_steps": 1.0,
+          "latency_ms": 81.59
         },
         {
           "prompt": "Q:Code:def f(x):return 5*x+4;f(4)=",
@@ -1027,9 +2023,9 @@
           "predicted": "24",
           "gold": "24",
           "verified": true,
-          "verifier_confidence": 0.8362,
-          "ponder_steps": 1.041,
-          "latency_ms": 147.71
+          "verifier_confidence": 0.8487,
+          "ponder_steps": 1.0,
+          "latency_ms": 86.91
         },
         {
           "prompt": "Q:Code:def f(x):return 2*x+4;f(5)=",
@@ -1037,9 +2033,9 @@
           "predicted": "14",
           "gold": "14",
           "verified": true,
-          "verifier_confidence": 0.851,
-          "ponder_steps": 1.059,
-          "latency_ms": 171.65
+          "verifier_confidence": 0.8725,
+          "ponder_steps": 1.0,
+          "latency_ms": 86.45
         }
       ]
     },
@@ -1061,9 +2057,9 @@
           "predicted": "51",
           "gold": "51",
           "verified": true,
-          "verifier_confidence": 0.8416,
+          "verifier_confidence": 0.8736,
           "ponder_steps": 1.0,
-          "latency_ms": 194.24
+          "latency_ms": 107.64
         },
         {
           "prompt": "Q:Quad:3x^2+3@x=3=",
@@ -1071,9 +2067,9 @@
           "predicted": "30",
           "gold": "30",
           "verified": true,
-          "verifier_confidence": 0.8403,
+          "verifier_confidence": 0.847,
           "ponder_steps": 1.0,
-          "latency_ms": 176.99
+          "latency_ms": 113.63
         },
         {
           "prompt": "Q:Quad:3x^2+1@x=5=",
@@ -1081,9 +2077,9 @@
           "predicted": "76",
           "gold": "76",
           "verified": true,
-          "verifier_confidence": 0.8299,
+          "verifier_confidence": 0.8419,
           "ponder_steps": 1.0,
-          "latency_ms": 193.16
+          "latency_ms": 108.11
         },
         {
           "prompt": "Q:Quad:4x^2+1@x=4=",
@@ -1091,9 +2087,9 @@
           "predicted": "65",
           "gold": "65",
           "verified": true,
-          "verifier_confidence": 0.8503,
+          "verifier_confidence": 0.845,
           "ponder_steps": 1.0,
-          "latency_ms": 200.27
+          "latency_ms": 103.16
         },
         {
           "prompt": "Q:Quad:4x^2+5@x=4=",
@@ -1101,9 +2097,9 @@
           "predicted": "69",
           "gold": "69",
           "verified": true,
-          "verifier_confidence": 0.834,
+          "verifier_confidence": 0.8104,
           "ponder_steps": 1.0,
-          "latency_ms": 198.1
+          "latency_ms": 101.88
         }
       ]
     },
@@ -1125,9 +2121,9 @@
           "predicted": "21",
           "gold": "21",
           "verified": true,
-          "verifier_confidence": 0.8482,
+          "verifier_confidence": 0.8787,
           "ponder_steps": 1.0,
-          "latency_ms": 142.95
+          "latency_ms": 85.37
         },
         {
           "prompt": "Q:Phys:a=5,t=3,u=2,v=",
@@ -1135,9 +2131,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8348,
-          "ponder_steps": 1.001,
-          "latency_ms": 109.51
+          "verifier_confidence": 0.8658,
+          "ponder_steps": 1.002,
+          "latency_ms": 87.9
         },
         {
           "prompt": "Q:Phys:a=3,t=5,u=2,v=",
@@ -1145,9 +2141,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8391,
-          "ponder_steps": 1.0,
-          "latency_ms": 113.22
+          "verifier_confidence": 0.8648,
+          "ponder_steps": 1.005,
+          "latency_ms": 88.41
         },
         {
           "prompt": "Q:Phys:a=3,t=2,u=4,v=",
@@ -1155,9 +2151,9 @@
           "predicted": "10",
           "gold": "10",
           "verified": true,
-          "verifier_confidence": 0.8495,
-          "ponder_steps": 1.0,
-          "latency_ms": 128.93
+          "verifier_confidence": 0.8633,
+          "ponder_steps": 1.005,
+          "latency_ms": 88.41
         },
         {
           "prompt": "Q:Phys:a=4,t=6,u=1,v=",
@@ -1165,9 +2161,9 @@
           "predicted": "25",
           "gold": "25",
           "verified": true,
-          "verifier_confidence": 0.8581,
+          "verifier_confidence": 0.865,
           "ponder_steps": 1.0,
-          "latency_ms": 171.21
+          "latency_ms": 86.84
         }
       ]
     },
@@ -1189,9 +2185,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8284,
-          "ponder_steps": 1.013,
-          "latency_ms": 173.17
+          "verifier_confidence": 0.8598,
+          "ponder_steps": 1.0,
+          "latency_ms": 88.63
         },
         {
           "prompt": "Q:Geom:w=2,h=6,p=5,A=",
@@ -1199,9 +2195,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8324,
-          "ponder_steps": 1.001,
-          "latency_ms": 157.51
+          "verifier_confidence": 0.8635,
+          "ponder_steps": 1.0,
+          "latency_ms": 87.58
         },
         {
           "prompt": "Q:Geom:w=4,h=2,p=1,A=",
@@ -1209,9 +2205,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8343,
-          "ponder_steps": 1.004,
-          "latency_ms": 135.25
+          "verifier_confidence": 0.8644,
+          "ponder_steps": 1.0,
+          "latency_ms": 81.51
         },
         {
           "prompt": "Q:Geom:w=2,h=6,p=3,A=",
@@ -1219,9 +2215,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.836,
-          "ponder_steps": 1.001,
-          "latency_ms": 160.51
+          "verifier_confidence": 0.8754,
+          "ponder_steps": 1.0,
+          "latency_ms": 90.94
         },
         {
           "prompt": "Q:Geom:w=2,h=7,p=1,A=",
@@ -1229,9 +2225,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8453,
-          "ponder_steps": 1.012,
-          "latency_ms": 174.57
+          "verifier_confidence": 0.874,
+          "ponder_steps": 1.0,
+          "latency_ms": 84.03
         }
       ]
     },
@@ -1253,9 +2249,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8432,
-          "ponder_steps": 1.032,
-          "latency_ms": 137.12
+          "verifier_confidence": 0.8657,
+          "ponder_steps": 1.073,
+          "latency_ms": 89.73
         },
         {
           "prompt": "Q:Seq:d=4,n=4,a0=1,an=",
@@ -1263,9 +2259,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8452,
-          "ponder_steps": 1.034,
-          "latency_ms": 113.08
+          "verifier_confidence": 0.8505,
+          "ponder_steps": 1.074,
+          "latency_ms": 89.23
         },
         {
           "prompt": "Q:Seq:d=2,n=4,a0=4,an=",
@@ -1273,9 +2269,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8474,
-          "ponder_steps": 1.034,
-          "latency_ms": 114.03
+          "verifier_confidence": 0.8657,
+          "ponder_steps": 1.078,
+          "latency_ms": 82.94
         },
         {
           "prompt": "Q:Seq:d=5,n=3,a0=3,an=",
@@ -1283,9 +2279,9 @@
           "predicted": "18",
           "gold": "18",
           "verified": true,
-          "verifier_confidence": 0.8291,
-          "ponder_steps": 1.035,
-          "latency_ms": 118.95
+          "verifier_confidence": 0.8503,
+          "ponder_steps": 1.074,
+          "latency_ms": 96.61
         },
         {
           "prompt": "Q:Seq:d=2,n=3,a0=1,an=",
@@ -1293,9 +2289,9 @@
           "predicted": "7",
           "gold": "7",
           "verified": true,
-          "verifier_confidence": 0.8315,
-          "ponder_steps": 1.034,
-          "latency_ms": 171.42
+          "verifier_confidence": 0.8464,
+          "ponder_steps": 1.079,
+          "latency_ms": 86.32
         }
       ]
     },
@@ -1317,9 +2313,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8284,
+          "verifier_confidence": 0.8484,
           "ponder_steps": 1.0,
-          "latency_ms": 220.8
+          "latency_ms": 103.37
         },
         {
           "prompt": "Q:Chain3:5*4+3-1=",
@@ -1327,9 +2323,9 @@
           "predicted": "22",
           "gold": "22",
           "verified": true,
-          "verifier_confidence": 0.8499,
-          "ponder_steps": 1.001,
-          "latency_ms": 213.7
+          "verifier_confidence": 0.8801,
+          "ponder_steps": 1.0,
+          "latency_ms": 119.6
         },
         {
           "prompt": "Q:Chain3:5*5+7-2=",
@@ -1337,9 +2333,9 @@
           "predicted": "30",
           "gold": "30",
           "verified": true,
-          "verifier_confidence": 0.8352,
-          "ponder_steps": 1.004,
-          "latency_ms": 221.47
+          "verifier_confidence": 0.859,
+          "ponder_steps": 1.0,
+          "latency_ms": 123.67
         },
         {
           "prompt": "Q:Chain3:6*5+3-1=",
@@ -1347,9 +2343,9 @@
           "predicted": "32",
           "gold": "32",
           "verified": true,
-          "verifier_confidence": 0.8472,
-          "ponder_steps": 1.001,
-          "latency_ms": 181.23
+          "verifier_confidence": 0.8569,
+          "ponder_steps": 1.0,
+          "latency_ms": 111.41
         },
         {
           "prompt": "Q:Chain3:5*5+5-1=",
@@ -1357,9 +2353,9 @@
           "predicted": "29",
           "gold": "29",
           "verified": true,
-          "verifier_confidence": 0.8315,
+          "verifier_confidence": 0.8568,
           "ponder_steps": 1.0,
-          "latency_ms": 157.69
+          "latency_ms": 114.13
         }
       ]
     },
@@ -1381,9 +2377,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8429,
-          "ponder_steps": 1.035,
-          "latency_ms": 111.2
+          "verifier_confidence": 0.8683,
+          "ponder_steps": 1.017,
+          "latency_ms": 84.77
         },
         {
           "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
@@ -1391,9 +2387,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8523,
-          "ponder_steps": 1.035,
-          "latency_ms": 171.34
+          "verifier_confidence": 0.8762,
+          "ponder_steps": 1.017,
+          "latency_ms": 107.51
         },
         {
           "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
@@ -1401,9 +2397,9 @@
           "predicted": "24",
           "gold": "24",
           "verified": true,
-          "verifier_confidence": 0.8361,
-          "ponder_steps": 1.033,
-          "latency_ms": 153.43
+          "verifier_confidence": 0.8423,
+          "ponder_steps": 1.032,
+          "latency_ms": 94.16
         },
         {
           "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
@@ -1411,9 +2407,9 @@
           "predicted": "23",
           "gold": "23",
           "verified": true,
-          "verifier_confidence": 0.8359,
-          "ponder_steps": 1.033,
-          "latency_ms": 156.47
+          "verifier_confidence": 0.8498,
+          "ponder_steps": 1.032,
+          "latency_ms": 237.35
         },
         {
           "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
@@ -1421,9 +2417,9 @@
           "predicted": "16",
           "gold": "16",
           "verified": true,
-          "verifier_confidence": 0.8411,
-          "ponder_steps": 1.033,
-          "latency_ms": 158.59
+          "verifier_confidence": 0.8369,
+          "ponder_steps": 1.032,
+          "latency_ms": 662.9
         }
       ]
     },
@@ -1445,9 +2441,9 @@
           "predicted": "38",
           "gold": "38",
           "verified": true,
-          "verifier_confidence": 0.8328,
+          "verifier_confidence": 0.8409,
           "ponder_steps": 1.0,
-          "latency_ms": 124.6
+          "latency_ms": 81.92
         },
         {
           "prompt": "Q:Fin:r=4,t=3,P=8,B=",
@@ -1455,9 +2451,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8444,
+          "verifier_confidence": 0.8717,
           "ponder_steps": 1.0,
-          "latency_ms": 133.95
+          "latency_ms": 84.16
         },
         {
           "prompt": "Q:Fin:r=5,t=6,P=10,B=",
@@ -1465,9 +2461,9 @@
           "predicted": "40",
           "gold": "40",
           "verified": true,
-          "verifier_confidence": 0.8365,
-          "ponder_steps": 1.016,
-          "latency_ms": 187.93
+          "verifier_confidence": 0.8564,
+          "ponder_steps": 1.0,
+          "latency_ms": 95.02
         },
         {
           "prompt": "Q:Fin:r=2,t=2,P=5,B=",
@@ -1475,9 +2471,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8356,
+          "verifier_confidence": 0.8619,
           "ponder_steps": 1.0,
-          "latency_ms": 167.08
+          "latency_ms": 87.55
         },
         {
           "prompt": "Q:Fin:r=5,t=5,P=8,B=",
@@ -1485,9 +2481,9 @@
           "predicted": "33",
           "gold": "33",
           "verified": true,
-          "verifier_confidence": 0.8231,
+          "verifier_confidence": 0.8413,
           "ponder_steps": 1.0,
-          "latency_ms": 171.6
+          "latency_ms": 88.85
         }
       ]
     },
@@ -1509,9 +2505,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8425,
-          "ponder_steps": 1.0,
-          "latency_ms": 117.96
+          "verifier_confidence": 0.844,
+          "ponder_steps": 1.008,
+          "latency_ms": 153.37
         },
         {
           "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
@@ -1519,9 +2515,9 @@
           "predicted": "27",
           "gold": "27",
           "verified": true,
-          "verifier_confidence": 0.855,
-          "ponder_steps": 1.0,
-          "latency_ms": 146.77
+          "verifier_confidence": 0.8445,
+          "ponder_steps": 1.008,
+          "latency_ms": 161.93
         },
         {
           "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
@@ -1529,9 +2525,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8602,
-          "ponder_steps": 1.0,
-          "latency_ms": 170.14
+          "verifier_confidence": 0.856,
+          "ponder_steps": 1.008,
+          "latency_ms": 96.3
         },
         {
           "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
@@ -1539,9 +2535,9 @@
           "predicted": "14",
           "gold": "14",
           "verified": true,
-          "verifier_confidence": 0.8411,
+          "verifier_confidence": 0.8444,
           "ponder_steps": 1.0,
-          "latency_ms": 161.64
+          "latency_ms": 206.36
         },
         {
           "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
@@ -1549,9 +2545,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8435,
+          "verifier_confidence": 0.8332,
           "ponder_steps": 1.0,
-          "latency_ms": 144.85
+          "latency_ms": 175.1
         }
       ]
     },
@@ -1573,9 +2569,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8485,
-          "ponder_steps": 1.11,
-          "latency_ms": 151.11
+          "verifier_confidence": 0.8495,
+          "ponder_steps": 1.159,
+          "latency_ms": 240.48
         },
         {
           "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
@@ -1583,9 +2579,9 @@
           "predicted": "10",
           "gold": "10",
           "verified": true,
-          "verifier_confidence": 0.8581,
-          "ponder_steps": 1.11,
-          "latency_ms": 159.88
+          "verifier_confidence": 0.8687,
+          "ponder_steps": 1.159,
+          "latency_ms": 127.3
         },
         {
           "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
@@ -1593,9 +2589,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8609,
-          "ponder_steps": 1.11,
-          "latency_ms": 157.14
+          "verifier_confidence": 0.821,
+          "ponder_steps": 1.158,
+          "latency_ms": 194.0
         },
         {
           "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
@@ -1603,9 +2599,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.8499,
-          "ponder_steps": 1.11,
-          "latency_ms": 182.97
+          "verifier_confidence": 0.8303,
+          "ponder_steps": 1.158,
+          "latency_ms": 177.25
         },
         {
           "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
@@ -1613,9 +2609,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.8444,
-          "ponder_steps": 1.11,
-          "latency_ms": 183.23
+          "verifier_confidence": 0.8419,
+          "ponder_steps": 1.159,
+          "latency_ms": 171.66
         }
       ]
     },
@@ -1637,9 +2633,9 @@
           "predicted": "13",
           "gold": "13",
           "verified": true,
-          "verifier_confidence": 0.8471,
-          "ponder_steps": 1.0,
-          "latency_ms": 198.28
+          "verifier_confidence": 0.8382,
+          "ponder_steps": 1.034,
+          "latency_ms": 221.7
         },
         {
           "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
@@ -1647,9 +2643,9 @@
           "predicted": "10",
           "gold": "10",
           "verified": true,
-          "verifier_confidence": 0.8396,
-          "ponder_steps": 1.0,
-          "latency_ms": 217.01
+          "verifier_confidence": 0.8309,
+          "ponder_steps": 1.03,
+          "latency_ms": 160.08
         },
         {
           "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
@@ -1657,9 +2653,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.8524,
-          "ponder_steps": 1.0,
-          "latency_ms": 221.81
+          "verifier_confidence": 0.8515,
+          "ponder_steps": 1.043,
+          "latency_ms": 233.89
         },
         {
           "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
@@ -1667,9 +2663,9 @@
           "predicted": "17",
           "gold": "17",
           "verified": true,
-          "verifier_confidence": 0.849,
-          "ponder_steps": 1.0,
-          "latency_ms": 232.67
+          "verifier_confidence": 0.8188,
+          "ponder_steps": 1.041,
+          "latency_ms": 258.35
         },
         {
           "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
@@ -1677,9 +2673,9 @@
           "predicted": "8",
           "gold": "8",
           "verified": true,
-          "verifier_confidence": 0.832,
-          "ponder_steps": 1.0,
-          "latency_ms": 218.94
+          "verifier_confidence": 0.8233,
+          "ponder_steps": 1.042,
+          "latency_ms": 250.3
         }
       ]
     },
@@ -1701,9 +2697,9 @@
           "predicted": "57",
           "gold": "57",
           "verified": true,
-          "verifier_confidence": 0.835,
-          "ponder_steps": 1.009,
-          "latency_ms": 232.36
+          "verifier_confidence": 0.8406,
+          "ponder_steps": 1.0,
+          "latency_ms": 171.04
         },
         {
           "prompt": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=",
@@ -1711,9 +2707,9 @@
           "predicted": "31",
           "gold": "31",
           "verified": true,
-          "verifier_confidence": 0.852,
-          "ponder_steps": 1.0,
-          "latency_ms": 363.88
+          "verifier_confidence": 0.8706,
+          "ponder_steps": 1.001,
+          "latency_ms": 306.73
         },
         {
           "prompt": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=",
@@ -1721,9 +2717,9 @@
           "predicted": "13",
           "gold": "13",
           "verified": true,
-          "verifier_confidence": 0.8621,
+          "verifier_confidence": 0.8885,
           "ponder_steps": 1.0,
-          "latency_ms": 170.39
+          "latency_ms": 256.95
         },
         {
           "prompt": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=",
@@ -1731,9 +2727,9 @@
           "predicted": "47",
           "gold": "47",
           "verified": true,
-          "verifier_confidence": 0.8488,
-          "ponder_steps": 1.0,
-          "latency_ms": 165.15
+          "verifier_confidence": 0.8557,
+          "ponder_steps": 1.001,
+          "latency_ms": 248.79
         },
         {
           "prompt": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=",
@@ -1741,9 +2737,9 @@
           "predicted": "5",
           "gold": "5",
           "verified": true,
-          "verifier_confidence": 0.8489,
-          "ponder_steps": 1.001,
-          "latency_ms": 160.65
+          "verifier_confidence": 0.8909,
+          "ponder_steps": 1.0,
+          "latency_ms": 173.89
         }
       ]
     },
@@ -1765,9 +2761,9 @@
           "predicted": "15",
           "gold": "15",
           "verified": true,
-          "verifier_confidence": 0.8343,
+          "verifier_confidence": 0.8418,
           "ponder_steps": 1.0,
-          "latency_ms": 305.02
+          "latency_ms": 244.2
         },
         {
           "prompt": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=",
@@ -1775,9 +2771,9 @@
           "predicted": "12",
           "gold": "12",
           "verified": true,
-          "verifier_confidence": 0.847,
+          "verifier_confidence": 0.868,
           "ponder_steps": 1.0,
-          "latency_ms": 237.45
+          "latency_ms": 243.78
         },
         {
           "prompt": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=",
@@ -1785,9 +2781,9 @@
           "predicted": "13",
           "gold": "13",
           "verified": true,
-          "verifier_confidence": 0.8442,
+          "verifier_confidence": 0.8528,
           "ponder_steps": 1.0,
-          "latency_ms": 245.08
+          "latency_ms": 242.44
         },
         {
           "prompt": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=",
@@ -1795,9 +2791,9 @@
           "predicted": "9",
           "gold": "9",
           "verified": true,
-          "verifier_confidence": 0.8459,
+          "verifier_confidence": 0.8573,
           "ponder_steps": 1.0,
-          "latency_ms": 199.78
+          "latency_ms": 252.3
         },
         {
           "prompt": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=",
@@ -1805,9 +2801,9 @@
           "predicted": "21",
           "gold": "21",
           "verified": true,
-          "verifier_confidence": 0.837,
+          "verifier_confidence": 0.857,
           "ponder_steps": 1.0,
-          "latency_ms": 205.55
+          "latency_ms": 235.52
         }
       ]
     },
@@ -1829,9 +2825,9 @@
           "predicted": "20",
           "gold": "20",
           "verified": true,
-          "verifier_confidence": 0.8585,
-          "ponder_steps": 1.049,
-          "latency_ms": 292.22
+          "verifier_confidence": 0.8761,
+          "ponder_steps": 1.0,
+          "latency_ms": 299.09
         },
         {
           "prompt": "Q:Chain4:2*2+3-2+6=",
@@ -1839,9 +2835,9 @@
           "predicted": "11",
           "gold": "11",
           "verified": true,
-          "verifier_confidence": 0.8515,
-          "ponder_steps": 1.117,
-          "latency_ms": 269.34
+          "verifier_confidence": 0.8759,
+          "ponder_steps": 1.001,
+          "latency_ms": 295.84
         },
         {
           "prompt": "Q:Chain4:3*3+3-2+6=",
@@ -1849,9 +2845,9 @@
           "predicted": "16",
           "gold": "16",
           "verified": true,
-          "verifier_confidence": 0.8558,
+          "verifier_confidence": 0.8725,
           "ponder_steps": 1.0,
-          "latency_ms": 207.84
+          "latency_ms": 336.64
         },
         {
           "prompt": "Q:Chain4:4*3+5-1+6=",
@@ -1859,9 +2855,9 @@
           "predicted": "22",
           "gold": "22",
           "verified": true,
-          "verifier_confidence": 0.8577,
-          "ponder_steps": 1.002,
-          "latency_ms": 283.91
+          "verifier_confidence": 0.8693,
+          "ponder_steps": 1.0,
+          "latency_ms": 281.17
         },
         {
           "prompt": "Q:Chain4:4*3+5-2+4=",
@@ -1869,9 +2865,201 @@
           "predicted": "19",
           "gold": "19",
           "verified": true,
-          "verifier_confidence": 0.8516,
-          "ponder_steps": 1.002,
-          "latency_ms": 340.48
+          "verifier_confidence": 0.8636,
+          "ponder_steps": 1.0,
+          "latency_ms": 282.97
+        }
+      ]
+    },
+    "BAYES_EPISTEMIC": {
+      "title": "Bayesian Epistemic Log-Odds Belief Updating",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "introduced_in": "v12-KIP-Symbiont",
+      "prefix": "Q:Bayes:",
+      "formula": "B_post = ((w * E) + B_prior) - N_noise",
+      "prompt_template": "Q:Bayes:w={w},E={e},prior={p},noise={n},post=",
+      "derivation_grammar": "<think>{w}*{e}={L};{L}+{p}={B};{B}-{n}={post}</think><ans>{post}</ans>",
+      "summary": "Updates prior epistemic belief B_prior by weighted evidence likelihood w*E minus observation noise N_noise.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/bayes_epistemic.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=",
+          "trace": "Q:Bayes:w=5,E=5,prior=3,noise=1,post=<think>5*5=25;25+3=28;28-1=27</think><ans>27</ans>",
+          "predicted": "27",
+          "gold": "27",
+          "verified": true,
+          "verifier_confidence": 0.848,
+          "ponder_steps": 1.06,
+          "latency_ms": 213.04
+        },
+        {
+          "prompt": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=",
+          "trace": "Q:Bayes:w=4,E=2,prior=6,noise=2,post=<think>4*2=8;8+6=14;14-2=12</think><ans>12</ans>",
+          "predicted": "12",
+          "gold": "12",
+          "verified": true,
+          "verifier_confidence": 0.8808,
+          "ponder_steps": 1.044,
+          "latency_ms": 165.44
+        },
+        {
+          "prompt": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=",
+          "trace": "Q:Bayes:w=6,E=4,prior=3,noise=2,post=<think>6*4=24;24+3=27;27-2=25</think><ans>25</ans>",
+          "predicted": "25",
+          "gold": "25",
+          "verified": true,
+          "verifier_confidence": 0.8628,
+          "ponder_steps": 1.045,
+          "latency_ms": 155.37
+        },
+        {
+          "prompt": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=",
+          "trace": "Q:Bayes:w=5,E=4,prior=6,noise=2,post=<think>5*4=20;20+6=26;26-2=24</think><ans>24</ans>",
+          "predicted": "24",
+          "gold": "24",
+          "verified": true,
+          "verifier_confidence": 0.8539,
+          "ponder_steps": 1.052,
+          "latency_ms": 177.74
+        },
+        {
+          "prompt": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=",
+          "trace": "Q:Bayes:w=6,E=2,prior=5,noise=2,post=<think>6*2=12;12+5=17;17-2=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8774,
+          "ponder_steps": 1.059,
+          "latency_ms": 271.36
+        }
+      ]
+    },
+    "CAUSAL_DO": {
+      "title": "Pearl Structural Causal Intervention (do-Calculus)",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "introduced_in": "v12-KIP-Symbiont",
+      "prefix": "Q:Causal:",
+      "formula": "Y_do = ((a * doX) + Z_med) - C_conf",
+      "prompt_template": "Q:Causal:a={a},doX={x},Z={z},conf={c},Y=",
+      "derivation_grammar": "<think>{a}*{x}={dir};{dir}+{z}={tot};{tot}-{c}={Y}</think><ans>{Y}</ans>",
+      "summary": "Computes causal intervention outcome Y under do(X) by combining direct causal effect a*doX plus mediator Z minus backdoor confounder C.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/causal_do.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=",
+          "trace": "Q:Causal:a=4,doX=2,Z=4,conf=3,Y=<think>4*2=8;8+4=12;12-3=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8421,
+          "ponder_steps": 1.023,
+          "latency_ms": 150.24
+        },
+        {
+          "prompt": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=",
+          "trace": "Q:Causal:a=4,doX=3,Z=4,conf=3,Y=<think>4*3=12;12+4=16;16-3=13</think><ans>13</ans>",
+          "predicted": "13",
+          "gold": "13",
+          "verified": true,
+          "verifier_confidence": 0.8486,
+          "ponder_steps": 1.022,
+          "latency_ms": 155.12
+        },
+        {
+          "prompt": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=",
+          "trace": "Q:Causal:a=4,doX=5,Z=4,conf=1,Y=<think>4*5=20;20+4=24;24-1=23</think><ans>23</ans>",
+          "predicted": "23",
+          "gold": "23",
+          "verified": true,
+          "verifier_confidence": 0.8527,
+          "ponder_steps": 1.022,
+          "latency_ms": 428.78
+        },
+        {
+          "prompt": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=",
+          "trace": "Q:Causal:a=6,doX=5,Z=7,conf=1,Y=<think>6*5=30;30+7=37;37-1=36</think><ans>36</ans>",
+          "predicted": "36",
+          "gold": "36",
+          "verified": true,
+          "verifier_confidence": 0.8322,
+          "ponder_steps": 1.022,
+          "latency_ms": 254.31
+        },
+        {
+          "prompt": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=",
+          "trace": "Q:Causal:a=3,doX=4,Z=2,conf=1,Y=<think>3*4=12;12+2=14;14-1=13</think><ans>13</ans>",
+          "predicted": "13",
+          "gold": "13",
+          "verified": true,
+          "verifier_confidence": 0.8502,
+          "ponder_steps": 1.017,
+          "latency_ms": 260.58
+        }
+      ]
+    },
+    "SYMBIOTIC_GAME": {
+      "title": "Positive-Sum Cooperative Game Theory & Coalition Surplus",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "introduced_in": "v12-KIP-Symbiont",
+      "prefix": "Q:Symb:",
+      "formula": "S_net = ((A * B) + G_syn) - C_coord",
+      "prompt_template": "Q:Symb:A={a},B={b},syn={s},cost={c},S=",
+      "derivation_grammar": "<think>{a}*{b}={joint};{joint}+{s}={gross};{gross}-{c}={S}</think><ans>{S}</ans>",
+      "summary": "Computes net positive-sum symbiotic surplus from multiplicative agent complementarity A*B plus synergy bonus G_syn minus coordination cost C_coord.",
+      "accuracy_pct": 100.0,
+      "monograph_path": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/knowledge_codex/entries/symbiotic_game.md",
+      "verified_examples": [
+        {
+          "prompt": "Q:Symb:A=2,B=4,syn=3,cost=2,S=",
+          "trace": "Q:Symb:A=2,B=4,syn=3,cost=2,S=<think>2*4=8;8+3=11;11-2=9</think><ans>9</ans>",
+          "predicted": "9",
+          "gold": "9",
+          "verified": true,
+          "verifier_confidence": 0.8609,
+          "ponder_steps": 1.07,
+          "latency_ms": 263.14
+        },
+        {
+          "prompt": "Q:Symb:A=5,B=2,syn=3,cost=2,S=",
+          "trace": "Q:Symb:A=5,B=2,syn=3,cost=2,S=<think>5*2=10;10+3=13;13-2=11</think><ans>11</ans>",
+          "predicted": "11",
+          "gold": "11",
+          "verified": true,
+          "verifier_confidence": 0.8597,
+          "ponder_steps": 1.046,
+          "latency_ms": 224.18
+        },
+        {
+          "prompt": "Q:Symb:A=5,B=4,syn=8,cost=1,S=",
+          "trace": "Q:Symb:A=5,B=4,syn=8,cost=1,S=<think>5*4=20;20+8=28;28-1=27</think><ans>27</ans>",
+          "predicted": "27",
+          "gold": "27",
+          "verified": true,
+          "verifier_confidence": 0.8432,
+          "ponder_steps": 1.045,
+          "latency_ms": 153.95
+        },
+        {
+          "prompt": "Q:Symb:A=5,B=3,syn=8,cost=1,S=",
+          "trace": "Q:Symb:A=5,B=3,syn=8,cost=1,S=<think>5*3=15;15+8=23;23-1=22</think><ans>22</ans>",
+          "predicted": "22",
+          "gold": "22",
+          "verified": true,
+          "verifier_confidence": 0.843,
+          "ponder_steps": 1.045,
+          "latency_ms": 254.65
+        },
+        {
+          "prompt": "Q:Symb:A=4,B=2,syn=8,cost=1,S=",
+          "trace": "Q:Symb:A=4,B=2,syn=8,cost=1,S=<think>4*2=8;8+8=16;16-1=15</think><ans>15</ans>",
+          "predicted": "15",
+          "gold": "15",
+          "verified": true,
+          "verifier_confidence": 0.8645,
+          "ponder_steps": 1.07,
+          "latency_ms": 246.42
         }
       ]
     }
@@ -2182,80 +3370,221 @@
         }
       ],
       "timestamp": "2026-11-05T07:26:41.273088+00:00"
+    },
+    {
+      "domain": "BAYES_EPISTEMIC",
+      "sample_prompt": "Q:Bayes:w=4,E=5,prior=6,noise=3,post=",
+      "canonical_trace": "<think>4*5=20;20+6=26;26-3=23</think><ans>23</ans>",
+      "web_sources": [
+        {
+          "source": "Wikipedia",
+          "title": "Bayesian inference",
+          "url": "https://en.wikipedia.org/wiki/Bayesian_inference",
+          "extract": "Bayesian inference is a method of statistical inference in which Bayes' theorem is used to calculate a probability of a hypothesis, given prior evidence, and update it as more information becomes available. Fundamentally, Bayesian inference uses a prior distribution to estimate posterior probabilities. Bayesian inference is an important technique in statisti"
+        },
+        {
+          "source": "arXiv",
+          "title": "A General Framework for Updating Belief Distributions",
+          "url": "http://arxiv.org/abs/1306.6430v2",
+          "extract": "We propose a framework for general Bayesian inference. We argue that a valid update of a prior belief distribution to a posterior can be made for parameters which are connected to observations through a loss function rather than the traditional likelihood function, which is recovered under the special case of using sel"
+        }
+      ],
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "First, the user is asking to use Bayesian inference in log-odds form to explain a specific formula: B_post = ((w * E) + prior) - noise, with given values w=4, E=5, prior=6, noise=3",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Okay, so I need to figure out if the user is using Bayesian inference correctly with those specific numbers. Let me start by understanding what each part of the formula represents.",
+      "consensus_note": "First, the user is asking me to distill a specific input into something called \"AIX-Zero's weights\" and explain why that teaches it \"BAYES_E",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "First, the user is asking to use Bayesian inference in log-odds form to explain a specific formula: B_post = ((w * E) + prior) - noise, with given values w=4, E=5, prior=6, noise=3"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Okay, so I need to figure out if the user is using Bayesian inference correctly with those specific numbers. Let me start by understanding what each part of the formula represents."
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "First, the user is asking me to distill a specific input into something called \"AIX-Zero's weights\" and explain why that teaches it \"BAYES_E"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v12 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Bayes:w=4,E=5,prior=6,noise=3,post=` -> `Q:Bayes:w=4,E=5,prior=6,noise=3,post=<think>4*5=20;20+6=26;26-3=23</think><ans>23</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-10T21:22:05.363376+00:00"
+    },
+    {
+      "domain": "CAUSAL_DO",
+      "sample_prompt": "Q:Causal:a=3,doX=6,Z=5,conf=4,Y=",
+      "canonical_trace": "<think>3*6=18;18+5=23;23-4=19</think><ans>19</ans>",
+      "web_sources": [
+        {
+          "source": "Wikipedia",
+          "title": "Causal model",
+          "url": "https://en.wikipedia.org/wiki/Causal_model",
+          "extract": "In metaphysics and statistics, a causal model is a conceptual model that represents the causal mechanisms of a system. Causal models often employ formal causal notation, such as structural equation modeling or causal directed acyclic graphs (DAGs), to describe relationships among variables and to guide inference."
+        },
+        {
+          "source": "arXiv",
+          "title": "Intuitionistic $j$-Do-Calculus in Topos Causal Models",
+          "url": "http://arxiv.org/abs/2510.17944v2",
+          "extract": "In this paper, we generalize Pearl's do-calculus to an Intuitionistic setting called $j$-stable causal inference inside a topos of sheaves. Our framework is an elaboration of the recently proposed framework of Topos Causal Models (TCMs), where causal interventions are defined as subobjects. We generalize the original s"
+        }
+      ],
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "First, the user is asking about Judea Pearl's do-calculus and specifically to explain the 3-step backdoor-adjusted intervention law: Y_do = ((a * doX) + Z) - conf. From the context",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Okay, so I need to figure out what Judea Pearl's do-calculus says about this causal question. The user is asking about Y_do, which should be calculated using the formula they provided",
+      "consensus_note": "Okay, let me think through this carefully. The user is asking about distilling a specific causal knowledge chunk (Q:Causal:a=3,doX=6,Z=5,conf",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "First, the user is asking about Judea Pearl's do-calculus and specifically to explain the 3-step backdoor-adjusted intervention law: Y_do = ((a * doX) + Z) - conf. From the context"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Okay, so I need to figure out what Judea Pearl's do-calculus says about this causal question. The user is asking about Y_do, which should be calculated using the formula they provided"
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "Okay, let me think through this carefully. The user is asking about distilling a specific causal knowledge chunk (Q:Causal:a=3,doX=6,Z=5,conf"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v12 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Causal:a=3,doX=6,Z=5,conf=4,Y=` -> `Q:Causal:a=3,doX=6,Z=5,conf=4,Y=<think>3*6=18;18+5=23;23-4=19</think><ans>19</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-10T21:23:19.788913+00:00"
+    },
+    {
+      "domain": "SYMBIOTIC_GAME",
+      "sample_prompt": "Q:Symb:A=5,B=4,syn=7,cost=2,S=",
+      "canonical_trace": "<think>5*4=20;20+7=27;27-2=25</think><ans>25</ans>",
+      "web_sources": [
+        {
+          "source": "Wikipedia",
+          "title": "Cooperative game theory",
+          "url": "https://en.wikipedia.org/wiki/Cooperative_game_theory",
+          "extract": "In game theory, a cooperative or coalitional game is a game with groups of players who form binding \"coalitions\" with external enforcement of cooperative behavior. This is different from non-cooperative games in which there is either no possibility to forge alliances or all agreements need to be self-enforcing."
+        },
+        {
+          "source": "arXiv",
+          "title": "Augmenting the action space with conventions to improve multi-agent cooperation in Hanabi",
+          "url": "http://arxiv.org/abs/2412.06333v3",
+          "extract": "The card game Hanabi is considered a strong medium for the testing and development of multi-agent reinforcement learning (MARL) algorithms, due to its cooperative nature, partial observability, limited communication and remarkable complexity. Previous research efforts have explored the capabilities of MARL algorithms w"
+        }
+      ],
+      "researcher_model": "aix-8b:latest",
+      "researcher_note": "First, the user is asking about the \"3-step positive-sum symbiotic surplus law\" which seems to be defined as S = ((A * B) + syn) - cost. They've provided values: A=5, B=4, syn=7, cost",
+      "formalizer_model": "aix3:latest",
+      "formalizer_note": "Okay, so I need to figure out what the user is asking about here. They mentioned a \"3-step positive-sum symbiotic surplus law\" which they've defined as S = ((A * B) + syn) - cost. Let",
+      "consensus_note": "First, the user is referencing a \"3-step positive-sum symbiotic surplus law\" defined as S = ((A * B) + syn) - cost. They've given an example",
+      "turns": [
+        {
+          "turn": 1,
+          "speaker": "aix-8b:latest (Theorist & Challenger)",
+          "utterance": "First, the user is asking about the \"3-step positive-sum symbiotic surplus law\" which seems to be defined as S = ((A * B) + syn) - cost. They've provided values: A=5, B=4, syn=7, cost"
+        },
+        {
+          "turn": 2,
+          "speaker": "aix3:latest (Solver & Critic)",
+          "utterance": "Okay, so I need to figure out what the user is asking about here. They mentioned a \"3-step positive-sum symbiotic surplus law\" which they've defined as S = ((A * B) + syn) - cost. Let"
+        },
+        {
+          "turn": 3,
+          "speaker": "aix-8b:latest (Curriculum Architect)",
+          "utterance": "First, the user is referencing a \"3-step positive-sum symbiotic surplus law\" defined as S = ((A * B) + syn) - cost. They've given an example"
+        },
+        {
+          "turn": 4,
+          "speaker": "AIX-Zero v12 (Standalone Neuro-Symbolic Student)",
+          "utterance": "Executed `Q:Symb:A=5,B=4,syn=7,cost=2,S=` -> `Q:Symb:A=5,B=4,syn=7,cost=2,S=<think>5*4=20;20+7=27;27-2=25</think><ans>25</ans>` (Verified PASS by Sandbox Kernel)"
+        }
+      ],
+      "timestamp": "2026-11-10T21:24:40.436311+00:00"
     }
   ],
   "training_cycles": [
     {
       "cycle": 1,
-      "total_grad_steps": 13,
-      "weighted_ce_loss": 0.4316,
-      "verifier_bce_loss": 0.4468,
-      "pure_sample_hits": 5,
-      "hard_mined": 21,
-      "dag_hash": "7fe5316918a4"
+      "total_grad_steps": 14,
+      "weighted_ce_loss": 0.2494,
+      "verifier_bce_loss": 0.4334,
+      "pure_sample_hits": 3,
+      "hard_mined": 23,
+      "dag_hash": "a2fd889ae2bf"
     },
     {
       "cycle": 2,
-      "total_grad_steps": 26,
-      "weighted_ce_loss": 0.2797,
-      "verifier_bce_loss": 0.4286,
-      "pure_sample_hits": 3,
-      "hard_mined": 23,
-      "dag_hash": "c03c2de185ea"
+      "total_grad_steps": 28,
+      "weighted_ce_loss": 0.1922,
+      "verifier_bce_loss": 0.4366,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "3c3801420b62"
     },
     {
       "cycle": 3,
-      "total_grad_steps": 39,
-      "weighted_ce_loss": 0.2193,
-      "verifier_bce_loss": 0.4337,
-      "pure_sample_hits": 2,
-      "hard_mined": 24,
-      "dag_hash": "51527639c753"
+      "total_grad_steps": 42,
+      "weighted_ce_loss": 0.1644,
+      "verifier_bce_loss": 0.4327,
+      "pure_sample_hits": 1,
+      "hard_mined": 25,
+      "dag_hash": "7c2f75f88af1"
     },
     {
       "cycle": 4,
-      "total_grad_steps": 52,
-      "weighted_ce_loss": 0.1894,
-      "verifier_bce_loss": 0.4376,
-      "pure_sample_hits": 2,
-      "hard_mined": 24,
-      "dag_hash": "03eda69fe049"
+      "total_grad_steps": 56,
+      "weighted_ce_loss": 0.1478,
+      "verifier_bce_loss": 0.4315,
+      "pure_sample_hits": 0,
+      "hard_mined": 26,
+      "dag_hash": "7297c80bc906"
     },
     {
       "cycle": 5,
-      "total_grad_steps": 65,
-      "weighted_ce_loss": 0.1616,
-      "verifier_bce_loss": 0.4265,
-      "pure_sample_hits": 3,
-      "hard_mined": 23,
-      "dag_hash": "9e7677c74974"
+      "total_grad_steps": 70,
+      "weighted_ce_loss": 0.1415,
+      "verifier_bce_loss": 0.4317,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "6dea5bcebd3d"
     },
     {
       "cycle": 6,
-      "total_grad_steps": 78,
-      "weighted_ce_loss": 0.1417,
-      "verifier_bce_loss": 0.4284,
-      "pure_sample_hits": 3,
-      "hard_mined": 23,
-      "dag_hash": "1023d733fcd3"
+      "total_grad_steps": 84,
+      "weighted_ce_loss": 0.1192,
+      "verifier_bce_loss": 0.4351,
+      "pure_sample_hits": 2,
+      "hard_mined": 24,
+      "dag_hash": "9e5ccf6847c8"
     },
     {
       "cycle": 7,
-      "total_grad_steps": 91,
-      "weighted_ce_loss": 0.1275,
-      "verifier_bce_loss": 0.4367,
+      "total_grad_steps": 98,
+      "weighted_ce_loss": 0.1086,
+      "verifier_bce_loss": 0.4301,
       "pure_sample_hits": 1,
       "hard_mined": 25,
-      "dag_hash": "599ee496e341"
+      "dag_hash": "4e023be14810"
     },
     {
       "cycle": 8,
-      "total_grad_steps": 104,
-      "weighted_ce_loss": 0.118,
-      "verifier_bce_loss": 0.4351,
-      "pure_sample_hits": 4,
-      "hard_mined": 22,
-      "dag_hash": "7ca1193480fc"
+      "total_grad_steps": 112,
+      "weighted_ce_loss": 0.1064,
+      "verifier_bce_loss": 0.4292,
+      "pure_sample_hits": 0,
+      "hard_mined": 26,
+      "dag_hash": "97ec8a38c509"
     }
   ]
 }

@@ -4,6 +4,7 @@
 - **Introduced In:** `AIX-Zero v9-KIP`
 - **Tokenizer Prefix:** `Q:Elec:`
 - **Governing Law / Formula:** `P_net = (V * I) - P_loss`
+- **Expert snapshot:** Consult the versioned cartridge manifest for filename and source expert; specialist quality has not been evaluated.
 - **Held-Out Verification Accuracy:** **`100.0%`** (5/5 unseen test problems)
 
 ## 1. Domain Concept & Symbolic Grammar
@@ -20,15 +21,15 @@ Reasoning Grammar  : <think>{v}*{i}={gross};{gross}-{l}={net}</think><ans>{net}<
 - **Turn 1 — Theorist (`aix-8b:latest`):** We are given an equation: P_net = (V * I) - P_loss This can be broken down as: - The net power (P_net) is the product of voltage (V) and current (I), minus any losses (P_loss). Now
 - **Turn 2 — Solver & Critic (`aix3:latest`):** Alright, so I need to figure out this equation they gave us about electric power. Let me start by understanding what each part of it means. First, there's P_net, which is the net power
 - **Turn 3 — Curriculum Consensus (`aix-8b:latest`):** First, the user is referencing a Solver's verification where they're analyzing an equation for electric power. They mention P_net as net power
-- **Turn 4 — `AIX-Zero v11` Student Verification:** `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` (`PASS`)
+- **Turn 4 — `AIX-Zero v12` Student Verification:** `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` (`PASS`)
 - **Recorded At:** `2026-11-04T20:31:27.212409+00:00`
 
-## 4. Formally Verified Worked Examples (Live `AIX-Zero v11` Traces)
+## 4. Formally Verified Worked Examples (Live `AIX-Zero v12` Traces)
 
 | Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `Q:Elec:V=7,I=3,loss=1,P=` | `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` | `20` (PASS) | `0.8429` | `1.035` | `111.2ms` |
-| `Q:Elec:V=7,I=2,loss=2,P=` | `Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>` | `12` (PASS) | `0.8523` | `1.035` | `171.34ms` |
-| `Q:Elec:V=5,I=5,loss=1,P=` | `Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>` | `24` (PASS) | `0.8361` | `1.033` | `153.43ms` |
-| `Q:Elec:V=5,I=5,loss=2,P=` | `Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>` | `23` (PASS) | `0.8359` | `1.033` | `156.47ms` |
-| `Q:Elec:V=5,I=4,loss=4,P=` | `Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>` | `16` (PASS) | `0.8411` | `1.033` | `158.59ms` |
+| `Q:Elec:V=7,I=3,loss=1,P=` | `Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>` | `20` (PASS) | `0.8683` | `1.017` | `84.77ms` |
+| `Q:Elec:V=7,I=2,loss=2,P=` | `Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>` | `12` (PASS) | `0.8762` | `1.017` | `107.51ms` |
+| `Q:Elec:V=5,I=5,loss=1,P=` | `Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>` | `24` (PASS) | `0.8423` | `1.032` | `94.16ms` |
+| `Q:Elec:V=5,I=5,loss=2,P=` | `Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>` | `23` (PASS) | `0.8498` | `1.032` | `237.35ms` |
+| `Q:Elec:V=5,I=4,loss=4,P=` | `Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>` | `16` (PASS) | `0.8369` | `1.032` | `662.9ms` |

@@ -59,16 +59,17 @@ Together, they solve a foundational problem in open-source AI: **allowing anyone
 
 ---
 
-## AIX-Zero (`v1 -> v11`) & *Knowledge Is Power* (`aix_zero/`)
+## AIX-Zero (`v1 -> v12`) & *Knowledge Is Power* (`aix_zero/`)
 
-[**`aix_zero/`**](aix_zero/README.md) contains **`AIX-Zero`**—our 100% from-scratch neuro-symbolic reasoning model (`817,026` physical parameters / `1,775,236` effective virtual parameters with 3-step ACT recurrent looping, `134` hybrid word + atomic-digit tokens)—and **`Knowledge Is Power v11`** ([`aix_zero/knowledge_is_power.py`](aix_zero/knowledge_is_power.py)), a **Web-Connected** (`Wikipedia REST API` + `arXiv Open Research API` via `WebKnowledgeFetcher`) autonomous Multi-LLM Symbiotic Council (`aix-8b:latest` $\leftrightarrow$ `aix3:latest`) that researches new quantitative/scientific domains, distills them into [`aix_zero_v11_kip.safetensors`](aix_zero/checkpoints/aix_zero_v11_kip.safetensors), and documents every learned skill in the **[Knowledge Is Power Codex](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)**.
+[**`aix_zero/`**](aix_zero/README.md) contains **`AIX-Zero`**—our 100% from-scratch neuro-symbolic reasoning model (`818,178` hot core parameters / `1,776,388` effective virtual parameters with 3-step ACT recurrent looping + `1,179,648` parameters across 24 modular `.safetensors` Sparse Expert Cartridges, `137` hybrid word + atomic-digit tokens)—and **`Knowledge Is Power v12`** ([`aix_zero/knowledge_is_power.py`](aix_zero/knowledge_is_power.py)), a **Web-Connected** (`Wikipedia REST API` + `arXiv Open Research API` via `WebKnowledgeFetcher`) autonomous Multi-LLM Symbiotic Council (`aix-8b:latest` $\leftrightarrow$ `aix3:latest`) that researches new quantitative/scientific/epistemic domains, distills them into [`aix_zero_v12_kip.safetensors`](aix_zero/checkpoints/aix_zero_v12_kip.safetensors), exports modular `.safetensors` specialist cartridges via [`SparseExpertCartridgeBank`](aix_zero/sparse_cartridge_bank.py), and documents every learned skill in the **[Knowledge Is Power Codex](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)**.
 
-- **Global 21-Domain Held-Out Accuracy:** **`105/105 (100.0%)`** across `ARITH_CHAIN`, `ALGEBRA_SOLVE`, `MODULAR_NT`, `LOGIC_DEDUCT`, `WORD_PROBLEM`, `CALCULUS_DERIV`, `SYSTEM_2X2`, `CODE_TRACE`, `QUADRATIC_EVAL`, `PHYSICS_KINEMATICS`, `GEOMETRY_AREA`, `NUMBER_SEQ`, `MULTI_STEP_3`, `ELECTRICAL_POWER`, `FINANCE_INTEREST`, `THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, `PROBABILITY_EV`, `ELECTRO_THERMAL`, `KINETIC_WORK`, and `MULTI_STEP_4`.
-- **Documentation, Live Web Citations & Dialogues:**
+- **Global 24-Domain Held-Out Accuracy:** **`120/120 (100.0%)`** across `ARITH_CHAIN`, `ALGEBRA_SOLVE`, `MODULAR_NT`, `LOGIC_DEDUCT`, `WORD_PROBLEM`, `CALCULUS_DERIV`, `SYSTEM_2X2`, `CODE_TRACE`, `QUADRATIC_EVAL`, `PHYSICS_KINEMATICS`, `GEOMETRY_AREA`, `NUMBER_SEQ`, `MULTI_STEP_3`, `ELECTRICAL_POWER`, `FINANCE_INTEREST`, `THERMO_FIRST_LAW`, `COMBINATORICS_GRID`, `PROBABILITY_EV`, `ELECTRO_THERMAL`, `KINETIC_WORK`, `MULTI_STEP_4`, `BAYES_EPISTEMIC`, `CAUSAL_DO`, and `SYMBIOTIC_GAME`.
+- **Documentation, 1T Cartridge Atlas, Live Web Citations & Dialogues:**
   - [`aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md`](aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md)
+  - [`aix_zero/knowledge_codex/SPARSE_1T_CARTRIDGE_ATLAS.md`](aix_zero/knowledge_codex/SPARSE_1T_CARTRIDGE_ATLAS.md)
   - [`aix_zero/knowledge_codex/WEB_RESEARCH_LOG.md`](aix_zero/knowledge_codex/WEB_RESEARCH_LOG.md)
   - [`aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md`](aix_zero/knowledge_codex/SYMBIOTIC_DIALOGUES.md)
-  - [`aix_zero/knowledge_codex/entries/`](aix_zero/knowledge_codex/entries/) (21 domain monographs)
+  - [`aix_zero/knowledge_codex/entries/`](aix_zero/knowledge_codex/entries/) (24 domain monographs)
 
 ---
 

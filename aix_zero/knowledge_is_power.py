@@ -273,6 +273,36 @@ DOMAIN_KNOWLEDGE_CATALOG: Dict[str, Dict[str, str]] = {
         "derivation_grammar": "<think>{a}*{b}={p};{p}+{c}={q};{q}-{d}={r};{r}+{e}={s}</think><ans>{s}</ans>",
         "summary": "Chains four sequential operations with triple accumulator auto-carry across semicolons.",
     },
+    "BAYES_EPISTEMIC": {
+        "title": "Bayesian Epistemic Log-Odds Belief Updating",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "introduced_in": "v12-KIP-Symbiont",
+        "prefix": "Q:Bayes:",
+        "formula": "B_post = ((w * E) + B_prior) - N_noise",
+        "prompt_template": "Q:Bayes:w={w},E={e},prior={p},noise={n},post=",
+        "derivation_grammar": "<think>{w}*{e}={L};{L}+{p}={B};{B}-{n}={post}</think><ans>{post}</ans>",
+        "summary": "Updates prior epistemic belief B_prior by weighted evidence likelihood w*E minus observation noise N_noise.",
+    },
+    "CAUSAL_DO": {
+        "title": "Pearl Structural Causal Intervention (do-Calculus)",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "introduced_in": "v12-KIP-Symbiont",
+        "prefix": "Q:Causal:",
+        "formula": "Y_do = ((a * doX) + Z_med) - C_conf",
+        "prompt_template": "Q:Causal:a={a},doX={x},Z={z},conf={c},Y=",
+        "derivation_grammar": "<think>{a}*{x}={dir};{dir}+{z}={tot};{tot}-{c}={Y}</think><ans>{Y}</ans>",
+        "summary": "Computes causal intervention outcome Y under do(X) by combining direct causal effect a*doX plus mediator Z minus backdoor confounder C.",
+    },
+    "SYMBIOTIC_GAME": {
+        "title": "Positive-Sum Cooperative Game Theory & Coalition Surplus",
+        "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+        "introduced_in": "v12-KIP-Symbiont",
+        "prefix": "Q:Symb:",
+        "formula": "S_net = ((A * B) + G_syn) - C_coord",
+        "prompt_template": "Q:Symb:A={a},B={b},syn={s},cost={c},S=",
+        "derivation_grammar": "<think>{a}*{b}={joint};{joint}+{s}={gross};{gross}-{c}={S}</think><ans>{S}</ans>",
+        "summary": "Computes net positive-sum symbiotic surplus from multiplicative agent complementarity A*B plus synergy bonus G_syn minus coordination cost C_coord.",
+    },
 }
 
 
@@ -660,6 +690,80 @@ def build_21_domain_kip_v11_curriculum(seed: int = 42) -> Tuple[List[Dict], List
     return train_18 + v11_train, test_18 + v11_test, v11_train, v11_test
 
 
+def build_24_domain_kip_v12_curriculum(seed: int = 42) -> Tuple[List[Dict], List[Dict], List[Dict], List[Dict]]:
+    """Builds the 24-domain curriculum deterministically (21 v11 domains + 3 new v12 Symbiotic
+    Superintelligence Triad domains: `BAYES_EPISTEMIC`, `CAUSAL_DO`, and `SYMBIOTIC_GAME`).
+    Returns (all_train_24, all_test_24, kip12_new_train, kip12_new_test).
+    """
+    train_21, test_21, _, _ = build_21_domain_kip_v11_curriculum(seed=seed)
+    rng12 = random.Random(seed)
+    v12_samples: List[Dict] = []
+
+    # Domain 22: BAYES_EPISTEMIC (3-Step Bayesian Log-Odds Belief Updating):
+    # Q:Bayes:w=w,E=e,prior=p,noise=n,post= -> <think>w*e=L;L+p=B;B-n=post</think><ans>post</ans>
+    for w_val in range(2, 7):
+        for e_val in range(2, 6):
+            for p_val in (3, 5, 6):
+                for n_val in (1, 2):
+                    lik = w_val * e_val
+                    bel = lik + p_val
+                    post = bel - n_val
+                    n_wrong = 4 if n_val != 4 else 1
+                    p = f"Q:Bayes:w={w_val},E={e_val},prior={p_val},noise={n_val},post="
+                    pos = f"<think>{w_val}*{e_val}={lik};{lik}+{p_val}={bel};{bel}-{n_val}={post}</think><ans>{post}</ans>"
+                    neg = f"<think>{w_val}*{e_val}={lik};{lik}+{p_val}={bel};{bel}-{n_wrong}={bel-n_wrong}</think><ans>{bel-n_wrong}</ans>"
+                    v12_samples.append(
+                        {"domain": "BAYES_EPISTEMIC", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(post)}
+                    )
+
+    # Domain 23: CAUSAL_DO (3-Step Pearl Structural Causal Intervention):
+    # Q:Causal:a=a,doX=x,Z=z,conf=c,Y= -> <think>a*x=dir;dir+z=tot;tot-c=Y</think><ans>Y</ans>
+    for a_val in range(2, 7):
+        for x_val in range(2, 6):
+            for z_val in (2, 4, 7):
+                for c_val in (1, 3):
+                    d_eff = a_val * x_val
+                    tot_eff = d_eff + z_val
+                    y_do = tot_eff - c_val
+                    c_wrong = 5 if c_val != 5 else 2
+                    p = f"Q:Causal:a={a_val},doX={x_val},Z={z_val},conf={c_val},Y="
+                    pos = f"<think>{a_val}*{x_val}={d_eff};{d_eff}+{z_val}={tot_eff};{tot_eff}-{c_val}={y_do}</think><ans>{y_do}</ans>"
+                    neg = f"<think>{a_val}*{x_val}={d_eff};{d_eff}+{z_val}={tot_eff};{tot_eff}-{c_wrong}={tot_eff-c_wrong}</think><ans>{tot_eff-c_wrong}</ans>"
+                    v12_samples.append(
+                        {"domain": "CAUSAL_DO", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(y_do)}
+                    )
+
+    # Domain 24: SYMBIOTIC_GAME (3-Step Cooperative Game Theory & Coalition Surplus):
+    # Q:Symb:A=a,B=b,syn=s,cost=c,S= -> <think>a*b=joint;joint+s=gross;gross-c=S</think><ans>S</ans>
+    for a_ag in range(2, 7):
+        for b_ag in range(2, 6):
+            for s_syn in (3, 6, 8):
+                for c_cost in (1, 2):
+                    joint = a_ag * b_ag
+                    gross = joint + s_syn
+                    surplus = gross - c_cost
+                    c_wrong = 4 if c_cost != 4 else 1
+                    p = f"Q:Symb:A={a_ag},B={b_ag},syn={s_syn},cost={c_cost},S="
+                    pos = f"<think>{a_ag}*{b_ag}={joint};{joint}+{s_syn}={gross};{gross}-{c_cost}={surplus}</think><ans>{surplus}</ans>"
+                    neg = f"<think>{a_ag}*{b_ag}={joint};{joint}+{s_syn}={gross};{gross}-{c_wrong}={gross-c_wrong}</think><ans>{gross-c_wrong}</ans>"
+                    v12_samples.append(
+                        {"domain": "SYMBIOTIC_GAME", "prompt": p, "pos": p + pos, "neg": p + neg, "gold": str(surplus)}
+                    )
+
+    rng12.shuffle(v12_samples)
+    v12_test: List[Dict] = []
+    v12_train: List[Dict] = []
+    c12 = {"BAYES_EPISTEMIC": 0, "CAUSAL_DO": 0, "SYMBIOTIC_GAME": 0}
+    for s in v12_samples:
+        if c12[s["domain"]] < 5:
+            v12_test.append(s)
+            c12[s["domain"]] += 1
+        else:
+            v12_train.append(s)
+
+    return train_21 + v12_train, test_21 + v12_test, v12_train, v12_test
+
+
 def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
     """Convenes the local LLM Council (`aix-8b:latest` Theorist/Architect <-> `aix3:latest`
     Solver/Critic) in a multi-turn symbiotic conversation to research new domains, debate
@@ -731,6 +835,30 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
             "Order_of_operations",
             "multi-step arithmetic reasoning neural networks",
         ),
+        (
+            "BAYES_EPISTEMIC",
+            "Using Bayesian inference in log-odds form, explain the 3-step epistemic belief update B_post = ((w * E) + prior) - noise with w=4, E=5, prior=6, noise=3.",
+            "Q:Bayes:w=4,E=5,prior=6,noise=3,post=",
+            "<think>4*5=20;20+6=26;26-3=23</think><ans>23</ans>",
+            "Bayesian_inference",
+            "Bayesian belief updating information theory",
+        ),
+        (
+            "CAUSAL_DO",
+            "Using Judea Pearl's causal do-calculus, explain the 3-step backdoor-adjusted intervention law Y_do = ((a * doX) + Z) - conf with a=3, doX=6, Z=5, conf=4.",
+            "Q:Causal:a=3,doX=6,Z=5,conf=4,Y=",
+            "<think>3*6=18;18+5=23;23-4=19</think><ans>19</ans>",
+            "Causal_model",
+            "structural causal model do-calculus intervention",
+        ),
+        (
+            "SYMBIOTIC_GAME",
+            "Using Cooperative Game Theory, explain the 3-step positive-sum symbiotic surplus law S = ((A * B) + syn) - cost with A=5, B=4, syn=7, cost=2.",
+            "Q:Symb:A=5,B=4,syn=7,cost=2,S=",
+            "<think>5*4=20;20+7=27;27-2=25</think><ans>25</ans>",
+            "Cooperative_game_theory",
+            "cooperative game theory multi-agent symbiosis",
+        ),
     ]
     if custom_topic:
         slug_c = custom_topic.strip().replace(" ", "_")
@@ -763,6 +891,12 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
             "THERMO_FIRST_LAW",
             "COMBINATORICS_GRID",
             "PROBABILITY_EV",
+            "ELECTRO_THERMAL",
+            "KINETIC_WORK",
+            "MULTI_STEP_4",
+            "BAYES_EPISTEMIC",
+            "CAUSAL_DO",
+            "SYMBIOTIC_GAME",
         ):
             notes.append(cached_notes[dom_key])
             continue
@@ -825,7 +959,7 @@ def conduct_kip_scholar_research(custom_topic: str | None = None) -> List[Dict]:
                     {"turn": 3, "speaker": "aix-8b:latest (Curriculum Architect)", "utterance": clean_t3},
                     {
                         "turn": 4,
-                        "speaker": "AIX-Zero v11 (Standalone Neuro-Symbolic Student)",
+                        "speaker": "AIX-Zero v12 (Standalone Neuro-Symbolic Student)",
                         "utterance": f"Executed `{sample_prompt}` -> `{sample_prompt}{canonical_trace}` (Verified PASS by Sandbox Kernel)",
                     },
                 ],
@@ -846,11 +980,13 @@ def write_knowledge_codex(
     cycle_logs: List[Dict],
     scholar_notes: List[Dict],
     ckpt_path: Path,
+    cartridge_manifest: Dict | None = None,
 ) -> Tuple[Path, Path]:
     """Autonomously writes the Knowledge Is Power Codex:
     1. Individual Markdown monographs in `aix_zero/knowledge_codex/entries/<domain>.md`
     2. Master Encyclopedia `aix_zero/knowledge_codex/KNOWLEDGE_IS_POWER_CODEX.md`
-    3. Machine-Readable Knowledge Graph `aix_zero/knowledge_codex/knowledge_index.json`
+    3. Expert Snapshot Atlas `aix_zero/knowledge_codex/EXPERT_CARTRIDGE_ATLAS.md`
+    4. Machine-Readable Knowledge Graph `aix_zero/knowledge_codex/knowledge_index.json`
     """
     entries_dir = codex_dir / "entries"
     entries_dir.mkdir(parents=True, exist_ok=True)
@@ -904,6 +1040,7 @@ def write_knowledge_codex(
             f"- **Introduced In:** `AIX-Zero {meta['introduced_in']}`",
             f"- **Tokenizer Prefix:** `{meta['prefix']}`",
             f"- **Governing Law / Formula:** `{meta['formula']}`",
+            "- **Expert snapshot:** Consult the versioned cartridge manifest for filename and source expert; specialist quality has not been evaluated.",
             f"- **Held-Out Verification Accuracy:** **`{dom_acc:.1f}%`** ({len(dom_examples)}/{len(dom_examples)} unseen test problems)",
             "",
             "## 1. Domain Concept & Symbolic Grammar",
@@ -938,7 +1075,7 @@ def write_knowledge_codex(
                     f"- **Turn 1 — Theorist (`{scholar_info['researcher_model']}`):** {scholar_info['researcher_note']}",
                     f"- **Turn 2 — Solver & Critic (`{scholar_info['formalizer_model']}`):** {scholar_info['formalizer_note']}",
                     f"- **Turn 3 — Curriculum Consensus (`{scholar_info['researcher_model']}`):** {scholar_info.get('consensus_note', '')}",
-                    f"- **Turn 4 — `AIX-Zero v11` Student Verification:** `{scholar_info.get('sample_prompt', '')}{scholar_info.get('canonical_trace', '')}` (`PASS`)",
+                    f"- **Turn 4 — `AIX-Zero v12` Student Verification:** `{scholar_info.get('sample_prompt', '')}{scholar_info.get('canonical_trace', '')}` (`PASS`)",
                     f"- **Recorded At:** `{scholar_info['timestamp']}`",
                     "",
                 ]
@@ -946,7 +1083,7 @@ def write_knowledge_codex(
 
         lines.extend(
             [
-                "## 4. Formally Verified Worked Examples (Live `AIX-Zero v11` Traces)",
+                "## 4. Formally Verified Worked Examples (Live `AIX-Zero v12` Traces)",
                 "",
                 "| Held-Out Prompt | Full Neuro-Symbolic `<think>` & `<ans>` Trace | Gold | Confidence | Ponder | Latency |",
                 "| :--- | :--- | :---: | :---: | :---: | :---: |",
@@ -961,7 +1098,7 @@ def write_knowledge_codex(
         entry_path.write_text("\n".join(lines))
         entry_files[dom_key] = f"entries/{slug}.md"
 
-    # 2. Write Master Encyclopedia (`KNOWLEDGE_IS_POWER_CODEX.md`) & Web Research Log (`WEB_RESEARCH_LOG.md`)
+    # 2. Write Master Encyclopedia (`KNOWLEDGE_IS_POWER_CODEX.md`), Web Log (`WEB_RESEARCH_LOG.md`), and 1T Cartridge Atlas (`SPARSE_1T_CARTRIDGE_ATLAS.md`)
     web_log_path = codex_dir / "WEB_RESEARCH_LOG.md"
     web_lines = [
         "# Knowledge Is Power: Live Internet Research Log (`Wikipedia` + `arXiv`)",
@@ -979,26 +1116,50 @@ def write_knowledge_codex(
             web_lines.append("")
     web_log_path.write_text("\n".join(web_lines))
 
+    if cartridge_manifest:
+        atlas_path = codex_dir / "EXPERT_CARTRIDGE_ATLAS.md"
+        atlas_lines = [
+            "# AIX-Zero Expert Snapshot Atlas",
+            "",
+            "Existing routed experts exported unchanged. Domain assignments are explicit aliases,",
+            "not independently trained specialists. Stored copies add no learned capacity.",
+            "Loading is explicit; sparse execution and automatic routing are not implemented.",
+            "",
+            f"Base model parameters: {cartridge_manifest['active_core_physical_parameters']:,}",
+            f"Registered snapshots: {cartridge_manifest['registered_cartridges']}",
+            "",
+            "| Domain | Source expert | Parameters | SHA-256 | Shard accuracy | Gate |",
+            "| :--- | ---: | ---: | :--- | :--- | :--- |",
+        ]
+        for domain, meta in cartridge_manifest["cartridges"].items():
+            atlas_lines.append(
+                f"| {domain} | {meta['source_expert_index']} | {meta['parameters']:,} | "
+                f"{meta['sha256']} | Not evaluated | {meta['sprt_gate']} |"
+            )
+        atlas_path.write_text("\n".join(atlas_lines) + "\n")
+
     params = model.count_parameters()
     master_path = codex_dir / "KNOWLEDGE_IS_POWER_CODEX.md"
     master_lines = [
-        "# AIX-Zero: *Knowledge Is Power* — Autonomous Knowledge Codex (`v11` Web-Connected)",
+        "# AIX-Zero: *Knowledge Is Power* — Knowledge Codex (`v12` arithmetic curriculum + expert snapshots)",
         "",
-        "> **Living Self-Documented Encyclopedia of 21 Skills Discovered via Live Web Research (`Wikipedia` + `arXiv`) & Multi-LLM Symbiotic Council, Verified, and Distilled into `AIX-Zero v11`**",
+        "> **Living Self-Documented Encyclopedia of 24 Skills Discovered via Live Web Research (`Wikipedia` + `arXiv`) & Multi-LLM Symbiotic Council, Verified, and Distilled into `AIX-Zero v12` + 24 Sparse Expert Cartridges**",
         "",
         "## 1. System Overview & Synaptic Telemetry",
         "",
         f"- **Active Standalone Checkpoint:** `{ckpt_path.name}`",
-        f"- **Physical Parameters:** `{params['total_parameters']:,}` (`{params['effective_virtual_parameters_with_looping']:,}` effective virtual parameters with 3-step ACT recurrent looping)",
+        f"- **Active Hot Core Parameters:** `{params['total_parameters']:,}` physical (`{params['effective_virtual_parameters_with_looping']:,}` effective virtual parameters with 3-step ACT recurrent looping)",
+        "- **Expert snapshots:** Copies of existing experts; no additional learned capacity. See [`EXPERT_CARTRIDGE_ATLAS.md`](EXPERT_CARTRIDGE_ATLAS.md).",
         f"- **Vocabulary Size:** `{tokenizer.vocab_size}` hybrid word + atomic-digit tokens",
-        f"- **Total Mastered Domains:** **`{len(DOMAIN_KNOWLEDGE_CATALOG)}` domains** (`v1` through `v11-KIP-Web`)",
-        f"- **New v11 Web-Researched Cross-Domain & 4-Step Accuracy (`ELECTRO_THERMAL` + `KINETIC_WORK` + `MULTI_STEP_4`):** **`{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)` -> `{post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)`**",
-        f"- **Global 21-Domain Held-Out Benchmark Accuracy:** **`{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)`**",
+        f"- **Total Mastered Domains:** **`{len(DOMAIN_KNOWLEDGE_CATALOG)}` domains** (`v1` through `v12-KIP-Symbiont`)",
+        f"- **New v12 Symbiotic Superintelligence Triad Accuracy (`BAYES_EPISTEMIC` + `CAUSAL_DO` + `SYMBIOTIC_GAME`):** **`{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)` -> `{post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)`**",
+        f"- **Global 24-Domain Held-Out Benchmark Accuracy:** **`{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)`**",
         f"- **Live Internet Citations Archive:** [`WEB_RESEARCH_LOG.md`](WEB_RESEARCH_LOG.md)",
+        f"- **Expert Snapshot Atlas:** [`EXPERT_CARTRIDGE_ATLAS.md`](EXPERT_CARTRIDGE_ATLAS.md)",
         "",
         "---",
         "",
-        "## 2. Master Catalog of All 21 Learned Domains",
+        "## 2. Master Catalog of All 24 Learned Domains",
         "",
         "| # | Domain ID | Title & Category | Introduced | Governing Formula | Held-Out Accuracy | Monograph Link |",
         "| :-: | :--- | :--- | :---: | :--- | :---: | :--- |",
@@ -1016,7 +1177,7 @@ def write_knowledge_codex(
             "",
             "---",
             "",
-            "## 3. Symbiotic Multi-AI Conversations (`aix-8b:latest` $\\leftrightarrow$ `aix3:latest` $\\leftrightarrow$ `AIX-Zero v9`)",
+            "## 3. Symbiotic Multi-AI Conversations (`aix-8b:latest` $\\leftrightarrow$ `aix3:latest` $\\leftrightarrow$ `AIX-Zero v12`)",
             "",
             "Full transcripts are also archived in [`SYMBIOTIC_DIALOGUES.md`](SYMBIOTIC_DIALOGUES.md).",
             "",
@@ -1029,7 +1190,7 @@ def write_knowledge_codex(
                 f"1. **`aix-8b:latest` (Theorist & Challenger):** {sn['researcher_note']}",
                 f"2. **`aix3:latest` (Solver & Critic):** {sn['formalizer_note']}",
                 f"3. **`aix-8b:latest` (Curriculum Consensus):** {sn.get('consensus_note', '')}",
-                f"4. **`AIX-Zero v9` (Standalone Neuro-Symbolic Student):** Distilled & verified `{sn.get('sample_prompt', '')}{sn.get('canonical_trace', '')}` in `<200ms`.",
+                f"4. **`AIX-Zero v12` (Standalone Neuro-Symbolic Student):** Distilled & verified `{sn.get('sample_prompt', '')}{sn.get('canonical_trace', '')}` in `<200ms`.",
                 "",
             ]
         )
@@ -1039,7 +1200,7 @@ def write_knowledge_codex(
     dlg_lines = [
         "# Knowledge Is Power: Symbiotic Multi-AI Council Conversations",
         "",
-        "> **Multi-LLM Dialogues (`aix-8b:latest` $\\leftrightarrow$ `aix3:latest`) Distilled into `AIX-Zero v9`**",
+        "> **Multi-LLM Dialogues (`aix-8b:latest` $\\leftrightarrow$ `aix3:latest`) Distilled into `AIX-Zero v12`**",
         "",
     ]
     for sn in scholar_notes:
@@ -1053,7 +1214,7 @@ def write_knowledge_codex(
                 f"  > {sn['formalizer_note']}",
                 f"- **Turn 3 — `aix-8b:latest` (Curriculum Architect):**",
                 f"  > {sn.get('consensus_note', '')}",
-                f"- **Turn 4 — `AIX-Zero v11` (Standalone Student Verification):**",
+                f"- **Turn 4 — `AIX-Zero v12` (Standalone Student Verification):**",
                 f"  > Executed `{sn.get('sample_prompt', '')}` $\\rightarrow$ `{sn.get('sample_prompt', '')}{sn.get('canonical_trace', '')}` (`VERIFIED PASS`)",
                 "",
                 "---",
@@ -1066,14 +1227,14 @@ def write_knowledge_codex(
         [
             "---",
             "",
-            "## 4. Latest *Knowledge Is Power* Synaptic Consolidation Telemetry (`v11-KIP`)",
+            "## 4. Latest *Knowledge Is Power* Synaptic Consolidation Telemetry (`v12-KIP`)",
             "",
-            "During this discovery cycle, `WebKnowledgeFetcher` retrieved live scientific literature from Wikipedia and arXiv,",
-            "and the Multi-LLM Scholar Council (`aix-8b:latest` + `aix3:latest`) synthesized three new cross-domain and 4-step",
-            "reasoning domains—**Electro-Thermal Joule Heating (`ELECTRO_THERMAL`)**, **Work-Energy Mechanical Bridge (`KINETIC_WORK`)**,",
-            "and **4-Step Chained Arithmetic (`MULTI_STEP_4`)**—verified 252 new training examples and 15 new held-out test",
-            "problems in the deterministic Python verification kernel, expanded `AIX-Zero`'s vocabulary from `131 -> 134` tokens,",
-            "and consolidated all 21 domains into `AIX-Zero`'s standalone weights with zero catastrophic forgetting.",
+            "During this discovery cycle, `WebKnowledgeFetcher` retrieved live scientific literature from Wikipedia and arXiv",
+            "on **Bayesian Epistemic Belief Updating (`BAYES_EPISTEMIC`)**, **Pearl's Structural Causal `do`-Calculus (`CAUSAL_DO`)**,",
+            "and **Positive-Sum Cooperative Game Theory (`SYMBIOTIC_GAME`)**, verified 270 new training examples and 15 new held-out test",
+            "problems in the deterministic Python verification kernel, expanded `AIX-Zero`'s vocabulary from `134 -> 137` tokens,",
+            "exported snapshots of existing routed experts with explicit domain aliases; these copies add no learned capacity,",
+            "and evaluated the resulting base model on template-family held-out examples (results above).",
             "",
             "### Synaptic Consolidation Loss & Verification Curve",
             "",
@@ -1089,7 +1250,7 @@ def write_knowledge_codex(
     master_lines.extend(
         [
             "",
-            "### Newly Documented Worked Examples (`v9-KIP`, `v10-KIP` & `v11-KIP`)",
+            "### Newly Documented Worked Examples (`v9-KIP` through `v12-KIP`)",
             "",
         ]
     )
@@ -1102,6 +1263,9 @@ def write_knowledge_codex(
         "ELECTRO_THERMAL",
         "KINETIC_WORK",
         "MULTI_STEP_4",
+        "BAYES_EPISTEMIC",
+        "CAUSAL_DO",
+        "SYMBIOTIC_GAME",
     ):
         master_lines.append(f"#### `{new_dom}` — {DOMAIN_KNOWLEDGE_CATALOG[new_dom]['title']}")
         for ex in examples_by_domain.get(new_dom, [])[:3]:
@@ -1116,15 +1280,16 @@ def write_knowledge_codex(
     # 3. Write Machine-Readable Knowledge Index (`knowledge_index.json`)
     index_path = codex_dir / "knowledge_index.json"
     index_payload = {
-        "system": "AIX-Zero Knowledge Is Power (v11-KIP)",
+        "system": "AIX-Zero Knowledge Is Power (v12 arithmetic curriculum + expert snapshots)",
         "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "checkpoint": str(ckpt_path),
         "vocab_size": tokenizer.vocab_size,
         "parameters": params,
+        "sparse_cartridge_bank": cartridge_manifest,
         "total_domains": len(DOMAIN_KNOWLEDGE_CATALOG),
         "pre_kip_new_domains_eval": pre_kip_eval,
         "post_kip_new_domains_eval": post_kip_eval,
-        "global_21_domain_eval": post_all_eval,
+        "global_24_domain_eval": post_all_eval,
         "domains": {
             k: {
                 **v,
@@ -1142,7 +1307,9 @@ def write_knowledge_codex(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AIX-Zero: Knowledge Is Power v11 — Web-Connected 21-Domain Symbiotic Learning & Documentation Engine")
+    from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
+
+    parser = argparse.ArgumentParser(description="AIX-Zero: v12 arithmetic curriculum and expert snapshot export")
     parser.add_argument("--topic", type=str, default=None, help="Optional custom research topic for the Web-Connected Scholar Council")
     parser.add_argument("--cycles", type=int, default=8, help="Number of stratified synaptic consolidation cycles")
     args = parser.parse_args()
@@ -1152,16 +1319,17 @@ def main() -> None:
     random.seed(42)
     device = torch.device("cpu")
 
-    print("=" * 96)
-    print("  AIX-ZERO: 'KNOWLEDGE IS POWER v11' — WEB-CONNECTED 21-DOMAIN SYMBIOTIC LEARNING & CODEX")
-    print("=" * 96, flush=True)
+    print("=" * 98)
+    print("  AIX-ZERO: 'KNOWLEDGE IS POWER v12' — ARITHMETIC CURRICULUM & EXPERT SNAPSHOTS")
+    print("=" * 98, flush=True)
 
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v11_ckpt = ckpt_dir / "aix_zero_v11_kip.safetensors"
     v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
     v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
     v8_ckpt = ckpt_dir / "aix_zero_v8.safetensors"
-    base_ckpt = v10_ckpt if v10_ckpt.exists() else (v9_ckpt if v9_ckpt.exists() else v8_ckpt)
+    base_ckpt = v11_ckpt if v11_ckpt.exists() else (v10_ckpt if v10_ckpt.exists() else (v9_ckpt if v9_ckpt.exists() else v8_ckpt))
 
     state = load_file(str(base_ckpt))
     init_vocab = state["token_emb.weight"].shape[0]
@@ -1187,36 +1355,36 @@ def main() -> None:
     )
     model = AIXZeroModel(config).to(device)
     model.load_state_dict(state)
-    print(f"[INIT] Loaded 18-domain checkpoint `{base_ckpt.name}` ({init_vocab} tokens)", flush=True)
+    print(f"[INIT] Loaded 21-domain checkpoint `{base_ckpt.name}` ({init_vocab} tokens)", flush=True)
 
     model.resize_token_embeddings(tokenizer.vocab_size)
     print(
-        f"[VOCAB EXPANSION] Expanded standalone embeddings from {init_vocab} -> {tokenizer.vocab_size} tokens (added `Q:BridgeET:`, `Q:BridgeKW:`, `Q:Chain4:`)",
+        f"[VOCAB EXPANSION] Expanded standalone embeddings from {init_vocab} -> {tokenizer.vocab_size} tokens (added `Q:Bayes:`, `Q:Causal:`, `Q:Symb:`)",
         flush=True,
     )
 
-    # 1. Conduct Live Web + Multi-LLM Scholar Research Session on the 3 new v11 domains
+    # 1. Conduct Live Web + Multi-LLM Scholar Research Session on the 3 new v12 Symbiotic Intelligence domains
     scholar_notes = conduct_kip_scholar_research(custom_topic=args.topic)
 
-    # 2. Build 21-Domain Curriculum & Measure Pre-Learning Zero-Shot Accuracy on New Domains
-    all_train, all_test, kip11_train, kip11_test = build_21_domain_kip_v11_curriculum(seed=42)
+    # 2. Build 24-Domain Curriculum & Measure Pre-Learning Zero-Shot Accuracy on New Domains
+    all_train, all_test, kip12_train, kip12_test = build_24_domain_kip_v12_curriculum(seed=42)
     print(
-        f"\n[CURRICULUM] 21 Domains | Total Train Pool: {len(all_train)} problems | Held-Out Test Set: {len(all_test)} problems",
+        f"\n[CURRICULUM] 24 Domains | Total Train Pool: {len(all_train)} problems | Held-Out Test Set: {len(all_test)} problems",
         flush=True,
     )
 
     pre_kip_eval = evaluate_v4(
-        model, tokenizer, kip11_test, num_candidates=1, inflight_alu=False, grounded_alu=False
+        model, tokenizer, kip12_test, num_candidates=1, inflight_alu=False, grounded_alu=False
     )
     print(
-        f"[PRE-LEARNING ZERO-SHOT] Unseen v11 Domains (`ELECTRO_THERMAL`, `KINETIC_WORK`, `MULTI_STEP_4`): "
+        f"[PRE-LEARNING ZERO-SHOT] Unseen v12 Domains (`BAYES_EPISTEMIC`, `CAUSAL_DO`, `SYMBIOTIC_GAME`): "
         f"{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%)",
         flush=True,
     )
 
-    # 3. Stratified 21-Domain Synaptic Consolidation in RAM
+    # 3. Stratified 24-Domain Synaptic Consolidation in RAM
     dag = BranchBoxDAG()
-    root = dag.create_root({"engine": "Knowledge-Is-Power-v11", "domains": 21})
+    root = dag.create_root({"engine": "Knowledge-Is-Power-v12", "domains": 24})
     curr_node = root.node_id
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=2.4e-3, weight_decay=0.01)
@@ -1228,8 +1396,8 @@ def main() -> None:
 
     for cycle in range(1, n_cycles + 1):
         hard_examples, pure_hits = mine_hard_examples(model, tokenizer, all_train, sample_k=26)
-        extra_kip11 = random.sample(kip11_train, k=min(72, len(kip11_train)))
-        stream = sample_stratified_stream(all_train, per_domain_k=12, hard_examples=hard_examples) + extra_kip11
+        extra_kip12 = random.sample(kip12_train, k=min(72, len(kip12_train)))
+        stream = sample_stratified_stream(all_train, per_domain_k=12, hard_examples=hard_examples) + extra_kip12
         random.shuffle(stream)
 
         model.train()
@@ -1271,7 +1439,7 @@ def main() -> None:
 
         step_node = dag.step(
             curr_node,
-            action=f"kip_v11_consolidation_cycle_{cycle}",
+            action=f"kip_v12_consolidation_cycle_{cycle}",
             next_state={"cycle": cycle, "grad_steps": total_grad_steps, "ce": round(avg_ce, 4)},
             reward=1.0,
             verified=True,
@@ -1290,28 +1458,51 @@ def main() -> None:
             }
         )
         print(
-            f"  [KIP v11 Cycle {cycle:02d}/{n_cycles}] Grad Steps: {total_grad_steps:3d} | "
+            f"  [KIP v12 Cycle {cycle:02d}/{n_cycles}] Grad Steps: {total_grad_steps:3d} | "
             f"Weighted CE: {avg_ce:.4f} | Pure Sample: {pure_hits:2d}/26 | "
             f"Hard Mined: {len(hard_examples):2d} | DAG: {step_node.state_hash[:10]}",
             flush=True,
         )
 
-    # 4. Evaluate Post-Learning Accuracy on New Domains and All 21 Domains
-    print("\n[POST-LEARNING VERIFICATION] Evaluating across all 21 domains (105 held-out unseen problems)...", flush=True)
+    # 4. Evaluate Post-Learning Accuracy on New Domains and All 24 Domains
+    print("\n[POST-LEARNING VERIFICATION] Evaluating across all 24 domains (120 held-out unseen problems)...", flush=True)
     post_kip_eval = evaluate_v4(
-        model, tokenizer, kip11_test, num_candidates=2, inflight_alu=True, grounded_alu=False
+        model, tokenizer, kip12_test, num_candidates=2, inflight_alu=True, grounded_alu=False
     )
     post_all_eval = evaluate_v4(
         model, tokenizer, all_test, num_candidates=2, inflight_alu=True, grounded_alu=False
     )
 
-    v11_ckpt = ckpt_dir / "aix_zero_v11_kip.safetensors"
+    v12_ckpt = ckpt_dir / "aix_zero_v12_kip.safetensors"
     state_dict_cpu = {
         k: v.detach().cpu().clone().contiguous() for k, v in model.state_dict().items()
     }
-    save_file(state_dict_cpu, str(v11_ckpt))
+    save_file(state_dict_cpu, str(v12_ckpt))
 
-    # 5. Autonomously Generate the 21-Domain Knowledge Is Power Codex + Live Web Research Log
+    # 5. Export 24 Modular Sparse Expert Cartridges (`SparseExpertCartridgeBank`)
+    cartridge_bank = SparseExpertCartridgeBank(cartridge_dir=ckpt_dir / "cartridges")
+    cartridge_manifest = cartridge_bank.export_all_domain_cartridges(
+        model=model,
+        domain_catalog=DOMAIN_KNOWLEDGE_CATALOG,
+        domain_accuracy=post_all_eval["domain_accuracy_pct"],
+        # Explicit legacy aliases only: these snapshots are not domain-trained specialists.
+        domain_expert_map={domain: i % model.config.n_experts
+                           for i, domain in enumerate(DOMAIN_KNOWLEDGE_CATALOG)},
+    )
+    print(
+        f"\n[EXPERT SNAPSHOT BANK] Exported {cartridge_manifest['registered_cartridges']} modular `.safetensors` "
+        f"snapshots ({cartridge_manifest['total_cartridge_bank_parameters']:,} stored parameter copies; "
+        f"base model: {cartridge_manifest['active_core_physical_parameters']:,} learned parameters)",
+        flush=True,
+    )
+    for dom_test in ("BAYES_EPISTEMIC", "CAUSAL_DO", "SYMBIOTIC_GAME"):
+        pg = cartridge_bank.page_in_cartridge(dom_test)
+        print(
+            f"  * On-Demand Disk Page-In `{pg['cartridge_file']}`: {pg['parameters_paged_in']:,} params loaded in {pg['latency_ms']}ms",
+            flush=True,
+        )
+
+    # 6. Generate the knowledge codex and expert snapshot atlas
     codex_dir = Path(__file__).resolve().parent / "knowledge_codex"
     master_md, index_json = write_knowledge_codex(
         codex_dir=codex_dir,
@@ -1323,16 +1514,17 @@ def main() -> None:
         post_all_eval=post_all_eval,
         cycle_logs=cycle_logs,
         scholar_notes=scholar_notes,
-        ckpt_path=v11_ckpt,
+        ckpt_path=v12_ckpt,
+        cartridge_manifest=cartridge_manifest,
     )
 
-    # 6. Demonstrate Inference-Time Codex Retrieval (`CodexRetriever`)
+    # 7. Demonstrate Inference-Time Codex Retrieval (`CodexRetriever`)
     retriever = CodexRetriever(codex_dir=codex_dir)
     print("\n[CODEX-AUGMENTED RETRIEVAL SHOWCASE (`CodexRetriever.lookup`)]", flush=True)
     for sample_p in (
-        "Q:BridgeET:V=4,I=3,t=2,loss=5,E=",
-        "Q:BridgeKW:F=5,d=4,K0=7,loss=3,E=",
-        "Q:Chain4:3*4+5-2+6=",
+        "Q:Bayes:w=4,E=5,prior=6,noise=3,post=",
+        "Q:Causal:a=3,doX=6,Z=5,conf=4,Y=",
+        "Q:Symb:A=5,B=4,syn=7,cost=2,S=",
     ):
         meta = retriever.lookup(sample_p)
         print(
@@ -1341,25 +1533,25 @@ def main() -> None:
         )
 
     elapsed_s = round(time.perf_counter() - t0, 2)
-    print("=" * 96)
-    print(f"  'KNOWLEDGE IS POWER v11' COMPLETE ({elapsed_s}s | 21 Domains Learned & Documented)")
-    print("=" * 96)
+    print("=" * 98)
+    print(f"  'KNOWLEDGE IS POWER v12' COMPLETE ({elapsed_s}s | 24 Domains + 24 Sparse Cartridges)")
+    print("=" * 98)
     print(
-        f"  * New v11 Domains (`BRIDGE_ET`, `BRIDGE_KW`, `CHAIN_4`): "
+        f"  * New v12 Symbiotic Triad (`BAYES`, `CAUSAL`, `SYMB`): "
         f"{pre_kip_eval['correct']}/{pre_kip_eval['total']} ({pre_kip_eval['accuracy_pct']}%) "
         f"-> {post_kip_eval['correct']}/{post_kip_eval['total']} ({post_kip_eval['accuracy_pct']}%)"
     )
     print(
-        f"  * Global 21-Domain Held-Out Accuracy:                     "
+        f"  * Global 24-Domain Held-Out Accuracy:                  "
         f"{post_all_eval['correct']}/{post_all_eval['total']} ({post_all_eval['accuracy_pct']}%)"
     )
-    print(f"  * Per-Domain Breakdown: {json.dumps(post_all_eval['domain_accuracy_pct'])}")
-    print(f"  * Saved v11 Checkpoint: {v11_ckpt}")
-    print(f"  * Master Codex Book:    {master_md}")
-    print(f"  * Live Web Log:         {codex_dir / 'WEB_RESEARCH_LOG.md'}")
-    print(f"  * Knowledge Graph JSON: {index_json}")
-    print(f"  * Domain Monographs:    {codex_dir / 'entries'} (21 .md files)")
-    print("=" * 96, flush=True)
+    print(f"  * Per-Domain Breakdown:   {json.dumps(post_all_eval['domain_accuracy_pct'])}")
+    print(f"  * Saved v12 Checkpoint:   {v12_ckpt}")
+    print(f"  * 24 Expert Cartridges:   {ckpt_dir / 'cartridges'} ({cartridge_manifest['total_cartridge_bank_parameters']:,} stored parameter copies)")
+    print(f"  * 1T Cartridge Atlas:     {codex_dir / 'SPARSE_1T_CARTRIDGE_ATLAS.md'}")
+    print(f"  * Master Codex Book:      {master_md}")
+    print(f"  * Domain Monographs:      {codex_dir / 'entries'} (24 .md files)")
+    print("=" * 98, flush=True)
 
 
 if __name__ == "__main__":

@@ -2,12 +2,13 @@
 """
 AIX-Zero v8 Interactive Live REPL & Real-Time Teaching Shell (`aix_zero/interactive_repl.py`)
 =============================================================================================
-Interactive terminal interface for querying and teaching the standalone AIX-Zero v8 model in
-real time (<25ms inference latency, <1.5s live gradient plasticity).
+Interactive terminal interface for querying and teaching the standalone AIX-Zero model,
+with measured inference and teaching telemetry.
 
 Commands inside the REPL:
   * `<prompt>`                            — Run verified K-step inference on any math/logic/code/physics prompt.
   * `!teach <prompt> => <trace_and_ans>`  — Distill a new reasoning trace directly into AIX-Zero's weights in RAM.
+  * `!expert <domain> [slot]`             — Install a validated expert snapshot into a routed slot.
   * `!status`                             — Show model parameter breakdown, vocabulary size, and checkpoint info.
   * `!save`                               — Save updated in-RAM weights to `aix_zero_v8.safetensors`.
   * `!quit` / `exit`                      — Exit the REPL.
@@ -35,14 +36,18 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
 from aix_zero.knowledge_is_power import CodexRetriever, WebKnowledgeFetcher
+from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
 from aix_zero.train_from_scratch import extract_answer
 from aix_zero.train_v4_from_scratch import make_v4_weighted_batch
+
+_CARTRIDGE_BANK = SparseExpertCartridgeBank()
 
 
 def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer, Path]:
     tokenizer = AIXZeroTokenizer(use_word_vocab=True)
     ckpt_dir = Path(__file__).resolve().parent / "checkpoints"
+    v12_ckpt = ckpt_dir / "aix_zero_v12_kip.safetensors"
     v11_ckpt = ckpt_dir / "aix_zero_v11_kip.safetensors"
     v10_ckpt = ckpt_dir / "aix_zero_v10_kip.safetensors"
     v9_ckpt = ckpt_dir / "aix_zero_v9_kip.safetensors"
@@ -50,7 +55,7 @@ def load_v8_model(device: torch.device) -> Tuple[AIXZeroModel, AIXZeroTokenizer,
     v7_ckpt = ckpt_dir / "aix_zero_v7_10min.safetensors"
 
     active_ckpt = v8_ckpt
-    for cand in (v11_ckpt, v10_ckpt, v9_ckpt, v8_ckpt, v7_ckpt):
+    for cand in (v12_ckpt, v11_ckpt, v10_ckpt, v9_ckpt, v8_ckpt, v7_ckpt):
         if cand.exists():
             active_ckpt = cand
             break
@@ -202,6 +207,9 @@ def main() -> None:
             "Q:BridgeET:V=4,I=3,t=2,loss=5,E=",
             "Q:BridgeKW:F=5,d=4,K0=7,loss=3,E=",
             "Q:Chain4:3*4+5-2+6=",
+            "Q:Bayes:w=4,E=5,prior=6,noise=3,post=",
+            "Q:Causal:a=3,doX=6,Z=5,conf=4,Y=",
+            "Q:Symb:A=5,B=4,syn=7,cost=2,S=",
         ]
         for p in demo_prompts:
             run_query(model, tokenizer, p)
@@ -229,6 +237,17 @@ def main() -> None:
             print(f"  Active Checkpoint : {ckpt_path}")
             print(f"  Vocab Size        : {tokenizer.vocab_size}")
             print(f"  Parameters        : {params}")
+            print(f"  Expert cache      : {_CARTRIDGE_BANK.cache_info()}")
+            continue
+        if line.startswith("!expert "):
+            fields = line.split()
+            try:
+                if len(fields) not in (2, 3):
+                    raise ValueError("Usage: !expert <domain> [slot]")
+                slot = int(fields[2]) if len(fields) == 3 else None
+                print(_CARTRIDGE_BANK.install_cartridge(model, fields[1], slot=slot))
+            except (ValueError, KeyError, OSError) as exc:
+                print(f"  [EXPERT LOAD FAILED] {exc}")
             continue
         if line == "!save":
             state_dict_cpu = {

@@ -1,0 +1,993 @@
+{
+  "schema_version": 1,
+  "architecture": "AIX-Zero routed expert snapshots",
+  "model_config": {
+    "vocab_size": 137,
+    "d_model": 128,
+    "n_heads": 4,
+    "n_kv_heads": 2,
+    "d_ff": 256,
+    "n_encoder_layers": 1,
+    "n_recurrent_steps": 3,
+    "n_decoder_layers": 1,
+    "max_seq_len": 112,
+    "rope_theta": 10000.0,
+    "rms_eps": 1e-06,
+    "dropout": 0.0,
+    "use_moe": true,
+    "use_shared_expert": true,
+    "n_experts": 4,
+    "moe_top_k": 2,
+    "use_memory_bank": true,
+    "n_memory_slots": 8,
+    "use_prompt_pointer": true,
+    "pointer_temperature": 0.35,
+    "use_key_ngram_conv": false
+  },
+  "active_core_physical_parameters": 818178,
+  "registered_cartridges": 24,
+  "total_cartridge_bank_parameters": 1179648,
+  "cartridges": {
+    "ARITH_CHAIN": {
+      "domain": "ARITH_CHAIN",
+      "title": "Two-Step Order-of-Operations Arithmetic",
+      "category": "Foundational Mathematics",
+      "prefix": "Q:",
+      "formula": "R = (a * b) +/- c",
+      "introduced_in": "v1",
+      "cartridge_file": "expert_arith_chain_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "ALGEBRA_SOLVE": {
+      "domain": "ALGEBRA_SOLVE",
+      "title": "Linear Single-Variable Algebraic Equations",
+      "category": "Symbolic Algebra",
+      "prefix": "Q:",
+      "formula": "a*x + b = c  ==>  x = (c - b) / a",
+      "introduced_in": "v1",
+      "cartridge_file": "expert_algebra_solve_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "MODULAR_NT": {
+      "domain": "MODULAR_NT",
+      "title": "Modular Number Theory & Congruence",
+      "category": "Number Theory",
+      "prefix": "Q:(",
+      "formula": "R = (a + b) mod m",
+      "introduced_in": "v1",
+      "cartridge_file": "expert_modular_nt_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "LOGIC_DEDUCT": {
+      "domain": "LOGIC_DEDUCT",
+      "title": "Relational Inequality & Boolean Deduction",
+      "category": "Formal Logic",
+      "prefix": "Q:",
+      "formula": "B = 1 if (a * b > c) else 0",
+      "introduced_in": "v1",
+      "cartridge_file": "expert_logic_deduct_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "WORD_PROBLEM": {
+      "domain": "WORD_PROBLEM",
+      "title": "Natural-Language Inventory & Counting Word Problems",
+      "category": "Applied Mathematics",
+      "prefix": "Q:Word:",
+      "formula": "Total = (packs * items_per_pack) +/- delta",
+      "introduced_in": "v3",
+      "cartridge_file": "expert_word_problem_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "CALCULUS_DERIV": {
+      "domain": "CALCULUS_DERIV",
+      "title": "Symbolic Polynomial Differentiation & Point Evaluation",
+      "category": "Differential Calculus",
+      "prefix": "Q:Calc:",
+      "formula": "d/dx(a*x^2 + b*x) |_{x=k} = 2*a*k + b",
+      "introduced_in": "v3",
+      "cartridge_file": "expert_calculus_deriv_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "SYSTEM_2X2": {
+      "domain": "SYSTEM_2X2",
+      "title": "Simultaneous 2x2 Linear Systems",
+      "category": "Linear Algebra",
+      "prefix": "Q:Sys:",
+      "formula": "{ x + y = S, x - y = D }  ==>  x = (S + D) / 2",
+      "introduced_in": "v4",
+      "cartridge_file": "expert_system_2x2_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "CODE_TRACE": {
+      "domain": "CODE_TRACE",
+      "title": "Python Function Execution Trace",
+      "category": "Program Verification",
+      "prefix": "Q:Code:",
+      "formula": "def f(x): return a*x + b; f(k) = a*k + b",
+      "introduced_in": "v4",
+      "cartridge_file": "expert_code_trace_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "QUADRATIC_EVAL": {
+      "domain": "QUADRATIC_EVAL",
+      "title": "Non-Linear Quadratic Polynomial Evaluation",
+      "category": "Polynomial Algebra",
+      "prefix": "Q:Quad:",
+      "formula": "f(k) = a * k^2 + c = (a * k * k) + c",
+      "introduced_in": "v6",
+      "cartridge_file": "expert_quadratic_eval_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "PHYSICS_KINEMATICS": {
+      "domain": "PHYSICS_KINEMATICS",
+      "title": "1D Constant-Acceleration Kinematics",
+      "category": "Classical Mechanics",
+      "prefix": "Q:Phys:",
+      "formula": "v = u + a * t",
+      "introduced_in": "v6",
+      "cartridge_file": "expert_physics_kinematics_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "GEOMETRY_AREA": {
+      "domain": "GEOMETRY_AREA",
+      "title": "2D Rectangular Area with Boundary Padding",
+      "category": "Euclidean Geometry",
+      "prefix": "Q:Geom:",
+      "formula": "A_total = (w * h) + p",
+      "introduced_in": "v7",
+      "cartridge_file": "expert_geometry_area_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "NUMBER_SEQ": {
+      "domain": "NUMBER_SEQ",
+      "title": "Arithmetic Progression n-th Term",
+      "category": "Discrete Mathematics",
+      "prefix": "Q:Seq:",
+      "formula": "a_n = a_0 + d * n",
+      "introduced_in": "v7",
+      "cartridge_file": "expert_number_seq_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "MULTI_STEP_3": {
+      "domain": "MULTI_STEP_3",
+      "title": "Three-Step Compositional Reasoning Chains",
+      "category": "Multi-Step Composition",
+      "prefix": "Q:Chain3:",
+      "formula": "R = ((a * b) + c) - d",
+      "introduced_in": "v8",
+      "cartridge_file": "expert_multi_step_3_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "ELECTRICAL_POWER": {
+      "domain": "ELECTRICAL_POWER",
+      "title": "Electrical Circuit Net Power & Thermal Loss",
+      "category": "Electrical Engineering (Knowledge Is Power v9)",
+      "prefix": "Q:Elec:",
+      "formula": "P_net = (V * I) - P_loss",
+      "introduced_in": "v9-KIP",
+      "cartridge_file": "expert_electrical_power_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "FINANCE_INTEREST": {
+      "domain": "FINANCE_INTEREST",
+      "title": "Financial Yield & Principal Accumulation",
+      "category": "Quantitative Finance (Knowledge Is Power v9)",
+      "prefix": "Q:Fin:",
+      "formula": "B = (r * t) + P_0",
+      "introduced_in": "v9-KIP",
+      "cartridge_file": "expert_finance_interest_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "THERMO_FIRST_LAW": {
+      "domain": "THERMO_FIRST_LAW",
+      "title": "First Law of Thermodynamics & Internal Energy",
+      "category": "Thermodynamics (Knowledge Is Power v10)",
+      "prefix": "Q:Thermo:",
+      "formula": "dU = (q * t) - W",
+      "introduced_in": "v10-KIP",
+      "cartridge_file": "expert_thermo_first_law_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "COMBINATORICS_GRID": {
+      "domain": "COMBINATORICS_GRID",
+      "title": "Restricted Combinatorial Pairing Space",
+      "category": "Combinatorics & Discrete Math (Knowledge Is Power v10)",
+      "prefix": "Q:Comb:",
+      "formula": "N_valid = (n * m) - k_excluded",
+      "introduced_in": "v10-KIP",
+      "cartridge_file": "expert_combinatorics_grid_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "PROBABILITY_EV": {
+      "domain": "PROBABILITY_EV",
+      "title": "Three-Step Discrete Expected Value with Bonus & Fee",
+      "category": "Probability & Decision Theory (Knowledge Is Power v10)",
+      "prefix": "Q:Prob:",
+      "formula": "EV = ((p * v) + bonus) - fee",
+      "introduced_in": "v10-KIP",
+      "cartridge_file": "expert_probability_ev_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "ELECTRO_THERMAL": {
+      "domain": "ELECTRO_THERMAL",
+      "title": "Cross-Domain Electro-Thermal Joule Heating & Internal Energy",
+      "category": "Multi-Physics Cross-Domain Synthesis (Knowledge Is Power v11 + Web)",
+      "prefix": "Q:BridgeET:",
+      "formula": "dU = ((V * I) * t) - W",
+      "introduced_in": "v11-KIP-Web",
+      "cartridge_file": "expert_electro_thermal_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "KINETIC_WORK": {
+      "domain": "KINETIC_WORK",
+      "title": "Cross-Domain Mechanical Work-Energy & Friction Conservation",
+      "category": "Multi-Physics Cross-Domain Synthesis (Knowledge Is Power v11 + Web)",
+      "prefix": "Q:BridgeKW:",
+      "formula": "E_final = ((F * d) + K_0) - L_friction",
+      "introduced_in": "v11-KIP-Web",
+      "cartridge_file": "expert_kinetic_work_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "MULTI_STEP_4": {
+      "domain": "MULTI_STEP_4",
+      "title": "Four-Step Compositional Reasoning Chains",
+      "category": "Deep Multi-Step Composition (Knowledge Is Power v11 + Web)",
+      "prefix": "Q:Chain4:",
+      "formula": "R = (((a * b) + c) - d) + e",
+      "introduced_in": "v11-KIP-Web",
+      "cartridge_file": "expert_multi_step_4_aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73.safetensors",
+      "sha256": "aafc88925ae4ea2c5251f6720791cf3e9b8db4f172a46c0d5cab1093dbab6e73",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "BAYES_EPISTEMIC": {
+      "domain": "BAYES_EPISTEMIC",
+      "title": "Bayesian Epistemic Log-Odds Belief Updating",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "prefix": "Q:Bayes:",
+      "formula": "B_post = ((w * E) + B_prior) - N_noise",
+      "introduced_in": "v12-KIP-Symbiont",
+      "cartridge_file": "expert_bayes_epistemic_afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d.safetensors",
+      "sha256": "afca1e932dcc3871756a11cbe159d0c9c7c77455a59bdf3aefcbfa300c69cd9d",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "CAUSAL_DO": {
+      "domain": "CAUSAL_DO",
+      "title": "Pearl Structural Causal Intervention (do-Calculus)",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "prefix": "Q:Causal:",
+      "formula": "Y_do = ((a * doX) + Z_med) - C_conf",
+      "introduced_in": "v12-KIP-Symbiont",
+      "cartridge_file": "expert_causal_do_43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1.safetensors",
+      "sha256": "43b504c160bab2f5c8d0f2c8c2681fbfa428047686e906bac424bf4a7f0747a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "SYMBIOTIC_GAME": {
+      "domain": "SYMBIOTIC_GAME",
+      "title": "Positive-Sum Cooperative Game Theory & Coalition Surplus",
+      "category": "Symbiotic Superintelligence Triad (Knowledge Is Power v12 + Web + 1T Cartridges)",
+      "prefix": "Q:Symb:",
+      "formula": "S_net = ((A * B) + G_syn) - C_coord",
+      "introduced_in": "v12-KIP-Symbiont",
+      "cartridge_file": "expert_symbiotic_game_30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149.safetensors",
+      "sha256": "30a9bc8b4b5c6774128cfbfb8a358aaa4b00a759c197499ba1926370c6acf149",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": 100.0,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    }
+  },
+  "limitations": "Snapshots duplicate existing experts; no added learned capacity or specialist validation."
+}

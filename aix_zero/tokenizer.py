@@ -68,6 +68,9 @@ WORD_VOCAB: List[str] = [
     "Q:BridgeET:",
     "Q:BridgeKW:",
     "Q:Chain4:",
+    "Q:Bayes:",
+    "Q:Causal:",
+    "Q:Symb:",
 ]
 
 
