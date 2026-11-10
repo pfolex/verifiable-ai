@@ -543,3 +543,230 @@ def assess_aix_paired_results(
         "reasons": reasons,
         "overall_mean_delta": statistics.fmean(p["delta"] for p in pairs),
     }
+
+
+def group_clustered_paired_interval(
+    pairs: List[Dict[str, Any]],
+    *,
+    alpha: float = 0.05,
+    comparisons: int = 1,
+) -> Dict[str, Any]:
+    """Compute group-aware paired confidence intervals (`EVAL-05` / Issue #45) by averaging
+    paired deltas within each `group_id` first, then applying Hoeffding bounds over the
+    independent group means `G` rather than the raw correlated prompt count `N`.
+    """
+    if not pairs or not (0.0 < alpha < 1.0) or comparisons < 1:
+        raise ValueError("Nonempty pairs, valid alpha, and positive comparisons are required")
+
+    by_group: Dict[str, List[float]] = {}
+    for p in pairs:
+        gid = str(p.get("group_id") or p.get("sample_id"))
+        delta = float(p["delta"])
+        if not math.isfinite(delta) or not (-1.0 <= delta <= 1.0):
+            raise ValueError("Paired deltas must be finite and bounded in [-1, 1]")
+        by_group.setdefault(gid, []).append(delta)
+
+    group_means = [statistics.fmean(vals) for vals in by_group.values()]
+    raw_interval = paired_interval([float(p["delta"]) for p in pairs], alpha=alpha, comparisons=comparisons)
+    group_interval = paired_interval(group_means, alpha=alpha, comparisons=comparisons)
+
+    warnings: List[str] = []
+    if len(pairs) > len(by_group):
+        warnings.append(
+            f"Correlated template/layout prompts detected (prompt_count={len(pairs)} > group_count={len(by_group)}); "
+            "using group-clustered confidence radius to avoid inflating sample independence."
+        )
+
+    return {
+        "prompt_count": len(pairs),
+        "group_count": len(by_group),
+        "mean_group_delta": group_interval["mean_delta"],
+        "group_lower": group_interval["lower"],
+        "group_upper": group_interval["upper"],
+        "naive_prompt_lower": raw_interval["lower"],
+        "naive_prompt_upper": raw_interval["upper"],
+        "warnings": warnings,
+    }
+
+
+def evaluate_probability_calibration(
+    records: List[Dict[str, Any]],
+    *,
+    num_bins: int = 5,
+) -> Dict[str, Any]:
+    """Evaluate probabilistic calibration (`EVAL-07` / Issue #47) separating:
+    1. Event-probability predictions (`predicted_prob` vs exact ground-truth `gold_prob` in `[0, 1]`
+       and realized binary outcomes `outcome_bit` in `{0, 1}`), and
+    2. Model verifier confidence about answer correctness (`verifier_confidence` vs `correct` in `{0, 1}`).
+    """
+    if num_bins < 1:
+        raise ValueError("num_bins must be positive")
+    if not records:
+        raise ValueError("records must be nonempty")
+
+    def _bin_stats(pairs_prob_target: List[Tuple[float, float]]) -> Dict[str, Any]:
+        brier = statistics.fmean((p - y) ** 2 for p, y in pairs_prob_target)
+        bins = [{"bin_index": i, "lower": i / num_bins, "upper": (i + 1) / num_bins, "count": 0, "mean_pred": 0.0, "mean_target": 0.0} for i in range(num_bins)]
+        bucket_lists: List[List[Tuple[float, float]]] = [[] for _ in range(num_bins)]
+        for p, y in pairs_prob_target:
+            if not (0.0 <= p <= 1.0) or not (0.0 <= y <= 1.0):
+                raise ValueError("Probabilities and targets must be in [0, 1]")
+            idx = min(num_bins - 1, int(p * num_bins))
+            bucket_lists[idx].append((p, y))
+        ece = 0.0
+        for i, items in enumerate(bucket_lists):
+            bins[i]["count"] = len(items)
+            if items:
+                mp = statistics.fmean(x[0] for x in items)
+                mt = statistics.fmean(x[1] for x in items)
+                bins[i]["mean_pred"] = round(mp, 6)
+                bins[i]["mean_target"] = round(mt, 6)
+                ece += (len(items) / len(pairs_prob_target)) * abs(mp - mt)
+        return {
+            "sample_count": len(pairs_prob_target),
+            "brier_score": round(brier, 6),
+            "ece": round(ece, 6),
+            "reliability_bins": bins,
+        }
+
+    event_pairs = [
+        (float(Fraction(r["predicted_prob"])), float(Fraction(r["gold_prob"])))
+        for r in records
+        if "predicted_prob" in r and "gold_prob" in r
+    ]
+    verifier_pairs = [
+        (float(r["verifier_confidence"]), 1.0 if r["correct"] else 0.0)
+        for r in records
+        if "verifier_confidence" in r and "correct" in r
+    ]
+
+    out: Dict[str, Any] = {"num_bins": num_bins}
+    if event_pairs:
+        out["event_probability_calibration"] = _bin_stats(event_pairs)
+    if verifier_pairs:
+        out["verifier_confidence_calibration"] = _bin_stats(verifier_pairs)
+    return out
+
+
+def build_latency_and_throughput_report(
+    samples: List[Dict[str, Any]],
+    *,
+    first_request_ms: float,
+    warmup_excluded_count: int = 1,
+    concurrency: int = 1,
+    cache_condition: str = "cold_application_cache_not_os_disk_cold",
+) -> Dict[str, Any]:
+    """Standardize latency and throughput reporting (`EVAL-08` / Issue #48), separating
+    time-to-first-token (`ttft_ms`), full-response latency (`latency_ms`), aggregate throughput,
+    and explicit cache condition (`cold_application_cache_not_os_disk_cold` vs `cold_os_disk`).
+    """
+    if not samples or concurrency < 1 or warmup_excluded_count < 0:
+        raise ValueError("Valid samples, concurrency, and warmup count are required")
+    if cache_condition not in ("cold_application_cache_not_os_disk_cold", "cold_os_disk", "warm_in_memory"):
+        raise ValueError(f"Unsupported cache_condition: {cache_condition!r}")
+
+    full_lat = sorted(float(s["latency_ms"]) for s in samples)
+    total_wall_s = sum(full_lat) / 1000.0
+    out_tokens = sum(int(s.get("output_tokens", 1)) for s in samples)
+    # Estimate or read time-to-first-token (for single-pass encoder + first step)
+    ttfts = sorted(
+        float(s.get("ttft_ms", float(s["latency_ms"]) / max(1, int(s.get("output_tokens", 1)))))
+        for s in samples
+    )
+
+    return {
+        "cache_condition": cache_condition,
+        "concurrency": concurrency,
+        "warmup_excluded_count": warmup_excluded_count,
+        "first_request_ms": float(first_request_ms),
+        "ttft_ms": {
+            "p50_ms": round(statistics.median(ttfts), 4),
+            "p95_ms": round(ttfts[max(0, math.ceil(0.95 * len(ttfts)) - 1)], 4),
+            "mean_ms": round(statistics.fmean(ttfts), 4),
+        },
+        "full_response_latency_ms": {
+            "p50_ms": round(statistics.median(full_lat), 4),
+            "p95_ms": round(full_lat[max(0, math.ceil(0.95 * len(full_lat)) - 1)], 4),
+            "mean_ms": round(statistics.fmean(full_lat), 4),
+        },
+        "throughput": {
+            "requests_per_second": round(len(samples) / max(1e-9, total_wall_s), 4),
+            "output_tokens_per_second": round(out_tokens / max(1e-9, total_wall_s), 4),
+        },
+    }
+
+
+def compute_energy_and_useful_work(
+    samples: List[Dict[str, Any]],
+    *,
+    measured_joules: Optional[float] = None,
+    estimated_tdp_watts: Optional[float] = None,
+    uncertainty_fraction: float = 0.25,
+    total_cost_usd: Optional[float] = None,
+) -> Dict[str, Any]:
+    """Account for device runtime vs. verified useful work (`EVAL-10` / Issue #50).
+
+    Never records unmeasured energy or cost as `0.0`; keeps `measured_energy_joules` and
+    `total_cost_usd` as `None` when unknown.
+    """
+    if not samples:
+        raise ValueError("samples must be nonempty")
+    total_runtime_s = sum(float(s["latency_ms"]) for s in samples) / 1000.0
+    verified_samples = [s for s in samples if float(s.get("score", 0.0)) == 1.0 and "error" not in s]
+    useful_runtime_s = sum(float(s["latency_ms"]) for s in verified_samples) / 1000.0
+
+    estimate = None
+    if measured_joules is None and estimated_tdp_watts is not None:
+        if estimated_tdp_watts <= 0 or not (0.0 <= uncertainty_fraction <= 1.0):
+            raise ValueError("Invalid TDP watts or uncertainty_fraction")
+        est_j = total_runtime_s * estimated_tdp_watts
+        estimate = {
+            "method": "wall_clock_seconds_times_declared_cpu_tdp_watts",
+            "estimated_joules": round(est_j, 4),
+            "lower_joules": round(est_j * (1.0 - uncertainty_fraction), 4),
+            "upper_joules": round(est_j * (1.0 + uncertainty_fraction), 4),
+            "uncertainty_fraction": uncertainty_fraction,
+        }
+
+    return {
+        "total_device_runtime_seconds": round(total_runtime_s, 6),
+        "verified_useful_work_seconds": round(useful_runtime_s, 6),
+        "verified_useful_samples": len(verified_samples),
+        "total_samples": len(samples),
+        "useful_work_efficiency_ratio": round(len(verified_samples) / len(samples), 6),
+        "measured_energy_joules": float(measured_joules) if measured_joules is not None else None,
+        "estimated_energy": estimate,
+        "total_cost_usd": float(total_cost_usd) if total_cost_usd is not None else None,
+    }
+
+
+OPEN_WEIGHT_BASELINE_REGISTRY: List[Dict[str, Any]] = [
+    {
+        "baseline_id": "qwen2.5-0.5b-instruct-cpu",
+        "model_family": "Qwen2.5-0.5B-Instruct",
+        "license_spdx": "Apache-2.0",
+        "physical_parameters": 494000000,
+        "tool_access": "none (neural_only)",
+        "sampling_budget": {"device": "cpu", "threads": 1, "temperature": 0.0, "max_new_tokens": 40},
+        "purpose": "Smallest permissive open-weight dense transformer baseline for comparing parameter-normalized CPU reasoning accuracy.",
+    },
+    {
+        "baseline_id": "qwen2.5-math-1.5b-instruct-cpu",
+        "model_family": "Qwen2.5-Math-1.5B-Instruct",
+        "license_spdx": "Apache-2.0",
+        "physical_parameters": 1540000000,
+        "tool_access": "none (neural_only)",
+        "sampling_budget": {"device": "cpu", "threads": 1, "temperature": 0.0, "max_new_tokens": 40},
+        "purpose": "Math-specialized permissive open-weight baseline under identical zero-tool prompt and token budgets.",
+    },
+    {
+        "baseline_id": "aix-zero-v11-neural-only",
+        "model_family": "AIX-Zero-v11",
+        "license_spdx": "Apache-2.0",
+        "physical_parameters": 817410,
+        "tool_access": "none (neural_only)",
+        "sampling_budget": {"device": "cpu", "threads": 1, "temperature": 0.35, "num_candidates": 2, "max_new_tokens": 40},
+        "purpose": "Sub-megaparameter (817K) latent-recurrent reference baseline (scores 9/105 neural-only on v11 held-out templates).",
+    },
+]
+

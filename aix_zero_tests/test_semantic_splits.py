@@ -8,7 +8,11 @@ import unittest
 from aix_zero.bayesian_tasks import build_dataset
 from aix_zero.knowledge_is_power import build_21_domain_kip_v11_curriculum
 from aix_zero.semantic_splits import (
+    SPLIT_ACCESS_POLICY,
+    build_rotating_test_partition,
     canonical_problem_identity,
+    compute_difficulty_factors,
+    export_training_split_safe,
     partition_by_semantic_identity,
     semantic_identity_hash,
     verify_disjoint_splits,
@@ -77,6 +81,38 @@ class SemanticSplitsTests(unittest.TestCase):
         test = [{"prompt": "Q:BP:e=0;b=1/5;p=2/6;a=2/3;P="}]
         with self.assertRaisesRegex(ValueError, "Semantic split leakage detected"):
             verify_disjoint_splits({"train": train, "test": test})
+
+    def test_eval_04_holdout_protection_and_rotating_slices(self):
+        self.assertFalse(SPLIT_ACCESS_POLICY["test"]["includes_gold_answers"])
+        self.assertTrue(SPLIT_ACCESS_POLICY["test"]["consumes_final_test_budget"])
+        ds = build_dataset(seed=42)
+        bp_splits = ds["tasks"]["BP"]
+
+        # Safe training export succeeds on disjoint splits and refuses test/holdout splits
+        exported = export_training_split_safe(bp_splits, requested_split="train")
+        self.assertEqual(len(exported), 340)
+        with self.assertRaisesRegex(PermissionError, "cannot be exported for training"):
+            export_training_split_safe(bp_splits, requested_split="test")
+
+        # Rotating test slice partition produces deterministic disjoint active/reserve slices
+        rot0 = build_rotating_test_partition(bp_splits["test"], epoch_id="2026-Q4", rotation_seed=0, active_test_groups=6)
+        rot1 = build_rotating_test_partition(bp_splits["test"], epoch_id="2026-Q4", rotation_seed=1, active_test_groups=6)
+        self.assertEqual(rot0["active_group_count"] + rot0["reserve_group_count"], 24)
+        self.assertNotEqual(
+            [x["prompt"] for x in rot0["public_test_cases"]],
+            [x["prompt"] for x in rot1["public_test_cases"]],
+        )
+        self.assertTrue(all("gold" not in x for x in rot0["public_test_cases"]))
+
+    def test_data_03_explicit_difficulty_metadata_across_domains(self):
+        bp_easy = compute_difficulty_factors({"domain": "BP", "prompt": "Q:BP:p=1/2;a=1/2;b=1/4;e=1;P="})
+        bs_hard = compute_difficulty_factors(
+            {"domain": "BS", "prompt": "Q:BS:p=3/7;a=4/9;b=2/9;e=101;P="}
+        )
+        self.assertGreater(bs_hard["operation_depth"], bp_easy["operation_depth"])
+        self.assertGreater(bs_hard["max_denominator"], bp_easy["max_denominator"])
+        self.assertEqual(bp_easy["difficulty_tier"], "tier_1_basic")
+        self.assertEqual(bs_hard["difficulty_tier"], "tier_3_compositional")
 
 
 if __name__ == "__main__":

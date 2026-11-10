@@ -1,4 +1,4 @@
-"""Offline v11 baseline and optional expert snapshot export (no training/network calls).
+"""[STABLE RELEASE INTERFACE] Offline v11 baseline and optional expert snapshot export (no training/network calls).
 
 Run from the repository root with python -m aix_zero.benchmark_baseline.
 Reports full response latency, including the final verifier forward pass. The first

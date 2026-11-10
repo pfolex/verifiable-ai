@@ -48,6 +48,49 @@ def _moe(model: AIXZeroModel):
 class SparseExpertCartridgeBank:
     """Integrity-checked expert storage with an LRU cache bounded by bytes and count."""
 
+    VALID_PROVENANCE_TYPES = (
+        "existing_routed_expert_snapshot",
+        "frozen_v11_single_expert_training_candidate",
+    )
+    VALID_PROMOTION_STATES = (
+        "NOT_EVALUATED_SNAPSHOT",
+        "PENDING_AUDIT",
+        "REJECTED",
+        "ELIGIBLE_NOT_ACTIVATED",
+        "APPROVED_ACTIVE",
+    )
+
+    @classmethod
+    def validate_specialist_provenance(cls, entry: Dict[str, Any]) -> None:
+        """Enforce `EXPERT-01` (#89) provenance and promotion state separation on a cartridge entry."""
+        prov = entry.get("provenance")
+        if prov not in cls.VALID_PROVENANCE_TYPES:
+            raise ValueError(f"Invalid cartridge provenance type: {prov!r}")
+
+        status = entry.get("promotion_status", "NOT_EVALUATED_SNAPSHOT")
+        if status not in cls.VALID_PROMOTION_STATES:
+            raise ValueError(f"Invalid cartridge promotion_status: {status!r}")
+
+        if prov == "existing_routed_expert_snapshot":
+            if status not in ("NOT_EVALUATED_SNAPSHOT",):
+                raise ValueError(
+                    "Copied existing_routed_expert_snapshot cannot claim trained specialist promotion states"
+                )
+            if entry.get("verified_accuracy_pct") is not None:
+                raise ValueError("Copied snapshot cannot claim a specialist verified_accuracy_pct")
+        elif prov == "frozen_v11_single_expert_training_candidate":
+            if status == "NOT_EVALUATED_SNAPSHOT":
+                raise ValueError("Trained specialist candidate must declare an explicit audit/promotion status")
+            training = entry.get("training")
+            if not isinstance(training, dict) or not training.get("frozen_tensors_unchanged"):
+                raise ValueError("Trained specialist candidate must record training recipe with frozen_tensors_unchanged=True")
+            gate = entry.get("empirical_gate")
+            if status in ("ELIGIBLE_NOT_ACTIVATED", "APPROVED_ACTIVE"):
+                if not isinstance(gate, dict) or gate.get("decision") != "PASS":
+                    raise ValueError(f"Promotion status {status!r} requires empirical_gate.decision == 'PASS'")
+            if status == "REJECTED" and isinstance(gate, dict) and gate.get("decision") == "PASS":
+                raise ValueError("REJECTED status conflicts with empirical_gate.decision == 'PASS'")
+
     def __init__(self, cartridge_dir: Optional[Path] = None, *,
                  max_cached_bytes: int = 1024 * 1024, max_cached_experts: int = 2,
                  max_shard_bytes: int = 16 * 1024 * 1024) -> None:

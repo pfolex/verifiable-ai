@@ -35,7 +35,7 @@ for sub in ("verisci", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "ever
     sys.path.insert(0, str(REPO_ROOT / sub / "src"))
 
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
-from aix_zero.checkpoint_registry import load_checkpoint_strict
+from aix_zero.checkpoint_registry import load_checkpoint_strict, save_checkpoint_protected
 from aix_zero.knowledge_is_power import CodexRetriever, WebKnowledgeFetcher
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
@@ -162,8 +162,20 @@ def run_live_teach(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AIX-Zero v8 Interactive REPL")
+    parser = argparse.ArgumentParser(
+        description=(
+            "[EXPERIMENTAL RESEARCH INTERFACE] AIX-Zero Interactive REPL for inference, "
+            "cartridge swapping, and in-RAM teaching. Source checkpoints are protected from "
+            "accidental overwrite by default."
+        )
+    )
     parser.add_argument("--demo", action="store_true", help="Run non-interactive 13-domain + live-teaching showcase")
+    parser.add_argument(
+        "--save-path",
+        type=Path,
+        default=None,
+        help="Disposable output checkpoint path for !save (default refuses to overwrite source checkpoint)",
+    )
     args = parser.parse_args()
 
     device = torch.device("cpu")
@@ -230,12 +242,20 @@ def main() -> None:
             except (ValueError, KeyError, OSError) as exc:
                 print(f"  [EXPERT LOAD FAILED] {exc}")
             continue
-        if line == "!save":
-            state_dict_cpu = {
-                k: v.detach().cpu().clone().contiguous() for k, v in model.state_dict().items()
-            }
-            save_file(state_dict_cpu, str(ckpt_path))
-            print(f"  [SAVED] Wrote live weights to {ckpt_path}")
+        if line == "!save" or line.startswith("!save "):
+            parts = line.split(maxsplit=1)
+            target_out = Path(parts[1]) if len(parts) == 2 else (args.save_path or ckpt_path)
+            try:
+                saved = save_checkpoint_protected(
+                    model,
+                    target_out,
+                    source_checkpoint_path=ckpt_path,
+                    allow_overwrite_source=False,
+                    allow_overwrite_indexed=False,
+                )
+                print(f"  [SAVED] Wrote live weights to {saved['saved_path']} (sha256={saved['sha256'][:12]})")
+            except (PermissionError, ValueError, OSError) as exc:
+                print(f"  [SAVE BLOCKED] {exc}")
             continue
         if line.startswith("!web "):
             topic = line[len("!web ") :].strip()

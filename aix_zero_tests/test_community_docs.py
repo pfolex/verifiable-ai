@@ -51,6 +51,22 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertIn("Apache-2.0", pol_text)
         self.assertIn("Explicit Exceptions: Datasets, Web Excerpts, and Checkpoints", pol_text)
 
+    def test_wave3_replication_triage_reasoning_website_and_pr_templates(self):
+        rep_doc = ROOT / "docs/REPLICATION-AND-TRIAGE.md"
+        reason_doc = ROOT / "docs/REASONING-CAPABILITY-SPEC.md"
+        web_doc = ROOT / "docs/WEBSITE-INFORMATION-ARCHITECTURE.md"
+        pr_default = ROOT / ".github/pull_request_template.md"
+        pr_exp = ROOT / ".github/PULL_REQUEST_TEMPLATE/experiment_or_research.md"
+        pr_code = ROOT / ".github/PULL_REQUEST_TEMPLATE/code_or_docs.md"
+
+        for p in (rep_doc, reason_doc, web_doc, pr_default, pr_exp, pr_code):
+            self.assertTrue(p.is_file(), f"Missing {p}")
+
+        self.assertIn("Independent Reproducer", rep_doc.read_text(encoding="utf-8"))
+        self.assertIn("NON_IDENTIFIABLE", reason_doc.read_text(encoding="utf-8"))
+        self.assertIn("Distributed coordinator: OFFLINE", web_doc.read_text(encoding="utf-8"))
+        self.assertIn("Neural-Only Exact Match", pr_exp.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

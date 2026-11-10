@@ -217,6 +217,13 @@ class MixtureOfReasoningExperts(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        if x.device.type not in ("cpu",):
+            raise ValueError(f"Unsupported device for MixtureOfReasoningExperts: {x.device.type!r} (supported: 'cpu')")
+        if x.dtype not in (torch.float32, torch.float64):
+            raise ValueError(
+                f"Unsupported precision dtype for MixtureOfReasoningExperts: {x.dtype} "
+                "(supported: torch.float32, torch.float64)"
+            )
         if self.forced_expert_index is not None:
             index = self.forced_expert_index
             if type(index) is not int or not 0 <= index < self.n_experts:

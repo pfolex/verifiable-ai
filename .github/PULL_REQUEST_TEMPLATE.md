@@ -1,11 +1,22 @@
-## Problem and resulting behavior
+## Summary
 
-## Linked issue and prerequisites
+- **Linked Issue(s):** Closes #
+- **Contribution Type:** [ ] Code / Bugfix | [ ] Documentation / Governance | [ ] Schema / Test Suite | [ ] Independent Replication
 
-## Evidence and validation
+## Scope & Scientific Honesty Checklist
 
-Record meaningful checks, source/model/data identities where relevant, and resource budgets. Distinguish neural-only, tool-assisted, and reference-solver results.
+- [ ] Does not overwrite committed baseline evidence (`aix_zero/checkpoints/aix_zero_v11_kip.safetensors`, `research/baseline/v11-local.json`, `research/dispatch/local.json`, `research/bayesian-pilot/results.json`).
+- [ ] Preserves the distinction between **physical learned parameters** (`817,410` in `v11`), **active per-token parameters** (`719,106`), and **recurrent passes** (`3`).
+- [ ] Reports **neural-only** (`9/105 = 8.57%`) and **symbolic-assisted** (`105/105 = 100.0%`) metrics separately wherever accuracy is cited.
+- [ ] Distinguishes proposed methods/specifications from validated capability gains.
 
-## Limitations and research outcome
+## Offline Reproduction Steps
 
-Include negative results, uncertainty, remaining blockers, and any data/model rights relevant to redistribution. A failed hypothesis can be a successful research contribution.
+```bash
+pytest -q aix_zero_tests tests
+```
+
+## Limitations & Licensing
+
+- **Known Limitations:**
+- **License & Provenance Confirmation:** I confirm this contribution is my original work (or carries compatible `Apache-2.0` / `MIT` / `BSD` provenance recorded in `research/dataset-provenance-catalog.json`) and is submitted under the repository `Apache-2.0` license.

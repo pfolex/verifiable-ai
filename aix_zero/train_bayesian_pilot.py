@@ -1,4 +1,4 @@
-"""Frozen-v11 specialist pilot with explicit routes and held-out probability structures.
+"""[EXPERIMENTAL RESEARCH INTERFACE] Frozen-v11 specialist pilot with explicit routes and held-out probability structures.
 
 No web/council calls, vocabulary expansion, base-checkpoint writes, or automatic
 promotion. Candidate exports and empirical decisions are saved in a new run folder.

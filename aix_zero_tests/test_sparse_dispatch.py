@@ -84,6 +84,28 @@ class SparseDispatchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             sparse.set_expert_dispatch('invalid')
 
+    def test_float32_and_float64_equivalence_and_unsupported_dtype_rejection(self):
+        for dtype, rtol, atol in ((torch.float32, 1e-5, 1e-6), (torch.float64, 1e-10, 1e-12)):
+            torch.manual_seed(7)
+            dense = MixtureOfReasoningExperts(
+                AIXZeroConfig(d_model=16, d_ff=64, n_experts=4, moe_top_k=2, use_shared_expert=True)
+            ).to(dtype=dtype)
+            sparse = copy.deepcopy(dense)
+            sparse.dispatch_mode = 'sparse'
+            x = torch.randn(3, 4, 16, dtype=dtype, requires_grad=True)
+            y = x.detach().clone().requires_grad_(True)
+            out_d, aux_d = dense(x)
+            out_s, aux_s = sparse(y)
+            torch.testing.assert_close(out_s, out_d, rtol=rtol, atol=atol)
+            (out_d.sum() + aux_d).backward()
+            (out_s.sum() + aux_s).backward()
+            torch.testing.assert_close(y.grad, x.grad, rtol=rtol, atol=atol)
+
+        # Unsupported precision mode (e.g. float16 on CPU MoRE) fails explicitly (`EXPERT-09`)
+        half_moe = MixtureOfReasoningExperts(AIXZeroConfig(d_model=16, d_ff=64, n_experts=4, moe_top_k=2)).half()
+        with self.assertRaisesRegex(ValueError, "Unsupported precision dtype"):
+            half_moe(torch.randn(2, 3, 16, dtype=torch.float16))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pfolex/verifiable-ai/blob/main/schemas/experiment-config-v1.schema.json",
+  "title": "AIX Machine-Readable Experiment Configuration Contract v1 (BASE-08)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "hypothesis",
+    "seed",
+    "model_identity",
+    "data_identity",
+    "optimizer",
+    "hardware_budget",
+    "selection_and_stop_rule",
+    "config_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "experiment_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "model_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_checkpoint_path",
+        "base_checkpoint_sha256",
+        "tokenizer_vocab_size",
+        "tokenizer_vocab_sha256",
+        "trainable_scope",
+        "trainable_parameters"
+      ],
+      "properties": {
+        "base_checkpoint_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "tokenizer_vocab_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tokenizer_vocab_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "trainable_scope": {
+          "enum": [
+            "eval_only_frozen",
+            "single_routed_expert",
+            "full_model"
+          ]
+        },
+        "trainable_parameters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_expert_slot": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "data_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_id",
+        "dataset_sha256",
+        "train_split",
+        "validation_split",
+        "test_split"
+      ],
+      "properties": {
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "train_split": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_split": {
+          "type": "string",
+          "minLength": 1
+        },
+        "test_split": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "optimizer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "lr",
+        "weight_decay",
+        "max_grad_norm",
+        "batch_size",
+        "max_steps"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "AdamW",
+            "SGD",
+            "none"
+          ]
+        },
+        "lr": {
+          "type": "number",
+          "minimum": 0
+        },
+        "weight_decay": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_grad_norm": {
+          "type": "number",
+          "minimum": 0
+        },
+        "batch_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_steps": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "hardware_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "device",
+        "dtype",
+        "threads",
+        "max_wall_clock_seconds"
+      ],
+      "properties": {
+        "device": {
+          "enum": [
+            "cpu"
+          ]
+        },
+        "dtype": {
+          "enum": [
+            "float32",
+            "float64"
+          ]
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_wall_clock_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "selection_and_stop_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_selection_metric",
+        "controls",
+        "promotion_gate"
+      ],
+      "properties": {
+        "checkpoint_selection_metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "promotion_gate": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "config_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

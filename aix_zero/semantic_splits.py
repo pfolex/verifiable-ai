@@ -198,3 +198,155 @@ def partition_by_semantic_identity(
     verify_disjoint_splits(splits)
     return splits
 
+
+SPLIT_ACCESS_POLICY: Dict[str, Dict[str, Any]] = {
+    "train": {
+        "allowed_consumers": ["training", "curriculum_diagnostics"],
+        "includes_gold_answers": True,
+        "consumes_final_test_budget": False,
+    },
+    "validation": {
+        "allowed_consumers": ["checkpoint_selection", "hyperparameter_search", "early_stopping"],
+        "includes_gold_answers": True,
+        "consumes_final_test_budget": False,
+    },
+    "test": {
+        "allowed_consumers": ["final_evaluation_scorer_only"],
+        "includes_gold_answers": False,
+        "consumes_final_test_budget": True,
+    },
+}
+
+
+def build_rotating_test_partition(
+    items: Iterable[Dict[str, Any]],
+    *,
+    epoch_id: str,
+    rotation_seed: int,
+    active_test_groups: int = 12,
+) -> Dict[str, Any]:
+    """Select a deterministic rotating final-test partition (`EVAL-04`) keyed by `epoch_id` and `rotation_seed`,
+    holding out the remaining test groups in a reserve pool and stripping private `gold`/`pos`/`neg` fields
+    from the public evaluation export.
+    """
+    if not isinstance(epoch_id, str) or not epoch_id.strip():
+        raise ValueError("epoch_id must be a nonempty string")
+    if active_test_groups < 1:
+        raise ValueError("active_test_groups must be positive")
+
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for item in items:
+        h = semantic_identity_hash(item)
+        groups.setdefault(h, []).append(item)
+
+    if len(groups) < active_test_groups:
+        raise ValueError("Not enough unique semantic groups for requested active_test_groups")
+
+    # Deterministic rotation order keyed by (epoch_id, rotation_seed, group_hash)
+    ranked_keys = sorted(
+        groups,
+        key=lambda gh: hashlib.sha256(f"{epoch_id}:{rotation_seed}:{gh}".encode("utf-8")).hexdigest(),
+    )
+    selected_keys = set(ranked_keys[:active_test_groups])
+
+    public_active = []
+    private_oracle = {}
+    reserve_count = 0
+    for gh, group_items in groups.items():
+        if gh in selected_keys:
+            for idx, row in enumerate(group_items):
+                sample_id = row.get("sample_id") or f"{epoch_id}-{gh[:8]}-{idx:02d}"
+                public_active.append(
+                    {
+                        "sample_id": sample_id,
+                        "group_hash": gh,
+                        "prompt": row["prompt"],
+                        "domain": row.get("domain") or row.get("task", "GENERIC"),
+                    }
+                )
+                private_oracle[sample_id] = str(row["gold"])
+        else:
+            reserve_count += len(group_items)
+
+    return {
+        "epoch_id": epoch_id,
+        "rotation_seed": rotation_seed,
+        "access_policy": SPLIT_ACCESS_POLICY["test"],
+        "consumes_final_test": True,
+        "active_group_count": len(selected_keys),
+        "reserve_group_count": len(groups) - len(selected_keys),
+        "reserve_prompt_count": reserve_count,
+        "public_test_cases": public_active,
+        "private_oracle_by_sample_id": private_oracle,
+    }
+
+
+def export_training_split_safe(
+    splits: Dict[str, List[Dict[str, Any]]],
+    *,
+    requested_split: str = "train",
+) -> List[Dict[str, Any]]:
+    """Export training or validation data while strictly blocking final-test examples or private test answers (`EVAL-04`)."""
+    if requested_split not in ("train", "validation"):
+        raise PermissionError(
+            f"Split {requested_split!r} cannot be exported for training or hyperparameter tuning"
+        )
+    verify_disjoint_splits(splits)
+    return [dict(row) for row in splits[requested_split]]
+
+
+def compute_difficulty_factors(item: Dict[str, Any] | str) -> Dict[str, Any]:
+    """Compute measurable difficulty axes (`DATA-03` / Issue #54):
+    - `operation_depth`: number of reasoning/arithmetic steps or Bayesian observations,
+    - `max_denominator`: largest rational denominator (1 for integer tasks),
+    - `sequence_length`: prompt character length,
+    - `structure_type`: `bayesian_dag`, `causal_scm`, `normal_form_game`, `program_ast`, or `algebraic_chain`,
+    - `difficulty_tier`: `tier_1_basic`, `tier_2_intermediate`, or `tier_3_compositional`.
+    """
+    prompt = item if isinstance(item, str) else str(item.get("prompt", ""))
+    compact = re.sub(r"\s+", "", prompt)
+
+    denominators = [int(d) for d in re.findall(r"/([1-9]\d*)", compact)]
+    max_den = max(denominators) if denominators else 1
+
+    m_bayes = re.fullmatch(r"Q:(BP|BS):([a-zA-Z0-9/=;]+);P=", compact)
+    if m_bayes:
+        _, body = m_bayes.groups()
+        kv = dict(p.split("=", 1) for p in body.split(";") if "=" in p)
+        obs_len = len(kv.get("e", "1"))
+        op_depth = obs_len
+        structure = "bayesian_dag"
+    elif compact.startswith("Q:Causal:"):
+        op_depth = 2
+        structure = "causal_scm"
+    elif compact.startswith("Q:Game:"):
+        op_depth = 2
+        structure = "normal_form_game"
+    elif compact.startswith("Q:Code:"):
+        op_depth = max(1, len(re.findall(r"[\+\-\*\/\%]", compact)))
+        structure = "program_ast"
+    else:
+        if "Chain4:" in compact:
+            op_depth = 4
+        elif any(k in compact for k in ("Chain3:", "BridgeET:", "BridgeKW:", "Prob:")):
+            op_depth = 3
+        else:
+            op_depth = 2
+        structure = "algebraic_chain"
+
+    if op_depth >= 3 or max_den >= 5:
+        tier = "tier_3_compositional"
+    elif op_depth == 2 and max_den > 1:
+        tier = "tier_2_intermediate"
+    else:
+        tier = "tier_1_basic"
+
+    return {
+        "operation_depth": op_depth,
+        "max_denominator": max_den,
+        "sequence_length": len(prompt),
+        "structure_type": structure,
+        "difficulty_tier": tier,
+    }
+
+

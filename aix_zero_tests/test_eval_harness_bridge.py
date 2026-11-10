@@ -12,10 +12,15 @@ from evaluation_result import validate_evaluation_result
 from aix_zero.benchmark_baseline import load_v11
 from aix_zero.eval_harness_bridge import (
     AIXZeroProvider,
-     assess_aix_paired_results,
+    OPEN_WEIGHT_BASELINE_REGISTRY,
+    assess_aix_paired_results,
     assert_comparable_conditions,
     baseline_report_to_eval_results,
+    build_latency_and_throughput_report,
     build_multidimensional_scorecard,
+    compute_energy_and_useful_work,
+    evaluate_probability_calibration,
+    group_clustered_paired_interval,
     rational_scorer_metadata,
     run_aix_benchmark,
     score_rational_or_probability,
@@ -162,6 +167,65 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(result["summary"]["sample_count"], 2)
         self.assertEqual(result["summary"]["mean_score"], 1.0)
         self.assertTrue(all(s["input_tokens"] > 0 and s["output_tokens"] > 0 for s in result["samples"]))
+
+    def test_eval_05_group_clustered_paired_intervals_prevent_correlated_variant_inflation(self):
+        # 5 semantic templates, each repeated 10 times with identical outcomes -> effective G is 5, not 50
+        pairs = []
+        for g in range(5):
+            for r in range(10):
+                pairs.append({
+                    "sample_id": f"s-{g}-{r}",
+                    "group_id": f"template-{g}",
+                    "delta": 1.0 if g < 3 else 0.0,
+                })
+        clustered = group_clustered_paired_interval(pairs, alpha=0.05)
+        self.assertEqual(clustered["prompt_count"], 50)
+        self.assertEqual(clustered["group_count"], 5)
+        self.assertTrue(len(clustered["warnings"]) >= 1)
+        self.assertAlmostEqual(clustered["mean_group_delta"], 0.6)
+        self.assertLess(clustered["group_lower"], clustered["naive_prompt_lower"])
+
+    def test_eval_07_probability_calibration_and_verifier_confidence(self):
+        records = [
+            {"predicted_prob": "4/5", "gold_prob": "3/4", "verifier_confidence": 0.9, "correct": True},
+            {"predicted_prob": "1/5", "gold_prob": "1/4", "verifier_confidence": 0.8, "correct": False},
+            {"predicted_prob": "1/2", "gold_prob": "1/2", "verifier_confidence": 0.6, "correct": True},
+        ]
+        cal = evaluate_probability_calibration(records, num_bins=5)
+        self.assertEqual(cal["event_probability_calibration"]["sample_count"], 3)
+        self.assertEqual(cal["verifier_confidence_calibration"]["sample_count"], 3)
+        self.assertGreaterEqual(cal["event_probability_calibration"]["brier_score"], 0.0)
+        self.assertGreaterEqual(cal["verifier_confidence_calibration"]["ece"], 0.0)
+
+    def test_eval_08_latency_and_eval_10_energy_and_eval_11_external_baselines(self):
+        samples = [
+            {"latency_ms": 12.0, "output_tokens": 4, "score": 1.0},
+            {"latency_ms": 15.0, "output_tokens": 5, "score": 0.0},
+            {"latency_ms": 18.0, "output_tokens": 6, "score": 1.0},
+            {"latency_ms": 42.0, "output_tokens": 5, "score": 0.0},
+        ]
+        lat = build_latency_and_throughput_report(
+            samples,
+            first_request_ms=25.0,
+            warmup_excluded_count=1,
+            concurrency=1,
+            cache_condition="cold_application_cache_not_os_disk_cold",
+        )
+        self.assertEqual(lat["cache_condition"], "cold_application_cache_not_os_disk_cold")
+        self.assertEqual(lat["full_response_latency_ms"]["p95_ms"], 42.0)
+
+        energy_unmeasured = compute_energy_and_useful_work(samples, measured_joules=None)
+        self.assertIsNone(energy_unmeasured["measured_energy_joules"])
+        self.assertIsNone(energy_unmeasured["estimated_energy"])
+        self.assertEqual(energy_unmeasured["verified_useful_samples"], 2)
+
+        energy_est = compute_energy_and_useful_work(samples, estimated_tdp_watts=15.0)
+        self.assertIsNone(energy_est["measured_energy_joules"])
+        self.assertIsNotNone(energy_est["estimated_energy"])
+        self.assertGreater(energy_est["estimated_energy"]["estimated_joules"], 0.0)
+
+        self.assertGreaterEqual(len(OPEN_WEIGHT_BASELINE_REGISTRY), 3)
+        self.assertEqual(OPEN_WEIGHT_BASELINE_REGISTRY[0]["baseline_id"], "qwen2.5-0.5b-instruct-cpu")
 
 
 if __name__ == "__main__":

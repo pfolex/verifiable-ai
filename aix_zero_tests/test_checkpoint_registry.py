@@ -12,10 +12,14 @@ import unittest
 import torch
 
 from aix_zero.checkpoint_registry import (
+    CLI_COMMAND_CLASSIFICATION,
     DEFAULT_INVENTORY_PATH,
     load_checkpoint_inventory,
     load_checkpoint_strict,
+    make_experiment_config,
+    save_checkpoint_protected,
     validate_checkpoint_inventory,
+    validate_experiment_config,
 )
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
 from aix_zero.tokenizer import AIXZeroTokenizer
@@ -89,6 +93,131 @@ class CheckpointRegistryAndSmokeTests(unittest.TestCase):
         tol_doc = ROOT / "docs/HARDWARE-AND-NUMERICAL-TOLERANCES.md"
         self.assertTrue(tol_doc.is_file())
         self.assertIn("Never promises bitwise logit equivalence", tol_doc.read_text(encoding="utf-8").replace("never", "Never"))
+
+    def test_cli_command_classification_and_help_fixture(self):
+        self.assertGreaterEqual(len(CLI_COMMAND_CLASSIFICATION), 4)
+        bench = CLI_COMMAND_CLASSIFICATION["aix_zero.benchmark_baseline"]
+        self.assertEqual(bench["tier"], "stable_release_interface")
+        self.assertEqual(bench["network_or_paid_calls"], "none")
+        kip = CLI_COMMAND_CLASSIFICATION["aix_zero.knowledge_is_power"]
+        self.assertEqual(kip["tier"], "experimental_research_command")
+
+    def test_experiment_config_schema_round_trip_and_rejection(self):
+        cfg = make_experiment_config(
+            {
+                "schema_version": "1.0.0",
+                "experiment_id": "exp-bayesian-pilot-01",
+                "hypothesis": "Single-expert frozen-backbone fine-tuning improves BP/BS exact match without anchor regression.",
+                "seed": 42,
+                "model_identity": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "a" * 64,
+                    "tokenizer_vocab_size": 134,
+                    "tokenizer_vocab_sha256": "b" * 64,
+                    "trainable_scope": "single_routed_expert",
+                    "trainable_parameters": 49152,
+                    "target_expert_slot": 3,
+                },
+                "data_identity": {
+                    "dataset_id": "aix-zero-bayesian-pilot-v1",
+                    "dataset_sha256": "c" * 64,
+                    "train_split": "train",
+                    "validation_split": "validation",
+                    "test_split": "test",
+                },
+                "optimizer": {
+                    "name": "AdamW",
+                    "lr": 0.001,
+                    "weight_decay": 0.01,
+                    "max_grad_norm": 1.0,
+                    "batch_size": 16,
+                    "max_steps": 120,
+                },
+                "hardware_budget": {
+                    "device": "cpu",
+                    "dtype": "float32",
+                    "threads": 1,
+                    "max_wall_clock_seconds": 300,
+                },
+                "selection_and_stop_rule": {
+                    "checkpoint_selection_metric": "validation_exact_match",
+                    "controls": ["no_test_split_access", "frozen_backbone_sha256_check"],
+                    "promotion_gate": "paired_hoeffding_union_bound",
+                },
+            }
+        )
+        validate_experiment_config(cfg)
+
+        bad_cfg = dict(cfg)
+        bad_cfg["unexpected_field"] = 123
+        with self.assertRaises(Exception):
+            validate_experiment_config(bad_cfg)
+
+    def test_save_checkpoint_protected_prevents_overwrite_and_supports_nested_dirs(self):
+        ckpt = ROOT / "aix_zero/checkpoints/aix_zero_v11_kip.safetensors"
+        model, _, _ = load_checkpoint_strict(ckpt)
+
+        # Attempting to overwrite the active v11 baseline fails closed
+        with self.assertRaisesRegex(PermissionError, "Refusing to overwrite indexed baseline checkpoint"):
+            save_checkpoint_protected(model, ckpt)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            nested_out = Path(tmp) / "nested" / "sub" / "candidate.safetensors"
+            source_ref = Path(tmp) / "source_ref.safetensors"
+            source_ref.write_bytes(b"placeholder")
+
+            # Saving to the same path as source_checkpoint_path fails closed
+            with self.assertRaisesRegex(PermissionError, "Refusing to overwrite source checkpoint"):
+                save_checkpoint_protected(model, source_ref, source_checkpoint_path=source_ref)
+
+            # Saving to a symlink pointing to source_checkpoint_path fails closed
+            symlink_path = Path(tmp) / "link.safetensors"
+            symlink_path.symlink_to(source_ref)
+            with self.assertRaisesRegex(PermissionError, "Refusing to overwrite source checkpoint"):
+                save_checkpoint_protected(model, symlink_path, source_checkpoint_path=source_ref)
+
+            # Saving to nested non-existent directory succeeds atomically and returns SHA-256
+            res = save_checkpoint_protected(
+                model,
+                nested_out,
+                source_checkpoint_path=ckpt,
+            )
+            self.assertTrue(nested_out.is_file())
+            self.assertEqual(len(res["sha256"]), 64)
+
+    def test_bayesian_pilot_readme_and_specialist_provenance_enforcement(self):
+        readme = ROOT / "research/bayesian-pilot/README.md"
+        self.assertTrue(readme.is_file())
+        text = readme.read_text(encoding="utf-8")
+        self.assertIn("REJECTED", text)
+        self.assertIn("frozen_tensors_unchanged", text)
+
+        # Verify EXPERT-01 provenance separation in SparseExpertCartridgeBank
+        SparseExpertCartridgeBank.validate_specialist_provenance(
+            {
+                "provenance": "existing_routed_expert_snapshot",
+                "promotion_status": "NOT_EVALUATED_SNAPSHOT",
+                "verified_accuracy_pct": None,
+            }
+        )
+
+        with self.assertRaisesRegex(ValueError, "Copied existing_routed_expert_snapshot cannot claim"):
+            SparseExpertCartridgeBank.validate_specialist_provenance(
+                {
+                    "provenance": "existing_routed_expert_snapshot",
+                    "promotion_status": "APPROVED_ACTIVE",
+                }
+            )
+
+        with self.assertRaisesRegex(ValueError, "requires empirical_gate.decision == 'PASS'"):
+            SparseExpertCartridgeBank.validate_specialist_provenance(
+                {
+                    "provenance": "frozen_v11_single_expert_training_candidate",
+                    "promotion_status": "APPROVED_ACTIVE",
+                    "training": {"frozen_tensors_unchanged": True},
+                    "empirical_gate": {"decision": "FAIL"},
+                }
+            )
 
 
 if __name__ == "__main__":
