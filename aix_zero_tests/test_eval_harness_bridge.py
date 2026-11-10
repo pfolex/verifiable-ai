@@ -42,6 +42,7 @@ from aix_zero.eval_harness_bridge import (
     generate_confounded_causal_pairs,
     group_clustered_paired_interval,
     measure_memory_and_cache_budget,
+    prepare_reproducible_competitive_model_release,
     rational_scorer_metadata,
     run_aix_benchmark,
     run_independent_capability_red_team_audit,
@@ -649,6 +650,17 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertTrue(ret["modes_strictly_separated"])
         self.assertAlmostEqual(ret["retrieved_evidence_only_accuracy"], 1 / 3, places=5)
         self.assertAlmostEqual(ret["solver_assisted_accuracy"], 2 / 3, places=5)
+
+    def test_wave11_scale_14(self):
+        rel = prepare_reproducible_competitive_model_release(
+            [
+                {"claim_id": "v11-21-domain-symbolic-assisted", "independently_reproduced": True, "beats_declared_controls": True},
+                {"claim_id": "v12-bayesian-single-expert", "independently_reproduced": True, "beats_declared_controls": False},
+            ]
+        )
+        self.assertEqual(rel["confirmed_claim_count"], 1)
+        self.assertEqual(rel["withdrawn_or_qualified_claim_count"], 1)
+        self.assertTrue(rel["release_ready"])
 
 
 if __name__ == "__main__":

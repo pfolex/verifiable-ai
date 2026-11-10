@@ -2008,6 +2008,45 @@ def evaluate_verified_retrieval_augmentation(
     }
 
 
+def prepare_reproducible_competitive_model_release(
+    headline_claims: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Prepare a reproducible competitive model release (`SCALE-14` / Issue #213).
+
+    Requires at least one independent reviewer to reproduce each headline gain, and
+    withdraws or qualifies claims that cannot be independently confirmed.
+    """
+    confirmed_claims: List[Dict[str, Any]] = []
+    withdrawn_or_qualified_claims: List[Dict[str, Any]] = []
+
+    for c in headline_claims:
+        if bool(c.get("independently_reproduced", False)) and bool(c.get("beats_declared_controls", False)):
+            confirmed_claims.append(
+                {
+                    "claim_id": str(c["claim_id"]),
+                    "status": "CONFIRMED_FOR_RELEASE",
+                    "reproducer_id": str(c.get("reproducer_id", "independent-reviewer")),
+                }
+            )
+        else:
+            withdrawn_or_qualified_claims.append(
+                {
+                    "claim_id": str(c["claim_id"]),
+                    "status": "WITHDRAWN_OR_QUALIFIED_UNCONFIRMED",
+                    "reason": "Lacks independent reproduction or positive margin over controls",
+                }
+            )
+
+    return {
+        "confirmed_claim_count": len(confirmed_claims),
+        "withdrawn_or_qualified_claim_count": len(withdrawn_or_qualified_claims),
+        "confirmed_claims": confirmed_claims,
+        "withdrawn_or_qualified_claims": withdrawn_or_qualified_claims,
+        "release_ready": len(confirmed_claims) > 0,
+    }
+
+
+
 
 
 

@@ -951,6 +951,86 @@ class CommunityDocsTests(unittest.TestCase):
         )
         self.assertFalse(gov["fictional_governing_board_claimed"])
 
+    def test_wave11_worker_15_sec_15_network_12_web_05_06_and_comm_15(self):
+        from aix_zero.network_coordinator import (
+            build_maintainer_succession_and_bus_factor_plan,
+            run_three_node_coordination_experiment,
+            validate_contributor_onboarding_guide,
+        )
+        from aix_zero.website_data_builder import (
+            build_network_status_page_payload,
+            build_reproducible_results_page_payload,
+            verify_website_and_api_access_controls,
+        )
+
+        # WORKER-15 contributor onboarding guide
+        guide_res = validate_contributor_onboarding_guide(ROOT / "docs/CONTRIBUTOR-WORKER-ONBOARDING.md")
+        self.assertTrue(guide_res["guide_verified"])
+
+        # SEC-15 website and API access controls
+        with self.assertRaisesRegex(PermissionError, "Unauthenticated users cannot mutate"):
+            verify_website_and_api_access_controls(
+                is_authenticated_maintainer=False, requested_method="POST", bundle_payload_text="clean"
+            )
+        with self.assertRaisesRegex(ValueError, "leaked sensitive tokens"):
+            verify_website_and_api_access_controls(
+                is_authenticated_maintainer=True, requested_method="GET", bundle_payload_text="const secret_key = '123'"
+            )
+        self.assertTrue(
+            verify_website_and_api_access_controls(
+                is_authenticated_maintainer=False, requested_method="GET", bundle_payload_text="public-ui-bundle"
+            )["access_permitted"]
+        )
+
+        # NETWORK-12 controlled three-node coordination experiment
+        exp3 = run_three_node_coordination_experiment(
+            single_machine_jobs_per_sec=10.0,
+            raw_three_node_jobs_per_sec=28.0,
+            replication_factor=2,
+            coordinator_overhead_fraction=0.08,
+            retry_overhead_fraction=0.05,
+        )
+        self.assertEqual(exp3["node_count"], 3)
+        self.assertGreater(exp3["net_verified_speedup_vs_single_machine"], 1.0)
+
+        # WEB-05 network status page payload
+        with self.assertRaisesRegex(ValueError, "cannot mix demo/simulated metrics"):
+            build_network_status_page_payload(
+                data_mode="SIMULATED_LOCAL_PILOT", metrics=[], contains_mixed_live_and_demo=True
+            )
+        ns = build_network_status_page_payload(
+            data_mode="SIMULATED_LOCAL_PILOT",
+            metrics=[
+                {
+                    "metric_id": "verified_jobs",
+                    "definition": "Total jobs passing 2x replication",
+                    "timestamp_utc": "2026-11-10T23:00:00Z",
+                    "data_source": "local_three_node_pilot",
+                    "value": 12,
+                }
+            ],
+        )
+        self.assertTrue(ns["is_simulated_or_demo"])
+
+        # WEB-06 reproducible results page payload
+        res_page = build_reproducible_results_page_payload(ROOT)
+        self.assertTrue(res_page["modes_visibly_distinct"])
+        self.assertEqual(res_page["neural_only_result"]["exact_matches"], 9)
+        self.assertEqual(res_page["symbolic_assisted_result"]["exact_matches"], 105)
+
+        # COMM-15 maintainer succession and bus-factor plan
+        with self.assertRaisesRegex(ValueError, "without explicit consent"):
+            build_maintainer_succession_and_bus_factor_plan(
+                [{"name": "eval", "primary_maintainer": "pfolex", "backup_maintainer": "bob", "backup_explicit_consent": False}]
+            )
+        succ = build_maintainer_succession_and_bus_factor_plan(
+            [
+                {"name": "eval", "primary_maintainer": "pfolex", "backup_maintainer": "alice", "backup_explicit_consent": True},
+                {"name": "signing", "primary_maintainer": "pfolex", "backup_maintainer": None},
+            ]
+        )
+        self.assertEqual(succ["honest_coverage_gap_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

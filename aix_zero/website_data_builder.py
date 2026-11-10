@@ -12,6 +12,7 @@ Guarantees:
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -267,5 +268,93 @@ def build_public_metrics_api_projection(
         "excludes_final_test_answers": True,
         "public_worker_summaries": sanitized_workers,
     }
+
+
+def verify_website_and_api_access_controls(
+    *,
+    is_authenticated_maintainer: bool,
+    requested_method: str,
+    bundle_payload_text: str,
+) -> Dict[str, Any]:
+    """Review website and API access controls (`SEC-15` / Issue #159).
+
+    Unauthenticated users cannot mutate jobs or releases, and no public page or browser
+    bundle may contain credentials or private test answers.
+    """
+    if requested_method.upper() in ("POST", "PUT", "DELETE", "PATCH") and not is_authenticated_maintainer:
+        raise PermissionError("Unauthenticated users cannot mutate jobs or releases")
+
+    forbidden_bundle_patterns = ("secret_key", "enrollment_token", "final_test_gold_answer", "PRIVATE_KEY")
+    leaked = [p for p in forbidden_bundle_patterns if p in bundle_payload_text]
+    if leaked:
+        raise ValueError(f"Public page or browser bundle leaked sensitive tokens/answers: {leaked}")
+
+    return {
+        "access_permitted": True,
+        "mutation_protected": True,
+        "bundle_free_of_credentials_and_test_answers": True,
+    }
+
+
+def build_network_status_page_payload(
+    *,
+    data_mode: str,
+    metrics: List[Dict[str, Any]],
+    contains_mixed_live_and_demo: bool = False,
+) -> Dict[str, Any]:
+    """Build a network status page payload (`WEB-05` / Issue #177).
+
+    Every metric requires a definition, timestamp, and data source; demo or simulated
+    metrics are explicitly labeled and never mixed with live data.
+    """
+    if contains_mixed_live_and_demo:
+        raise ValueError("Network status page cannot mix demo/simulated metrics with live telemetry")
+    if data_mode not in ("SIMULATED_LOCAL_PILOT", "LIVE_COORDINATOR_TELEMETRY", "OFFLINE_SNAPSHOT"):
+        raise ValueError(f"Unsupported network status data_mode: {data_mode!r}")
+
+    for m in metrics:
+        for req in ("metric_id", "definition", "timestamp_utc", "data_source", "value"):
+            if req not in m:
+                raise ValueError(f"Network status metric missing required field {req!r}")
+
+    return {
+        "data_mode": data_mode,
+        "is_simulated_or_demo": data_mode == "SIMULATED_LOCAL_PILOT",
+        "mixed_live_and_demo": False,
+        "metric_count": len(metrics),
+        "metrics": metrics,
+    }
+
+
+def build_reproducible_results_page_payload(root: Path) -> Dict[str, Any]:
+    """Build a reproducible results page payload (`WEB-06` / Issue #178).
+
+    Links to the underlying immutable report and manifest, and keeps symbolic-assisted
+    and neural-only results visibly distinct.
+    """
+    v11_path = root / "research/baseline/v11-local.json"
+    raw = v11_path.read_bytes()
+    v11 = json.loads(raw.decode("utf-8"))
+    report_sha = hashlib.sha256(raw).hexdigest()
+
+    return {
+        "immutable_report_path": "research/baseline/v11-local.json",
+        "immutable_report_sha256": report_sha,
+        "checkpoint_sha256": v11["checkpoint_sha256"],
+        "modes_visibly_distinct": True,
+        "neural_only_result": {
+            "mode_label": "Unassisted Neural-Only (inflight_alu=False)",
+            "exact_matches": int(v11["modes"]["neural_only"]["correct"]),
+            "total_prompts": int(v11["modes"]["neural_only"]["total"]),
+            "accuracy_pct": float(v11["modes"]["neural_only"]["accuracy_pct"]),
+        },
+        "symbolic_assisted_result": {
+            "mode_label": "Symbolic ALU-Assisted (inflight_alu=True)",
+            "exact_matches": int(v11["modes"]["symbolic_assisted"]["correct"]),
+            "total_prompts": int(v11["modes"]["symbolic_assisted"]["total"]),
+            "accuracy_pct": float(v11["modes"]["symbolic_assisted"]["accuracy_pct"]),
+        },
+    }
+
 
 

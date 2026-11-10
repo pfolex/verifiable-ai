@@ -601,6 +601,30 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertEqual(dist["rejected_teacher_sample_count"], 1)
         self.assertFalse(dist["distillation_promoted"])
 
+    def test_wave11_scale_04(self):
+        from aix_zero.sparse_cartridge_bank import evaluate_sparse_capacity_scaling
+
+        with self.assertRaisesRegex(ValueError, "Cannot sum duplicate snapshot shard sizes"):
+            evaluate_sparse_capacity_scaling(
+                stored_bank_parameters=688128,
+                trainable_specialist_parameters=32768,
+                resident_parameters=817410,
+                selected_active_parameters_per_token=719106,
+                verified_task_coverage_count=21,
+                held_out_accuracy=0.0857,
+                claims_duplicate_shard_sum_as_capacity=True,
+            )
+        sc04 = evaluate_sparse_capacity_scaling(
+            stored_bank_parameters=688128,
+            trainable_specialist_parameters=32768,
+            resident_parameters=817410,
+            selected_active_parameters_per_token=719106,
+            verified_task_coverage_count=21,
+            held_out_accuracy=0.0857,
+        )
+        self.assertTrue(sc04["parameters_reported_separately"])
+        self.assertTrue(sc04["duplicate_shard_sum_rejected"])
+
 
 if __name__ == "__main__":
     unittest.main()
