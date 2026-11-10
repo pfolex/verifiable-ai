@@ -584,6 +584,130 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertEqual(ledger["rejected_unverified_count"], 1)
         self.assertEqual(ledger["recognized_contributions"][1]["public_contributor_handle"], "anonymous-contributor")
 
+    def test_wave8_worker_06_08_10_network_07_09_and_comm_09(self):
+        import hashlib
+        import tempfile
+        from aix_zero.network_coordinator import (
+            resume_bounded_worker_job,
+            schedule_with_fairness_and_starvation_control,
+            validate_and_ingest_worker_result,
+            validate_opt_in_research_proposal,
+            verify_desktop_client_package_lifecycle,
+            verify_worker_input_artifact_before_execution,
+        )
+
+        # WORKER-06 verify input artifacts before execution
+        full_bytes = b"verified-input-dataset-payload"
+        full_sha = hashlib.sha256(full_bytes).hexdigest()
+        trunc = verify_worker_input_artifact_before_execution(
+            [full_bytes[:10]], expected_sha256=full_sha, expected_byte_length=len(full_bytes)
+        )
+        self.assertFalse(trunc["execution_permitted"])
+        self.assertEqual(trunc["status"], "TRUNCATED_NEEDS_RESUMABLE_FETCH")
+        self.assertEqual(trunc["resume_byte_offset"], 10)
+
+        corrupt = verify_worker_input_artifact_before_execution(
+            [b"x" * len(full_bytes)], expected_sha256=full_sha, expected_byte_length=len(full_bytes)
+        )
+        self.assertFalse(corrupt["execution_permitted"])
+        self.assertEqual(corrupt["status"], "REJECTED_CORRUPT_SHA256_MISMATCH")
+
+        ready = verify_worker_input_artifact_before_execution(
+            [full_bytes[:10], full_bytes[10:]], expected_sha256=full_sha, expected_byte_length=len(full_bytes)
+        )
+        self.assertTrue(ready["execution_permitted"])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tdir = Path(tmp)
+            src_ckpt = tdir / "source_v11.safetensors"
+            out_ckpt = tdir / "candidate_out.safetensors"
+
+            # WORKER-08 resumable bounded jobs never overwrite source models
+            with self.assertRaisesRegex(PermissionError, "prohibited from overwriting immutable source model"):
+                resume_bounded_worker_job(
+                    checkpoint_bundle={"experiment_config_sha256": "a" * 64, "step": 10},
+                    active_job_contract={"experiment_config_sha256": "a" * 64},
+                    source_model_path=src_ckpt,
+                    candidate_output_path=src_ckpt,
+                )
+            res_ok = resume_bounded_worker_job(
+                checkpoint_bundle={"experiment_config_sha256": "a" * 64, "step": 10},
+                active_job_contract={"experiment_config_sha256": "a" * 64},
+                source_model_path=src_ckpt,
+                candidate_output_path=out_ckpt,
+                lease_active=True,
+            )
+            self.assertTrue(res_ok["resumed"])
+            self.assertEqual(res_ok["resumed_from_step"], 10)
+
+            # WORKER-10 desktop client package install/uninstall and GPU backend guard
+            gpu_fail = verify_desktop_client_package_lifecycle(
+                tdir / "pkg_gpu", requested_gpu_backend="rocm", gpu_backend_supported=False
+            )
+            self.assertFalse(gpu_fail["installed"])
+            self.assertFalse(gpu_fail["silent_excessive_cpu_fallback"])
+
+            pkg_ok = verify_desktop_client_package_lifecycle(tdir / "pkg_cpu", requested_gpu_backend="cpu")
+            self.assertTrue(pkg_ok["installed"])
+            self.assertTrue(pkg_ok["clean_uninstall_verified"])
+
+        # NETWORK-07 reject malformed and self-declared worker results without crashing coordinator
+        rej_log = []
+        self_dec = validate_and_ingest_worker_result(
+            {"job_id": "j1", "promotion_status": "PROMOTED"}, rejection_log=rej_log
+        )
+        self.assertFalse(self_dec["accepted"])
+        self.assertTrue(self_dec["coordinator_healthy"])
+        self.assertEqual(len(rej_log), 1)
+
+        ing_ok = validate_and_ingest_worker_result(
+            {
+                "job_id": "j1",
+                "lease_id": "l1",
+                "worker_id": "w1",
+                "result_sha256": "a" * 64,
+                "metrics": {"accuracy": 0.125},
+            },
+            rejection_log=rej_log,
+        )
+        self.assertTrue(ing_ok["accepted"])
+
+        # NETWORK-09 fairness and starvation controls
+        sched = schedule_with_fairness_and_starvation_control(
+            [
+                {"worker_id": "fast-monopoly", "active_leases": 2, "wait_seconds": 10, "reliability_score": 1.0},
+                {"worker_id": "fast-idle", "active_leases": 0, "wait_seconds": 20, "reliability_score": 1.0},
+                {"worker_id": "slow-reliable-starved", "active_leases": 0, "wait_seconds": 400, "reliability_score": 0.95},
+            ],
+            max_active_leases_per_contributor=2,
+            starvation_threshold_seconds=300,
+        )
+        self.assertEqual(sched["selected_worker_id"], "slow-reliable-starved")
+        self.assertIn("fast-monopoly", sched["throttled_workers"])
+        self.assertTrue(sched["starvation_boost_applied"])
+
+        # COMM-09 opt-in community research discussion process
+        with self.assertRaisesRegex(ValueError, "unsolicited mass mentions"):
+            validate_opt_in_research_proposal(
+                {
+                    "hypothesis": "H1",
+                    "controls": ["base"],
+                    "validation_budget": "100 steps",
+                    "stopping_criteria": "2 failures",
+                    "uses_unsolicited_mass_mentions": True,
+                }
+            )
+        prop_ok = validate_opt_in_research_proposal(
+            {
+                "hypothesis": "H1",
+                "controls": ["base", "prior_only"],
+                "validation_budget": "180 steps",
+                "stopping_criteria": "paired Hoeffding gate",
+            }
+        )
+        self.assertTrue(prop_ok["proposal_valid"])
+        self.assertTrue(prop_ok["opt_in_only"])
+
 
 if __name__ == "__main__":
     unittest.main()

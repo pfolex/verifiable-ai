@@ -565,3 +565,35 @@ def evaluate_experiment_stopping_policy(
         "maintainer_compute_justification": maintainer_compute_justification,
     }
 
+
+def audit_m2_measured_learning_gain_before_scaling(
+    *,
+    validation_loss_decreased: bool,
+    held_out_exact_match_gain_over_controls: float,
+    min_required_gain: float = 0.05,
+    independently_reproduced: bool = False,
+) -> Dict[str, Any]:
+    """Audit measured learning gain before scaling (`TRAIN-16` / Issue #103).
+
+    Requires at least one useful independently reproduced held-out capability gain over all
+    controls OR documents an explicit `NO_GO_FOR_LARGE_VOLUNTEER_TRAINING`. Never unlocks
+    large volunteer training merely because validation loss decreased.
+    """
+    useful_gain = float(held_out_exact_match_gain_over_controls) >= float(min_required_gain)
+    unlock = bool(useful_gain and independently_reproduced)
+
+    return {
+        "validation_loss_decreased": bool(validation_loss_decreased),
+        "held_out_exact_match_gain_over_controls": round(float(held_out_exact_match_gain_over_controls), 6),
+        "min_required_gain": float(min_required_gain),
+        "independently_reproduced": bool(independently_reproduced),
+        "unlock_large_volunteer_training": unlock,
+        "scaling_decision": "GO_BOUNDED_SCALING" if unlock else "NO_GO_FOR_LARGE_VOLUNTEER_TRAINING",
+        "rationale": (
+            "Independent held-out capability gain over controls verified."
+            if unlock
+            else "Validation loss reduction alone does not constitute a held-out capability gain; large volunteer training remains locked."
+        ),
+    }
+
+

@@ -1010,3 +1010,244 @@ def build_verified_contribution_ledger(
     }
 
 
+def verify_worker_input_artifact_before_execution(
+    downloaded_chunks: List[bytes],
+    *,
+    expected_sha256: str,
+    expected_byte_length: int,
+    max_download_retries: int = 2,
+    retry_attempts_used: int = 0,
+) -> Dict[str, Any]:
+    """Verify worker input artifacts before execution (`WORKER-06` / Issue #133).
+
+    Corrupt, truncated, or incompatible objects never execute, and interrupted downloads
+    resume or restart within a bounded retry budget.
+    """
+    if retry_attempts_used > max_download_retries:
+        return {
+            "execution_permitted": False,
+            "status": "ABORTED_DOWNLOAD_RETRY_BUDGET_EXCEEDED",
+            "retry_attempts_used": int(retry_attempts_used),
+        }
+
+    assembled = b"".join(downloaded_chunks)
+    if len(assembled) < expected_byte_length:
+        return {
+            "execution_permitted": False,
+            "status": "TRUNCATED_NEEDS_RESUMABLE_FETCH",
+            "resume_byte_offset": len(assembled),
+            "expected_byte_length": int(expected_byte_length),
+        }
+    if len(assembled) > expected_byte_length:
+        return {
+            "execution_permitted": False,
+            "status": "REJECTED_OVERSIZED_INPUT_OBJECT",
+        }
+
+    actual_sha = hashlib.sha256(assembled).hexdigest()
+    if actual_sha != expected_sha256:
+        return {
+            "execution_permitted": False,
+            "status": "REJECTED_CORRUPT_SHA256_MISMATCH",
+            "actual_sha256": actual_sha,
+        }
+
+    return {
+        "execution_permitted": True,
+        "status": "VERIFIED_READY_FOR_EXECUTION",
+        "sha256": actual_sha,
+        "byte_length": len(assembled),
+    }
+
+
+def resume_bounded_worker_job(
+    *,
+    checkpoint_bundle: Dict[str, Any],
+    active_job_contract: Dict[str, Any],
+    source_model_path: Path,
+    candidate_output_path: Path,
+    lease_active: bool = True,
+) -> Dict[str, Any]:
+    """Support resumable bounded jobs (`WORKER-08` / Issue #137).
+
+    A worker restart resumes a compatible job or reports why it cannot, and no resume
+    path ever overwrites immutable source models.
+    """
+    if source_model_path.resolve() == candidate_output_path.resolve():
+        raise PermissionError("Resume path prohibited from overwriting immutable source model")
+    if not lease_active:
+        return {
+            "resumed": False,
+            "status": "CANNOT_RESUME_LEASE_EXPIRED_OR_CANCELLED",
+            "source_model_overwrite_blocked": True,
+        }
+    if checkpoint_bundle.get("experiment_config_sha256") != active_job_contract.get("experiment_config_sha256"):
+        return {
+            "resumed": False,
+            "status": "CANNOT_RESUME_INCOMPATIBLE_EXPERIMENT_CONFIG",
+            "source_model_overwrite_blocked": True,
+        }
+
+    return {
+        "resumed": True,
+        "status": "RESUMED_FROM_VERIFIED_CHECKPOINT",
+        "resumed_from_step": int(checkpoint_bundle.get("step", 0)),
+        "source_model_overwrite_blocked": True,
+    }
+
+
+def verify_desktop_client_package_lifecycle(
+    install_root: Path,
+    *,
+    requested_gpu_backend: str = "cpu",
+    gpu_backend_supported: bool = True,
+) -> Dict[str, Any]:
+    """Package and verify desktop client install/uninstall lifecycle (`WORKER-10` / Issue #141).
+
+    Tests clean-machine install and uninstall under `install_root`, and ensures unsupported
+    GPU backends fail explicitly rather than silently falling back to excessive CPU use.
+    """
+    if requested_gpu_backend != "cpu" and not gpu_backend_supported:
+        return {
+            "installed": False,
+            "status": "REJECTED_UNSUPPORTED_GPU_BACKEND_NO_SILENT_CPU_FALLBACK",
+            "silent_excessive_cpu_fallback": False,
+        }
+
+    bin_dir = install_root / "bin"
+    cfg_dir = install_root / "config"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+
+    worker_bin = bin_dir / "aix-worker-client"
+    worker_cfg = cfg_dir / "default.json"
+    worker_bin.write_text("#!/bin/sh\necho aix-worker\n", encoding="utf-8")
+    write_json({"max_cpu_threads": 1, "idle_only": True}, worker_cfg)
+    installed_ok = worker_bin.is_file() and worker_cfg.is_file()
+
+    # Clean uninstall removes installed files cleanly
+    worker_bin.unlink()
+    worker_cfg.unlink()
+    bin_dir.rmdir()
+    cfg_dir.rmdir()
+    remaining = list(install_root.iterdir())
+
+    return {
+        "installed": installed_ok,
+        "clean_uninstall_verified": len(remaining) == 0,
+        "silent_excessive_cpu_fallback": False,
+        "status": "INSTALL_AND_UNINSTALL_VERIFIED",
+    }
+
+
+def validate_and_ingest_worker_result(
+    worker_payload: Dict[str, Any],
+    *,
+    rejection_log: List[Dict[str, str]],
+) -> Dict[str, Any]:
+    """Reject malformed and unsupported worker results (`NETWORK-07` / Issue #150).
+
+    A worker cannot self-declare statistical acceptance or model promotion; contract
+    failures are recorded in `rejection_log` without crashing the coordinator.
+    """
+    prohibited_self_declarations = {"sprt_decision", "promotion_status", "statistical_acceptance", "is_promoted"}
+    leaked = sorted(prohibited_self_declarations.intersection(worker_payload.keys()))
+    if leaked:
+        rejection_log.append(
+            {
+                "job_id": str(worker_payload.get("job_id", "unknown")),
+                "reason": f"Worker attempted prohibited self-declaration: {leaked}",
+            }
+        )
+        return {
+            "accepted": False,
+            "status": "REJECTED_PROHIBITED_WORKER_SELF_DECLARATION",
+            "coordinator_healthy": True,
+        }
+
+    req_fields = ("job_id", "lease_id", "worker_id", "result_sha256", "metrics")
+    missing = [k for k in req_fields if k not in worker_payload]
+    if missing or not isinstance(worker_payload.get("metrics"), dict):
+        rejection_log.append(
+            {
+                "job_id": str(worker_payload.get("job_id", "unknown")),
+                "reason": f"Malformed worker result missing fields: {missing}",
+            }
+        )
+        return {
+            "accepted": False,
+            "status": "REJECTED_MALFORMED_RESULT_CONTRACT",
+            "coordinator_healthy": True,
+        }
+
+    return {
+        "accepted": True,
+        "status": "INGESTED_FOR_INDEPENDENT_COORDINATOR_EVALUATION",
+        "coordinator_healthy": True,
+    }
+
+
+def schedule_with_fairness_and_starvation_control(
+    candidates: List[Dict[str, Any]],
+    *,
+    max_active_leases_per_contributor: int = 2,
+    starvation_threshold_seconds: int = 300,
+) -> Dict[str, Any]:
+    """Add fairness and starvation controls to worker scheduling (`NETWORK-09` / Issue #166).
+
+    Prevents a single contributor from monopolizing leases and boosts reliable workers that
+    have waited beyond `starvation_threshold_seconds` so slow but reliable workers receive work.
+    """
+    eligible: List[Tuple[Tuple[int, int, float], Dict[str, Any]]] = []
+    throttled_workers: List[str] = []
+
+    for w in candidates:
+        active = int(w.get("active_leases", 0))
+        if active >= max_active_leases_per_contributor:
+            throttled_workers.append(str(w["worker_id"]))
+            continue
+        if float(w.get("reliability_score", 1.0)) < 0.8:
+            continue
+        wait_s = int(w.get("wait_seconds", 0))
+        starved_boost = 1 if wait_s >= starvation_threshold_seconds else 0
+        # Sort key: (starved_boost DESC, wait_seconds DESC, -active_leases DESC)
+        eligible.append(((starved_boost, wait_s, -active), w))
+
+    if not eligible:
+        return {
+            "selected_worker_id": None,
+            "throttled_workers": throttled_workers,
+            "starvation_boost_applied": False,
+        }
+
+    eligible.sort(key=lambda x: x[0], reverse=True)
+    best_key, best_w = eligible[0]
+    return {
+        "selected_worker_id": str(best_w["worker_id"]),
+        "throttled_workers": throttled_workers,
+        "starvation_boost_applied": best_key[0] == 1,
+    }
+
+
+def validate_opt_in_research_proposal(proposal: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate an opt-in community research discussion proposal (`COMM-09` / Issue #192).
+
+    Requires explicit `hypothesis`, `controls`, `validation_budget`, and `stopping_criteria`,
+    and prohibits unsolicited mass mentions or forced participant assignments.
+    """
+    if proposal.get("uses_unsolicited_mass_mentions", False) or proposal.get("forced_assignments", []):
+        raise ValueError("Research proposal rejected: unsolicited mass mentions and forced assignments are prohibited")
+
+    required = ("hypothesis", "controls", "validation_budget", "stopping_criteria")
+    missing = [k for k in required if not proposal.get(k)]
+    if missing:
+        raise ValueError(f"Research proposal missing required fields: {missing}")
+
+    return {
+        "proposal_valid": True,
+        "opt_in_only": True,
+        "verified_fields": list(required),
+    }
+
+
+

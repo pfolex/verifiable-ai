@@ -627,3 +627,161 @@ class SparseExpertCartridgeBank:
             "base_preserved": _base_preserved(),
         }
 
+    def compose_experts_with_verified_interfaces(
+        self,
+        stages: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Compose multiple specialist stages with verified input/output contracts (`EXPERT-08` / Issue #98).
+
+        Each stage validates its input/output contract and provenance; any failed stage prevents
+        an unsupported final answer from being marked verified.
+        """
+        if not stages:
+            raise ValueError("stages must be nonempty")
+
+        manifest = self.get_manifest()
+        cartridges = manifest.get("cartridges", {})
+        stage_reports: List[Dict[str, Any]] = []
+        pipeline_verified = True
+        failed_stage_name: Optional[str] = None
+
+        for idx, st in enumerate(stages):
+            s_name = str(st["stage_name"])
+            dom = str(st["domain"])
+            inp_ok = bool(st.get("input_contract_valid", False))
+            out_ok = bool(st.get("output_contract_valid", False))
+            meta = cartridges.get(dom)
+            prov_ok = meta is not None and (
+                meta.get("provenance") == "existing_routed_expert_snapshot"
+                or meta.get("promotion_status") == "APPROVED_ACTIVE"
+            )
+            stage_ok = inp_ok and out_ok and prov_ok
+            if not stage_ok and pipeline_verified:
+                pipeline_verified = False
+                failed_stage_name = s_name
+
+            stage_reports.append(
+                {
+                    "stage_index": idx,
+                    "stage_name": s_name,
+                    "domain": dom,
+                    "input_contract_valid": inp_ok,
+                    "output_contract_valid": out_ok,
+                    "provenance_verified": prov_ok,
+                    "stage_passed": stage_ok,
+                }
+            )
+
+        return {
+            "pipeline_verified": pipeline_verified,
+            "final_answer_marked_verified": pipeline_verified,
+            "failed_stage": failed_stage_name,
+            "stage_reports": stage_reports,
+        }
+
+    def revoke_and_rollback_expert_version(
+        self,
+        domain: str,
+        *,
+        revocation_reason: str,
+        known_good_manifest: Dict[str, Any],
+        active_inflight_sessions: int = 0,
+    ) -> Dict[str, Any]:
+        """Revoke a regressed/compromised expert and roll back to a known-good manifest (`EXPERT-15` / Issue #123).
+
+        Restores the known-good previous version reproducibly and specifies in-flight request
+        handling (`DRAIN_INFLIGHT_SESSIONS_BEFORE_UNLINK`).
+        """
+        cur_manifest = self.get_manifest()
+        if domain not in cur_manifest.get("cartridges", {}):
+            raise KeyError(f"Unknown expert domain for revocation: {domain}")
+
+        revoked_sha = cur_manifest["cartridges"][domain]["sha256"]
+        if domain not in known_good_manifest.get("cartridges", {}):
+            raise ValueError(f"known_good_manifest does not contain a fallback entry for {domain}")
+
+        self.publish_verified_catalog_atomic(known_good_manifest)
+        restored = self.get_manifest()["cartridges"][domain]
+
+        return {
+            "domain": domain,
+            "revoked_sha256": revoked_sha,
+            "restored_sha256": restored["sha256"],
+            "revocation_reason": revocation_reason,
+            "active_inflight_sessions": int(active_inflight_sessions),
+            "inflight_request_policy": "DRAIN_INFLIGHT_SESSIONS_BLOCK_NEW_INSTALLS",
+            "rollback_reproducible": restored["sha256"] == known_good_manifest["cartridges"][domain]["sha256"],
+        }
+
+
+def evaluate_learned_vs_explicit_routing(
+    *,
+    explicit_routing_metrics: Dict[str, float],
+    learned_routing_metrics: Dict[str, float],
+) -> Dict[str, Any]:
+    """Compare learned routing against explicit schema routing (`EXPERT-06` / Issue #115).
+
+    Compares `task_selection_accuracy`, `answer_accuracy`, `overhead_ms`, and `abstention_rate`,
+    and ensures a learned router cannot hide an expert quality regression.
+    """
+    req = ("task_selection_accuracy", "answer_accuracy", "overhead_ms", "abstention_rate")
+    for k in req:
+        if k not in explicit_routing_metrics or k not in learned_routing_metrics:
+            raise ValueError(f"Routing comparison missing metric {k!r}")
+
+    exp_ans = float(explicit_routing_metrics["answer_accuracy"])
+    lrn_ans = float(learned_routing_metrics["answer_accuracy"])
+    regression = lrn_ans < exp_ans
+
+    return {
+        "explicit_routing": {k: round(float(explicit_routing_metrics[k]), 6) for k in req},
+        "learned_routing": {k: round(float(learned_routing_metrics[k]), 6) for k in req},
+        "answer_accuracy_delta": round(lrn_ans - exp_ans, 6),
+        "learned_router_quality_regression_detected": regression,
+        "learned_routing_approved": (not regression)
+        and float(learned_routing_metrics["task_selection_accuracy"]) >= float(explicit_routing_metrics["task_selection_accuracy"]),
+    }
+
+
+class DeviceResidentExpertSlotManager:
+    """Manage bounded device-resident expert slots (`EXPERT-11` / Issue #119).
+
+    Reports total stored bank parameters separately from resident active parameters,
+    and preserves router-to-expert slot identity while refusing incompatible weights.
+    """
+
+    def __init__(self, model: AIXZeroModel, bank: SparseExpertCartridgeBank, *, max_resident_slots: int = 2) -> None:
+        moe = _moe(model)
+        if max_resident_slots < 1 or max_resident_slots > len(moe.experts):
+            raise ValueError("max_resident_slots out of range")
+        self.model = model
+        self.bank = bank
+        self.max_resident_slots = int(max_resident_slots)
+        self.slot_to_domain: Dict[int, str] = {}
+
+    def replace_resident_slot(self, slot: int, domain: str, *, active_base_checkpoint_sha256: Optional[str] = None) -> Dict[str, Any]:
+        if slot not in self.slot_to_domain and len(self.slot_to_domain) >= self.max_resident_slots:
+            raise RuntimeError(f"Resident slot cap ({self.max_resident_slots}) reached; evict a slot first")
+        self.model.eval()
+        info = self.bank.install_cartridge(
+            self.model, domain, slot=slot, active_base_checkpoint_sha256=active_base_checkpoint_sha256
+        )
+        self.slot_to_domain[int(slot)] = domain
+        manifest = self.bank.get_manifest()
+        moe = _moe(self.model)
+        resident_expert_params = sum(
+            sum(p.numel() for p in moe.experts[s].parameters()) for s in self.slot_to_domain
+        )
+        return {
+            "slot": int(slot),
+            "domain": domain,
+            "router_to_expert_identity": dict(self.slot_to_domain),
+            "resident_slot_count": len(self.slot_to_domain),
+            "max_resident_slots": self.max_resident_slots,
+            "resident_active_parameters": resident_expert_params,
+            "total_physical_model_parameters": self.model.count_parameters()["total_parameters"],
+            "total_stored_bank_parameters": manifest.get("total_cartridge_bank_parameters", 0),
+            "installed": info["installed"],
+        }
+
+

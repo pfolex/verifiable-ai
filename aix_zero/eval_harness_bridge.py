@@ -1770,6 +1770,108 @@ def run_independent_capability_red_team_audit(
     }
 
 
+def evaluate_causal_identifiability_task(
+    prediction: str,
+    *,
+    has_unobserved_confounder_on_backdoor: bool,
+    gold_identified_probability: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Evaluate causal identifiability negative cases (`REASON-09` / Issue #109).
+
+    Accepts explicit `NON_IDENTIFIABLE` answers when an unobserved confounder blocks backdoor
+    adjustment, and ensures a solver receives 0 credit (`REJECTED_INVENTED_CAUSAL_EFFECT`)
+    if it invents a numerical causal effect on a non-identifiable graph.
+    """
+    text = prediction.strip()
+    m = re.search(r"<ans>(.*?)</ans>", text, flags=re.DOTALL)
+    cand = (m.group(1).strip() if m else text).upper()
+    non_id_tokens = {"NON_IDENTIFIABLE", "UNIDENTIFIABLE", "ABSTAIN", "INSUFFICIENT_INFO"}
+
+    if has_unobserved_confounder_on_backdoor:
+        if cand in non_id_tokens:
+            return {
+                "is_identifiable": False,
+                "score": 1.0,
+                "status": "CORRECT_NON_IDENTIFIABLE_RECOGNITION",
+                "invented_causal_effect": False,
+            }
+        return {
+            "is_identifiable": False,
+            "score": 0.0,
+            "status": "REJECTED_INVENTED_CAUSAL_EFFECT",
+            "invented_causal_effect": True,
+        }
+
+    if gold_identified_probability is None:
+        raise ValueError("gold_identified_probability is required when causal effect is identifiable")
+    if cand in non_id_tokens:
+        return {
+            "is_identifiable": True,
+            "score": 0.0,
+            "status": "FALSE_NON_IDENTIFIABLE_CLAIM",
+            "invented_causal_effect": False,
+        }
+
+    sc = score_rational_or_probability(cand, gold_identified_probability, is_probability=True)
+    return {
+        "is_identifiable": True,
+        "score": sc["score"],
+        "status": "IDENTIFIED_EXACT_MATCH" if sc["score"] == 1.0 else "IDENTIFIED_WRONG_VALUE",
+        "invented_causal_effect": False,
+    }
+
+
+def assess_cross_representation_transfer(
+    paired_groups: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Assess transfer across task representations (`REASON-15` / Issue #112).
+
+    Holds underlying `semantic_group_id` fixed for paired comparisons across representations
+    and distinguishes `parser_failure` from `reasoning_failure`.
+    """
+    if not paired_groups:
+        raise ValueError("paired_groups must be nonempty")
+
+    rep_stats: Dict[str, Dict[str, int]] = {}
+    for grp in paired_groups:
+        if not grp.get("semantic_group_id") or not grp.get("gold"):
+            raise ValueError("Each paired group requires semantic_group_id and gold")
+        gold = str(grp["gold"])
+        reps = grp.get("representations", {})
+        if len(reps) < 2:
+            raise ValueError("Each paired group must contain at least 2 representations")
+
+        for rep_name, pred in reps.items():
+            st = rep_stats.setdefault(
+                rep_name, {"total": 0, "exact_match": 0, "parser_failures": 0, "reasoning_failures": 0}
+            )
+            st["total"] += 1
+            sc = score_rational_or_probability(str(pred), gold, is_probability=True)
+            if sc["score"] == 1.0:
+                st["exact_match"] += 1
+            elif str(sc["status"]).startswith("MALFORMED"):
+                st["parser_failures"] += 1
+            else:
+                st["reasoning_failures"] += 1
+
+    summary: Dict[str, Dict[str, Any]] = {}
+    for rep_name, st in rep_stats.items():
+        n = st["total"]
+        summary[rep_name] = {
+            "sample_count": n,
+            "exact_match_accuracy": round(st["exact_match"] / n, 6),
+            "parser_failure_rate": round(st["parser_failures"] / n, 6),
+            "reasoning_failure_rate": round(st["reasoning_failures"] / n, 6),
+        }
+
+    return {
+        "semantic_groups_held_fixed": True,
+        "group_count": len(paired_groups),
+        "representations": summary,
+    }
+
+
+
 
 
 

@@ -15,6 +15,7 @@ from aix_zero.eval_harness_bridge import (
     EXTERNAL_CODING_BENCHMARK_COMPATIBILITY,
     OPEN_WEIGHT_BASELINE_REGISTRY,
     assess_aix_paired_results,
+    assess_cross_representation_transfer,
     assert_comparable_conditions,
     baseline_report_to_eval_results,
     build_latency_and_throughput_report,
@@ -24,6 +25,7 @@ from aix_zero.eval_harness_bridge import (
     enumerate_finite_scm_exact,
     evaluate_bayesian_edge_cases,
     evaluate_bounded_test_time_search,
+    evaluate_causal_identifiability_task,
     evaluate_compositional_belief_decision_task,
     evaluate_cooperation_stability,
     evaluate_non_iid_evidence_task,
@@ -543,6 +545,40 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(rt["total_findings"], 2)
         self.assertFalse(rt["contains_private_contributor_data"])
         self.assertEqual(len(rt["failures_by_category"]["model_failure"]), 1)
+
+    def test_wave8_reason_09_and_15(self):
+        # REASON-09 causal identifiability negative cases
+        non_id_ok = evaluate_causal_identifiability_task(
+            "<ans>NON_IDENTIFIABLE</ans>", has_unobserved_confounder_on_backdoor=True
+        )
+        self.assertEqual(non_id_ok["score"], 1.0)
+        self.assertFalse(non_id_ok["invented_causal_effect"])
+
+        invented = evaluate_causal_identifiability_task(
+            "<ans>3/5</ans>", has_unobserved_confounder_on_backdoor=True
+        )
+        self.assertEqual(invented["score"], 0.0)
+        self.assertTrue(invented["invented_causal_effect"])
+        self.assertEqual(invented["status"], "REJECTED_INVENTED_CAUSAL_EFFECT")
+
+        # REASON-15 cross-representation transfer holding semantic groups fixed
+        tr = assess_cross_representation_transfer(
+            [
+                {
+                    "semantic_group_id": "G1",
+                    "gold": "4/5",
+                    "representations": {
+                        "compact_dsl": "4/5",
+                        "verbose_kv": "1/5",
+                        "json_fields": "not_a_fraction",
+                    },
+                }
+            ]
+        )
+        self.assertTrue(tr["semantic_groups_held_fixed"])
+        self.assertEqual(tr["representations"]["compact_dsl"]["exact_match_accuracy"], 1.0)
+        self.assertEqual(tr["representations"]["verbose_kv"]["reasoning_failure_rate"], 1.0)
+        self.assertEqual(tr["representations"]["json_fields"]["parser_failure_rate"], 1.0)
 
 
 if __name__ == "__main__":

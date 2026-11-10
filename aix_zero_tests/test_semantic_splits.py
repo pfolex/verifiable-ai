@@ -430,6 +430,94 @@ class SemanticSplitsTests(unittest.TestCase):
             self.assertEqual(fb_bad_out["fallback_reason"], "INVALID_SPECIALIST_OUTPUT")
             self.assertTrue(fb_bad_out["base_preserved"])
 
+    def test_wave8_expert_06_08_11_15_and_train_16(self):
+        import copy
+        import tempfile
+        import torch
+        from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+        from aix_zero.sparse_cartridge_bank import (
+            DeviceResidentExpertSlotManager,
+            SparseExpertCartridgeBank,
+            evaluate_learned_vs_explicit_routing,
+        )
+        from aix_zero.validation_training_studies import audit_m2_measured_learning_gain_before_scaling
+
+        # TRAIN-16 M2 learning gain audit doc and programmatic gate
+        self.assertTrue((ROOT / "docs/M2-LEARNING-GAIN-AUDIT.md").is_file())
+        no_go = audit_m2_measured_learning_gain_before_scaling(
+            validation_loss_decreased=True,
+            held_out_exact_match_gain_over_controls=-0.125,
+            independently_reproduced=True,
+        )
+        self.assertFalse(no_go["unlock_large_volunteer_training"])
+        self.assertEqual(no_go["scaling_decision"], "NO_GO_FOR_LARGE_VOLUNTEER_TRAINING")
+
+        # EXPERT-06 learned vs explicit routing comparison
+        r_cmp = evaluate_learned_vs_explicit_routing(
+            explicit_routing_metrics={
+                "task_selection_accuracy": 1.0,
+                "answer_accuracy": 0.85,
+                "overhead_ms": 0.1,
+                "abstention_rate": 0.0,
+            },
+            learned_routing_metrics={
+                "task_selection_accuracy": 0.9,
+                "answer_accuracy": 0.70,
+                "overhead_ms": 0.4,
+                "abstention_rate": 0.05,
+            },
+        )
+        self.assertTrue(r_cmp["learned_router_quality_regression_detected"])
+        self.assertFalse(r_cmp["learned_routing_approved"])
+
+        tiny_model = AIXZeroModel(
+            AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=2, moe_top_k=1)
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            bank = SparseExpertCartridgeBank(Path(tmp) / "bank")
+            m_good = bank.export_all_domain_cartridges(
+                tiny_model, {"DOM_0": {}, "DOM_1": {}}, {}, domain_expert_map={"DOM_0": 0, "DOM_1": 1}
+            )
+            m_good_copy = copy.deepcopy(m_good)
+
+            # EXPERT-08 compose experts with verified interfaces
+            comp_bad = bank.compose_experts_with_verified_interfaces(
+                [
+                    {"stage_name": "belief_stage", "domain": "DOM_0", "input_contract_valid": True, "output_contract_valid": False},
+                    {"stage_name": "decision_stage", "domain": "DOM_1", "input_contract_valid": True, "output_contract_valid": True},
+                ]
+            )
+            self.assertFalse(comp_bad["pipeline_verified"])
+            self.assertFalse(comp_bad["final_answer_marked_verified"])
+            self.assertEqual(comp_bad["failed_stage"], "belief_stage")
+
+            comp_ok = bank.compose_experts_with_verified_interfaces(
+                [
+                    {"stage_name": "belief_stage", "domain": "DOM_0", "input_contract_valid": True, "output_contract_valid": True},
+                    {"stage_name": "decision_stage", "domain": "DOM_1", "input_contract_valid": True, "output_contract_valid": True},
+                ]
+            )
+            self.assertTrue(comp_ok["pipeline_verified"])
+            self.assertTrue(comp_ok["final_answer_marked_verified"])
+
+            # EXPERT-11 bounded device-resident expert slots
+            mgr = DeviceResidentExpertSlotManager(tiny_model, bank, max_resident_slots=1)
+            s_info = mgr.replace_resident_slot(0, "DOM_0")
+            self.assertEqual(s_info["resident_slot_count"], 1)
+            self.assertGreater(s_info["total_stored_bank_parameters"], 0)
+            with self.assertRaisesRegex(RuntimeError, "Resident slot cap"):
+                mgr.replace_resident_slot(1, "DOM_1")
+
+            # EXPERT-15 expert revocation and rollback
+            rollback = bank.revoke_and_rollback_expert_version(
+                "DOM_0",
+                revocation_reason="regression_on_holdout",
+                known_good_manifest=m_good_copy,
+                active_inflight_sessions=1,
+            )
+            self.assertTrue(rollback["rollback_reproducible"])
+            self.assertEqual(rollback["inflight_request_policy"], "DRAIN_INFLIGHT_SESSIONS_BLOCK_NEW_INSTALLS")
+
 
 if __name__ == "__main__":
     unittest.main()
