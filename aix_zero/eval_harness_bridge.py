@@ -1939,6 +1939,76 @@ def evaluate_cross_task_family_generalization(
     }
 
 
+def evaluate_quantization_tradeoffs(
+    *,
+    method_version: str,
+    fp32_accuracy: float,
+    quantized_accuracy: float,
+    fp32_memory_bytes: int,
+    quantized_memory_bytes: int,
+    fp32_latency_ms: float,
+    quantized_latency_ms: float,
+    max_allowed_accuracy_drop: float = 0.01,
+) -> Dict[str, Any]:
+    """Study quantization accuracy and efficiency tradeoffs (`SCALE-05` / Issue #204).
+
+    Reports capability regressions, memory, latency, and method/version; a compression
+    ratio alone never qualifies as a model improvement when capability regresses.
+    """
+    if not method_version.strip():
+        raise ValueError("method_version is required")
+    if quantized_memory_bytes <= 0 or fp32_memory_bytes <= 0:
+        raise ValueError("Memory byte counts must be positive")
+
+    acc_delta = round(float(quantized_accuracy) - float(fp32_accuracy), 6)
+    comp_ratio = round(fp32_memory_bytes / quantized_memory_bytes, 4)
+    regressed = acc_delta < -abs(float(max_allowed_accuracy_drop))
+
+    return {
+        "method_version": method_version,
+        "fp32_accuracy": round(float(fp32_accuracy), 6),
+        "quantized_accuracy": round(float(quantized_accuracy), 6),
+        "capability_regression_delta": acc_delta,
+        "compression_ratio": comp_ratio,
+        "fp32_memory_bytes": int(fp32_memory_bytes),
+        "quantized_memory_bytes": int(quantized_memory_bytes),
+        "fp32_latency_ms": round(float(fp32_latency_ms), 3),
+        "quantized_latency_ms": round(float(quantized_latency_ms), 3),
+        "capability_regressed": regressed,
+        "qualifies_as_model_improvement": (not regressed) and (acc_delta > 0.0),
+        "compression_alone_is_improvement": False,
+    }
+
+
+def evaluate_verified_retrieval_augmentation(
+    cases: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Evaluate verified retrieval augmentation (`SCALE-06` / Issue #205).
+
+    Separates retrieved evidence, solver execution, and model-only results, and tests
+    missing and conflicting evidence cases rather than assuming retrieval always helps.
+    """
+    required_regimes = {"complete_evidence", "missing_evidence", "conflicting_evidence"}
+    observed_regimes = {str(c.get("evidence_regime", "")) for c in cases}
+    if not required_regimes.issubset(observed_regimes):
+        raise ValueError(f"Retrieval evaluation must include all regimes: {sorted(required_regimes)}")
+
+    n = len(cases)
+    model_only_hits = sum(1 for c in cases if bool(c.get("model_only_correct", False)))
+    retrieved_only_hits = sum(1 for c in cases if bool(c.get("retrieved_only_correct", False)))
+    solver_assisted_hits = sum(1 for c in cases if bool(c.get("solver_assisted_correct", False)))
+
+    return {
+        "sample_count": n,
+        "tested_evidence_regimes": sorted(observed_regimes),
+        "model_only_accuracy": round(model_only_hits / n, 6),
+        "retrieved_evidence_only_accuracy": round(retrieved_only_hits / n, 6),
+        "solver_assisted_accuracy": round(solver_assisted_hits / n, 6),
+        "modes_strictly_separated": True,
+    }
+
+
+
 
 
 

@@ -570,6 +570,37 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertGreaterEqual(loc["evictions"], 1)
         self.assertTrue(loc["prefetch_within_budget"])
 
+    def test_wave10_expert_16_and_scale_03(self):
+        from aix_zero.sparse_cartridge_bank import audit_m3_expert_library_release_readiness
+        from aix_zero.validation_training_studies import evaluate_verified_teacher_distillation
+
+        # EXPERT-16 M3 expert library release readiness audit
+        self.assertTrue((ROOT / "docs/M3-EXPERT-LIBRARY-READINESS-AUDIT.md").is_file())
+        with self.assertRaisesRegex(ValueError, "Prohibited claim"):
+            audit_m3_expert_library_release_readiness(
+                promoted_specialist_count=0, advertises_unlimited_experts=True
+            )
+        m3 = audit_m3_expert_library_release_readiness(promoted_specialist_count=0, snapshot_cartridge_count=21)
+        self.assertEqual(
+            m3["specialist_release_decision"], "NO_GO_FOR_PRODUCTION_SPECIALIST_CLAIM_INFRASTRUCTURE_ONLY"
+        )
+
+        # SCALE-03 verified teacher distillation filters bad teacher samples and compares against controls
+        dist = evaluate_verified_teacher_distillation(
+            teacher_model_id="qwen2.5-math-teacher",
+            teacher_license="Apache-2.0",
+            generated_samples=[
+                {"prompt": "p1", "teacher_prediction": "4/5", "reference_gold": "4/5"},
+                {"prompt": "p2", "teacher_prediction": "9/9", "reference_gold": "1/5"},
+            ],
+            distilled_student_accuracy=0.10,
+            unassisted_student_accuracy=0.0857,
+            shortcut_control_accuracy=0.125,
+        )
+        self.assertEqual(dist["verified_teacher_sample_count"], 1)
+        self.assertEqual(dist["rejected_teacher_sample_count"], 1)
+        self.assertFalse(dist["distillation_promoted"])
+
 
 if __name__ == "__main__":
     unittest.main()

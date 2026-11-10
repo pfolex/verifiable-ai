@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, List
 import torch
 import torch.nn.functional as F
 
+from artifact_io import canonical_json
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
 from aix_zero.eval_harness_bridge import evaluate_probability_calibration, score_rational_or_probability
 from aix_zero.semantic_splits import (
@@ -676,6 +677,54 @@ def gate_v12_capability_naming_on_evidence(
         "independently_reproduced": bool(independently_reproduced),
         "trace_verifier_passed": bool(trace_verifier_passed),
     }
+
+
+def evaluate_verified_teacher_distillation(
+    *,
+    teacher_model_id: str,
+    teacher_license: str,
+    generated_samples: List[Dict[str, str]],
+    distilled_student_accuracy: float,
+    unassisted_student_accuracy: float,
+    shortcut_control_accuracy: float,
+) -> Dict[str, Any]:
+    """Study small-model distillation with verified teachers (`SCALE-03` / Issue #202).
+
+    Documents teacher model rights and provenance of generated training data, filters teacher
+    outputs through the exact reference verifier, and compares with the strongest declared
+    shortcut and unassisted student controls.
+    """
+    if not teacher_model_id or not teacher_license:
+        raise ValueError("teacher_model_id and teacher_license are required")
+    if not generated_samples:
+        raise ValueError("generated_samples must be nonempty")
+
+    verified_teacher_samples = []
+    rejected_teacher_samples = 0
+    for s in generated_samples:
+        sc = score_rational_or_probability(str(s["teacher_prediction"]), str(s["reference_gold"]), is_probability=False)
+        if sc["score"] == 1.0:
+            verified_teacher_samples.append(s)
+        else:
+            rejected_teacher_samples += 1
+
+    prov_sha = hashlib.sha256(canonical_json(verified_teacher_samples).encode("utf-8")).hexdigest()
+    strongest_ctrl = max(float(unassisted_student_accuracy), float(shortcut_control_accuracy))
+    gain = round(float(distilled_student_accuracy) - strongest_ctrl, 6)
+
+    return {
+        "teacher_model_id": teacher_model_id,
+        "teacher_license": teacher_license,
+        "generated_data_provenance_sha256": prov_sha,
+        "verified_teacher_sample_count": len(verified_teacher_samples),
+        "rejected_teacher_sample_count": rejected_teacher_samples,
+        "distilled_student_accuracy": round(float(distilled_student_accuracy), 6),
+        "unassisted_student_accuracy": round(float(unassisted_student_accuracy), 6),
+        "shortcut_control_accuracy": round(float(shortcut_control_accuracy), 6),
+        "gain_over_strongest_control": gain,
+        "distillation_promoted": gain > 0.0,
+    }
+
 
 
 

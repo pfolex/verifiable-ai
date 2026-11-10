@@ -801,6 +801,156 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertEqual(sprint["completed_reviewed_artifact_count"], 1)
         self.assertEqual(sprint["sprint_completion_basis"], "reviewed_artifacts_not_claimed_issues")
 
+    def test_wave10_worker_12_14_sec_11_12_13_network_08_11_web_04_and_comm_13(self):
+        import tempfile
+        from aix_zero.checkpoint_registry import make_network_job_contract
+        from aix_zero.network_coordinator import (
+            PublicEndpointRateAndStorageQuotaGuard,
+            WorkerEnrollmentRegistry,
+            assess_poisoning_and_collusion_risks,
+            export_contributor_local_activity_log,
+            record_project_governance_decision,
+            run_incident_response_tabletop_drill,
+            simulate_unreliable_network_worker_lifecycle,
+            simulate_worker_churn_and_coordinator_recovery,
+            verify_submission_vs_promotion_separation,
+        )
+        from aix_zero.website_data_builder import build_public_metrics_api_projection
+
+        self.assertTrue((ROOT / "docs/DECISION-AND-ESCALATION-RULES.md").is_file())
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tdir = Path(tmp)
+            # WORKER-12 contributor-local activity log export without public account
+            act = export_contributor_local_activity_log(
+                tdir / "local_activity.json",
+                activity_entries=[{"job_id": "j1", "cpu_seconds": 12.5, "hostname": "private-mac"}],
+            )
+            self.assertFalse(act["requires_public_account"])
+            self.assertNotIn("hostname", act["entries"][0])
+
+            # NETWORK-11 worker churn and coordinator recovery
+            job = make_network_job_contract(
+                {
+                    "schema_version": "1.0.0",
+                    "job_id": "job-churn-01",
+                    "job_type": "OFFLINE_EVALUATION_JOB",
+                    "experiment_config_sha256": "a" * 64,
+                    "inputs": {
+                        "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                        "base_checkpoint_sha256": "b" * 64,
+                        "dataset_id": "v11-kip-test",
+                        "dataset_sha256": "c" * 64,
+                        "seed": 42,
+                        "target_expert_slot": None,
+                    },
+                    "resource_budget": {
+                        "max_steps": 0,
+                        "max_wall_clock_seconds": 120,
+                        "max_memory_mb": 512,
+                        "device": "cpu",
+                    },
+                    "lease": {
+                        "lease_id": "lease-churn-01",
+                        "worker_id": "w1",
+                        "issued_at_utc": "2026-11-10T22:00:00Z",
+                        "expires_at_utc": "2026-11-10T22:30:00Z",
+                        "heartbeat_interval_seconds": 15,
+                        "attempt_number": 1,
+                    },
+                    "expected_outputs": {
+                        "requires_evaluation_result_json": True,
+                        "requires_candidate_safetensors": False,
+                        "requires_failure_record_on_abort": True,
+                    },
+                }
+            )
+            churn = simulate_worker_churn_and_coordinator_recovery(tdir / "churn_q.json", job)
+            self.assertTrue(churn["canonical_accepted"])
+            self.assertTrue(churn["duplicate_prevented"])
+            self.assertTrue(churn["provenance_preserved"])
+
+        # WORKER-14 unreliable network lifecycle
+        net_sim = simulate_unreliable_network_worker_lifecycle(
+            failure_events=["transient_timeout", "dropped_heartbeat", "upload_acknowledged", "upload_acknowledged"],
+            max_retries=3,
+        )
+        self.assertFalse(net_sim["unbounded_retry_loop_occurred"])
+        self.assertEqual(net_sim["duplicate_completions"], 0)
+        self.assertEqual(net_sim["canonical_completions"], 1)
+
+        stop_sim = simulate_unreliable_network_worker_lifecycle(
+            failure_events=["transient_timeout", "transient_timeout"],
+            max_retries=3,
+            user_requested_stop_at_step=1,
+        )
+        self.assertTrue(stop_sim["stopped_by_user"])
+
+        # SEC-11 rate and storage quotas for public endpoints
+        guard = PublicEndpointRateAndStorageQuotaGuard(
+            max_requests_per_window=2, max_storage_bytes=100, max_queue_depth=1
+        )
+        self.assertTrue(guard.check_and_record_request("actor-1", payload_bytes=50, enqueue_job=True)["allowed"])
+        q_full = guard.check_and_record_request("actor-1", payload_bytes=20, enqueue_job=True)
+        self.assertFalse(q_full["allowed"])
+        self.assertEqual(q_full["status"], "QUEUE_CAPACITY_EXCEEDED")
+        self.assertGreater(q_full["retry_after_seconds"], 0)
+
+        # SEC-13 incident response tabletop drill
+        reg = WorkerEnrollmentRegistry("drill-secret")
+        reg.enroll_worker("compromised-w", expires_at_epoch=999)
+        drill = run_incident_response_tabletop_drill(
+            registry=reg, compromised_worker_id="compromised-w", bad_artifact_sha256="f" * 64
+        )
+        self.assertTrue(drill["drill_completed"])
+        self.assertEqual(drill["revoked_worker_status"], "REVOKED")
+        self.assertFalse(drill["real_credentials_published"])
+
+        # WEB-04 public metrics API projection
+        proj = build_public_metrics_api_projection(
+            submitted_total=20,
+            verified_total=12,
+            rejected_total=8,
+            promoted_total=0,
+            raw_worker_records=[{"worker_id": "w1", "hostname": "secret", "final_test_gold_answer": "4/5"}],
+        )
+        self.assertTrue(proj["totals_distinct"])
+        self.assertNotIn("hostname", proj["public_worker_summaries"][0])
+        self.assertNotIn("final_test_gold_answer", proj["public_worker_summaries"][0])
+
+        # NETWORK-08 separate training submission from promotion authority
+        w_sub = verify_submission_vs_promotion_separation(
+            submitter_role="worker", reviewed_evaluation_evidence_present=True, maintainer_approved=False
+        )
+        self.assertFalse(w_sub["approved_catalog_mutated"])
+        self.assertFalse(w_sub["release_published"])
+
+        # SEC-12 poisoning and collusion risk assessment
+        coll = assess_poisoning_and_collusion_risks(
+            worker_consensus_count=5, trusted_held_out_eval_passed=False
+        )
+        self.assertFalse(coll["worker_consensus_alone_sufficient"])
+        self.assertFalse(coll["promotion_permitted"])
+
+        # COMM-13 project decision and escalation rules
+        with self.assertRaisesRegex(ValueError, "fictional governing board"):
+            record_project_governance_decision(
+                decision_id="D-1",
+                summary="Test",
+                evidence_sha256="a" * 64,
+                consenting_maintainers=["pfolex"],
+                unresolved_roles=[],
+                fictional_governing_board_claimed=True,
+            )
+        gov = record_project_governance_decision(
+            decision_id="D-1",
+            summary="Lock large volunteer training until held-out capability gain > 0.",
+            evidence_sha256="a" * 64,
+            consenting_maintainers=["pfolex"],
+            unresolved_roles=["external-security-reviewer"],
+        )
+        self.assertFalse(gov["fictional_governing_board_claimed"])
+
 
 if __name__ == "__main__":
     unittest.main()

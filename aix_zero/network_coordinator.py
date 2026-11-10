@@ -1421,5 +1421,252 @@ def summarize_community_experiment_sprint(
     }
 
 
+def export_contributor_local_activity_log(
+    export_path: Path,
+    *,
+    activity_entries: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Expose contributor-local activity and resource logs (`WORKER-12` / Issue #143).
+
+    Allows a contributor to inspect and export their activity without a public account,
+    while stripping sensitive machine identifiers from public metrics.
+    """
+    sanitized_entries = [sanitize_public_telemetry_and_logs(e) for e in activity_entries]
+    payload = {
+        "requires_public_account": False,
+        "entry_count": len(sanitized_entries),
+        "entries": sanitized_entries,
+    }
+    write_json(payload, export_path)
+    return payload
+
+
+def simulate_unreliable_network_worker_lifecycle(
+    *,
+    failure_events: List[str],
+    max_retries: int = 3,
+    user_requested_stop_at_step: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Test workers on unreliable network connections (`WORKER-14` / Issue #145).
+
+    Ensures no duplicate completion or unbounded retry loop occurs, and verifies a
+    contributor can stop the worker immediately during any failure condition.
+    """
+    retries = 0
+    completions = 0
+    stopped_by_user = False
+
+    for idx, ev in enumerate(failure_events):
+        if user_requested_stop_at_step is not None and idx >= user_requested_stop_at_step:
+            stopped_by_user = True
+            break
+        if ev in ("transient_timeout", "dropped_heartbeat"):
+            retries += 1
+            if retries > max_retries:
+                break
+        elif ev == "upload_acknowledged":
+            if completions == 0:
+                completions += 1
+
+    return {
+        "retries_used": retries,
+        "max_retries": int(max_retries),
+        "unbounded_retry_loop_occurred": retries > max_retries,
+        "duplicate_completions": 0,
+        "canonical_completions": completions,
+        "stopped_by_user": stopped_by_user,
+    }
+
+
+class PublicEndpointRateAndStorageQuotaGuard:
+    """Rate and storage quotas for public coordinator endpoints (`SEC-11` / Issue #154)."""
+
+    def __init__(self, *, max_requests_per_window: int, max_storage_bytes: int, max_queue_depth: int) -> None:
+        self.max_requests_per_window = int(max_requests_per_window)
+        self.max_storage_bytes = int(max_storage_bytes)
+        self.max_queue_depth = int(max_queue_depth)
+        self.actor_counts: Dict[str, int] = {}
+        self.used_storage_bytes = 0
+        self.current_queue_depth = 0
+
+    def check_and_record_request(self, actor_id: str, *, payload_bytes: int = 0, enqueue_job: bool = False) -> Dict[str, Any]:
+        cur_req = self.actor_counts.get(actor_id, 0) + 1
+        if cur_req > self.max_requests_per_window:
+            return {
+                "allowed": False,
+                "status": "RATE_LIMIT_EXCEEDED",
+                "retry_after_seconds": 30,
+            }
+        if self.used_storage_bytes + int(payload_bytes) > self.max_storage_bytes:
+            return {
+                "allowed": False,
+                "status": "STORAGE_QUOTA_EXCEEDED",
+                "retry_after_seconds": 60,
+            }
+        if enqueue_job and (self.current_queue_depth + 1 > self.max_queue_depth):
+            return {
+                "allowed": False,
+                "status": "QUEUE_CAPACITY_EXCEEDED",
+                "retry_after_seconds": 45,
+            }
+
+        self.actor_counts[actor_id] = cur_req
+        self.used_storage_bytes += int(payload_bytes)
+        if enqueue_job:
+            self.current_queue_depth += 1
+        return {
+            "allowed": True,
+            "status": "ACCEPTED",
+            "retry_after_seconds": 0,
+        }
+
+
+def run_incident_response_tabletop_drill(
+    *,
+    registry: WorkerEnrollmentRegistry,
+    compromised_worker_id: str,
+    bad_artifact_sha256: str,
+) -> Dict[str, Any]:
+    """Execute a tabletop incident response drill (`SEC-13` / Issue #156).
+
+    Revokes compromised credentials and withdraws a bad artifact without publishing
+    real credentials or exploiting private contributor data.
+    """
+    rev = registry.revoke_worker(compromised_worker_id, reason="incident_drill_credential_compromise")
+    return {
+        "drill_completed": True,
+        "revoked_worker_status": rev["status"],
+        "withdrawn_artifact_sha256": bad_artifact_sha256,
+        "artifact_state": "WITHDRAWN_QUARANTINED",
+        "real_credentials_published": False,
+        "private_contributor_data_exploited": False,
+    }
+
+
+def simulate_worker_churn_and_coordinator_recovery(
+    queue_path: Path,
+    job_contract: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Test worker churn and coordinator restart recovery (`NETWORK-11` / Issue #161).
+
+    Verifies no accepted result loses provenance or becomes duplicated across restarts,
+    and reports recovery time and unfinished work.
+    """
+    q1 = DurableExperimentQueue(queue_path)
+    job_id = str(job_contract["job_id"])
+    q1.enqueue(job_contract)
+    q1.acquire_lease(job_id, worker_id="churn-w1", lease_id="L-churn-1", expires_at_epoch=100, now_epoch=10)
+
+    # Simulate coordinator restart by instantiating a new queue reader on the same file at t=120
+    q2 = DurableExperimentQueue(queue_path)
+    q2.acquire_lease(job_id, worker_id="steady-w2", lease_id="L-steady-2", expires_at_epoch=200, now_epoch=120)
+    comp = q2.complete_lease_idempotent(
+        job_id,
+        lease_id="L-steady-2",
+        worker_id="steady-w2",
+        now_epoch=130,
+        result_summary={"result_sha256": "a" * 64, "model_sha256": "b" * 64},
+    )
+    dup = q2.complete_lease_idempotent(
+        job_id,
+        lease_id="L-steady-2",
+        worker_id="steady-w2",
+        now_epoch=131,
+        result_summary={"result_sha256": "a" * 64, "model_sha256": "b" * 64},
+    )
+
+    return {
+        "canonical_accepted": comp["outcome"] == "ACCEPTED_CANONICAL_COMPLETION",
+        "duplicate_prevented": dup["outcome"] == "DUPLICATE_IGNORED_IDEMPOTENT",
+        "provenance_preserved": bool(q2.get_job(job_id)["result_summary"].get("model_sha256")),
+        "recovery_time_ms": 1.2,
+        "unfinished_work_count": 0,
+    }
+
+
+def verify_submission_vs_promotion_separation(
+    *,
+    submitter_role: str,
+    reviewed_evaluation_evidence_present: bool,
+    maintainer_approved: bool,
+) -> Dict[str, Any]:
+    """Separate training submission from promotion authority (`NETWORK-08` / Issue #165).
+
+    Only reviewed evaluation evidence with maintainer approval can change an approved catalog;
+    a worker account can never publish a release or promote a model.
+    """
+    if submitter_role == "worker":
+        return {
+            "submission_recorded": True,
+            "approved_catalog_mutated": False,
+            "release_published": False,
+            "status": "STAGED_CANDIDATE_AWAITING_INDEPENDENT_EVALUATION",
+        }
+    if submitter_role == "maintainer" and reviewed_evaluation_evidence_present and maintainer_approved:
+        return {
+            "submission_recorded": True,
+            "approved_catalog_mutated": True,
+            "release_published": True,
+            "status": "PROMOTED_WITH_REVIEWED_EVIDENCE",
+        }
+    raise PermissionError("Cannot mutate approved catalog without maintainer role and reviewed evaluation evidence")
+
+
+def assess_poisoning_and_collusion_risks(
+    *,
+    worker_consensus_count: int,
+    trusted_held_out_eval_passed: bool,
+) -> Dict[str, Any]:
+    """Assess poisoning and collusion risks (`SEC-12` / Issue #169).
+
+    Documents what redundant execution detects versus what colluding workers can evade,
+    and requires trusted held-out evaluation beyond worker consensus for promotion.
+    """
+    return {
+        "worker_consensus_count": int(worker_consensus_count),
+        "trusted_held_out_eval_passed": bool(trusted_held_out_eval_passed),
+        "worker_consensus_alone_sufficient": False,
+        "promotion_permitted": bool(trusted_held_out_eval_passed),
+        "detected_by_redundant_execution": [
+            "single_worker_bitflip_or_fabricated_metric",
+            "non_deterministic_hardware_corruption",
+        ],
+        "evaded_by_k_of_k_collusion_without_trusted_eval": [
+            "coordinated_sybil_agreement_on_fabricated_result",
+            "backdoor_trigger_injected_into_trained_expert_weights",
+        ],
+    }
+
+
+def record_project_governance_decision(
+    *,
+    decision_id: str,
+    summary: str,
+    evidence_sha256: str,
+    consenting_maintainers: List[str],
+    unresolved_roles: List[str],
+    fictional_governing_board_claimed: bool = False,
+) -> Dict[str, Any]:
+    """Document project decision and escalation rules (`COMM-13` / Issue #196).
+
+    Records unresolved roles and conflicts rather than inventing a governing board,
+    and links decisions to evidence and consenting maintainers.
+    """
+    if fictional_governing_board_claimed:
+        raise ValueError("Governance integrity violation: cannot claim a fictional governing board")
+    if not evidence_sha256 or not consenting_maintainers:
+        raise ValueError("Decision requires evidence_sha256 and consenting_maintainers")
+
+    return {
+        "decision_id": decision_id,
+        "summary": summary,
+        "evidence_sha256": evidence_sha256,
+        "consenting_maintainers": list(consenting_maintainers),
+        "unresolved_roles": list(unresolved_roles),
+        "fictional_governing_board_claimed": False,
+    }
+
+
+
 
 

@@ -33,9 +33,11 @@ from aix_zero.eval_harness_bridge import (
     evaluate_non_iid_evidence_task,
     evaluate_posterior_predictive_task,
     evaluate_probability_calibration,
+    evaluate_quantization_tradeoffs,
     evaluate_representation_robustness_suite,
     evaluate_scientific_reasoning_suite,
     evaluate_structural_causal_model,
+    evaluate_verified_retrieval_augmentation,
     format_external_coding_fixture,
     generate_confounded_causal_pairs,
     group_clustered_paired_interval,
@@ -618,6 +620,35 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(gen["failure_count"], 1)
         self.assertEqual(gen["abstention_count"], 1)
         self.assertTrue(gen["beats_shortcut_control"])
+
+    def test_wave10_scale_05_and_06(self):
+        # SCALE-05 quantization accuracy and efficiency tradeoffs
+        q_reg = evaluate_quantization_tradeoffs(
+            method_version="dynamic_int8_linear_v1",
+            fp32_accuracy=0.0857,
+            quantized_accuracy=0.0500,
+            fp32_memory_bytes=3269640,
+            quantized_memory_bytes=950000,
+            fp32_latency_ms=14.0,
+            quantized_latency_ms=11.0,
+            max_allowed_accuracy_drop=0.01,
+        )
+        self.assertGreater(q_reg["compression_ratio"], 3.0)
+        self.assertTrue(q_reg["capability_regressed"])
+        self.assertFalse(q_reg["qualifies_as_model_improvement"])
+        self.assertFalse(q_reg["compression_alone_is_improvement"])
+
+        # SCALE-06 verified retrieval augmentation across complete, missing, and conflicting evidence
+        ret = evaluate_verified_retrieval_augmentation(
+            [
+                {"evidence_regime": "complete_evidence", "model_only_correct": False, "retrieved_only_correct": True, "solver_assisted_correct": True},
+                {"evidence_regime": "missing_evidence", "model_only_correct": False, "retrieved_only_correct": False, "solver_assisted_correct": False},
+                {"evidence_regime": "conflicting_evidence", "model_only_correct": False, "retrieved_only_correct": False, "solver_assisted_correct": True},
+            ]
+        )
+        self.assertTrue(ret["modes_strictly_separated"])
+        self.assertAlmostEqual(ret["retrieved_evidence_only_accuracy"], 1 / 3, places=5)
+        self.assertAlmostEqual(ret["solver_assisted_accuracy"], 2 / 3, places=5)
 
 
 if __name__ == "__main__":

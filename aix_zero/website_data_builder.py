@@ -234,3 +234,38 @@ def audit_html_accessibility_and_keyboard_nav(html_text: str) -> Dict[str, Any]:
         ],
     }
 
+
+def build_public_metrics_api_projection(
+    *,
+    submitted_total: int,
+    verified_total: int,
+    rejected_total: int,
+    promoted_total: int,
+    raw_worker_records: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Define a public metrics API projection (`WEB-04` / Issue #158).
+
+    Keeps submitted, verified, rejected, and promoted totals distinct, and excludes
+    private worker identifiers and private final-test gold answers.
+    """
+    forbidden_keys = {"hostname", "ip_address", "mac_address", "email", "home_directory", "final_test_gold_answer", "api_key"}
+    sanitized_workers = []
+    for rec in raw_worker_records:
+        clean = {k: v for k, v in rec.items() if k not in forbidden_keys}
+        sanitized_workers.append(clean)
+
+    return {
+        "schema_version": "1.0.0",
+        "work_totals": {
+            "submitted": int(submitted_total),
+            "verified": int(verified_total),
+            "rejected": int(rejected_total),
+            "promoted": int(promoted_total),
+        },
+        "totals_distinct": True,
+        "excludes_private_worker_identifiers": True,
+        "excludes_final_test_answers": True,
+        "public_worker_summaries": sanitized_workers,
+    }
+
+

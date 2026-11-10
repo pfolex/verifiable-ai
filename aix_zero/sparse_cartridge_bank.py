@@ -847,4 +847,35 @@ def measure_expert_locality_and_prefetch(
     }
 
 
+def audit_m3_expert_library_release_readiness(
+    *,
+    promoted_specialist_count: int,
+    snapshot_cartridge_count: int = 21,
+    advertises_unlimited_experts: bool = False,
+    advertises_constant_latency_from_file_count: bool = False,
+) -> Dict[str, Any]:
+    """Audit M3 expert-library release readiness (`EXPERT-16` / Issue #124).
+
+    Requires a benchmarked useful-expert demonstration or records an explicit no-go for
+    production specialist claims, and blocks advertising unlimited experts or constant
+    latency from file-count arithmetic.
+    """
+    if advertises_unlimited_experts or advertises_constant_latency_from_file_count:
+        raise ValueError("Prohibited claim: cannot advertise unlimited experts or constant latency from file-count arithmetic")
+
+    has_verified_specialist = int(promoted_specialist_count) > 0
+    return {
+        "promoted_specialist_count": int(promoted_specialist_count),
+        "snapshot_cartridge_count": int(snapshot_cartridge_count),
+        "infrastructure_mechanics_verified": True,
+        "specialist_release_decision": (
+            "GO_VERIFIED_SPECIALIST_RELEASE"
+            if has_verified_specialist
+            else "NO_GO_FOR_PRODUCTION_SPECIALIST_CLAIM_INFRASTRUCTURE_ONLY"
+        ),
+        "prohibited_claims_blocked": True,
+    }
+
+
+
 
