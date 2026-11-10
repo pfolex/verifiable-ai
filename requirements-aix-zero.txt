@@ -1,0 +1,5 @@
+# CPU checkpoint baseline and expert snapshot storage tests (Python 3.11).
+-r requirements-test.txt
+numpy>=1.26,<2
+torch==2.2.2
+safetensors>=0.4.3,<1
