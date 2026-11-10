@@ -20,6 +20,7 @@ from aix_zero.eval_harness_bridge import (
     baseline_report_to_eval_results,
     build_latency_and_throughput_report,
     build_multidimensional_scorecard,
+    compare_open_base_with_tiny_aix_zero,
     compute_energy_and_useful_work,
     compute_exact_shapley_values,
     enumerate_finite_scm_exact,
@@ -28,6 +29,7 @@ from aix_zero.eval_harness_bridge import (
     evaluate_causal_identifiability_task,
     evaluate_compositional_belief_decision_task,
     evaluate_cooperation_stability,
+    evaluate_cross_task_family_generalization,
     evaluate_non_iid_evidence_task,
     evaluate_posterior_predictive_task,
     evaluate_probability_calibration,
@@ -579,6 +581,43 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(tr["representations"]["compact_dsl"]["exact_match_accuracy"], 1.0)
         self.assertEqual(tr["representations"]["verbose_kv"]["reasoning_failure_rate"], 1.0)
         self.assertEqual(tr["representations"]["json_fields"]["parser_failure_rate"], 1.0)
+
+    def test_wave9_scale_02_and_08(self):
+        # SCALE-02 compare stronger open base with tiny AIX-Zero without conflating capabilities
+        cmp_base = compare_open_base_with_tiny_aix_zero(
+            aix_zero_metrics={
+                "model_id": "aix-zero-v11-817k",
+                "license": "MIT",
+                "source_revision_sha": "a" * 40,
+                "peak_memory_mb": 42.0,
+                "execution_cost_ms": 14.0,
+                "accuracy": 0.0857,
+            },
+            external_open_base_metrics={
+                "model_id": "qwen2.5-0.5b-instruct",
+                "license": "Apache-2.0",
+                "source_revision_sha": "b" * 40,
+                "peak_memory_mb": 1150.0,
+                "execution_cost_ms": 420.0,
+                "accuracy": 0.45,
+            },
+        )
+        self.assertTrue(cmp_base["capabilities_strictly_separated"])
+        self.assertIn("qwen2.5-0.5b-instruct", cmp_base["inherited_capability_attribution"])
+
+        # SCALE-08 measure generalization across task families with failures and abstentions reported
+        gen = evaluate_cross_task_family_generalization(
+            predeclared_partition_id="final_cross_family_v1",
+            task_family_records=[
+                {"family": "BP", "outcome": "EXACT_MATCH"},
+                {"family": "SCM", "outcome": "ABSTAINED"},
+                {"family": "COOP", "outcome": "FAILED"},
+            ],
+            shortcut_control_accuracy=0.25,
+        )
+        self.assertEqual(gen["failure_count"], 1)
+        self.assertEqual(gen["abstention_count"], 1)
+        self.assertTrue(gen["beats_shortcut_control"])
 
 
 if __name__ == "__main__":

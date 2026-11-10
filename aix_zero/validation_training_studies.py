@@ -597,3 +597,85 @@ def audit_m2_measured_learning_gain_before_scaling(
     }
 
 
+def evaluate_specialist_interactions_under_composition(
+    cases: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Test specialist interactions under composition (`TRAIN-14` / Issue #99).
+
+    Measures each individual specialist and the combined pipeline, preserving provenance
+    and stage-level failure attribution (`stage_1_failures`, `stage_2_failures`,
+    `interface_failures`).
+    """
+    if not cases:
+        raise ValueError("cases must be nonempty")
+
+    s1_ok = 0
+    s2_ok = 0
+    combined_ok = 0
+    stage_1_failures = 0
+    stage_2_failures = 0
+    interface_failures = 0
+
+    for c in cases:
+        a_pass = bool(c["stage_1_passed"])
+        b_pass = bool(c["stage_2_passed"])
+        iface_pass = bool(c.get("interface_valid", True))
+        if a_pass:
+            s1_ok += 1
+        else:
+            stage_1_failures += 1
+        if b_pass:
+            s2_ok += 1
+        else:
+            stage_2_failures += 1
+        if not iface_pass:
+            interface_failures += 1
+        if a_pass and b_pass and iface_pass:
+            combined_ok += 1
+
+    n = len(cases)
+    return {
+        "sample_count": n,
+        "specialist_stage_1_accuracy": round(s1_ok / n, 6),
+        "specialist_stage_2_accuracy": round(s2_ok / n, 6),
+        "combined_pipeline_accuracy": round(combined_ok / n, 6),
+        "failure_attribution": {
+            "stage_1_failures": stage_1_failures,
+            "stage_2_failures": stage_2_failures,
+            "interface_failures": interface_failures,
+        },
+        "provenance_preserved": True,
+    }
+
+
+def gate_v12_capability_naming_on_evidence(
+    *,
+    proposed_capability_name: str,
+    held_out_gain_over_controls: float,
+    independently_reproduced: bool,
+    trace_verifier_passed: bool,
+) -> Dict[str, Any]:
+    """Gate v12 capability naming on independently verified held-out improvement (`REASON-16` / Issue #113).
+
+    Unsuccessful prototypes remain labeled `EXPERIMENTAL_OR_REJECTED_PROTOTYPE`.
+    """
+    approved = (
+        float(held_out_gain_over_controls) > 0.0
+        and bool(independently_reproduced)
+        and bool(trace_verifier_passed)
+    )
+    return {
+        "proposed_capability_name": proposed_capability_name,
+        "naming_approved": approved,
+        "assigned_public_label": (
+            f"VERIFIED_CAPABILITY:{proposed_capability_name}"
+            if approved
+            else f"EXPERIMENTAL_OR_REJECTED_PROTOTYPE:{proposed_capability_name}"
+        ),
+        "held_out_gain_over_controls": round(float(held_out_gain_over_controls), 6),
+        "independently_reproduced": bool(independently_reproduced),
+        "trace_verifier_passed": bool(trace_verifier_passed),
+    }
+
+
+

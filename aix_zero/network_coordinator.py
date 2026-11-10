@@ -1250,4 +1250,176 @@ def validate_opt_in_research_proposal(proposal: Dict[str, Any]) -> Dict[str, Any
     }
 
 
+def upload_worker_result_with_provenance(
+    *,
+    payload_bytes: bytes,
+    expected_byte_length: int,
+    provenance: Dict[str, str],
+    public_log_record: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Upload worker results with complete provenance (`WORKER-09` / Issue #139).
+
+    Partial uploads cannot become verified results, and secrets/local home paths are
+    excluded from public logs.
+    """
+    req_prov = ("model_sha256", "dataset_sha256", "source_sha256", "config_sha256")
+    missing = [k for k in req_prov if not provenance.get(k)]
+    sanitized_log = sanitize_public_telemetry_and_logs(public_log_record)
+
+    if len(payload_bytes) != int(expected_byte_length) or missing:
+        return {
+            "verified_result": False,
+            "status": "REJECTED_PARTIAL_OR_INCOMPLETE_PROVENANCE_UPLOAD",
+            "sanitized_public_log": sanitized_log,
+        }
+
+    return {
+        "verified_result": True,
+        "status": "UPLOAD_COMPLETE_WITH_PROVENANCE",
+        "result_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "provenance": dict(provenance),
+        "sanitized_public_log": sanitized_log,
+    }
+
+
+def negotiate_worker_update_and_version(
+    *,
+    current_version: Tuple[int, int, int],
+    target_version: Tuple[int, int, int],
+    supported_protocol_major: int,
+    target_protocol_major: int,
+    contributor_limits: Dict[str, int],
+) -> Dict[str, Any]:
+    """Negotiate safe worker updates and protocol versions (`WORKER-11` / Issue #142).
+
+    Rejects downgraded or incompatible protocol versions, preserves contributor limits,
+    and supports rollback to `current_version`.
+    """
+    if target_protocol_major != supported_protocol_major:
+        raise ValueError(
+            f"Incompatible protocol major version: target={target_protocol_major}, supported={supported_protocol_major}"
+        )
+    if target_version < current_version:
+        raise ValueError(f"Downgraded worker version rejected: {target_version} < {current_version}")
+
+    return {
+        "update_accepted": True,
+        "previous_version": list(current_version),
+        "active_version": list(target_version),
+        "preserved_contributor_limits": copy.deepcopy(contributor_limits),
+        "rollback_target_version": list(current_version),
+        "rollback_supported": True,
+    }
+
+
+def evaluate_malicious_result_submission_guard(
+    submission: Dict[str, Any],
+    *,
+    independent_verification_passed: bool,
+    private_gold_answer: str = "4/5",
+) -> Dict[str, Any]:
+    """Guard against malicious and unreliable result submissions (`SEC-10` / Issue #151).
+
+    Requires independent verification before granting acceptance, and ensures rejection
+    reasons never reveal private final-test answers.
+    """
+    if not independent_verification_passed:
+        reason = "Submission failed independent verification check on reserved partition."
+        assert private_gold_answer not in reason
+        return {
+            "accepted": False,
+            "independent_verification_required": True,
+            "public_rejection_reason": reason,
+            "private_gold_answer_leaked": private_gold_answer in reason,
+        }
+
+    return {
+        "accepted": True,
+        "independent_verification_required": True,
+        "public_rejection_reason": None,
+        "private_gold_answer_leaked": False,
+    }
+
+
+def build_coordinator_observability_snapshot(
+    *,
+    submitted_count: int,
+    completed_count: int,
+    verified_count: int,
+    promoted_count: int,
+    incident_logs: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Build coordinator observability and sanitized incident logs (`NETWORK-10` / Issue #152).
+
+    Metrics strictly distinguish submitted, completed, verified, and promoted work, and
+    incident logs are sanitized of secrets and personal identifiers.
+    """
+    return {
+        "work_totals": {
+            "submitted": int(submitted_count),
+            "completed": int(completed_count),
+            "verified": int(verified_count),
+            "promoted": int(promoted_count),
+        },
+        "sanitized_incident_logs": [sanitize_public_telemetry_and_logs(rec) for rec in incident_logs],
+    }
+
+
+def enforce_privilege_separation(
+    *,
+    actor_id: str,
+    actor_role: str,
+    requested_action: str,
+    evidence_sha256: Optional[str],
+    audit_log: List[Dict[str, str]],
+) -> Dict[str, Any]:
+    """Separate maintainer and worker privileges (`SEC-09` / Issue #155).
+
+    Worker credentials cannot mutate approved models or repository administration;
+    privileged changes record actor and evidence in `audit_log`.
+    """
+    privileged_actions = {"PROMOTE_MODEL", "PUBLISH_RELEASE", "REVOKE_SIGNING_KEY", "MUTATE_REPO_ADMIN"}
+    if requested_action in privileged_actions:
+        if actor_role != "maintainer":
+            raise PermissionError(
+                f"Privilege violation: actor_role={actor_role!r} cannot execute {requested_action!r}"
+            )
+        if not evidence_sha256 or len(evidence_sha256) < 16:
+            raise ValueError("Privileged maintainer change requires a verified evidence_sha256")
+        entry = {
+            "actor_id": actor_id,
+            "actor_role": actor_role,
+            "action": requested_action,
+            "evidence_sha256": evidence_sha256,
+        }
+        audit_log.append(entry)
+        return {"permitted": True, "audit_entry": entry}
+
+    return {"permitted": True, "audit_entry": None}
+
+
+def summarize_community_experiment_sprint(
+    *,
+    actual_participants: List[str],
+    claimed_issue_count: int,
+    reviewed_artifacts: List[Dict[str, Any]],
+    reviewer_load_hours: float,
+) -> Dict[str, Any]:
+    """Summarize a small community experiment sprint (`COMM-14` / Issue #197).
+
+    Records actual participants, completed evidence, and reviewer load; completion is
+    measured by reviewed artifacts rather than claimed issues.
+    """
+    accepted_artifacts = [a for a in reviewed_artifacts if a.get("review_status") == "APPROVED_EVIDENCE"]
+    return {
+        "actual_participant_count": len(actual_participants),
+        "actual_participants": list(actual_participants),
+        "claimed_issue_count": int(claimed_issue_count),
+        "completed_reviewed_artifact_count": len(accepted_artifacts),
+        "reviewer_load_hours": round(float(reviewer_load_hours), 2),
+        "sprint_completion_basis": "reviewed_artifacts_not_claimed_issues",
+    }
+
+
+
 

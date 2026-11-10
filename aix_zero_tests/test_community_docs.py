@@ -708,6 +708,99 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertTrue(prop_ok["proposal_valid"])
         self.assertTrue(prop_ok["opt_in_only"])
 
+    def test_wave9_worker_09_11_sec_09_10_network_10_and_comm_14(self):
+        from aix_zero.network_coordinator import (
+            build_coordinator_observability_snapshot,
+            enforce_privilege_separation,
+            evaluate_malicious_result_submission_guard,
+            negotiate_worker_update_and_version,
+            summarize_community_experiment_sprint,
+            upload_worker_result_with_provenance,
+        )
+
+        # WORKER-09 partial uploads rejected and secrets stripped from logs
+        up_partial = upload_worker_result_with_provenance(
+            payload_bytes=b"short",
+            expected_byte_length=100,
+            provenance={"model_sha256": "a" * 64, "dataset_sha256": "b" * 64, "source_sha256": "c" * 64, "config_sha256": "d" * 64},
+            public_log_record={"msg": "Upload from /Users/bob/secret", "api_key": "secret-token"},
+        )
+        self.assertFalse(up_partial["verified_result"])
+        self.assertNotIn("api_key", up_partial["sanitized_public_log"])
+        self.assertIn("<REDACTED_HOME_PATH>", up_partial["sanitized_public_log"]["msg"])
+
+        # WORKER-11 safe worker update and version negotiation
+        with self.assertRaisesRegex(ValueError, "Downgraded worker version rejected"):
+            negotiate_worker_update_and_version(
+                current_version=(1, 2, 0),
+                target_version=(1, 1, 9),
+                supported_protocol_major=1,
+                target_protocol_major=1,
+                contributor_limits={"max_cpu_threads": 2},
+            )
+        upd_ok = negotiate_worker_update_and_version(
+            current_version=(1, 2, 0),
+            target_version=(1, 3, 0),
+            supported_protocol_major=1,
+            target_protocol_major=1,
+            contributor_limits={"max_cpu_threads": 2},
+        )
+        self.assertTrue(upd_ok["update_accepted"])
+        self.assertEqual(upd_ok["preserved_contributor_limits"]["max_cpu_threads"], 2)
+
+        # SEC-10 malicious submission guard requires independent verification & hides private gold answers
+        mal = evaluate_malicious_result_submission_guard(
+            {"job_id": "j1"}, independent_verification_passed=False, private_gold_answer="17/23"
+        )
+        self.assertFalse(mal["accepted"])
+        self.assertFalse(mal["private_gold_answer_leaked"])
+        self.assertNotIn("17/23", mal["public_rejection_reason"])
+
+        # NETWORK-10 coordinator observability snapshot distinguishes work stages
+        obs = build_coordinator_observability_snapshot(
+            submitted_count=10,
+            completed_count=8,
+            verified_count=6,
+            promoted_count=0,
+            incident_logs=[{"incident": "timeout on 10.0.0.5", "token": "secret"}],
+        )
+        self.assertEqual(obs["work_totals"]["submitted"], 10)
+        self.assertEqual(obs["work_totals"]["promoted"], 0)
+        self.assertNotIn("token", obs["sanitized_incident_logs"][0])
+
+        # SEC-09 separate maintainer and worker privileges
+        audit_log = []
+        with self.assertRaisesRegex(PermissionError, "Privilege violation"):
+            enforce_privilege_separation(
+                actor_id="w-1",
+                actor_role="worker",
+                requested_action="PROMOTE_MODEL",
+                evidence_sha256="a" * 64,
+                audit_log=audit_log,
+            )
+        priv_ok = enforce_privilege_separation(
+            actor_id="maint-1",
+            actor_role="maintainer",
+            requested_action="PROMOTE_MODEL",
+            evidence_sha256="a" * 64,
+            audit_log=audit_log,
+        )
+        self.assertTrue(priv_ok["permitted"])
+        self.assertEqual(len(audit_log), 1)
+
+        # COMM-14 community experiment sprint summary based on reviewed artifacts
+        sprint = summarize_community_experiment_sprint(
+            actual_participants=["alice", "bob"],
+            claimed_issue_count=15,
+            reviewed_artifacts=[
+                {"id": "a1", "review_status": "APPROVED_EVIDENCE"},
+                {"id": "a2", "review_status": "PENDING"},
+            ],
+            reviewer_load_hours=3.5,
+        )
+        self.assertEqual(sprint["completed_reviewed_artifact_count"], 1)
+        self.assertEqual(sprint["sprint_completion_basis"], "reviewed_artifacts_not_claimed_issues")
+
 
 if __name__ == "__main__":
     unittest.main()

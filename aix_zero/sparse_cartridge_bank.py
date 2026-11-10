@@ -785,3 +785,66 @@ class DeviceResidentExpertSlotManager:
         }
 
 
+def measure_expert_locality_and_prefetch(
+    access_trace: List[str],
+    *,
+    approved_domains: List[str],
+    shard_size_bytes: int,
+    max_cache_slots: int,
+    prefetch_candidates: Optional[List[str]] = None,
+    max_prefetch_bytes: int = 0,
+) -> Dict[str, Any]:
+    """Measure locality and prefetch policies (`EXPERT-12` / Issue #120).
+
+    Reports cache hits, misses, evictions, bandwidth, and memory-pressure events, and ensures
+    prefetch never exceeds `max_prefetch_bytes` or stages unapproved experts.
+    """
+    approved_set = set(approved_domains)
+    cache: List[str] = []
+    hits = 0
+    misses = 0
+    evictions = 0
+    memory_pressure_events = 0
+    bandwidth_bytes = 0
+
+    for dom in prefetch_candidates or []:
+        if dom not in approved_set:
+            raise ValueError(f"Prefetch rejected: cannot stage unapproved expert {dom!r}")
+        if bandwidth_bytes + shard_size_bytes > max_prefetch_bytes:
+            memory_pressure_events += 1
+            break
+        if dom not in cache:
+            if len(cache) >= max_cache_slots:
+                cache.pop(0)
+                evictions += 1
+            cache.append(dom)
+            bandwidth_bytes += shard_size_bytes
+
+    for dom in access_trace:
+        if dom not in approved_set:
+            raise ValueError(f"Access rejected for unapproved expert {dom!r}")
+        if dom in cache:
+            hits += 1
+            cache.remove(dom)
+            cache.append(dom)
+        else:
+            misses += 1
+            bandwidth_bytes += shard_size_bytes
+            if len(cache) >= max_cache_slots:
+                cache.pop(0)
+                evictions += 1
+                memory_pressure_events += 1
+            cache.append(dom)
+
+    return {
+        "cache_hits": hits,
+        "cache_misses": misses,
+        "evictions": evictions,
+        "bandwidth_bytes": bandwidth_bytes,
+        "memory_pressure_events": memory_pressure_events,
+        "prefetch_within_budget": True,
+        "unapproved_experts_activated": 0,
+    }
+
+
+

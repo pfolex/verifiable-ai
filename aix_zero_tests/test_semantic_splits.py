@@ -518,6 +518,58 @@ class SemanticSplitsTests(unittest.TestCase):
             self.assertTrue(rollback["rollback_reproducible"])
             self.assertEqual(rollback["inflight_request_policy"], "DRAIN_INFLIGHT_SESSIONS_BLOCK_NEW_INSTALLS")
 
+    def test_wave9_train_14_reason_16_and_expert_12(self):
+        from aix_zero.sparse_cartridge_bank import measure_expert_locality_and_prefetch
+        from aix_zero.validation_training_studies import (
+            evaluate_specialist_interactions_under_composition,
+            gate_v12_capability_naming_on_evidence,
+        )
+
+        # TRAIN-14 specialist interactions under composition
+        comp = evaluate_specialist_interactions_under_composition(
+            [
+                {"stage_1_passed": True, "stage_2_passed": True, "interface_valid": True},
+                {"stage_1_passed": True, "stage_2_passed": False, "interface_valid": True},
+                {"stage_1_passed": False, "stage_2_passed": True, "interface_valid": False},
+            ]
+        )
+        self.assertAlmostEqual(comp["specialist_stage_1_accuracy"], 2 / 3, places=5)
+        self.assertAlmostEqual(comp["combined_pipeline_accuracy"], 1 / 3, places=5)
+        self.assertEqual(comp["failure_attribution"]["stage_2_failures"], 1)
+        self.assertEqual(comp["failure_attribution"]["interface_failures"], 1)
+
+        # REASON-16 gate v12 capability naming on evidence
+        rej_name = gate_v12_capability_naming_on_evidence(
+            proposed_capability_name="Bayesian-Specialist-v12",
+            held_out_gain_over_controls=-0.125,
+            independently_reproduced=True,
+            trace_verifier_passed=True,
+        )
+        self.assertFalse(rej_name["naming_approved"])
+        self.assertTrue(rej_name["assigned_public_label"].startswith("EXPERIMENTAL_OR_REJECTED_PROTOTYPE:"))
+
+        # EXPERT-12 locality and prefetch policy measurements
+        with self.assertRaisesRegex(ValueError, "unapproved expert"):
+            measure_expert_locality_and_prefetch(
+                ["DOM_0"],
+                approved_domains=["DOM_0"],
+                shard_size_bytes=100,
+                max_cache_slots=2,
+                prefetch_candidates=["UNAPPROVED_DOM"],
+                max_prefetch_bytes=200,
+            )
+        loc = measure_expert_locality_and_prefetch(
+            ["DOM_0", "DOM_1", "DOM_0", "DOM_2"],
+            approved_domains=["DOM_0", "DOM_1", "DOM_2"],
+            shard_size_bytes=100,
+            max_cache_slots=2,
+            prefetch_candidates=["DOM_0", "DOM_1"],
+            max_prefetch_bytes=100,
+        )
+        self.assertEqual(loc["cache_hits"], 2)
+        self.assertGreaterEqual(loc["evictions"], 1)
+        self.assertTrue(loc["prefetch_within_budget"])
+
 
 if __name__ == "__main__":
     unittest.main()

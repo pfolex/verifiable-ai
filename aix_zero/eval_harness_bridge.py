@@ -1871,6 +1871,75 @@ def assess_cross_representation_transfer(
     }
 
 
+def compare_open_base_with_tiny_aix_zero(
+    *,
+    aix_zero_metrics: Dict[str, Any],
+    external_open_base_metrics: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Compare a stronger open base model with the tiny AIX-Zero model (`SCALE-02` / Issue #201).
+
+    Keeps AIX-Zero research results strictly separate from capabilities inherited from another
+    open-weight model, and records model rights, source revision, memory, and execution cost.
+    """
+    req_fields = ("model_id", "license", "source_revision_sha", "peak_memory_mb", "execution_cost_ms", "accuracy")
+    for label, m in (("aix_zero_metrics", aix_zero_metrics), ("external_open_base_metrics", external_open_base_metrics)):
+        missing = [k for k in req_fields if k not in m]
+        if missing:
+            raise ValueError(f"{label} missing required fields: {missing}")
+
+    if aix_zero_metrics["model_id"] == external_open_base_metrics["model_id"]:
+        raise ValueError("Cannot conflate AIX-Zero model_id with external open base model_id")
+
+    return {
+        "capabilities_strictly_separated": True,
+        "aix_zero_tiny_model": copy.deepcopy(aix_zero_metrics),
+        "external_open_base_model": copy.deepcopy(external_open_base_metrics),
+        "inherited_capability_attribution": f"Capabilities of {external_open_base_metrics['model_id']} are attributed to its external pretraining, not AIX-Zero v11.",
+    }
+
+
+def evaluate_cross_task_family_generalization(
+    *,
+    predeclared_partition_id: str,
+    task_family_records: List[Dict[str, Any]],
+    shortcut_control_accuracy: float,
+) -> Dict[str, Any]:
+    """Measure generalization across task families (`SCALE-08` / Issue #207).
+
+    Predeclares a fresh final partition, assesses shortcuts, and reports failures and
+    abstentions alongside aggregate scores.
+    """
+    if not predeclared_partition_id.strip():
+        raise ValueError("predeclared_partition_id is required")
+    if not task_family_records:
+        raise ValueError("task_family_records must be nonempty")
+
+    exact_hits = 0
+    failures = 0
+    abstentions = 0
+    for rec in task_family_records:
+        out = str(rec.get("outcome", ""))
+        if out == "EXACT_MATCH":
+            exact_hits += 1
+        elif out == "ABSTAINED":
+            abstentions += 1
+        else:
+            failures += 1
+
+    n = len(task_family_records)
+    acc = round(exact_hits / n, 6)
+    return {
+        "predeclared_partition_id": predeclared_partition_id,
+        "sample_count": n,
+        "exact_match_accuracy": acc,
+        "failure_count": failures,
+        "abstention_count": abstentions,
+        "shortcut_control_accuracy": round(float(shortcut_control_accuracy), 6),
+        "beats_shortcut_control": acc > float(shortcut_control_accuracy),
+    }
+
+
+
 
 
 
