@@ -23,6 +23,8 @@ from aix_zero.eval_harness_bridge import (
     compute_exact_shapley_values,
     enumerate_finite_scm_exact,
     evaluate_bayesian_edge_cases,
+    evaluate_bounded_test_time_search,
+    evaluate_compositional_belief_decision_task,
     evaluate_cooperation_stability,
     evaluate_non_iid_evidence_task,
     evaluate_posterior_predictive_task,
@@ -31,15 +33,18 @@ from aix_zero.eval_harness_bridge import (
     evaluate_scientific_reasoning_suite,
     evaluate_structural_causal_model,
     format_external_coding_fixture,
+    generate_confounded_causal_pairs,
     group_clustered_paired_interval,
     measure_memory_and_cache_budget,
     rational_scorer_metadata,
     run_aix_benchmark,
+    run_independent_capability_red_team_audit,
     score_cooperative_game_task,
     score_epistemic_abstention_task,
     score_rational_or_probability,
     validate_frontier_comparison_claim,
     verify_independent_reproduction,
+    verify_reasoning_trace_steps,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -438,6 +443,106 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(pp["latent_posterior_h1"], "2/3")
         self.assertEqual(pp["posterior_predictive_e_next_1"], "7/12")
         self.assertTrue(pp["posterior_differs_from_predictive"])
+
+    def test_wave7_reason_08_13_14_and_scale_07_13(self):
+        # REASON-14 reference-verified trace checks reject right answer from invalid intermediate steps
+        expected = [
+            {"step_name": "unnormalized_h1", "value": "2/5"},
+            {"step_name": "unnormalized_h0", "value": "1/10"},
+        ]
+        bad_trace = verify_reasoning_trace_steps(
+            [{"step_name": "unnormalized_h1", "value": "9/10"}, {"step_name": "unnormalized_h0", "value": "1/10"}],
+            expected_steps=expected,
+            final_prediction="4/5",
+            gold_final_answer="4/5",
+        )
+        self.assertEqual(bad_trace["status"], "REJECTED_INVALID_INTERMEDIATE_STEP")
+        self.assertEqual(bad_trace["score"], 0.0)
+        self.assertFalse(bad_trace["formal_proof_claimed"])
+
+        good_trace = verify_reasoning_trace_steps(
+            expected,
+            expected_steps=expected,
+            final_prediction="4/5",
+            gold_final_answer="4/5",
+        )
+        self.assertEqual(good_trace["status"], "VERIFIED_TRACE_AND_ANSWER")
+        self.assertEqual(good_trace["score"], 1.0)
+
+        # REASON-08 confounding pairs and held-out graph topology
+        pairs = generate_confounded_causal_pairs()
+        self.assertTrue(pairs["train_pair"]["observational_differs_from_interventional"])
+        self.assertTrue(pairs["held_out_test_pair"]["observational_differs_from_interventional"])
+        self.assertTrue(pairs["holds_out_graph_topology"])
+        self.assertEqual(pairs["train_pair"]["confounder_variable"], "Z")
+
+        # REASON-13 compositional belief + decision evaluation
+        comp = evaluate_compositional_belief_decision_task(
+            p="1/2",
+            a="4/5",
+            b="1/5",
+            e="1",
+            payoff_act_if_h1=10,
+            payoff_act_if_h0=-5,
+            payoff_wait=0,
+            predicted_posterior="4/5",
+            predicted_expected_utility_act="7",
+            predicted_action="ACT",
+        )
+        self.assertEqual(comp["stage1_belief_score"], 1.0)
+        self.assertEqual(comp["stage2_expected_utility_score"], 1.0)
+        self.assertEqual(comp["stage3_final_action_score"], 1.0)
+        self.assertEqual(comp["full_compositional_exact_score"], 1.0)
+
+        # SCALE-07 bounded test-time search requires disclosure when comparing multi-candidate/tool vs 1-sample
+        with self.assertRaisesRegex(ValueError, "without disclosure"):
+            evaluate_bounded_test_time_search(
+                single_sample_baseline_accuracy=0.0857,
+                search_candidate_accuracy=1.0,
+                verifier_kind="inflight_alu",
+                num_candidates=4,
+                max_candidates_cap=8,
+                tokens_used=160,
+                max_token_budget=256,
+                wall_clock_ms=18.5,
+                multi_sample_or_tool_disclosure=False,
+            )
+        search_ok = evaluate_bounded_test_time_search(
+            single_sample_baseline_accuracy=0.0857,
+            search_candidate_accuracy=1.0,
+            verifier_kind="inflight_alu",
+            num_candidates=4,
+            max_candidates_cap=8,
+            tokens_used=160,
+            max_token_budget=256,
+            wall_clock_ms=18.5,
+            multi_sample_or_tool_disclosure=True,
+        )
+        self.assertTrue(search_ok["multi_sample_or_tool_disclosure"])
+
+        # SCALE-13 independent red-team evaluation separates failure categories and strips private data
+        rt = run_independent_capability_red_team_audit(
+            [
+                {
+                    "finding_id": "RT-01",
+                    "reviewer_consent": True,
+                    "failure_category": "model_failure",
+                    "summary": "Neural-only v11 gets 9/105 without arithmetic repair.",
+                    "remediation": "Always report neural-only and ALU-assisted scores separately.",
+                    "private_email": "redteam@example.org",
+                },
+                {
+                    "finding_id": "RT-02",
+                    "reviewer_consent": True,
+                    "failure_category": "data_failure",
+                    "summary": "Prompt layout novelty could leak if not held out.",
+                    "remediation": "Enforce disjoint semantic group hashes.",
+                },
+            ]
+        )
+        self.assertEqual(rt["total_findings"], 2)
+        self.assertFalse(rt["contains_private_contributor_data"])
+        self.assertEqual(len(rt["failures_by_category"]["model_failure"]), 1)
 
 
 if __name__ == "__main__":

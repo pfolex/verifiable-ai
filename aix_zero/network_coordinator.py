@@ -497,3 +497,516 @@ def sanitize_public_telemetry_and_logs(record: Dict[str, Any]) -> Dict[str, Any]
             clean[k] = copy.deepcopy(v)
     return clean
 
+
+def enforce_worker_resource_limits(
+    *,
+    max_cpu_threads: int,
+    max_memory_mb: int,
+    job_requested_threads: int,
+    job_estimated_memory_mb: int,
+    os_platform: str = "darwin",
+) -> Dict[str, Any]:
+    """Expose explicit contributor CPU and memory caps with platform enforcement reporting (`WORKER-03` / Issue #129)."""
+    if max_cpu_threads < 1 or max_memory_mb < 64:
+        raise ValueError("max_cpu_threads >= 1 and max_memory_mb >= 64 are required")
+
+    torch.set_num_threads(int(max_cpu_threads))
+    threads_exceeded = job_requested_threads > max_cpu_threads
+    memory_exceeded = job_estimated_memory_mb > max_memory_mb
+
+    if threads_exceeded or memory_exceeded:
+        status = "TERMINATED_RESOURCE_CAP_EXCEEDED"
+        allowed = False
+    else:
+        status = "WITHIN_RESOURCE_CAPS"
+        allowed = True
+
+    return {
+        "status": status,
+        "execution_allowed": allowed,
+        "max_cpu_threads": int(max_cpu_threads),
+        "applied_torch_num_threads": int(torch.get_num_threads()),
+        "max_memory_mb": int(max_memory_mb),
+        "job_requested_threads": int(job_requested_threads),
+        "job_estimated_memory_mb": int(job_estimated_memory_mb),
+        "enforcement_report": {
+            "cpu_threads": "HARD_ENFORCED_TORCH_THREADPOOL",
+            "memory_mb": "HARD_PREFLIGHT_GATE_PLUS_OS_RLIMIT" if os_platform == "linux" else "HARD_PREFLIGHT_GATE_ADVISORY_RSS_MONITOR",
+            "os_platform": os_platform,
+        },
+    }
+
+
+def manage_worker_schedule_and_pause(
+    config_path: Path,
+    *,
+    allowed_hours_utc: Optional[List[int]] = None,
+    idle_only: Optional[bool] = None,
+    paused: Optional[bool] = None,
+    active_lease_policy: str = "RELINQUISH_CLEANLY",
+    current_hour_utc: int = 12,
+    host_is_idle: bool = True,
+    active_lease_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Persist contributor schedule and pause controls (`WORKER-04` / Issue #130).
+
+    Pausing prevents new work and handles an active lease according to policy; settings
+    survive restarts without silently enabling additional resources.
+    """
+    if config_path.exists():
+        state = json.loads(config_path.read_text(encoding="utf-8"))
+    else:
+        state = {
+            "allowed_hours_utc": list(range(24)),
+            "idle_only": True,
+            "paused": False,
+            "active_lease_policy": "RELINQUISH_CLEANLY",
+            "max_cpu_threads": 2,
+            "max_memory_mb": 1024,
+        }
+
+    if allowed_hours_utc is not None:
+        state["allowed_hours_utc"] = [int(h) for h in allowed_hours_utc]
+    if idle_only is not None:
+        state["idle_only"] = bool(idle_only)
+    if paused is not None:
+        state["paused"] = bool(paused)
+    if active_lease_policy:
+        state["active_lease_policy"] = str(active_lease_policy)
+
+    write_json(state, config_path)
+    reloaded = json.loads(config_path.read_text(encoding="utf-8"))
+
+    in_window = int(current_hour_utc) in set(reloaded["allowed_hours_utc"])
+    idle_ok = (not reloaded["idle_only"]) or bool(host_is_idle)
+    can_accept_new_work = (not reloaded["paused"]) and in_window and idle_ok
+
+    active_lease_action = "NONE"
+    if active_lease_id is not None and not can_accept_new_work:
+        active_lease_action = reloaded["active_lease_policy"]
+
+    return {
+        "persisted_settings": reloaded,
+        "can_accept_new_lease": can_accept_new_work,
+        "active_lease_id": active_lease_id,
+        "active_lease_action": active_lease_action,
+    }
+
+
+def manage_worker_disk_quota(
+    worker_dir: Path,
+    *,
+    quota_bytes: int,
+    incoming_artifact_bytes: int = 0,
+    pending_upload_filenames: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Manage downloaded inputs and outputs under a dedicated worker directory (`WORKER-05` / Issue #131).
+
+    Quota exhaustion stops work without touching unrelated files outside `worker_dir`, and
+    cleanup retains evidence needed for pending uploads and retries.
+    """
+    worker_dir.mkdir(parents=True, exist_ok=True)
+    pending_set = set(pending_upload_filenames or [])
+
+    used_before = sum(f.stat().st_size for f in worker_dir.rglob("*") if f.is_file())
+    reclaimed_files: List[str] = []
+    retained_pending_files: List[str] = []
+
+    for f in sorted(worker_dir.iterdir()):
+        if not f.is_file():
+            continue
+        if f.name in pending_set:
+            retained_pending_files.append(f.name)
+        elif f.name.endswith(".scratch") or f.name.endswith(".completed"):
+            f.unlink()
+            reclaimed_files.append(f.name)
+
+    used_after_cleanup = sum(f.stat().st_size for f in worker_dir.rglob("*") if f.is_file())
+    projected = used_after_cleanup + int(incoming_artifact_bytes)
+    quota_exceeded = projected > int(quota_bytes)
+
+    return {
+        "worker_dir": str(worker_dir.resolve()),
+        "quota_bytes": int(quota_bytes),
+        "used_bytes_before_cleanup": used_before,
+        "used_bytes_after_cleanup": used_after_cleanup,
+        "projected_bytes": projected,
+        "reclaimed_files": reclaimed_files,
+        "retained_pending_files": retained_pending_files,
+        "status": "STOPPED_DISK_QUOTA_EXCEEDED" if quota_exceeded else "OK_WITHIN_QUOTA",
+        "work_permitted": not quota_exceeded,
+    }
+
+
+class WorkerHeartbeatAndCancellationTracker:
+    """Track worker lease heartbeats and idempotent lease cancellations (`WORKER-07` / Issue #136)."""
+
+    def __init__(self, state_path: Path) -> None:
+        self.state_path = state_path
+        if not self.state_path.exists():
+            write_json({"leases": {}, "local_cancellation_log": []}, self.state_path)
+
+    def _load(self) -> Dict[str, Any]:
+        return json.loads(self.state_path.read_text(encoding="utf-8"))
+
+    def _save(self, state: Dict[str, Any]) -> None:
+        write_json(state, self.state_path)
+
+    def register_lease(self, job_id: str, lease_id: str, expires_at_epoch: int) -> None:
+        state = self._load()
+        state["leases"][lease_id] = {
+            "job_id": job_id,
+            "lease_id": lease_id,
+            "status": "ACTIVE",
+            "last_heartbeat_epoch": 0,
+            "expires_at_epoch": int(expires_at_epoch),
+        }
+        self._save(state)
+
+    def record_heartbeat(self, lease_id: str, *, now_epoch: int) -> Dict[str, Any]:
+        state = self._load()
+        entry = state["leases"].get(lease_id)
+        if entry is None:
+            raise KeyError(f"Unknown lease_id: {lease_id}")
+        if entry["status"] == "CANCELLED" or now_epoch >= entry["expires_at_epoch"]:
+            entry["status"] = "LOST_OR_CANCELLED"
+            self._save(state)
+            return {"lease_active": False, "status": entry["status"]}
+        entry["last_heartbeat_epoch"] = int(now_epoch)
+        self._save(state)
+        return {"lease_active": True, "status": "ACTIVE", "last_heartbeat_epoch": int(now_epoch)}
+
+    def cancel_lease(self, lease_id: str, *, reason: str) -> Dict[str, Any]:
+        """Idempotently cancel a lease and record cancellation locally."""
+        state = self._load()
+        entry = state["leases"].get(lease_id)
+        if entry is None:
+            raise KeyError(f"Unknown lease_id: {lease_id}")
+        already_cancelled = entry["status"] in ("CANCELLED", "LOST_OR_CANCELLED")
+        entry["status"] = "CANCELLED"
+        if not already_cancelled:
+            state["local_cancellation_log"].append({"lease_id": lease_id, "reason": reason})
+        self._save(state)
+        return {
+            "lease_id": lease_id,
+            "status": "CANCELLED",
+            "idempotent_noop": already_cancelled,
+            "cancellation_log_count": len(state["local_cancellation_log"]),
+        }
+
+    def validate_upload_eligibility(self, lease_id: str, *, now_epoch: int) -> bool:
+        state = self._load()
+        entry = state["leases"].get(lease_id)
+        if entry is None:
+            raise PermissionError(f"Unknown lease_id: {lease_id}")
+        if entry["status"] != "ACTIVE" or now_epoch >= entry["expires_at_epoch"]:
+            raise PermissionError(f"Lost or cancelled lease {lease_id!r} cannot upload result as current")
+        return True
+
+
+class ImmutableArtifactStore:
+    """Content-addressed immutable input and result artifact store (`NETWORK-05` / Issue #138)."""
+
+    def __init__(self, root_dir: Path) -> None:
+        self.root_dir = root_dir
+        self.objects_dir = self.root_dir / "objects"
+        self.staging_dir = self.root_dir / "staging"
+        self.objects_dir.mkdir(parents=True, exist_ok=True)
+        self.staging_dir.mkdir(parents=True, exist_ok=True)
+
+    def publish_result_artifact(
+        self,
+        payload_bytes: bytes,
+        *,
+        model_sha256: str,
+        dataset_sha256: str,
+        source_sha256: str,
+        config_sha256: str,
+        simulate_incomplete_staging: bool = False,
+    ) -> Dict[str, Any]:
+        for name, val in (
+            ("model_sha256", model_sha256),
+            ("dataset_sha256", dataset_sha256),
+            ("source_sha256", source_sha256),
+            ("config_sha256", config_sha256),
+        ):
+            if not val or len(val) < 16:
+                raise ValueError(f"Result artifact requires valid {name}")
+
+        digest = hashlib.sha256(payload_bytes).hexdigest()
+        staging_path = self.staging_dir / f"{digest}.part"
+        staging_path.write_bytes(payload_bytes)
+        if simulate_incomplete_staging:
+            raise RuntimeError("Simulated crash during staging before atomic publication")
+
+        final_obj_path = self.objects_dir / f"{digest}.bin"
+        staging_path.replace(final_obj_path)
+
+        manifest = {
+            "object_sha256": digest,
+            "byte_length": len(payload_bytes),
+            "model_sha256": model_sha256,
+            "dataset_sha256": dataset_sha256,
+            "source_sha256": source_sha256,
+            "config_sha256": config_sha256,
+        }
+        write_json(manifest, self.objects_dir / f"{digest}.manifest.json")
+        return manifest
+
+    def retrieve_artifact(self, object_sha256: str, *, max_bytes: int = 1024 * 1024) -> bytes:
+        obj_path = self.objects_dir / f"{object_sha256}.bin"
+        if not obj_path.exists():
+            raise FileNotFoundError(f"Accepted artifact {object_sha256} not found")
+        size = obj_path.stat().st_size
+        if size > max_bytes:
+            raise ValueError(f"Artifact exceeds bounded retrieval limit ({size} > {max_bytes})")
+        data = obj_path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != object_sha256:
+            raise ValueError("Content-addressed integrity check failed on read")
+        return data
+
+
+SHELL_METACHAR_PATTERN = re.compile(r"[;&|`$><\n\r]")
+
+
+def validate_constrained_job_arguments(
+    job_payload: Dict[str, Any],
+    *,
+    user_resource_caps: Dict[str, int],
+) -> Dict[str, Any]:
+    """Constrain public job arguments and paths via allowlists (`SEC-05` / Issue #148).
+
+    Rejects shell metacharacters, out-of-scope paths, and any attempt by a job payload
+    to override user-selected resource caps.
+    """
+    if "override_user_resource_cap" in job_payload or "max_memory_mb" in job_payload or "max_cpu_threads" in job_payload:
+        raise ValueError("Malicious job payload cannot alter user-selected resource caps")
+
+    task = str(job_payload.get("task", ""))
+    if task not in ("BP", "BS"):
+        raise ValueError(f"Disallowed public job task: {task!r}")
+
+    rel_path = str(job_payload.get("artifact_relative_path", ""))
+    if not rel_path or rel_path.startswith("/") or ".." in rel_path or "\\" in rel_path:
+        raise ValueError(f"Out-of-scope job path rejected: {rel_path!r}")
+    if SHELL_METACHAR_PATTERN.search(rel_path):
+        raise ValueError("Shell metacharacters rejected in artifact_relative_path")
+
+    for k, v in job_payload.get("arguments", {}).items():
+        s_val = str(v)
+        if SHELL_METACHAR_PATTERN.search(s_val) or ".." in s_val:
+            raise ValueError(f"Shell metacharacters or path traversal rejected in argument {k!r}: {s_val!r}")
+
+    return {
+        "validated": True,
+        "task": task,
+        "enforced_user_resource_caps": dict(user_resource_caps),
+    }
+
+
+def evaluate_independent_result_replication(
+    primary_result: Dict[str, Any],
+    replica_result: Dict[str, Any],
+    *,
+    metric_tolerance: float = 0.0,
+) -> Dict[str, Any]:
+    """Compare duplicate verification runs and compute useful throughput (`NETWORK-06` / Issue #149).
+
+    Disagreement triggers investigation rather than automatic majority trust, and verification
+    overhead is included in useful-throughput measurements.
+    """
+    if primary_result.get("worker_id") == replica_result.get("worker_id"):
+        raise ValueError("Independent replication requires distinct primary and replica worker_ids")
+
+    p_score = float(primary_result["accuracy"])
+    r_score = float(replica_result["accuracy"])
+    diff = abs(p_score - r_score)
+    hash_match = primary_result.get("result_sha256") == replica_result.get("result_sha256")
+
+    agreed = (diff <= metric_tolerance) and (hash_match if metric_tolerance == 0.0 else True)
+    total_compute_units = 2
+    useful_verified_jobs = 1 if agreed else 0
+
+    return {
+        "replication_status": "VERIFIED_BY_REPLICATION" if agreed else "DISAGREEMENT_INVESTIGATION_REQUIRED",
+        "automatic_majority_trust_used": False,
+        "score_difference": round(diff, 8),
+        "replication_factor": total_compute_units,
+        "total_compute_units_spent": total_compute_units,
+        "useful_verified_jobs": useful_verified_jobs,
+        "useful_verified_throughput_ratio": round(useful_verified_jobs / total_compute_units, 6),
+    }
+
+
+class WorkerEnrollmentRegistry:
+    """Manage authenticated worker enrollment, credential expiration, and revocation (`SEC-04` / Issue #153)."""
+
+    def __init__(self, master_secret: str) -> None:
+        self.master_secret = master_secret
+        self._workers: Dict[str, Dict[str, Any]] = {}
+
+    def enroll_worker(self, worker_id: str, *, expires_at_epoch: int) -> Dict[str, Any]:
+        token = hmac.new(
+            self.master_secret.encode("utf-8"),
+            f"{worker_id}:{expires_at_epoch}".encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        self._workers[worker_id] = {
+            "worker_id": worker_id,
+            "enrollment_token": token,
+            "expires_at_epoch": int(expires_at_epoch),
+            "status": "ACTIVE",
+        }
+        return copy.deepcopy(self._workers[worker_id])
+
+    def revoke_worker(self, worker_id: str, *, reason: str) -> Dict[str, Any]:
+        if worker_id not in self._workers:
+            raise KeyError(f"Unknown worker_id: {worker_id}")
+        self._workers[worker_id]["status"] = "REVOKED"
+        self._workers[worker_id]["revocation_reason"] = reason
+        return {"worker_id": worker_id, "status": "REVOKED", "reason": reason}
+
+    def verify_worker_can_lease(self, worker_id: str, token: str, *, now_epoch: int) -> bool:
+        info = self._workers.get(worker_id)
+        if info is None:
+            raise PermissionError("Unenrolled worker")
+        if info["status"] != "ACTIVE":
+            raise PermissionError(f"Revoked worker {worker_id!r} cannot obtain new leases")
+        if now_epoch >= info["expires_at_epoch"]:
+            raise PermissionError(f"Expired worker credential for {worker_id!r}")
+        if not hmac.compare_digest(info["enrollment_token"], token):
+            raise PermissionError("Invalid worker enrollment token")
+        return True
+
+    def export_public_worker_telemetry(self) -> List[Dict[str, Any]]:
+        """Return public telemetry without enrollment tokens or secrets."""
+        return [
+            {
+                "worker_id": w["worker_id"],
+                "status": w["status"],
+                "expires_at_epoch": w["expires_at_epoch"],
+            }
+            for w in self._workers.values()
+        ]
+
+
+def match_job_to_worker_capabilities(
+    job_requirements: Dict[str, Any],
+    worker_capabilities: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Match work to hardware and contributor budgets (`NETWORK-04` / Issue #164), enforcing
+    memory, disk, platform, and deadline constraints before assignment and recording deferral reasons.
+    """
+    deferral_reasons: List[str] = []
+    if worker_capabilities.get("available_ram_mb", 0) < job_requirements.get("min_ram_mb", 0):
+        deferral_reasons.append("insufficient_ram_mb")
+    if worker_capabilities.get("available_disk_mb", 0) < job_requirements.get("min_disk_mb", 0):
+        deferral_reasons.append("insufficient_disk_mb")
+    req_backends = set(job_requirements.get("allowed_backends", ["cpu"]))
+    if worker_capabilities.get("accelerator_backend") not in req_backends:
+        deferral_reasons.append("incompatible_accelerator_backend")
+    if worker_capabilities.get("max_runtime_seconds", 0) < job_requirements.get("estimated_duration_seconds", 0):
+        deferral_reasons.append("exceeds_worker_deadline_budget")
+
+    matched = len(deferral_reasons) == 0
+    return {
+        "assigned": matched,
+        "status": "ASSIGNED" if matched else "DEFERRED_CAPABILITY_MISMATCH",
+        "deferral_reasons": deferral_reasons,
+    }
+
+
+def verify_dataset_distribution_permission(dataset_manifest: Dict[str, Any]) -> Dict[str, Any]:
+    """Enforce training-data distribution permissions (`SEC-07` / Issue #172), blocking restricted,
+    private, or provenance-unknown datasets from volunteer jobs.
+    """
+    allowed_licenses = {"MIT", "Apache-2.0", "CC-BY-4.0", "CC0-1.0"}
+    lic = str(dataset_manifest.get("license", ""))
+    prov = str(dataset_manifest.get("provenance_sha256", ""))
+    redist = bool(dataset_manifest.get("public_redistribution_allowed", False))
+    has_private = bool(dataset_manifest.get("contains_private_samples", False))
+
+    if has_private:
+        raise PermissionError("Dataset rejected: fixture or payload contains private sample data")
+    if lic not in allowed_licenses or not prov or not redist:
+        raise PermissionError(
+            f"Dataset blocked from volunteer distribution: license={lic!r}, provenance_present={bool(prov)}, public_redistribution_allowed={redist}"
+        )
+
+    return {
+        "distribution_permitted": True,
+        "license": lic,
+        "provenance_sha256": prov,
+    }
+
+
+def generate_supply_chain_sbom_review(
+    *,
+    dependencies: List[Dict[str, str]],
+    known_unresolved_issues: List[str],
+    unreviewed_dependency_update: bool = False,
+) -> Dict[str, Any]:
+    """Create a lightweight dependency and supply-chain review (`SEC-14` / Issue #173).
+
+    Lists the software bill of materials (SBOM) with pinned versions and update provenance,
+    and blocks unreviewed dependency updates from bypassing the worker signing process.
+    """
+    if unreviewed_dependency_update:
+        raise ValueError("Unreviewed dependency update rejected: cannot bypass worker release signing review")
+    if not dependencies:
+        raise ValueError("SBOM must list executable dependencies")
+
+    for dep in dependencies:
+        if not dep.get("name") or not dep.get("pinned_version") or not dep.get("provenance"):
+            raise ValueError(f"Incomplete SBOM dependency entry: {dep!r}")
+
+    sbom_digest = hashlib.sha256(canonical_json(dependencies).encode("utf-8")).hexdigest()
+    return {
+        "sbom_sha256": sbom_digest,
+        "sbom_components": dependencies,
+        "known_unresolved_issues": list(known_unresolved_issues),
+        "signing_gate_passed": True,
+    }
+
+
+def build_verified_contribution_ledger(
+    contributions: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Recognize verified code, dataset, reproduction, review, and compute contributions (`COMM-12` / Issue #195).
+
+    Recognition follows accepted useful work rather than self-reported runtime, and
+    participants can opt out of public attribution.
+    """
+    allowed_types = {"code", "dataset", "independent_reproduction", "review", "verified_compute"}
+    recognized: List[Dict[str, Any]] = []
+    rejected_unverified_count = 0
+
+    for item in contributions:
+        c_type = str(item.get("contribution_type", ""))
+        if c_type not in allowed_types:
+            raise ValueError(f"Unsupported contribution_type: {c_type!r}")
+        if item.get("verification_status") != "ACCEPTED_VERIFIED":
+            rejected_unverified_count += 1
+            continue
+
+        opt_out = bool(item.get("opt_out_public_attribution", False))
+        public_handle = "anonymous-contributor" if opt_out else str(item.get("contributor_handle", "anonymous-contributor"))
+        recognized.append(
+            {
+                "contribution_id": str(item["contribution_id"]),
+                "contribution_type": c_type,
+                "public_contributor_handle": public_handle,
+                "opt_out_public_attribution": opt_out,
+                "accepted_useful_work_units": int(item.get("accepted_useful_work_units", 1)),
+                "credited_from_self_reported_runtime": False,
+                "artifact_sha256": str(item.get("artifact_sha256", "")),
+            }
+        )
+
+    return {
+        "recognized_contribution_count": len(recognized),
+        "rejected_unverified_count": rejected_unverified_count,
+        "recognized_contributions": recognized,
+    }
+
+

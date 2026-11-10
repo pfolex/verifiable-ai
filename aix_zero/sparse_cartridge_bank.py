@@ -526,3 +526,104 @@ class SparseExpertCartridgeBank:
                 'reclaimable_shards': reclaimable_shards,
                 'deleted_shards': deleted_shards,
             }
+
+    def execute_specialist_with_bounded_fallback(
+        self,
+        model: AIXZeroModel,
+        domain: str,
+        *,
+        slot_index: int = 0,
+        active_base_checkpoint_sha256: Optional[str] = None,
+        candidate_output: Optional[str] = None,
+        attempted_chain: Optional[List[str]] = None,
+        max_retry_attempts: int = 2,
+    ) -> Dict[str, Any]:
+        """Execute a specialist with bounded fallback to the frozen base model (`EXPERT-07` / Issue #116).
+
+        Handles unavailable, incompatible, rejected, and invalid-output specialists while
+        preserving base model state and enforcing `max_retry_attempts` to prevent recursive
+        expert-selection loops.
+        """
+        if max_retry_attempts < 1 or max_retry_attempts > 3:
+            raise ValueError("max_retry_attempts must be in 1..3")
+
+        moe = _moe(model)
+        saved_base_slot = {
+            k: v.detach().clone()
+            for k, v in moe.experts[slot_index].state_dict().items()
+        }
+
+        def _base_preserved() -> bool:
+            cur = moe.experts[slot_index].state_dict()
+            return all(torch.equal(cur[k], saved_base_slot[k]) for k in saved_base_slot)
+
+        chain = list(attempted_chain or [])
+        if domain in chain:
+            return {
+                "executed_route": "base_model_fallback",
+                "fallback_triggered": True,
+                "fallback_reason": "RECURSIVE_EXPERT_LOOP_PREVENTED",
+                "attempted_chain": chain + [domain],
+                "base_preserved": _base_preserved(),
+            }
+        if len(chain) >= max_retry_attempts:
+            return {
+                "executed_route": "base_model_fallback",
+                "fallback_triggered": True,
+                "fallback_reason": "RETRY_LIMIT_EXCEEDED",
+                "attempted_chain": chain,
+                "base_preserved": _base_preserved(),
+            }
+
+        chain.append(domain)
+        try:
+            with self.temporary_specialist_session(
+                model,
+                domain,
+                slot=slot_index,
+                active_base_checkpoint_sha256=active_base_checkpoint_sha256,
+            ):
+                if candidate_output is not None and ("<ans>" not in candidate_output or "</ans>" not in candidate_output):
+                    raise RuntimeError("INVALID_SPECIALIST_OUTPUT")
+        except (KeyError, FileNotFoundError):
+            return {
+                "executed_route": "base_model_fallback",
+                "fallback_triggered": True,
+                "fallback_reason": "UNAVAILABLE_CARTRIDGE",
+                "attempted_chain": chain,
+                "base_preserved": _base_preserved(),
+            }
+        except ValueError as exc:
+            msg = str(exc)
+            reason = (
+                "REJECTED_PROMOTION_GATE"
+                if ("promotion_status" in msg or "empirical_gate" in msg)
+                else "INCOMPATIBLE_CARTRIDGE"
+            )
+            return {
+                "executed_route": "base_model_fallback",
+                "fallback_triggered": True,
+                "fallback_reason": reason,
+                "error_detail": msg,
+                "attempted_chain": chain,
+                "base_preserved": _base_preserved(),
+            }
+        except RuntimeError as exc:
+            if str(exc) == "INVALID_SPECIALIST_OUTPUT":
+                return {
+                    "executed_route": "base_model_fallback",
+                    "fallback_triggered": True,
+                    "fallback_reason": "INVALID_SPECIALIST_OUTPUT",
+                    "attempted_chain": chain,
+                    "base_preserved": _base_preserved(),
+                }
+            raise
+
+        return {
+            "executed_route": f"specialist:{domain}",
+            "fallback_triggered": False,
+            "fallback_reason": None,
+            "attempted_chain": chain,
+            "base_preserved": _base_preserved(),
+        }
+

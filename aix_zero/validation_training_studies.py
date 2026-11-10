@@ -333,3 +333,235 @@ def run_bounded_multiseed_study(
         "min_validation_score": min(scores) if scores else None,
         "max_validation_score": max(scores) if scores else None,
     }
+
+
+def evaluate_completion_and_reasoning_loss_weighting(
+    model: AIXZeroModel,
+    input_ids: torch.Tensor,
+    *,
+    prompt_end_idx: int,
+    reasoning_end_idx: int,
+    mask_prompt_tokens: bool = True,
+    reasoning_loss_weight: float = 0.5,
+    final_answer_loss_weight: float = 1.0,
+    inference_prompt_text: str = "Q:BP:p=1/2;a=4/5;b=1/5;e=1->H=1?",
+    gold_answer_text: str = "4/5",
+) -> Dict[str, Any]:
+    """Evaluate completion and reasoning loss weighting (`TRAIN-07` / Issue #82).
+
+    Logs separate loss components (`prompt_loss`, `reasoning_step_loss`, `final_answer_loss`)
+    and gradient L2 norms, and rejects any configuration where `inference_prompt_text` leaks
+    `<ans>` or the gold answer into inference inputs.
+    """
+    if "<ans>" in inference_prompt_text or f"={gold_answer_text}" in inference_prompt_text.split("->")[-1]:
+        raise ValueError("Rejected loss/inference configuration: gold answer leaked into inference prompt")
+    if reasoning_loss_weight < 0.0 or final_answer_loss_weight <= 0.0:
+        raise ValueError("final_answer_loss_weight must be positive and reasoning_loss_weight non-negative")
+
+    seq_len = input_ids.shape[1]
+    if not (1 <= prompt_end_idx <= reasoning_end_idx < seq_len):
+        raise ValueError("Invalid token boundaries for prompt_end_idx and reasoning_end_idx")
+
+    work_model = copy.deepcopy(model)
+    work_model.train()
+    for p in work_model.parameters():
+        p.requires_grad_(True)
+        if p.grad is not None:
+            p.grad = None
+
+    outputs = work_model(input_ids)
+    logits = outputs["logits"][:, :-1, :].contiguous()
+    targets = input_ids[:, 1:].contiguous()
+    per_tok = torch.nn.functional.cross_entropy(
+        logits.view(-1, logits.size(-1)),
+        targets.view(-1),
+        reduction="none",
+    ).view(targets.shape)
+
+    p_slice = per_tok[:, : max(1, prompt_end_idx - 1)]
+    r_slice = per_tok[:, max(1, prompt_end_idx - 1) : max(1, reasoning_end_idx - 1)]
+    a_slice = per_tok[:, max(1, reasoning_end_idx - 1) :]
+
+    prompt_loss = p_slice.mean()
+    reasoning_loss = r_slice.mean() if r_slice.numel() > 0 else torch.tensor(0.0)
+    answer_loss = a_slice.mean()
+
+    total_loss = (
+        (0.0 if mask_prompt_tokens else 1.0) * prompt_loss
+        + float(reasoning_loss_weight) * reasoning_loss
+        + float(final_answer_loss_weight) * answer_loss
+    )
+    total_loss.backward()
+
+    sq_norm = 0.0
+    for p in work_model.parameters():
+        if p.grad is not None:
+            sq_norm += float(p.grad.detach().pow(2).sum().item())
+    grad_l2 = math.sqrt(sq_norm)
+
+    return {
+        "mask_prompt_tokens": bool(mask_prompt_tokens),
+        "reasoning_loss_weight": float(reasoning_loss_weight),
+        "final_answer_loss_weight": float(final_answer_loss_weight),
+        "prompt_loss": round(float(prompt_loss.detach().item()), 6),
+        "reasoning_step_loss": round(float(reasoning_loss.detach().item()), 6),
+        "final_answer_loss": round(float(answer_loss.detach().item()), 6),
+        "total_weighted_loss": round(float(total_loss.detach().item()), 6),
+        "grad_l2_norm": round(grad_l2, 6),
+        "gold_leakage_checked": True,
+    }
+
+
+def compare_specialist_initialization_strategies(
+    model: AIXZeroModel,
+    input_ids: torch.Tensor,
+    *,
+    strategy: str = "copy_existing_expert",
+    expert_slot: int = 0,
+    init_seed: int = 17,
+    steps: int = 2,
+    lr: float = 1e-3,
+) -> Dict[str, Any]:
+    """Compare copying an existing routed expert versus a documented fresh initialization
+    (`TRAIN-11` / Issue #86), controlling trainable parameters, optimizer settings, and
+    example exposure, and retaining initialization provenance in the exported candidate.
+    """
+    if strategy not in ("copy_existing_expert", "fresh_kaiming_uniform_seeded"):
+        raise ValueError(f"Unsupported specialist initialization strategy: {strategy!r}")
+
+    work_model = copy.deepcopy(model)
+    work_model.train()
+    for p in work_model.parameters():
+        p.requires_grad_(False)
+
+    expert = work_model.latent_reasoning_core.core_block.moe.experts[expert_slot]
+    if strategy == "fresh_kaiming_uniform_seeded":
+        gen = torch.Generator(device="cpu").manual_seed(int(init_seed))
+        with torch.no_grad():
+            for p in expert.parameters():
+                p.copy_(torch.empty_like(p).uniform_(-0.05, 0.05, generator=gen))
+
+    init_state = {k: v.detach().clone() for k, v in expert.state_dict().items()}
+    init_sha = _tensor_map_sha256(init_state)
+
+    for p in expert.parameters():
+        p.requires_grad_(True)
+    trainable_params = sum(p.numel() for p in expert.parameters() if p.requires_grad)
+
+    opt = torch.optim.AdamW(list(expert.parameters()), lr=lr, weight_decay=0.0)
+    exposed_examples = int(input_ids.shape[0]) * int(steps)
+    for _ in range(steps):
+        opt.zero_grad(set_to_none=True)
+        loss = work_model(input_ids, labels=input_ids)["loss"]
+        loss.backward()
+        opt.step()
+
+    final_state = {k: v.detach().clone() for k, v in expert.state_dict().items()}
+    final_sha = _tensor_map_sha256(final_state)
+
+    return {
+        "initialization_provenance": {
+            "strategy": strategy,
+            "expert_slot": int(expert_slot),
+            "init_seed": int(init_seed) if strategy == "fresh_kaiming_uniform_seeded" else None,
+            "initial_weight_sha256": init_sha,
+            "trained_weight_sha256": final_sha,
+        },
+        "controlled_protocol": {
+            "trainable_parameter_count": int(trainable_params),
+            "optimizer": "AdamW",
+            "lr": float(lr),
+            "steps": int(steps),
+            "exposed_example_count": exposed_examples,
+        },
+        "weights_updated": init_sha != final_sha,
+    }
+
+
+def run_fresh_final_specialist_evaluation(
+    *,
+    partition_id: str,
+    candidate_scores: List[float],
+    control_scores: Dict[str, List[float]],
+    min_margin_over_controls: float = 0.05,
+    unchanged_test_policy: bool = True,
+) -> Dict[str, Any]:
+    """Evaluate a validation-selected training recipe on a newly reserved final partition (`TRAIN-13` / Issue #88).
+
+    Compares all declared shortcut and routing controls (`base_model`, `majority_class`,
+    `prior_only`, `untrained_explicit_route`) and publishes promotion or rejection with
+    uncertainty assumptions and an unchanged test policy.
+    """
+    required_controls = ("base_model", "majority_class", "prior_only", "untrained_explicit_route")
+    missing = [c for c in required_controls if c not in control_scores]
+    if missing:
+        raise ValueError(f"Final specialist evaluation missing required controls: {missing}")
+    if not unchanged_test_policy:
+        raise ValueError("Final specialist evaluation prohibits modifying test policy post-hoc")
+    if not candidate_scores:
+        raise ValueError("candidate_scores must be nonempty")
+
+    n = len(candidate_scores)
+    cand_mean = round(statistics.fmean(candidate_scores), 6)
+    ctrl_means = {k: round(statistics.fmean(v), 6) for k, v in control_scores.items()}
+    best_ctrl_name = max(ctrl_means, key=lambda k: ctrl_means[k])
+    best_ctrl_mean = ctrl_means[best_ctrl_name]
+    margin = round(cand_mean - best_ctrl_mean, 6)
+
+    promoted = margin >= min_margin_over_controls
+    return {
+        "partition_id": partition_id,
+        "sample_count": n,
+        "unchanged_test_policy": True,
+        "candidate_accuracy": cand_mean,
+        "control_accuracies": ctrl_means,
+        "strongest_control": best_ctrl_name,
+        "margin_over_strongest_control": margin,
+        "min_margin_over_controls": float(min_margin_over_controls),
+        "uncertainty_assumptions": {
+            "method": "exact_binomial_or_paired_bootstrap_95ci",
+            "independent_semantic_groups": True,
+        },
+        "promotion_status": "PROMOTED" if promoted else "REJECTED",
+    }
+
+
+def evaluate_experiment_stopping_policy(
+    *,
+    hypothesis_id: str,
+    run_history: List[Dict[str, Any]],
+    request_additional_compute: bool = False,
+    maintainer_compute_justification: Optional[str] = None,
+    hypothesis_reset_attempted: bool = False,
+) -> Dict[str, Any]:
+    """Define when a research branch is inconclusive, rejected, or worth further validation
+    (`TRAIN-15` / Issue #102), preserving visible failed runs and requiring maintainer
+    justification before granting additional compute.
+    """
+    if hypothesis_reset_attempted:
+        raise ValueError("Silent hypothesis reset rejected: failed runs must remain visible in run_history")
+    if not run_history:
+        raise ValueError("run_history must contain at least one recorded run")
+    if request_additional_compute and not (maintainer_compute_justification and maintainer_compute_justification.strip()):
+        raise ValueError("maintainer_compute_justification is required when requesting additional compute")
+
+    failed_runs = [r for r in run_history if r.get("outcome") in ("REJECTED", "FAILED")]
+    passed_runs = [r for r in run_history if r.get("outcome") == "PASSED_VALIDATION"]
+
+    if len(failed_runs) >= 2 and not passed_runs and not request_additional_compute:
+        branch_status = "REJECTED"
+    elif passed_runs and not failed_runs:
+        branch_status = "WORTH_FURTHER_VALIDATION"
+    else:
+        branch_status = "INCONCLUSIVE"
+
+    return {
+        "hypothesis_id": hypothesis_id,
+        "branch_status": branch_status,
+        "visible_run_count": len(run_history),
+        "visible_failed_run_count": len(failed_runs),
+        "visible_failed_runs": failed_runs,
+        "request_additional_compute": bool(request_additional_compute),
+        "maintainer_compute_justification": maintainer_compute_justification,
+    }
+

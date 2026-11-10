@@ -359,6 +359,231 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertIn("<REDACTED_HOME_PATH>", sanitized["log_message"])
         self.assertIn("<REDACTED_IP>", sanitized["log_message"])
 
+    def test_wave7_worker_03_04_05_07_network_04_05_06_sec_04_05_07_14_and_comm_12(self):
+        import tempfile
+        from aix_zero.network_coordinator import (
+            ImmutableArtifactStore,
+            WorkerEnrollmentRegistry,
+            WorkerHeartbeatAndCancellationTracker,
+            build_verified_contribution_ledger,
+            enforce_worker_resource_limits,
+            evaluate_independent_result_replication,
+            generate_supply_chain_sbom_review,
+            manage_worker_disk_quota,
+            manage_worker_schedule_and_pause,
+            match_job_to_worker_capabilities,
+            validate_constrained_job_arguments,
+            verify_dataset_distribution_permission,
+        )
+
+        # WORKER-03 CPU and memory limits
+        r_ok = enforce_worker_resource_limits(
+            max_cpu_threads=1, max_memory_mb=512, job_requested_threads=1, job_estimated_memory_mb=256
+        )
+        self.assertTrue(r_ok["execution_allowed"])
+        r_stress = enforce_worker_resource_limits(
+            max_cpu_threads=1, max_memory_mb=512, job_requested_threads=4, job_estimated_memory_mb=1024
+        )
+        self.assertFalse(r_stress["execution_allowed"])
+        self.assertEqual(r_stress["status"], "TERMINATED_RESOURCE_CAP_EXCEEDED")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tdir = Path(tmp)
+
+            # WORKER-04 contribution schedules and pause controls survive restarts
+            sched_cfg = tdir / "worker_schedule.json"
+            s1 = manage_worker_schedule_and_pause(
+                sched_cfg,
+                allowed_hours_utc=[10, 11, 12],
+                idle_only=True,
+                paused=True,
+                active_lease_policy="RELINQUISH_CLEANLY",
+                current_hour_utc=11,
+                host_is_idle=True,
+                active_lease_id="lease-active-99",
+            )
+            self.assertFalse(s1["can_accept_new_lease"])
+            self.assertEqual(s1["active_lease_action"], "RELINQUISH_CLEANLY")
+            # Restart reload without args preserves paused=True and resource caps
+            s2 = manage_worker_schedule_and_pause(sched_cfg, current_hour_utc=11, host_is_idle=True)
+            self.assertFalse(s2["can_accept_new_lease"])
+            self.assertEqual(s2["persisted_settings"]["max_cpu_threads"], 2)
+
+            # WORKER-05 bounded disk quota and cleanup
+            wdir = tdir / "worker_storage"
+            wdir.mkdir()
+            outside_file = tdir / "unrelated_user_file.txt"
+            outside_file.write_text("do-not-touch", encoding="utf-8")
+            (wdir / "job1.scratch").write_bytes(b"x" * 100)
+            (wdir / "pending_result.json").write_bytes(b"y" * 80)
+
+            dq = manage_worker_disk_quota(
+                wdir,
+                quota_bytes=150,
+                incoming_artifact_bytes=50,
+                pending_upload_filenames=["pending_result.json"],
+            )
+            self.assertTrue(dq["work_permitted"])
+            self.assertIn("job1.scratch", dq["reclaimed_files"])
+            self.assertIn("pending_result.json", dq["retained_pending_files"])
+            self.assertTrue(outside_file.exists())
+
+            dq_exceed = manage_worker_disk_quota(
+                wdir,
+                quota_bytes=100,
+                incoming_artifact_bytes=50,
+                pending_upload_filenames=["pending_result.json"],
+            )
+            self.assertFalse(dq_exceed["work_permitted"])
+            self.assertEqual(dq_exceed["status"], "STOPPED_DISK_QUOTA_EXCEEDED")
+            self.assertTrue(outside_file.exists())
+
+            # WORKER-07 heartbeat and idempotent lease cancellation
+            hb = WorkerHeartbeatAndCancellationTracker(tdir / "hb.json")
+            hb.register_lease("job-1", "lease-1", expires_at_epoch=100)
+            self.assertTrue(hb.record_heartbeat("lease-1", now_epoch=50)["lease_active"])
+            c1 = hb.cancel_lease("lease-1", reason="user_paused")
+            self.assertFalse(c1["idempotent_noop"])
+            c2 = hb.cancel_lease("lease-1", reason="duplicate_cancel")
+            self.assertTrue(c2["idempotent_noop"])
+            self.assertEqual(c2["cancellation_log_count"], 1)
+            with self.assertRaisesRegex(PermissionError, "Lost or cancelled lease"):
+                hb.validate_upload_eligibility("lease-1", now_epoch=60)
+
+            # NETWORK-05 immutable input and result artifact store
+            store = ImmutableArtifactStore(tdir / "immutable_store")
+            with self.assertRaises(RuntimeError):
+                store.publish_result_artifact(
+                    b"incomplete-payload",
+                    model_sha256="a" * 64,
+                    dataset_sha256="b" * 64,
+                    source_sha256="c" * 64,
+                    config_sha256="d" * 64,
+                    simulate_incomplete_staging=True,
+                )
+            self.assertEqual(list(store.objects_dir.glob("*.bin")), [])
+            man = store.publish_result_artifact(
+                b"verified-result-payload",
+                model_sha256="a" * 64,
+                dataset_sha256="b" * 64,
+                source_sha256="c" * 64,
+                config_sha256="d" * 64,
+            )
+            self.assertEqual(store.retrieve_artifact(man["object_sha256"]), b"verified-result-payload")
+
+        # SEC-05 constrained public job arguments and paths
+        with self.assertRaisesRegex(ValueError, "Shell metacharacters"):
+            validate_constrained_job_arguments(
+                {"task": "BP", "artifact_relative_path": "out.json", "arguments": {"arg": "1; rm -rf /"}},
+                user_resource_caps={"max_memory_mb": 512},
+            )
+        with self.assertRaisesRegex(ValueError, "cannot alter user-selected resource caps"):
+            validate_constrained_job_arguments(
+                {"task": "BP", "artifact_relative_path": "out.json", "max_memory_mb": 999999},
+                user_resource_caps={"max_memory_mb": 512},
+            )
+        valid_args = validate_constrained_job_arguments(
+            {"task": "BP", "artifact_relative_path": "results/out.json", "arguments": {"seed": "42"}},
+            user_resource_caps={"max_memory_mb": 512},
+        )
+        self.assertTrue(valid_args["validated"])
+
+        # NETWORK-06 independent result replication
+        rep_disagree = evaluate_independent_result_replication(
+            {"worker_id": "w1", "accuracy": 0.9, "result_sha256": "h1"},
+            {"worker_id": "w2", "accuracy": 0.1, "result_sha256": "h2"},
+        )
+        self.assertEqual(rep_disagree["replication_status"], "DISAGREEMENT_INVESTIGATION_REQUIRED")
+        self.assertEqual(rep_disagree["useful_verified_throughput_ratio"], 0.0)
+
+        rep_agree = evaluate_independent_result_replication(
+            {"worker_id": "w1", "accuracy": 0.125, "result_sha256": "h1"},
+            {"worker_id": "w2", "accuracy": 0.125, "result_sha256": "h1"},
+        )
+        self.assertEqual(rep_agree["replication_status"], "VERIFIED_BY_REPLICATION")
+        self.assertEqual(rep_agree["useful_verified_throughput_ratio"], 0.5)
+
+        # SEC-04 authenticated worker enrollment and revocation
+        reg = WorkerEnrollmentRegistry(master_secret="coord-secret")
+        w_cred = reg.enroll_worker("worker-01", expires_at_epoch=500)
+        self.assertTrue(reg.verify_worker_can_lease("worker-01", w_cred["enrollment_token"], now_epoch=100))
+        reg.revoke_worker("worker-01", reason="compromised_key")
+        with self.assertRaisesRegex(PermissionError, "Revoked worker"):
+            reg.verify_worker_can_lease("worker-01", w_cred["enrollment_token"], now_epoch=110)
+        pub_tel = reg.export_public_worker_telemetry()
+        self.assertNotIn("enrollment_token", pub_tel[0])
+
+        # NETWORK-04 match work to hardware and contributor budgets
+        m_defer = match_job_to_worker_capabilities(
+            {"min_ram_mb": 2048, "min_disk_mb": 500, "allowed_backends": ["cuda"], "estimated_duration_seconds": 300},
+            {"available_ram_mb": 1024, "available_disk_mb": 1000, "accelerator_backend": "cpu", "max_runtime_seconds": 120},
+        )
+        self.assertFalse(m_defer["assigned"])
+        self.assertIn("insufficient_ram_mb", m_defer["deferral_reasons"])
+        self.assertIn("incompatible_accelerator_backend", m_defer["deferral_reasons"])
+
+        # SEC-07 training-data distribution permissions
+        with self.assertRaisesRegex(PermissionError, "private sample data"):
+            verify_dataset_distribution_permission(
+                {"license": "MIT", "provenance_sha256": "a" * 64, "public_redistribution_allowed": True, "contains_private_samples": True}
+            )
+        self.assertTrue(
+            verify_dataset_distribution_permission(
+                {"license": "MIT", "provenance_sha256": "a" * 64, "public_redistribution_allowed": True, "contains_private_samples": False}
+            )["distribution_permitted"]
+        )
+
+        # SEC-14 lightweight dependency and supply-chain review
+        with self.assertRaisesRegex(ValueError, "Unreviewed dependency update rejected"):
+            generate_supply_chain_sbom_review(
+                dependencies=[{"name": "torch", "pinned_version": "2.6.0", "provenance": "pypi-sha256"}],
+                known_unresolved_issues=[],
+                unreviewed_dependency_update=True,
+            )
+        sbom = generate_supply_chain_sbom_review(
+            dependencies=[
+                {"name": "torch", "pinned_version": "2.6.0", "provenance": "pypi-wheel-sha256"},
+                {"name": "safetensors", "pinned_version": "0.5.3", "provenance": "pypi-wheel-sha256"},
+            ],
+            known_unresolved_issues=["None blocking CPU inference"],
+        )
+        self.assertTrue(sbom["signing_gate_passed"])
+
+        # COMM-12 recognize verified contributions fairly & opt-out attribution
+        ledger = build_verified_contribution_ledger(
+            [
+                {
+                    "contribution_id": "c-1",
+                    "contribution_type": "independent_reproduction",
+                    "verification_status": "ACCEPTED_VERIFIED",
+                    "contributor_handle": "alice",
+                    "opt_out_public_attribution": False,
+                    "accepted_useful_work_units": 1,
+                    "self_reported_runtime_hours": 9999,
+                    "artifact_sha256": "a" * 64,
+                },
+                {
+                    "contribution_id": "c-2",
+                    "contribution_type": "verified_compute",
+                    "verification_status": "ACCEPTED_VERIFIED",
+                    "contributor_handle": "bob",
+                    "opt_out_public_attribution": True,
+                    "accepted_useful_work_units": 2,
+                    "artifact_sha256": "b" * 64,
+                },
+                {
+                    "contribution_id": "c-3",
+                    "contribution_type": "verified_compute",
+                    "verification_status": "UNVERIFIED_SELF_REPORT",
+                    "contributor_handle": "mallory",
+                    "self_reported_runtime_hours": 10000,
+                },
+            ]
+        )
+        self.assertEqual(ledger["recognized_contribution_count"], 2)
+        self.assertEqual(ledger["rejected_unverified_count"], 1)
+        self.assertEqual(ledger["recognized_contributions"][1]["public_contributor_handle"], "anonymous-contributor")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1517,5 +1517,259 @@ def evaluate_posterior_predictive_task(
     }
 
 
+def verify_reasoning_trace_steps(
+    trace_steps: List[Dict[str, str]],
+    *,
+    expected_steps: List[Dict[str, str]],
+    final_prediction: str,
+    gold_final_answer: str,
+) -> Dict[str, Any]:
+    """Validate individual probability, intervention, and allocation trace steps (`REASON-14` / Issue #97).
+
+    Rejects a trace that reaches the right final answer through invalid intermediate steps,
+    and explicitly exposes verifier coverage limits rather than labeling traces formally proved.
+    """
+    final_ok = score_rational_or_probability(final_prediction, gold_final_answer, is_probability=False)["score"] == 1.0
+    step_checks: List[Dict[str, Any]] = []
+    all_steps_valid = len(trace_steps) == len(expected_steps)
+
+    for idx, exp in enumerate(expected_steps):
+        if idx >= len(trace_steps):
+            step_checks.append({"step_index": idx, "step_name": exp["step_name"], "valid": False, "reason": "missing_step"})
+            all_steps_valid = False
+            continue
+        obs = trace_steps[idx]
+        s_ok = (
+            obs.get("step_name") == exp["step_name"]
+            and score_rational_or_probability(str(obs.get("value", "")), str(exp["value"]), is_probability=False)["score"]
+            == 1.0
+        )
+        if not s_ok:
+            all_steps_valid = False
+        step_checks.append(
+            {
+                "step_index": idx,
+                "step_name": exp["step_name"],
+                "observed_value": obs.get("value"),
+                "expected_value": exp["value"],
+                "valid": s_ok,
+            }
+        )
+
+    if final_ok and all_steps_valid:
+        status = "VERIFIED_TRACE_AND_ANSWER"
+        score = 1.0
+    elif final_ok and not all_steps_valid:
+        status = "REJECTED_INVALID_INTERMEDIATE_STEP"
+        score = 0.0
+    else:
+        status = "REJECTED_WRONG_FINAL_ANSWER"
+        score = 0.0
+
+    return {
+        "status": status,
+        "score": score,
+        "final_answer_correct": final_ok,
+        "all_intermediate_steps_valid": all_steps_valid,
+        "step_checks": step_checks,
+        "formal_proof_claimed": False,
+        "verifier_coverage_limits": [
+            "Checks finite rational intermediate equations against reference solver steps; does not constitute an interactive theorem prover (Lean/Coq) proof.",
+            "Unstructured free-text prose steps outside the schema are not verified.",
+        ],
+    }
+
+
+def generate_confounded_causal_pairs() -> Dict[str, Any]:
+    """Generate paired cases where $P(Y=1 \\mid X=1) \\ne P(Y=1 \\mid do(X=1))$ (`REASON-08` / Issue #108),
+    identifying the source of confounding and holding out graph topology between train and test.
+    """
+    train_scm = {
+        "graph_topology": "confounded_fork_Z_to_X_and_Y",
+        "confounder_variable": "Z",
+        "backdoor_path": "X <- Z -> Y",
+        "p_z1": "1/2",
+        "p_x1_given_z0": "1/5",
+        "p_x1_given_z1": "4/5",
+        "p_y1_given_z0_x0": "1/10",
+        "p_y1_given_z0_x1": "1/5",
+        "p_y1_given_z1_x0": "3/5",
+        "p_y1_given_z1_x1": "4/5",
+    }
+    obs_train = evaluate_structural_causal_model(train_scm, query_kind="observational_given_x", x_value=1)["exact_probability"]
+    int_train = evaluate_structural_causal_model(train_scm, query_kind="interventional_do_x", x_value=1)["exact_probability"]
+
+    # Held-out test topology adds a post-treatment mediator M (Z -> X -> M -> Y and Z -> Y)
+    test_scm = {
+        "graph_topology": "confounded_mediator_diamond_Z_X_M_Y",
+        "confounder_variable": "Z",
+        "backdoor_path": "X <- Z -> Y (with held-out mediator M on X -> M -> Y)",
+        "p_z1": "1/3",
+        "p_x1_given_z0": "1/4",
+        "p_x1_given_z1": "3/4",
+        "p_y1_given_z0_x0": "1/8",
+        "p_y1_given_z0_x1": "3/8",
+        "p_y1_given_z1_x0": "5/8",
+        "p_y1_given_z1_x1": "7/8",
+    }
+    obs_test = evaluate_structural_causal_model(test_scm, query_kind="observational_given_x", x_value=1)["exact_probability"]
+    int_test = evaluate_structural_causal_model(test_scm, query_kind="interventional_do_x", x_value=1)["exact_probability"]
+
+    return {
+        "train_pair": {
+            "graph_topology": train_scm["graph_topology"],
+            "confounder_variable": train_scm["confounder_variable"],
+            "backdoor_path": train_scm["backdoor_path"],
+            "p_y1_given_x1": obs_train,
+            "p_y1_given_do_x1": int_train,
+            "observational_differs_from_interventional": obs_train != int_train,
+        },
+        "held_out_test_pair": {
+            "graph_topology": test_scm["graph_topology"],
+            "confounder_variable": test_scm["confounder_variable"],
+            "backdoor_path": test_scm["backdoor_path"],
+            "p_y1_given_x1": obs_test,
+            "p_y1_given_do_x1": int_test,
+            "observational_differs_from_interventional": obs_test != int_test,
+        },
+        "holds_out_graph_topology": train_scm["graph_topology"] != test_scm["graph_topology"],
+    }
+
+
+def evaluate_compositional_belief_decision_task(
+    *,
+    p: str,
+    a: str,
+    b: str,
+    e: str,
+    payoff_act_if_h1: int,
+    payoff_act_if_h0: int,
+    payoff_wait: int,
+    predicted_posterior: str,
+    predicted_expected_utility_act: str,
+    predicted_action: str,
+) -> Dict[str, Any]:
+    """Evaluate a compositional belief + expected-utility decision task (`REASON-13` / Issue #111),
+    keeping belief, decision criterion, and payoff assumptions explicit and scoring intermediate
+    stages and final outcomes independently.
+    """
+    p_f, a_f, b_f = Fraction(p), Fraction(a), Fraction(b)
+    w1, w0 = p_f, 1 - p_f
+    for ch in e:
+        if ch == "1":
+            w1 *= a_f
+            w0 *= b_f
+        else:
+            w1 *= (1 - a_f)
+            w0 *= (1 - b_f)
+    post_h1 = w1 / (w1 + w0)
+    eu_act = post_h1 * Fraction(payoff_act_if_h1) + (1 - post_h1) * Fraction(payoff_act_if_h0)
+    eu_wait = Fraction(payoff_wait)
+    gold_action = "ACT" if eu_act > eu_wait else "WAIT"
+
+    gold_post_str = f"{post_h1.numerator}/{post_h1.denominator}" if post_h1.denominator != 1 else str(post_h1.numerator)
+    gold_eu_str = f"{eu_act.numerator}/{eu_act.denominator}" if eu_act.denominator != 1 else str(eu_act.numerator)
+
+    s1 = score_rational_or_probability(predicted_posterior, gold_post_str, is_probability=True)["score"]
+    s2 = score_rational_or_probability(predicted_expected_utility_act, gold_eu_str, is_probability=False)["score"]
+    s3 = 1.0 if predicted_action.strip().upper() == gold_action else 0.0
+
+    return {
+        "explicit_assumptions": {
+            "belief_model": "conditional_independent_sensor_bayes",
+            "decision_criterion": "maximize_expected_utility_strict_inequality",
+            "payoff_matrix": {
+                "ACT": {"H=1": payoff_act_if_h1, "H=0": payoff_act_if_h0},
+                "WAIT": {"H=1": payoff_wait, "H=0": payoff_wait},
+            },
+        },
+        "gold_stage1_posterior": gold_post_str,
+        "gold_stage2_expected_utility_act": gold_eu_str,
+        "gold_stage3_action": gold_action,
+        "stage1_belief_score": s1,
+        "stage2_expected_utility_score": s2,
+        "stage3_final_action_score": s3,
+        "full_compositional_exact_score": 1.0 if (s1 == 1.0 and s2 == 1.0 and s3 == 1.0) else 0.0,
+    }
+
+
+def evaluate_bounded_test_time_search(
+    *,
+    single_sample_baseline_accuracy: float,
+    search_candidate_accuracy: float,
+    verifier_kind: str,
+    num_candidates: int,
+    max_candidates_cap: int,
+    tokens_used: int,
+    max_token_budget: int,
+    wall_clock_ms: float,
+    multi_sample_or_tool_disclosure: bool,
+) -> Dict[str, Any]:
+    """Compare candidate search or tool use under fixed time/token budgets (`SCALE-07` / Issue #206).
+
+    Rejects budget overruns or comparing a multi-candidate/tool system to an unassisted
+    single-sample baseline without explicit disclosure.
+    """
+    if num_candidates > max_candidates_cap or tokens_used > max_token_budget:
+        raise ValueError("Bounded test-time search exceeded declared candidate or token budget")
+    if (num_candidates > 1 or verifier_kind != "none") and not multi_sample_or_tool_disclosure:
+        raise ValueError(
+            "Cannot compare a multi-candidate or tool-assisted system to an unassisted single-sample baseline without disclosure"
+        )
+
+    return {
+        "verifier_kind": verifier_kind,
+        "num_candidates": int(num_candidates),
+        "max_candidates_cap": int(max_candidates_cap),
+        "tokens_used": int(tokens_used),
+        "max_token_budget": int(max_token_budget),
+        "wall_clock_ms": round(float(wall_clock_ms), 3),
+        "single_sample_baseline_accuracy": round(float(single_sample_baseline_accuracy), 6),
+        "search_candidate_accuracy": round(float(search_candidate_accuracy), 6),
+        "multi_sample_or_tool_disclosure": bool(multi_sample_or_tool_disclosure),
+    }
+
+
+def run_independent_capability_red_team_audit(
+    findings: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Process independent red-team findings probing unsupported claims, brittle assumptions,
+    and benchmark shortcuts (`SCALE-13` / Issue #212), separating failure categories and
+    publishing a remediation list without private contributor data.
+    """
+    allowed_categories = {"model_failure", "tool_failure", "data_failure", "system_failure"}
+    grouped: Dict[str, List[Dict[str, Any]]] = {k: [] for k in sorted(allowed_categories)}
+    remediation_list: List[Dict[str, str]] = []
+
+    for item in findings:
+        if not item.get("reviewer_consent", False):
+            raise ValueError("Red-team finding requires explicit reviewer_consent=True")
+        cat = str(item.get("failure_category", ""))
+        if cat not in allowed_categories:
+            raise ValueError(f"Unsupported red-team failure_category: {cat!r}")
+        clean_entry = {
+            "finding_id": str(item["finding_id"]),
+            "failure_category": cat,
+            "summary": str(item["summary"]),
+            "remediation": str(item["remediation"]),
+        }
+        grouped[cat].append(clean_entry)
+        remediation_list.append(
+            {
+                "finding_id": clean_entry["finding_id"],
+                "failure_category": cat,
+                "remediation": clean_entry["remediation"],
+            }
+        )
+
+    return {
+        "total_findings": len(findings),
+        "failures_by_category": grouped,
+        "remediation_list": remediation_list,
+        "contains_private_contributor_data": False,
+    }
+
+
+
 
 

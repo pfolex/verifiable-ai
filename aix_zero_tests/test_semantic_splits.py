@@ -323,6 +323,113 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertEqual(t09["completed_seed_count"], 2)
         self.assertEqual(t09["failed_seed_count"], 1)
 
+    def test_wave7_train_07_11_13_15_and_expert_07(self):
+        import tempfile
+        import torch
+        from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+        from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
+        from aix_zero.validation_training_studies import (
+            compare_specialist_initialization_strategies,
+            evaluate_completion_and_reasoning_loss_weighting,
+            evaluate_experiment_stopping_policy,
+            run_fresh_final_specialist_evaluation,
+        )
+
+        tiny_model = AIXZeroModel(
+            AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=2, moe_top_k=1)
+        )
+        ids = torch.tensor([[1, 2, 3, 4, 5, 6, 7, 8]], dtype=torch.long)
+
+        # TRAIN-07 completion & reasoning loss weighting + gold leakage guard
+        with self.assertRaisesRegex(ValueError, "gold answer leaked"):
+            evaluate_completion_and_reasoning_loss_weighting(
+                tiny_model,
+                ids,
+                prompt_end_idx=3,
+                reasoning_end_idx=5,
+                inference_prompt_text="Q:BP:p=1/2->H=1?<ans>4/5</ans>",
+                gold_answer_text="4/5",
+            )
+        t07 = evaluate_completion_and_reasoning_loss_weighting(
+            tiny_model, ids, prompt_end_idx=3, reasoning_end_idx=5, mask_prompt_tokens=True
+        )
+        self.assertIn("prompt_loss", t07)
+        self.assertIn("reasoning_step_loss", t07)
+        self.assertIn("final_answer_loss", t07)
+        self.assertGreater(t07["grad_l2_norm"], 0.0)
+
+        # TRAIN-11 specialist initialization strategy comparison
+        init_copy = compare_specialist_initialization_strategies(
+            tiny_model, ids, strategy="copy_existing_expert", expert_slot=0, steps=2
+        )
+        init_fresh = compare_specialist_initialization_strategies(
+            tiny_model, ids, strategy="fresh_kaiming_uniform_seeded", expert_slot=0, init_seed=99, steps=2
+        )
+        self.assertNotEqual(
+            init_copy["initialization_provenance"]["initial_weight_sha256"],
+            init_fresh["initialization_provenance"]["initial_weight_sha256"],
+        )
+        self.assertEqual(
+            init_copy["controlled_protocol"]["trainable_parameter_count"],
+            init_fresh["controlled_protocol"]["trainable_parameter_count"],
+        )
+
+        # TRAIN-13 fresh final specialist evaluation
+        fin_eval = run_fresh_final_specialist_evaluation(
+            partition_id="final_reserved_test_v1",
+            candidate_scores=[0.1, 0.0, 0.1],
+            control_scores={
+                "base_model": [0.0, 0.0, 0.0],
+                "majority_class": [0.5, 0.5, 0.5],
+                "prior_only": [0.125, 0.125, 0.125],
+                "untrained_explicit_route": [0.0, 0.0, 0.0],
+            },
+            min_margin_over_controls=0.05,
+        )
+        self.assertEqual(fin_eval["promotion_status"], "REJECTED")
+        self.assertEqual(fin_eval["strongest_control"], "majority_class")
+
+        # TRAIN-15 experiment stopping and abandonment policy
+        with self.assertRaisesRegex(ValueError, "Silent hypothesis reset rejected"):
+            evaluate_experiment_stopping_policy(
+                hypothesis_id="H-BP-01",
+                run_history=[{"run_id": "r1", "outcome": "REJECTED"}],
+                hypothesis_reset_attempted=True,
+            )
+        with self.assertRaisesRegex(ValueError, "maintainer_compute_justification is required"):
+            evaluate_experiment_stopping_policy(
+                hypothesis_id="H-BP-01",
+                run_history=[{"run_id": "r1", "outcome": "REJECTED"}],
+                request_additional_compute=True,
+            )
+        stop_res = evaluate_experiment_stopping_policy(
+            hypothesis_id="H-BP-01",
+            run_history=[{"run_id": "r1", "outcome": "REJECTED"}, {"run_id": "r2", "outcome": "REJECTED"}],
+        )
+        self.assertEqual(stop_res["branch_status"], "REJECTED")
+        self.assertEqual(stop_res["visible_failed_run_count"], 2)
+
+        # EXPERT-07 bounded fallback policy for failed experts
+        with tempfile.TemporaryDirectory() as tmp:
+            bank = SparseExpertCartridgeBank(Path(tmp) / "bank")
+            bank.export_all_domain_cartridges(tiny_model, {"DOM_0": {}}, {}, domain_expert_map={"DOM_0": 0})
+            fb_missing = bank.execute_specialist_with_bounded_fallback(tiny_model, "MISSING_DOM")
+            self.assertTrue(fb_missing["fallback_triggered"])
+            self.assertEqual(fb_missing["fallback_reason"], "UNAVAILABLE_CARTRIDGE")
+            self.assertTrue(fb_missing["base_preserved"])
+
+            fb_loop = bank.execute_specialist_with_bounded_fallback(
+                tiny_model, "DOM_0", attempted_chain=["DOM_0"]
+            )
+            self.assertEqual(fb_loop["fallback_reason"], "RECURSIVE_EXPERT_LOOP_PREVENTED")
+            self.assertTrue(fb_loop["base_preserved"])
+
+            fb_bad_out = bank.execute_specialist_with_bounded_fallback(
+                tiny_model, "DOM_0", candidate_output="no-answer-tags"
+            )
+            self.assertEqual(fb_bad_out["fallback_reason"], "INVALID_SPECIALIST_OUTPUT")
+            self.assertTrue(fb_bad_out["base_preserved"])
+
 
 if __name__ == "__main__":
     unittest.main()
