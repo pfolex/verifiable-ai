@@ -9,3 +9,5 @@ The research baseline adds integrity-checked export/reload of existing routed ex
 See [setup, measurements, storage contracts, and reproduction](../docs/AIX-ZERO-EXPERT-STORAGE.md). Source checkpoint files are not changed by the offline baseline command. Legacy training, web/council, and generated-codex programs remain separate experimental tools; generated claims are not evaluation evidence.
 
 Opt-in selected-token dispatch and dense-reference comparisons are documented in [the dispatch study](../docs/AIX-ZERO-SPARSE-DISPATCH.md). All expert weights remain resident. Dense remains the default because the current four-expert model showed no full-response benefit.
+
+The [frozen-base Bayesian pilot](../docs/AIX-ZERO-BAYESIAN-PILOT.md) publishes two rejected candidates and stronger shortcut controls. Its solver-assisted result is separate from learned probability reasoning.
