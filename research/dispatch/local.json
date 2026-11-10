@@ -1,0 +1,4747 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-08T15:05:32.043599+00:00",
+  "hardware": {
+    "platform": "macOS-15.7.9-x86_64-i386-64bit",
+    "machine": "x86_64",
+    "processor": "i386",
+    "cpu_count": 8,
+    "hw.model": "MacBookAir9,1",
+    "hw.memsize": "17179869184",
+    "machdep.cpu.brand_string": "Intel(R) Core(TM) i5-1030NG7 CPU @ 1.10GHz"
+  },
+  "python": "3.11.17 (main, Oct 21 2026, 17:37:42) [Clang 23.1.3 ]",
+  "torch": "2.2.2",
+  "threads": 1,
+  "repeats": 15,
+  "checkpoint_sha256": "3af801152922cd27c40c8e349bdb68b6a10efb87445716c3262b85daf5cb44cb",
+  "source_sha256": {
+    "__init__.py": "98a927cf13fe9565c25e8e78275cb8375d785d778427edbf75dc9d392e7d63f4",
+    "ablate_architectures.py": "a0142f7a4219a2819db886a7bc6ae80353a25448d1d429d54f0da6cc1ecc9714",
+    "architecture.py": "c8d207d59ec55a16dd3d00091698e0bf1e64b34c6cdbbf851597345b89444f73",
+    "autonomous_symbiont.py": "5e0c11faefb8bb5de2f07286bf5a51a282fb5552a7968b740b8c52015ae8081d",
+    "benchmark_baseline.py": "a707019adce007d19217011e8c97b7064825602badcd7a2605bc26780f3c724d",
+    "benchmark_dispatch.py": "5655640c4d43fc8444dd75c1a54c0bad6865d18c661b3c2947915dfd7a2292f8",
+    "continuous_time_trainer.py": "b8366236eac03dbc6f7aab41156f2bb32fa6c3498ffccab79125a0baedd19214",
+    "interactive_repl.py": "b97d283272925e534ef492f65057905798bf1092ea171c727ea5398c9ee5cbfd",
+    "knowledge_is_power.py": "d70d93f33792178e49153830b7d27ffcc0c424ba32df5f69cc238438423eea61",
+    "sparse_cartridge_bank.py": "947bcfd20b32396e6a18963b7ad0951be7c2d67f91c911bff51fce4911986b6c",
+    "tokenizer.py": "07f55d772602fa508940bade928cea19ad9841880ed755908cbc189a518ccb67",
+    "train_from_scratch.py": "72b59de46719a963a78899af0521281b3071402da8a02959f3f980268d5b10cb",
+    "train_v3_from_scratch.py": "a72e7182ba62aa290bb4537aa57355f24a3ee6128c7200f86d979173887d8755",
+    "train_v4_from_scratch.py": "a5536ae3c6fa7b21dbfaef96c04dbf190467bbbc0904cab08005e6e5b96bfde2",
+    "train_v5_from_scratch.py": "67730f7242029cb8fcb532554ca482662b2a04164fa4a6c0466c03e295e80e6f",
+    "train_v8_stratified.py": "edca88dc428b7bd6ba43f6b1953f047ef89866587a5637d93f4d90b1886d82b7"
+  },
+  "limitations": [
+    "CPU F32 only; resident weights in both dispatch modes.",
+    "Synthetic 16/64 expert banks are not trained models.",
+    "Application-cache misses use OS-cached files, not cold-disk latency.",
+    "RSS includes framework/import overhead; peak increments are approximate.",
+    "No automatic disk routing or training-memory benchmark."
+  ],
+  "kernels": [
+    {
+      "experts": 4,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 1,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 0.5181101150810719,
+          "p95_ms": 1.1344230733811855
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 0.510744284838438,
+          "p95_ms": 0.9420178830623627
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 2048,
+        "sparse": 1024
+      },
+      "dense_over_sparse_p50": 1.0144217575434327
+    },
+    {
+      "experts": 4,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 32,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 0.914393924176693,
+          "p95_ms": 1.4686002396047115
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 1.0481416247785091,
+          "p95_ms": 2.6265899650752544
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 65536,
+        "sparse": 32768
+      },
+      "dense_over_sparse_p50": 0.872395392530967
+    },
+    {
+      "experts": 4,
+      "top_k": 2,
+      "batch": 4,
+      "sequence": 112,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 6.290030665695667,
+          "p95_ms": 7.346867583692074
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 4.849288146942854,
+          "p95_ms": 6.221388932317495
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 917504,
+        "sparse": 458752
+      },
+      "dense_over_sparse_p50": 1.2971039202240648
+    },
+    {
+      "experts": 16,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 1,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 1.3085142709314823,
+          "p95_ms": 2.577188890427351
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 0.7355222478508949,
+          "p95_ms": 1.4022570103406906
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 8192,
+        "sparse": 1024
+      },
+      "dense_over_sparse_p50": 1.7790274526090806
+    },
+    {
+      "experts": 16,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 32,
+      "max_absolute_output_difference": 6.705522537231445e-08,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 2.720765769481659,
+          "p95_ms": 4.322834312915802
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 2.3063230328261852,
+          "p95_ms": 4.387562163174152
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 262144,
+        "sparse": 32768
+      },
+      "dense_over_sparse_p50": 1.1796984770809025
+    },
+    {
+      "experts": 16,
+      "top_k": 2,
+      "batch": 4,
+      "sequence": 112,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 21.33557992056012,
+          "p95_ms": 23.450708016753197
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 6.900982931256294,
+          "p95_ms": 9.277499746531248
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 3670016,
+        "sparse": 458752
+      },
+      "dense_over_sparse_p50": 3.0916726114371174
+    },
+    {
+      "experts": 64,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 1,
+      "max_absolute_output_difference": 0.0,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 4.345628898590803,
+          "p95_ms": 6.302377209067345
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 1.2181070633232594,
+          "p95_ms": 1.5074079856276512
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 32768,
+        "sparse": 1024
+      },
+      "dense_over_sparse_p50": 3.5675262293734575
+    },
+    {
+      "experts": 64,
+      "top_k": 2,
+      "batch": 1,
+      "sequence": 32,
+      "max_absolute_output_difference": 5.960464477539063e-08,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 9.002143982797861,
+          "p95_ms": 10.658974293619394
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 5.276824347674847,
+          "p95_ms": 7.417844142764807
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 1048576,
+        "sparse": 32768
+      },
+      "dense_over_sparse_p50": 1.7059775709162122
+    },
+    {
+      "experts": 64,
+      "top_k": 2,
+      "batch": 4,
+      "sequence": 112,
+      "max_absolute_output_difference": 5.21540641784668e-08,
+      "modes": {
+        "dense": {
+          "samples": 15,
+          "p50_ms": 85.48230491578579,
+          "p95_ms": 93.83720019832253
+        },
+        "sparse": {
+          "samples": 15,
+          "p50_ms": 16.713276971131563,
+          "p95_ms": 19.487170968204737
+        }
+      },
+      "routed_output_tensor_bytes": {
+        "dense": 14680064,
+        "sparse": 458752
+      },
+      "dense_over_sparse_p50": 5.1146346143510515
+    }
+  ],
+  "storage": [
+    {
+      "bank_experts": 4,
+      "scenarios": {
+        "empty_app_cache": {
+          "samples": 15,
+          "p50_ms": 1.6213050112128258,
+          "p95_ms": 3.3398661762475967,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "verified_cache_hit": {
+          "samples": 15,
+          "p50_ms": 1.342104747891426,
+          "p95_ms": 2.1903831511735916,
+          "hits": 15,
+          "misses": 0,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "eviction_cycle": {
+          "samples": 15,
+          "p50_ms": 1.5995758585631847,
+          "p95_ms": 2.020633779466152,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "install_with_eviction": {
+          "samples": 15,
+          "p50_ms": 2.0100711844861507,
+          "p95_ms": 3.178462851792574,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        }
+      },
+      "serialized_shard_bytes": 196864
+    },
+    {
+      "bank_experts": 16,
+      "scenarios": {
+        "empty_app_cache": {
+          "samples": 15,
+          "p50_ms": 1.402406021952629,
+          "p95_ms": 1.8585226498544216,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "verified_cache_hit": {
+          "samples": 15,
+          "p50_ms": 1.216087955981493,
+          "p95_ms": 1.99997890740633,
+          "hits": 15,
+          "misses": 0,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "eviction_cycle": {
+          "samples": 15,
+          "p50_ms": 1.7881570383906364,
+          "p95_ms": 2.1912320517003536,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "install_with_eviction": {
+          "samples": 15,
+          "p50_ms": 2.2292081266641617,
+          "p95_ms": 3.279868047684431,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        }
+      },
+      "serialized_shard_bytes": 196864
+    },
+    {
+      "bank_experts": 64,
+      "scenarios": {
+        "empty_app_cache": {
+          "samples": 15,
+          "p50_ms": 2.1301009692251682,
+          "p95_ms": 2.696450799703598,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "verified_cache_hit": {
+          "samples": 15,
+          "p50_ms": 2.0186477340757847,
+          "p95_ms": 2.2811107337474823,
+          "hits": 15,
+          "misses": 0,
+          "final_cache": {
+            "entries": 1,
+            "bytes": 196608,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "eviction_cycle": {
+          "samples": 15,
+          "p50_ms": 2.057915087789297,
+          "p95_ms": 2.399626187980175,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        },
+        "install_with_eviction": {
+          "samples": 15,
+          "p50_ms": 2.2807978093624115,
+          "p95_ms": 4.365760833024979,
+          "hits": 0,
+          "misses": 15,
+          "final_cache": {
+            "entries": 2,
+            "bytes": 393216,
+            "max_bytes": 1048576,
+            "max_experts": 2
+          }
+        }
+      },
+      "serialized_shard_bytes": 196864
+    }
+  ],
+  "memory": [
+    {
+      "experts": 4,
+      "mode": "dense",
+      "peak_rss_bytes": 192180224,
+      "peak_before_forward_bytes": 187215872,
+      "incremental_peak_bytes": 4964352,
+      "output_finite": true,
+      "resident_parameter_bytes": 1181696,
+      "batch": 4,
+      "sequence": 112
+    },
+    {
+      "experts": 4,
+      "mode": "sparse",
+      "peak_rss_bytes": 189550592,
+      "peak_before_forward_bytes": 185311232,
+      "incremental_peak_bytes": 4239360,
+      "output_finite": true,
+      "resident_parameter_bytes": 1181696,
+      "batch": 4,
+      "sequence": 112
+    },
+    {
+      "experts": 16,
+      "mode": "dense",
+      "peak_rss_bytes": 198217728,
+      "peak_before_forward_bytes": 188706816,
+      "incremental_peak_bytes": 9510912,
+      "output_finite": true,
+      "resident_parameter_bytes": 3547136,
+      "batch": 4,
+      "sequence": 112
+    },
+    {
+      "experts": 16,
+      "mode": "sparse",
+      "peak_rss_bytes": 191885312,
+      "peak_before_forward_bytes": 188317696,
+      "incremental_peak_bytes": 3567616,
+      "output_finite": true,
+      "resident_parameter_bytes": 3547136,
+      "batch": 4,
+      "sequence": 112
+    },
+    {
+      "experts": 64,
+      "mode": "dense",
+      "peak_rss_bytes": 231337984,
+      "peak_before_forward_bytes": 200437760,
+      "incremental_peak_bytes": 30900224,
+      "output_finite": true,
+      "resident_parameter_bytes": 13008896,
+      "batch": 4,
+      "sequence": 112
+    },
+    {
+      "experts": 64,
+      "mode": "sparse",
+      "peak_rss_bytes": 203714560,
+      "peak_before_forward_bytes": 200011776,
+      "incremental_peak_bytes": 3702784,
+      "output_finite": true,
+      "resident_parameter_bytes": 13008896,
+      "batch": 4,
+      "sequence": 112
+    }
+  ],
+  "v11_accuracy": {
+    "neural_only": {
+      "samples": [
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:5x+1=21,x=",
+          "gold": "4",
+          "modes": {
+            "dense": {
+              "prediction": "5",
+              "correct": false,
+              "trace": "Q:5x+1=21,x=<think>13-1=12;12+1=5</think><ans>5</ans>",
+              "latency_ms": 401.1340420693159
+            },
+            "sparse": {
+              "prediction": "5",
+              "correct": false,
+              "trace": "Q:5x+1=21,x=<think>13-1=12;12+1=5</think><ans>5</ans>",
+              "latency_ms": 425.56440318003297
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+          "gold": "11",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=12;12+1=12</think><ans>12</ans>",
+              "latency_ms": 508.2174548879266
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=12;12+1=12</think><ans>12</ans>",
+              "latency_ms": 511.8116098456085
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+          "gold": "27",
+          "modes": {
+            "dense": {
+              "prediction": "26",
+              "correct": false,
+              "trace": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=10;10+2=26</think><ans>26</ans>",
+              "latency_ms": 458.861636929214
+            },
+            "sparse": {
+              "prediction": "26",
+              "correct": false,
+              "trace": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=10;10+2=26</think><ans>26</ans>",
+              "latency_ms": 550.8293369784951
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+          "gold": "12",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 472.02448174357414
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 448.97734420374036
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Sys:x+y=14,x-y=4,x=<think>12+4=14;14/2=4</think><ans>4</ans>",
+              "latency_ms": 412.2538259252906
+            },
+            "sparse": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Sys:x+y=14,x-y=4,x=<think>12+4=14;14/2=4</think><ans>4</ans>",
+              "latency_ms": 421.7499759979546
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+          "gold": "19",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=4;4+7=15</think><ans>15</ans>",
+              "latency_ms": 447.6827848702669
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=4;4+7=15</think><ans>15</ans>",
+              "latency_ms": 447.90080515667796
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(4*3)+3=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(4*3)+3=<think>4*3=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 403.97188579663634
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(4*3)+3=<think>4*3=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 434.3065097928047
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 468.5533088631928
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 459.2004301957786
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:5x+1=16,x=",
+          "gold": "3",
+          "modes": {
+            "dense": {
+              "prediction": "5",
+              "correct": false,
+              "trace": "Q:5x+1=16,x=<think>13-1=12;12+1=5</think><ans>5</ans>",
+              "latency_ms": 455.96464071422815
+            },
+            "sparse": {
+              "prediction": "5",
+              "correct": false,
+              "trace": "Q:5x+1=16,x=<think>13-1=12;12+1=5</think><ans>5</ans>",
+              "latency_ms": 441.70147832483053
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=12;12+6=16</think><ans>16</ans>",
+              "latency_ms": 444.4365738891065
+            },
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=12;12+6=16</think><ans>16</ans>",
+              "latency_ms": 438.59609914943576
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*2>5?",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:2*2>5?<think>2*2=12;12>5->>0</think><ans>0</ans>",
+              "latency_ms": 406.99690068140626
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:2*2>5?<think>2*2=12;12>5->>0</think><ans>0</ans>",
+              "latency_ms": 401.2496480718255
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+          "gold": "36",
+          "modes": {
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=15;15+6=16</think><ans>16</ans>",
+              "latency_ms": 447.88923067972064
+            },
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=15;15+6=16</think><ans>16</ans>",
+              "latency_ms": 491.3232051767409
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+          "gold": "45",
+          "modes": {
+            "dense": {
+              "prediction": "20",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*2=20;20+5=20</think><ans>20</ans>",
+              "latency_ms": 551.5660019591451
+            },
+            "sparse": {
+              "prediction": "20",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*2=20;20+5=20</think><ans>20</ans>",
+              "latency_ms": 590.0765871629119
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+          "gold": "25",
+          "modes": {
+            "sparse": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=15;15+5=21</think><ans>21</ans>",
+              "latency_ms": 538.0418850108981
+            },
+            "dense": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=15;15+5=21</think><ans>21</ans>",
+              "latency_ms": 458.29434879124165
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(9+7)%3=",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(9+7)%3=<think>9+7=12;12%3=1</think><ans>1</ans>",
+              "latency_ms": 393.59092712402344
+            },
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(9+7)%3=<think>9+7=12;12%3=1</think><ans>1</ans>",
+              "latency_ms": 415.98683036863804
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+          "gold": "32",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=12;12+2=12</think><ans>12</ans>",
+              "latency_ms": 480.1837890408933
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=12;12+2=12</think><ans>12</ans>",
+              "latency_ms": 472.09704015403986
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=8,x=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=8,x=<think>10+8=16;16/2=6</think><ans>6</ans>",
+              "latency_ms": 448.25451681390405
+            },
+            "sparse": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=8,x=<think>10+8=16;16/2=6</think><ans>6</ans>",
+              "latency_ms": 508.8442782871425
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:4x+2=18,x=",
+          "gold": "4",
+          "modes": {
+            "sparse": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:4x+2=18,x=<think>13-2=14;14/4=6</think><ans>6</ans>",
+              "latency_ms": 435.8672290109098
+            },
+            "dense": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:4x+2=18,x=<think>13-2=14;14/4=6</think><ans>6</ans>",
+              "latency_ms": 410.5583275668323
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:2x+2=12,x=",
+          "gold": "5",
+          "modes": {
+            "dense": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:2x+2=12,x=<think>14-2=14;14/2=6</think><ans>6</ans>",
+              "latency_ms": 395.6411727704108
+            },
+            "sparse": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:2x+2=12,x=<think>14-2=14;14/2=6</think><ans>6</ans>",
+              "latency_ms": 404.110262170434
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(7*7)+1=",
+          "gold": "50",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(7*7)+1=<think>7*7=14;14+1=13</think><ans>13</ans>",
+              "latency_ms": 428.1766191124916
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(7*7)+1=<think>7*7=14;14+1=13</think><ans>13</ans>",
+              "latency_ms": 422.983355820179
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(7+5)%4=",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "1",
+              "correct": false,
+              "trace": "Q:(7+5)%4=<think>7+5=12;12%4=1</think><ans>1</ans>",
+              "latency_ms": 389.960918109864
+            },
+            "sparse": {
+              "prediction": "1",
+              "correct": false,
+              "trace": "Q:(7+5)%4=<think>7+5=12;12%4=1</think><ans>1</ans>",
+              "latency_ms": 408.9878583326936
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(8+5)%4=",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(8+5)%4=<think>8+7=12;12%4=1</think><ans>1</ans>",
+              "latency_ms": 428.22703160345554
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(8+5)%4=<think>8+7=12;12%4=1</think><ans>1</ans>",
+              "latency_ms": 391.185131855309
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 6*x+1;f(2)=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+1;f(2)=<think>6*2=12;12+1=13</think><ans>13</ans>",
+              "latency_ms": 421.08881706371903
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+1;f(2)=<think>6*2=12;12+1=13</think><ans>13</ans>",
+              "latency_ms": 558.5042336024344
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(11+2)%3=",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "3",
+              "correct": false,
+              "trace": "Q:(11+2)%3=<think>13+2=12;12%3=</think><ans>3</ans>",
+              "latency_ms": 442.36583495512605
+            },
+            "dense": {
+              "prediction": "3",
+              "correct": false,
+              "trace": "Q:(11+2)%3=<think>13+2=12;12%3=</think><ans>3</ans>",
+              "latency_ms": 480.35536985844374
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 5*x+4;f(4)=",
+          "gold": "24",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 5*x+4;f(4)=<think>5*4=12;12+4=16</think><ans>16</ans>",
+              "latency_ms": 440.1484369300306
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 5*x+4;f(4)=<think>5*4=12;12+4=16</think><ans>16</ans>",
+              "latency_ms": 465.8141378313303
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(6*3)+1=",
+          "gold": "19",
+          "modes": {
+            "sparse": {
+              "prediction": "18",
+              "correct": false,
+              "trace": "Q:(6*3)+1=<think>6*3=12;12+1=18</think><ans>18</ans>",
+              "latency_ms": 449.32721508666873
+            },
+            "dense": {
+              "prediction": "18",
+              "correct": false,
+              "trace": "Q:(6*3)+1=<think>6*3=12;12+1=18</think><ans>18</ans>",
+              "latency_ms": 495.6218609586358
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*4>2?",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": false,
+              "trace": "Q:2*4>2?<think>2*4=12;12>1->0</think><ans>0</ans>",
+              "latency_ms": 487.0157348923385
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": false,
+              "trace": "Q:2*4>2?<think>2*4=12;12>1->0</think><ans>0</ans>",
+              "latency_ms": 493.5032823123038
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:6x+4=34,x=",
+          "gold": "5",
+          "modes": {
+            "sparse": {
+              "prediction": "2",
+              "correct": false,
+              "trace": "Q:6x+4=34,x=<think>32-4=12;12/6=5</think><ans>2</ans>",
+              "latency_ms": 505.08864829316735
+            },
+            "dense": {
+              "prediction": "2",
+              "correct": false,
+              "trace": "Q:6x+4=34,x=<think>32-4=12;12/6=5</think><ans>2</ans>",
+              "latency_ms": 461.67220594361424
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*4>1?",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": false,
+              "trace": "Q:2*4>1?<think>2*4=12;12>1->0</think><ans>0</ans>",
+              "latency_ms": 385.1834889501333
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": false,
+              "trace": "Q:2*4>1?<think>2*4=12;12>1->0</think><ans>0</ans>",
+              "latency_ms": 415.52032716572285
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(6*6)+3=",
+          "gold": "39",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(6*6)+3=<think>6*6=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 426.4756399206817
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:(6*6)+3=<think>6*6=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 414.5339452661574
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(5+7)%4=",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(5+7)%4=<think>5+7=10;10%4=0</think><ans>0</ans>",
+              "latency_ms": 393.5565771535039
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(5+7)%4=<think>5+7=10;10%4=0</think><ans>0</ans>",
+              "latency_ms": 406.4034572802484
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(4*2)+1=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:(4*2)+1=<think>4*2=12;12+1=16</think><ans>16</ans>",
+              "latency_ms": 448.3132241293788
+            },
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:(4*2)+1=<think>4*2=12;12+1=16</think><ans>16</ans>",
+              "latency_ms": 409.09413481131196
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(4x^2+5x)@x=2=",
+          "gold": "21",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 481.38848692178726
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 483.3290888927877
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*8>8?",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:2*8>8?<think>2*8=1;1-2=12</think><ans>12</ans>",
+              "latency_ms": 410.35990975797176
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:2*8>8?<think>2*8=1;1-2=12</think><ans>12</ans>",
+              "latency_ms": 407.24599501118064
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=11,x-y=5,x=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=11,x-y=5,x=<think>11+5=14;14/2=6</think><ans>6</ans>",
+              "latency_ms": 452.8657868504524
+            },
+            "sparse": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=11,x-y=5,x=<think>11+5=14;14/2=6</think><ans>6</ans>",
+              "latency_ms": 446.0652219131589
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(3x^2+5x)@x=1=",
+          "gold": "11",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 525.2099190838635
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 504.07511088997126
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 2*x+4;f(5)=",
+          "gold": "14",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 2*x+4;f(5)=<think>2*5=10;10+4=16</think><ans>16</ans>",
+              "latency_ms": 463.44569977372885
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Code:def f(x):return 2*x+4;f(5)=<think>2*5=10;10+4=16</think><ans>16</ans>",
+              "latency_ms": 476.73565708100796
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*7>7?",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*7>7?<think>2*7=12;12>7->1</think><ans>1</ans>",
+              "latency_ms": 391.70427713543177
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*7>7?<think>2*7=12;12>7->1</think><ans>1</ans>",
+              "latency_ms": 378.55682289227843
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=4,x=",
+          "gold": "7",
+          "modes": {
+            "dense": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=4,x=<think>10+4=10;10/2=4</think><ans>4</ans>",
+              "latency_ms": 429.84759621322155
+            },
+            "sparse": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=4,x=<think>10+4=10;10/2=4</think><ans>4</ans>",
+              "latency_ms": 435.4236740618944
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=6,x=",
+          "gold": "8",
+          "modes": {
+            "sparse": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=6,x=<think>10+6=11;11/2=6</think><ans>6</ans>",
+              "latency_ms": 427.37551499158144
+            },
+            "dense": {
+              "prediction": "6",
+              "correct": false,
+              "trace": "Q:Sys:x+y=10,x-y=6,x=<think>10+6=11;11/2=6</think><ans>6</ans>",
+              "latency_ms": 449.7644999064505
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:2x^2+1@x=5=",
+          "gold": "51",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:2x^2+1@x=5=<think>2*5*5=15;15+1=15</think><ans>15</ans>",
+              "latency_ms": 527.8379768133163
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:2x^2+1@x=5=<think>2*5*5=15;15+1=15</think><ans>15</ans>",
+              "latency_ms": 564.3670922145247
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=4,t=5,u=1,v=",
+          "gold": "21",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Phys:a=4,t=5,u=1,v=<think>4*5=15;15+1=12</think><ans>12</ans>",
+              "latency_ms": 527.3186736740172
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Phys:a=4,t=5,u=1,v=<think>4*5=15;15+1=12</think><ans>12</ans>",
+              "latency_ms": 493.5779180377722
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=5,t=3,u=2,v=",
+          "gold": "17",
+          "modes": {
+            "dense": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Phys:a=5,t=3,u=2,v=<think>5*3=10;10+2=21</think><ans>21</ans>",
+              "latency_ms": 448.47120018675923
+            },
+            "sparse": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Phys:a=5,t=3,u=2,v=<think>5*3=10;10+2=21</think><ans>21</ans>",
+              "latency_ms": 447.7896452881396
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=3,t=5,u=2,v=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Phys:a=3,t=5,u=2,v=<think>3*5=5;5+3=15</think><ans>15</ans>",
+              "latency_ms": 439.83987299725413
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Phys:a=3,t=5,u=2,v=<think>3*5=5;5+3=15</think><ans>15</ans>",
+              "latency_ms": 414.4038539379835
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=3,t=2,u=4,v=",
+          "gold": "10",
+          "modes": {
+            "dense": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Phys:a=3,t=2,u=4,v=<think>3*2=12;12+4=14</think><ans>14</ans>",
+              "latency_ms": 441.96828128769994
+            },
+            "sparse": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Phys:a=3,t=2,u=4,v=<think>3*2=12;12+4=14</think><ans>14</ans>",
+              "latency_ms": 487.3778121545911
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:3x^2+3@x=3=",
+          "gold": "30",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Quad:3x^2+3@x=3=<think>3*3*3=10;10+3=13</think><ans>13</ans>",
+              "latency_ms": 534.898177254945
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Quad:3x^2+3@x=3=<think>3*3*3=10;10+3=13</think><ans>13</ans>",
+              "latency_ms": 506.75394805148244
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=4,t=6,u=1,v=",
+          "gold": "25",
+          "modes": {
+            "dense": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Phys:a=4,t=6,u=1,v=<think>4*4=44;44+1=14</think><ans>14</ans>",
+              "latency_ms": 557.5403780676425
+            },
+            "sparse": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Phys:a=4,t=6,u=1,v=<think>4*4=44;44+1=14</think><ans>14</ans>",
+              "latency_ms": 461.4356467500329
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:3x^2+1@x=5=",
+          "gold": "76",
+          "modes": {
+            "sparse": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Quad:3x^2+1@x=5=<think>3*5*5=10;10+1=21</think><ans>21</ans>",
+              "latency_ms": 492.2595461830497
+            },
+            "dense": {
+              "prediction": "21",
+              "correct": false,
+              "trace": "Q:Quad:3x^2+1@x=5=<think>3*5*5=10;10+1=21</think><ans>21</ans>",
+              "latency_ms": 472.8296957910061
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:4x^2+1@x=4=",
+          "gold": "65",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:4x^2+1@x=4=<think>4*4*4=14;14+1=15</think><ans>15</ans>",
+              "latency_ms": 535.4523207060993
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:4x^2+1@x=4=<think>4*4*4=14;14+1=15</think><ans>15</ans>",
+              "latency_ms": 584.4007837586105
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:4x^2+5@x=4=",
+          "gold": "69",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:4x^2+5@x=4=<think>4*4*4=14;14+5=15</think><ans>15</ans>",
+              "latency_ms": 646.2283763103187
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Quad:4x^2+5@x=4=<think>4*4*4=14;14+5=15</think><ans>15</ans>",
+              "latency_ms": 551.4730447903275
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=2,p=5,A=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=2,p=5,A=<think>2*2=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 513.1486533209682
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=2,p=5,A=<think>2*2=12;12+5=15</think><ans>15</ans>",
+              "latency_ms": 453.35055189207196
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=6,p=5,A=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "25",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=6,p=5,A=<think>2*7=12;12+5=25</think><ans>25</ans>",
+              "latency_ms": 477.1443707868457
+            },
+            "dense": {
+              "prediction": "25",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=6,p=5,A=<think>2*7=12;12+5=25</think><ans>25</ans>",
+              "latency_ms": 467.4358908087015
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=6,a0=3,an=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "11",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=11</think><ans>11</ans>",
+              "latency_ms": 461.53962099924684
+            },
+            "sparse": {
+              "prediction": "11",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=11</think><ans>11</ans>",
+              "latency_ms": 473.34525594487786
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=4,n=4,a0=1,an=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "11",
+              "correct": false,
+              "trace": "Q:Seq:d=4,n=4,a0=1,an=<think>4*4=12;12+1=11</think><ans>11</ans>",
+              "latency_ms": 486.56914103776217
+            },
+            "dense": {
+              "prediction": "11",
+              "correct": false,
+              "trace": "Q:Seq:d=4,n=4,a0=1,an=<think>4*4=12;12+1=11</think><ans>11</ans>",
+              "latency_ms": 551.8746906891465
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=4,a0=4,an=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=4,a0=4,an=<think>2*4=12;12+4=14</think><ans>14</ans>",
+              "latency_ms": 530.3490310907364
+            },
+            "sparse": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=4,a0=4,an=<think>2*4=12;12+4=14</think><ans>14</ans>",
+              "latency_ms": 600.6534621119499
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=5,n=3,a0=3,an=",
+          "gold": "18",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Seq:d=5,n=3,a0=3,an=<think>5*3=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 485.2057150565088
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Seq:d=5,n=3,a0=3,an=<think>5*3=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 472.89254795759916
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=4,h=2,p=1,A=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Geom:w=4,h=2,p=1,A=<think>4*2=12;12+1=10</think><ans>10</ans>",
+              "latency_ms": 977.9620366171002
+            },
+            "sparse": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Geom:w=4,h=2,p=1,A=<think>4*2=12;12+1=10</think><ans>10</ans>",
+              "latency_ms": 564.5293509587646
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=3,a0=1,an=",
+          "gold": "7",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=3,a0=1,an=<think>2*3=12;12+1=12</think><ans>12</ans>",
+              "latency_ms": 465.446004178375
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Seq:d=2,n=3,a0=1,an=<think>2*3=12;12+1=12</think><ans>12</ans>",
+              "latency_ms": 484.78832887485623
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=6,p=3,A=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=6,p=3,A=<think>2*7=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 439.6587801165879
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=6,p=3,A=<think>2*7=12;12+3=13</think><ans>13</ans>",
+              "latency_ms": 474.49661931023
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=7,p=1,A=",
+          "gold": "15",
+          "modes": {
+            "sparse": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=7,p=1,A=<think>2*7=24;24+1=14</think><ans>14</ans>",
+              "latency_ms": 458.8617030531168
+            },
+            "dense": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Geom:w=2,h=7,p=1,A=<think>2*7=24;24+1=14</think><ans>14</ans>",
+              "latency_ms": 440.34833228215575
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:2*3+5-2=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Chain3:2*3+5-2=<think>2*3=18;18+5=24;24-2=16</think><ans>16</ans>",
+              "latency_ms": 604.3086107820272
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Chain3:2*3+5-2=<think>2*3=18;18+5=24;24-2=16</think><ans>16</ans>",
+              "latency_ms": 630.1458668895066
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*4+3-1=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:5*4+3-1=<think>5*3=10;10+3=13;13-1=13</think><ans>13</ans>",
+              "latency_ms": 625.6322031840682
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:5*4+3-1=<think>5*3=10;10+3=13;13-1=13</think><ans>13</ans>",
+              "latency_ms": 616.7800799012184
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*5+7-2=",
+          "gold": "30",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Chain3:5*5+7-2=<think>5*5=15;15+5=25;25-2=15</think><ans>15</ans>",
+              "latency_ms": 593.2803140021861
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Chain3:5*5+7-2=<think>5*5=15;15+5=25;25-2=15</think><ans>15</ans>",
+              "latency_ms": 601.8055169843137
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:6*5+3-1=",
+          "gold": "32",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:6*5+3-1=<think>6*5=12;12+3=16;16-1=13</think><ans>13</ans>",
+              "latency_ms": 806.2496823258698
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:6*5+3-1=<think>6*5=12;12+3=16;16-1=13</think><ans>13</ans>",
+              "latency_ms": 641.6963906958699
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*5+5-1=",
+          "gold": "29",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:5*5+5-1=<think>5*5=15;15+5=20;20-1=13</think><ans>13</ans>",
+              "latency_ms": 616.4486417546868
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain3:5*5+5-1=<think>5*5=15;15+5=20;20-1=13</think><ans>13</ans>",
+              "latency_ms": 735.2702128700912
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 638.4013453498483
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 541.3559381850064
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=6,P=8,B=",
+          "gold": "38",
+          "modes": {
+            "dense": {
+              "prediction": "24",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=44;44+8=24</think><ans>24</ans>",
+              "latency_ms": 518.1072209961712
+            },
+            "sparse": {
+              "prediction": "24",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=44;44+8=24</think><ans>24</ans>",
+              "latency_ms": 477.84229228273034
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=4,t=3,P=8,B=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=10;10+4=14</think><ans>14</ans>",
+              "latency_ms": 574.7368368320167
+            },
+            "dense": {
+              "prediction": "14",
+              "correct": false,
+              "trace": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=10;10+4=14</think><ans>14</ans>",
+              "latency_ms": 466.192333959043
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=6,P=10,B=",
+          "gold": "40",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=16;16+10=16</think><ans>16</ans>",
+              "latency_ms": 478.6034761928022
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=16;16+10=16</think><ans>16</ans>",
+              "latency_ms": 532.1741080842912
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=2,t=2,P=5,B=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=12;12+5=13</think><ans>13</ans>",
+              "latency_ms": 485.9874052926898
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=12;12+5=13</think><ans>13</ans>",
+              "latency_ms": 452.841741964221
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "19",
+              "correct": false,
+              "trace": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=12;12-2=19</think><ans>19</ans>",
+              "latency_ms": 494.1519177518785
+            },
+            "sparse": {
+              "prediction": "19",
+              "correct": false,
+              "trace": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=12;12-2=19</think><ans>19</ans>",
+              "latency_ms": 484.30481599643826
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=5,P=8,B=",
+          "gold": "33",
+          "modes": {
+            "sparse": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=15;15+4=23</think><ans>23</ans>",
+              "latency_ms": 479.5774891972542
+            },
+            "dense": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=15;15+4=23</think><ans>23</ans>",
+              "latency_ms": 464.14977172389627
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
+          "gold": "24",
+          "modes": {
+            "dense": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=30;30-1=10</think><ans>10</ans>",
+              "latency_ms": 492.2771630808711
+            },
+            "sparse": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=30;30-1=10</think><ans>10</ans>",
+              "latency_ms": 536.0502079129219
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
+          "gold": "23",
+          "modes": {
+            "sparse": {
+              "prediction": "25",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=30;30-2=25</think><ans>25</ans>",
+              "latency_ms": 872.8652899153531
+            },
+            "dense": {
+              "prediction": "25",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=30;30-2=25</think><ans>25</ans>",
+              "latency_ms": 516.807512845844
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
+          "gold": "16",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=12;12*4=13;13-4=12</think><ans>12</ans>",
+              "latency_ms": 567.4239289946854
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=12;12*4=13;13-4=12</think><ans>12</ans>",
+              "latency_ms": 576.7646073363721
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=7,m=3,ex=1,N=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 465.0377309881151
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 459.3798238784075
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=6,t=3,W=1,dU=",
+          "gold": "17",
+          "modes": {
+            "dense": {
+              "prediction": "19",
+              "correct": false,
+              "trace": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=15;15-1=19</think><ans>19</ans>",
+              "latency_ms": 454.8653238452971
+            },
+            "sparse": {
+              "prediction": "19",
+              "correct": false,
+              "trace": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=15;15-1=19</think><ans>19</ans>",
+              "latency_ms": 487.71299282088876
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
+          "gold": "27",
+          "modes": {
+            "sparse": {
+              "prediction": "29",
+              "correct": false,
+              "trace": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=12;12-1=29</think><ans>29</ans>",
+              "latency_ms": 532.1437520906329
+            },
+            "dense": {
+              "prediction": "29",
+              "correct": false,
+              "trace": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=12;12-1=29</think><ans>29</ans>",
+              "latency_ms": 572.7551686577499
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*5=12;12+5=14;14-2=16</think><ans>16</ans>",
+              "latency_ms": 809.3441897071898
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*5=12;12+5=14;14-2=16</think><ans>16</ans>",
+              "latency_ms": 743.8352778553963
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
+          "gold": "10",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=30;30+3=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 717.7679417654872
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=30;30+3=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 752.755462191999
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
+          "gold": "11",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=12;12-3=15</think><ans>15</ans>",
+              "latency_ms": 483.69548795744777
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=12;12-3=15</think><ans>15</ans>",
+              "latency_ms": 483.6561088450253
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
+          "gold": "10",
+          "modes": {
+            "sparse": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=16</think><ans>16</ans>",
+              "latency_ms": 452.7820283547044
+            },
+            "dense": {
+              "prediction": "16",
+              "correct": false,
+              "trace": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=16</think><ans>16</ans>",
+              "latency_ms": 461.6383910179138
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*4=12;12+5=16;16-1=12</think><ans>12</ans>",
+              "latency_ms": 688.1729508750141
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*4=12;12+5=16;16-1=12</think><ans>12</ans>",
+              "latency_ms": 754.4662519358099
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
+          "gold": "14",
+          "modes": {
+            "sparse": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15-1=10</think><ans>10</ans>",
+              "latency_ms": 439.23562904819846
+            },
+            "dense": {
+              "prediction": "10",
+              "correct": false,
+              "trace": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15-1=10</think><ans>10</ans>",
+              "latency_ms": 483.61267521977425
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
+          "gold": "20",
+          "modes": {
+            "dense": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=4;4-4=4</think><ans>4</ans>",
+              "latency_ms": 373.6755670979619
+            },
+            "sparse": {
+              "prediction": "4",
+              "correct": false,
+              "trace": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=4;4-4=4</think><ans>4</ans>",
+              "latency_ms": 376.12393172457814
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=12;12+3=12;12-2=13</think><ans>13</ans>",
+              "latency_ms": 725.115570705384
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=12;12+3=12;12-2=13</think><ans>13</ans>",
+              "latency_ms": 731.1402121558785
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*2=10;10+3=19;19-1=12</think><ans>12</ans>",
+              "latency_ms": 693.7255919910967
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*2=10;10+3=19;19-1=12</think><ans>12</ans>",
+              "latency_ms": 752.5212010368705
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
+          "gold": "5",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=15;15-8=15</think><ans>15</ans>",
+              "latency_ms": 464.11198982968926
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=15;15-8=15</think><ans>15</ans>",
+              "latency_ms": 440.4309228993952
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=23</think><ans>23</ans>",
+              "latency_ms": 530.4819042794406
+            },
+            "sparse": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=23</think><ans>23</ans>",
+              "latency_ms": 546.5835081413388
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 554.5751880854368
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=12;12-1=13</think><ans>13</ans>",
+              "latency_ms": 502.8721974231303
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=<think>4*3=12;12+5=14;14-2=12</think><ans>12</ans>",
+              "latency_ms": 711.997393053025
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=<think>4*3=12;12+5=14;14-2=12</think><ans>12</ans>",
+              "latency_ms": 723.9918722771108
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:3*4+3-1+6=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:3*4+3-1+6=<think>3*3=12;12+3=11;11-1=15;15+4=13</think><ans>13</ans>",
+              "latency_ms": 832.7926797792315
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:3*4+3-1+6=<think>3*3=12;12+3=11;11-1=15;15+4=13</think><ans>13</ans>",
+              "latency_ms": 825.158977881074
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:2*2+3-2+6=",
+          "gold": "11",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:2*2+3-2+6=<think>2*2=12;12+2=13;13-2=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 819.7205471806228
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:2*2+3-2+6=<think>2*2=12;12+2=13;13-2=12;12+4=13</think><ans>13</ans>",
+              "latency_ms": 835.37762099877
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=",
+          "gold": "12",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*2=12;12+5=11;11-1=12</think><ans>12</ans>",
+              "latency_ms": 720.2455601654947
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*2=12;12+5=11;11-1=12</think><ans>12</ans>",
+              "latency_ms": 702.9426912777126
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>2*4=12;12+7=11;11-2=13</think><ans>13</ans>",
+              "latency_ms": 724.7929777950048
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>2*4=12;12+7=11;11-2=13</think><ans>13</ans>",
+              "latency_ms": 710.7390309683979
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=10;10+3=12;12-2=13</think><ans>13</ans>",
+              "latency_ms": 734.7581922076643
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=10;10+3=12;12-2=13</think><ans>13</ans>",
+              "latency_ms": 740.2066676877439
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:3*3+3-2+6=",
+          "gold": "16",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:3*3+3-2+6=<think>3*3=12;12+3=15;15-2=16;16+4=13</think><ans>13</ans>",
+              "latency_ms": 817.9158540442586
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:Chain4:3*3+3-2+6=<think>3*3=12;12+3=15;15-2=16;16+4=13</think><ans>13</ans>",
+              "latency_ms": 853.5729921422899
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=",
+          "gold": "21",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*4=18;18+3=34;34-2=12</think><ans>12</ans>",
+              "latency_ms": 837.580407038331
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*4=18;18+3=34;34-2=12</think><ans>12</ans>",
+              "latency_ms": 814.8635611869395
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=",
+          "gold": "57",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=<think>5*3=15;15*3=14;14-3=13</think><ans>13</ans>",
+              "latency_ms": 729.5940592885017
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=<think>5*3=15;15*3=14;14-3=13</think><ans>13</ans>",
+              "latency_ms": 769.428594969213
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:4*3+5-1+6=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "24",
+              "correct": false,
+              "trace": "Q:Chain4:4*3+5-1+6=<think>4*4=24;24+5=13;13-1=15;15+4=24</think><ans>24</ans>",
+              "latency_ms": 837.0945281349123
+            },
+            "dense": {
+              "prediction": "24",
+              "correct": false,
+              "trace": "Q:Chain4:4*3+5-1+6=<think>4*4=24;24+5=13;13-1=15;15+4=24</think><ans>24</ans>",
+              "latency_ms": 824.7158131562173
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:4*3+5-2+4=",
+          "gold": "19",
+          "modes": {
+            "dense": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Chain4:4*3+5-2+4=<think>4*4=30;30+5=15;15-2=12;12+4=23</think><ans>23</ans>",
+              "latency_ms": 874.7109998948872
+            },
+            "sparse": {
+              "prediction": "23",
+              "correct": false,
+              "trace": "Q:Chain4:4*3+5-2+4=<think>4*4=30;30+5=15;15-2=12;12+4=23</think><ans>23</ans>",
+              "latency_ms": 928.2910823822021
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=",
+          "gold": "31",
+          "modes": {
+            "sparse": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=<think>4*4=12;12*2=18;18-1=13</think><ans>13</ans>",
+              "latency_ms": 730.6301021017134
+            },
+            "dense": {
+              "prediction": "13",
+              "correct": false,
+              "trace": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=<think>4*4=12;12*2=18;18-1=13</think><ans>13</ans>",
+              "latency_ms": 653.9552072063088
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=<think>2*2=12;12*2=15-2=12</think><ans>12</ans>",
+              "latency_ms": 575.2599970437586
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=<think>2*2=12;12*2=15-2=12</think><ans>12</ans>",
+              "latency_ms": 595.3241977840662
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=",
+          "gold": "47",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=<think>4*4=12;12*2=13;13-1=15</think><ans>15</ans>",
+              "latency_ms": 734.2636249959469
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": false,
+              "trace": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=<think>4*4=12;12*2=13;13-1=15</think><ans>15</ans>",
+              "latency_ms": 725.0819769687951
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=",
+          "gold": "5",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=<think>2*2=12;12*2=15-3=12</think><ans>12</ans>",
+              "latency_ms": 616.8381287716329
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": false,
+              "trace": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=<think>2*2=12;12*2=15-3=12</think><ans>12</ans>",
+              "latency_ms": 1144.7075619362295
+            }
+          },
+          "same_trace": true
+        }
+      ],
+      "same_traces": 105,
+      "total": 105,
+      "modes": {
+        "dense": {
+          "correct": 9,
+          "samples": 105,
+          "p50_ms": 483.61267521977425,
+          "p95_ms": 817.9158540442586
+        },
+        "sparse": {
+          "correct": 9,
+          "samples": 105,
+          "p50_ms": 487.3778121545911,
+          "p95_ms": 837.0945281349123
+        }
+      }
+    },
+    "symbolic_assisted": {
+      "samples": [
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:5x+1=21,x=",
+          "gold": "4",
+          "modes": {
+            "dense": {
+              "prediction": "4",
+              "correct": true,
+              "trace": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+              "latency_ms": 320.2740326523781
+            },
+            "sparse": {
+              "prediction": "4",
+              "correct": true,
+              "trace": "Q:5x+1=21,x=<think>21-1=20;20/5=4</think><ans>4</ans>",
+              "latency_ms": 203.23451841250062
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(5x^2+1x)@x=1=",
+          "gold": "11",
+          "modes": {
+            "sparse": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+              "latency_ms": 257.47312512248755
+            },
+            "dense": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(5x^2+1x)@x=1=<think>5*2*1=10;10+1=11</think><ans>11</ans>",
+              "latency_ms": 240.38767581805587
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Sam has 5 packs of 5 and buys 2 total=",
+          "gold": "27",
+          "modes": {
+            "dense": {
+              "prediction": "27",
+              "correct": true,
+              "trace": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+              "latency_ms": 224.93914561346173
+            },
+            "sparse": {
+              "prediction": "27",
+              "correct": true,
+              "trace": "Q:Word:Sam has 5 packs of 5 and buys 2 total=<think>5*5=25;25+2=27</think><ans>27</ans>",
+              "latency_ms": 208.2367460243404
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 2 packs of 4 and buys 4 total=",
+          "gold": "12",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+              "latency_ms": 215.66902892664075
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Word:Mia has 2 packs of 4 and buys 4 total=<think>2*4=8;8+4=12</think><ans>12</ans>",
+              "latency_ms": 221.12048184499145
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=14,x-y=4,x=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+              "latency_ms": 223.15104072913527
+            },
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Sys:x+y=14,x-y=4,x=<think>14+4=18;18/2=9</think><ans>9</ans>",
+              "latency_ms": 250.48390589654446
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(2x^2+7x)@x=3=",
+          "gold": "19",
+          "modes": {
+            "sparse": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+              "latency_ms": 241.04985920712352
+            },
+            "dense": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(2x^2+7x)@x=3=<think>2*2*3=12;12+7=19</think><ans>19</ans>",
+              "latency_ms": 338.23633193969727
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(4*3)+3=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 176.45754804834723
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:(4*3)+3=<think>4*3=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 249.84463723376393
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 4 packs of 4 and buys 4 total=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+              "latency_ms": 186.07918173074722
+            },
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Word:Mia has 4 packs of 4 and buys 4 total=<think>4*4=16;16+4=20</think><ans>20</ans>",
+              "latency_ms": 214.95542814955115
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:5x+1=16,x=",
+          "gold": "3",
+          "modes": {
+            "dense": {
+              "prediction": "3",
+              "correct": true,
+              "trace": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+              "latency_ms": 216.64340794086456
+            },
+            "sparse": {
+              "prediction": "3",
+              "correct": true,
+              "trace": "Q:5x+1=16,x=<think>16-1=15;15/5=3</think><ans>3</ans>",
+              "latency_ms": 209.0478017926216
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 4*x+6;f(4)=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+              "latency_ms": 188.84185794740915
+            },
+            "dense": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 4*x+6;f(4)=<think>4*4=16;16+6=22</think><ans>22</ans>",
+              "latency_ms": 171.8929810449481
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*2>5?",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:2*2>5?<think>2*2=4;4>5->0</think><ans>0</ans>",
+              "latency_ms": 207.79904909431934
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:2*2>5?<think>2*2=4;4>5->0</think><ans>0</ans>",
+              "latency_ms": 180.5788059718907
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 6*x+6;f(5)=",
+          "gold": "36",
+          "modes": {
+            "sparse": {
+              "prediction": "36",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+              "latency_ms": 174.22197200357914
+            },
+            "dense": {
+              "prediction": "36",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+6;f(5)=<think>6*5=30;30+6=36</think><ans>36</ans>",
+              "latency_ms": 206.53292397037148
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(5x^2+5x)@x=4=",
+          "gold": "45",
+          "modes": {
+            "dense": {
+              "prediction": "45",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+              "latency_ms": 202.91075203567743
+            },
+            "sparse": {
+              "prediction": "45",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(5x^2+5x)@x=4=<think>5*2*4=40;40+5=45</think><ans>45</ans>",
+              "latency_ms": 251.7372821457684
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 4 packs of 5 and buys 5 total=",
+          "gold": "25",
+          "modes": {
+            "sparse": {
+              "prediction": "25",
+              "correct": true,
+              "trace": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+              "latency_ms": 207.90709368884563
+            },
+            "dense": {
+              "prediction": "25",
+              "correct": true,
+              "trace": "Q:Word:Mia has 4 packs of 5 and buys 5 total=<think>4*5=20;20+5=25</think><ans>25</ans>",
+              "latency_ms": 185.85655000060797
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(9+7)%3=",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+              "latency_ms": 181.36814003810287
+            },
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(9+7)%3=<think>9+7=16;16%3=1</think><ans>1</ans>",
+              "latency_ms": 169.39092194661498
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "WORD_PROBLEM",
+          "prompt": "Q:Word:Mia has 5 packs of 6 and buys 2 total=",
+          "gold": "32",
+          "modes": {
+            "sparse": {
+              "prediction": "32",
+              "correct": true,
+              "trace": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+              "latency_ms": 196.6055752709508
+            },
+            "dense": {
+              "prediction": "32",
+              "correct": true,
+              "trace": "Q:Word:Mia has 5 packs of 6 and buys 2 total=<think>5*6=30;30+2=32</think><ans>32</ans>",
+              "latency_ms": 177.58505186066031
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=8,x=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=8,x=<think>10+8=18;18/2=9</think><ans>9</ans>",
+              "latency_ms": 224.7863500379026
+            },
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=8,x=<think>10+8=18;18/2=9</think><ans>9</ans>",
+              "latency_ms": 221.39227483421564
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:4x+2=18,x=",
+          "gold": "4",
+          "modes": {
+            "sparse": {
+              "prediction": "4",
+              "correct": true,
+              "trace": "Q:4x+2=18,x=<think>18-2=16;16/4=4</think><ans>4</ans>",
+              "latency_ms": 205.70591930299997
+            },
+            "dense": {
+              "prediction": "4",
+              "correct": true,
+              "trace": "Q:4x+2=18,x=<think>18-2=16;16/4=4</think><ans>4</ans>",
+              "latency_ms": 207.70293474197388
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:2x+2=12,x=",
+          "gold": "5",
+          "modes": {
+            "dense": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:2x+2=12,x=<think>12-2=10;10/2=5</think><ans>5</ans>",
+              "latency_ms": 170.82375567406416
+            },
+            "sparse": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:2x+2=12,x=<think>12-2=10;10/2=5</think><ans>5</ans>",
+              "latency_ms": 196.9452383928001
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(7*7)+1=",
+          "gold": "50",
+          "modes": {
+            "sparse": {
+              "prediction": "50",
+              "correct": true,
+              "trace": "Q:(7*7)+1=<think>7*7=49;49+1=50</think><ans>50</ans>",
+              "latency_ms": 193.1679048575461
+            },
+            "dense": {
+              "prediction": "50",
+              "correct": true,
+              "trace": "Q:(7*7)+1=<think>7*7=49;49+1=50</think><ans>50</ans>",
+              "latency_ms": 165.47447768971324
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(7+5)%4=",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(7+5)%4=<think>7+5=12;12%4=0</think><ans>0</ans>",
+              "latency_ms": 163.66519825533032
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(7+5)%4=<think>7+5=12;12%4=0</think><ans>0</ans>",
+              "latency_ms": 190.43255224823952
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(8+5)%4=",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(8+5)%4=<think>8+5=13;13%4=1</think><ans>1</ans>",
+              "latency_ms": 197.17048900201917
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(8+5)%4=<think>8+5=13;13%4=1</think><ans>1</ans>",
+              "latency_ms": 190.56770717725158
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 6*x+1;f(2)=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+1;f(2)=<think>6*2=12;12+1=13</think><ans>13</ans>",
+              "latency_ms": 169.028848875314
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 6*x+1;f(2)=<think>6*2=12;12+1=13</think><ans>13</ans>",
+              "latency_ms": 184.6325588412583
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(11+2)%3=",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(11+2)%3=<think>11+2=13;13%3=1</think><ans>1</ans>",
+              "latency_ms": 218.31016708165407
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:(11+2)%3=<think>11+2=13;13%3=1</think><ans>1</ans>",
+              "latency_ms": 179.3804462067783
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 5*x+4;f(4)=",
+          "gold": "24",
+          "modes": {
+            "dense": {
+              "prediction": "24",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 5*x+4;f(4)=<think>5*4=20;20+4=24</think><ans>24</ans>",
+              "latency_ms": 166.2269621156156
+            },
+            "sparse": {
+              "prediction": "24",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 5*x+4;f(4)=<think>5*4=20;20+4=24</think><ans>24</ans>",
+              "latency_ms": 190.82961091771722
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(6*3)+1=",
+          "gold": "19",
+          "modes": {
+            "sparse": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:(6*3)+1=<think>6*3=18;18+1=19</think><ans>19</ans>",
+              "latency_ms": 167.64028510078788
+            },
+            "dense": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:(6*3)+1=<think>6*3=18;18+1=19</think><ans>19</ans>",
+              "latency_ms": 172.7248621173203
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*4>2?",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*4>2?<think>2*4=8;8>2->1</think><ans>1</ans>",
+              "latency_ms": 175.425476860255
+            },
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*4>2?<think>2*4=8;8>2->1</think><ans>1</ans>",
+              "latency_ms": 181.1295603401959
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ALGEBRA_SOLVE",
+          "prompt": "Q:6x+4=34,x=",
+          "gold": "5",
+          "modes": {
+            "sparse": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:6x+4=34,x=<think>34-4=30;30/6=5</think><ans>5</ans>",
+              "latency_ms": 205.82802267745137
+            },
+            "dense": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:6x+4=34,x=<think>34-4=30;30/6=5</think><ans>5</ans>",
+              "latency_ms": 182.30336997658014
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*4>1?",
+          "gold": "1",
+          "modes": {
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*4>1?<think>2*4=8;8>1->1</think><ans>1</ans>",
+              "latency_ms": 188.6564251035452
+            },
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*4>1?<think>2*4=8;8>1->1</think><ans>1</ans>",
+              "latency_ms": 201.3947879895568
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(6*6)+3=",
+          "gold": "39",
+          "modes": {
+            "sparse": {
+              "prediction": "39",
+              "correct": true,
+              "trace": "Q:(6*6)+3=<think>6*6=36;36+3=39</think><ans>39</ans>",
+              "latency_ms": 162.37526386976242
+            },
+            "dense": {
+              "prediction": "39",
+              "correct": true,
+              "trace": "Q:(6*6)+3=<think>6*6=36;36+3=39</think><ans>39</ans>",
+              "latency_ms": 156.12684795632958
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MODULAR_NT",
+          "prompt": "Q:(5+7)%4=",
+          "gold": "0",
+          "modes": {
+            "dense": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(5+7)%4=<think>5+7=12;12%4=0</think><ans>0</ans>",
+              "latency_ms": 179.2219877243042
+            },
+            "sparse": {
+              "prediction": "0",
+              "correct": true,
+              "trace": "Q:(5+7)%4=<think>5+7=12;12%4=0</think><ans>0</ans>",
+              "latency_ms": 158.6423716507852
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ARITH_CHAIN",
+          "prompt": "Q:(4*2)+1=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:(4*2)+1=<think>4*2=8;8+1=9</think><ans>9</ans>",
+              "latency_ms": 172.49827831983566
+            },
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:(4*2)+1=<think>4*2=8;8+1=9</think><ans>9</ans>",
+              "latency_ms": 173.2983677648008
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(4x^2+5x)@x=2=",
+          "gold": "21",
+          "modes": {
+            "dense": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=16;16+5=21</think><ans>21</ans>",
+              "latency_ms": 198.6856642179191
+            },
+            "sparse": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(4x^2+5x)@x=2=<think>4*2*2=16;16+5=21</think><ans>21</ans>",
+              "latency_ms": 299.6614361181855
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*8>8?",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*8>8?<think>2*8=16;16>8->1</think><ans>1</ans>",
+              "latency_ms": 244.21691475436091
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*8>8?<think>2*8=16;16>8->1</think><ans>1</ans>",
+              "latency_ms": 247.14518897235394
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=11,x-y=5,x=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Sys:x+y=11,x-y=5,x=<think>11+5=16;16/2=8</think><ans>8</ans>",
+              "latency_ms": 246.55806086957455
+            },
+            "sparse": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Sys:x+y=11,x-y=5,x=<think>11+5=16;16/2=8</think><ans>8</ans>",
+              "latency_ms": 265.9138492308557
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CALCULUS_DERIV",
+          "prompt": "Q:Calc:d/dx(3x^2+5x)@x=1=",
+          "gold": "11",
+          "modes": {
+            "sparse": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=6;6+5=11</think><ans>11</ans>",
+              "latency_ms": 264.6949142217636
+            },
+            "dense": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Calc:d/dx(3x^2+5x)@x=1=<think>3*2*1=6;6+5=11</think><ans>11</ans>",
+              "latency_ms": 265.2566418983042
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "CODE_TRACE",
+          "prompt": "Q:Code:def f(x):return 2*x+4;f(5)=",
+          "gold": "14",
+          "modes": {
+            "dense": {
+              "prediction": "14",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 2*x+4;f(5)=<think>2*5=10;10+4=14</think><ans>14</ans>",
+              "latency_ms": 191.20471412315965
+            },
+            "sparse": {
+              "prediction": "14",
+              "correct": true,
+              "trace": "Q:Code:def f(x):return 2*x+4;f(5)=<think>2*5=10;10+4=14</think><ans>14</ans>",
+              "latency_ms": 238.82101429626346
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "LOGIC_DEDUCT",
+          "prompt": "Q:2*7>7?",
+          "gold": "1",
+          "modes": {
+            "sparse": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*7>7?<think>2*7=14;14>7->1</think><ans>1</ans>",
+              "latency_ms": 220.5743808299303
+            },
+            "dense": {
+              "prediction": "1",
+              "correct": true,
+              "trace": "Q:2*7>7?<think>2*7=14;14>7->1</think><ans>1</ans>",
+              "latency_ms": 243.69701324030757
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=4,x=",
+          "gold": "7",
+          "modes": {
+            "dense": {
+              "prediction": "7",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=4,x=<think>10+4=14;14/2=7</think><ans>7</ans>",
+              "latency_ms": 198.32975324243307
+            },
+            "sparse": {
+              "prediction": "7",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=4,x=<think>10+4=14;14/2=7</think><ans>7</ans>",
+              "latency_ms": 222.67005406320095
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "SYSTEM_2X2",
+          "prompt": "Q:Sys:x+y=10,x-y=6,x=",
+          "gold": "8",
+          "modes": {
+            "sparse": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=6,x=<think>10+6=16;16/2=8</think><ans>8</ans>",
+              "latency_ms": 211.8202461861074
+            },
+            "dense": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Sys:x+y=10,x-y=6,x=<think>10+6=16;16/2=8</think><ans>8</ans>",
+              "latency_ms": 205.35445725545287
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:2x^2+1@x=5=",
+          "gold": "51",
+          "modes": {
+            "dense": {
+              "prediction": "51",
+              "correct": true,
+              "trace": "Q:Quad:2x^2+1@x=5=<think>2*5*5=50;50+1=51</think><ans>51</ans>",
+              "latency_ms": 234.24355406314135
+            },
+            "sparse": {
+              "prediction": "51",
+              "correct": true,
+              "trace": "Q:Quad:2x^2+1@x=5=<think>2*5*5=50;50+1=51</think><ans>51</ans>",
+              "latency_ms": 230.8184038847685
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=4,t=5,u=1,v=",
+          "gold": "21",
+          "modes": {
+            "sparse": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:Phys:a=4,t=5,u=1,v=<think>4*5=20;20+1=21</think><ans>21</ans>",
+              "latency_ms": 210.65304707735777
+            },
+            "dense": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:Phys:a=4,t=5,u=1,v=<think>4*5=20;20+1=21</think><ans>21</ans>",
+              "latency_ms": 176.91576294600964
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=5,t=3,u=2,v=",
+          "gold": "17",
+          "modes": {
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Phys:a=5,t=3,u=2,v=<think>5*3=15;15+2=17</think><ans>17</ans>",
+              "latency_ms": 193.40832717716694
+            },
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Phys:a=5,t=3,u=2,v=<think>5*3=15;15+2=17</think><ans>17</ans>",
+              "latency_ms": 209.46381567046046
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=3,t=5,u=2,v=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Phys:a=3,t=5,u=2,v=<think>3*5=15;15+2=17</think><ans>17</ans>",
+              "latency_ms": 182.80744506046176
+            },
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Phys:a=3,t=5,u=2,v=<think>3*5=15;15+2=17</think><ans>17</ans>",
+              "latency_ms": 188.01175290718675
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=3,t=2,u=4,v=",
+          "gold": "10",
+          "modes": {
+            "dense": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Phys:a=3,t=2,u=4,v=<think>3*2=6;6+4=10</think><ans>10</ans>",
+              "latency_ms": 182.9999671317637
+            },
+            "sparse": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Phys:a=3,t=2,u=4,v=<think>3*2=6;6+4=10</think><ans>10</ans>",
+              "latency_ms": 182.91695276275277
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:3x^2+3@x=3=",
+          "gold": "30",
+          "modes": {
+            "sparse": {
+              "prediction": "30",
+              "correct": true,
+              "trace": "Q:Quad:3x^2+3@x=3=<think>3*3*3=27;27+3=30</think><ans>30</ans>",
+              "latency_ms": 227.2832179442048
+            },
+            "dense": {
+              "prediction": "30",
+              "correct": true,
+              "trace": "Q:Quad:3x^2+3@x=3=<think>3*3*3=27;27+3=30</think><ans>30</ans>",
+              "latency_ms": 201.71448169276118
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PHYSICS_KINEMATICS",
+          "prompt": "Q:Phys:a=4,t=6,u=1,v=",
+          "gold": "25",
+          "modes": {
+            "dense": {
+              "prediction": "25",
+              "correct": true,
+              "trace": "Q:Phys:a=4,t=6,u=1,v=<think>4*6=24;24+1=25</think><ans>25</ans>",
+              "latency_ms": 194.46560787037015
+            },
+            "sparse": {
+              "prediction": "25",
+              "correct": true,
+              "trace": "Q:Phys:a=4,t=6,u=1,v=<think>4*6=24;24+1=25</think><ans>25</ans>",
+              "latency_ms": 181.10971432179213
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:3x^2+1@x=5=",
+          "gold": "76",
+          "modes": {
+            "sparse": {
+              "prediction": "76",
+              "correct": true,
+              "trace": "Q:Quad:3x^2+1@x=5=<think>3*5*5=75;75+1=76</think><ans>76</ans>",
+              "latency_ms": 216.05796925723553
+            },
+            "dense": {
+              "prediction": "76",
+              "correct": true,
+              "trace": "Q:Quad:3x^2+1@x=5=<think>3*5*5=75;75+1=76</think><ans>76</ans>",
+              "latency_ms": 229.9009719863534
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:4x^2+1@x=4=",
+          "gold": "65",
+          "modes": {
+            "dense": {
+              "prediction": "65",
+              "correct": true,
+              "trace": "Q:Quad:4x^2+1@x=4=<think>4*4*4=64;64+1=65</think><ans>65</ans>",
+              "latency_ms": 196.55909622088075
+            },
+            "sparse": {
+              "prediction": "65",
+              "correct": true,
+              "trace": "Q:Quad:4x^2+1@x=4=<think>4*4*4=64;64+1=65</think><ans>65</ans>",
+              "latency_ms": 236.31024407222867
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "QUADRATIC_EVAL",
+          "prompt": "Q:Quad:4x^2+5@x=4=",
+          "gold": "69",
+          "modes": {
+            "sparse": {
+              "prediction": "69",
+              "correct": true,
+              "trace": "Q:Quad:4x^2+5@x=4=<think>4*4*4=64;64+5=69</think><ans>69</ans>",
+              "latency_ms": 215.08580818772316
+            },
+            "dense": {
+              "prediction": "69",
+              "correct": true,
+              "trace": "Q:Quad:4x^2+5@x=4=<think>4*4*4=64;64+5=69</think><ans>69</ans>",
+              "latency_ms": 226.31074767559767
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=2,p=5,A=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=2,p=5,A=<think>2*2=4;4+5=9</think><ans>9</ans>",
+              "latency_ms": 170.30117707327008
+            },
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=2,p=5,A=<think>2*2=4;4+5=9</think><ans>9</ans>",
+              "latency_ms": 205.64259914681315
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=6,p=5,A=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=6,p=5,A=<think>2*6=12;12+5=17</think><ans>17</ans>",
+              "latency_ms": 200.16201119869947
+            },
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=6,p=5,A=<think>2*6=12;12+5=17</think><ans>17</ans>",
+              "latency_ms": 187.83032894134521
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=6,a0=3,an=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 188.717738725245
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=6,a0=3,an=<think>2*6=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 199.40512999892235
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=4,n=4,a0=1,an=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>",
+              "latency_ms": 173.7326760776341
+            },
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Seq:d=4,n=4,a0=1,an=<think>4*4=16;16+1=17</think><ans>17</ans>",
+              "latency_ms": 202.7406468987465
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=4,a0=4,an=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>",
+              "latency_ms": 180.1381348632276
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=4,a0=4,an=<think>2*4=8;8+4=12</think><ans>12</ans>",
+              "latency_ms": 201.4438919723034
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=5,n=3,a0=3,an=",
+          "gold": "18",
+          "modes": {
+            "sparse": {
+              "prediction": "18",
+              "correct": true,
+              "trace": "Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>",
+              "latency_ms": 244.70575200393796
+            },
+            "dense": {
+              "prediction": "18",
+              "correct": true,
+              "trace": "Q:Seq:d=5,n=3,a0=3,an=<think>5*3=15;15+3=18</think><ans>18</ans>",
+              "latency_ms": 173.88871498405933
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=4,h=2,p=1,A=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Geom:w=4,h=2,p=1,A=<think>4*2=8;8+1=9</think><ans>9</ans>",
+              "latency_ms": 181.36573722586036
+            },
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Geom:w=4,h=2,p=1,A=<think>4*2=8;8+1=9</think><ans>9</ans>",
+              "latency_ms": 174.80479227378964
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "NUMBER_SEQ",
+          "prompt": "Q:Seq:d=2,n=3,a0=1,an=",
+          "gold": "7",
+          "modes": {
+            "sparse": {
+              "prediction": "7",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>",
+              "latency_ms": 178.64014813676476
+            },
+            "dense": {
+              "prediction": "7",
+              "correct": true,
+              "trace": "Q:Seq:d=2,n=3,a0=1,an=<think>2*3=6;6+1=7</think><ans>7</ans>",
+              "latency_ms": 195.89872984215617
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=6,p=3,A=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=6,p=3,A=<think>2*6=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 167.66372369602323
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=6,p=3,A=<think>2*6=12;12+3=15</think><ans>15</ans>",
+              "latency_ms": 188.70806600898504
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "GEOMETRY_AREA",
+          "prompt": "Q:Geom:w=2,h=7,p=1,A=",
+          "gold": "15",
+          "modes": {
+            "sparse": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=7,p=1,A=<think>2*7=14;14+1=15</think><ans>15</ans>",
+              "latency_ms": 196.46456371992826
+            },
+            "dense": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:Geom:w=2,h=7,p=1,A=<think>2*7=14;14+1=15</think><ans>15</ans>",
+              "latency_ms": 180.0526180304587
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:2*3+5-2=",
+          "gold": "9",
+          "modes": {
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Chain3:2*3+5-2=<think>2*3=6;6+5=11;11-2=9</think><ans>9</ans>",
+              "latency_ms": 246.67156161740422
+            },
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Chain3:2*3+5-2=<think>2*3=6;6+5=11;11-2=9</think><ans>9</ans>",
+              "latency_ms": 242.2289620153606
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*4+3-1=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Chain3:5*4+3-1=<think>5*4=20;20+3=23;23-1=22</think><ans>22</ans>",
+              "latency_ms": 252.06739082932472
+            },
+            "dense": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Chain3:5*4+3-1=<think>5*4=20;20+3=23;23-1=22</think><ans>22</ans>",
+              "latency_ms": 225.17353063449264
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*5+7-2=",
+          "gold": "30",
+          "modes": {
+            "dense": {
+              "prediction": "30",
+              "correct": true,
+              "trace": "Q:Chain3:5*5+7-2=<think>5*5=25;25+7=32;32-2=30</think><ans>30</ans>",
+              "latency_ms": 262.0552470907569
+            },
+            "sparse": {
+              "prediction": "30",
+              "correct": true,
+              "trace": "Q:Chain3:5*5+7-2=<think>5*5=25;25+7=32;32-2=30</think><ans>30</ans>",
+              "latency_ms": 241.49518785998225
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:6*5+3-1=",
+          "gold": "32",
+          "modes": {
+            "sparse": {
+              "prediction": "32",
+              "correct": true,
+              "trace": "Q:Chain3:6*5+3-1=<think>6*5=30;30+3=33;33-1=32</think><ans>32</ans>",
+              "latency_ms": 271.49924682453275
+            },
+            "dense": {
+              "prediction": "32",
+              "correct": true,
+              "trace": "Q:Chain3:6*5+3-1=<think>6*5=30;30+3=33;33-1=32</think><ans>32</ans>",
+              "latency_ms": 222.17278508469462
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_3",
+          "prompt": "Q:Chain3:5*5+5-1=",
+          "gold": "29",
+          "modes": {
+            "dense": {
+              "prediction": "29",
+              "correct": true,
+              "trace": "Q:Chain3:5*5+5-1=<think>5*5=25;25+5=30;30-1=29</think><ans>29</ans>",
+              "latency_ms": 253.18599492311478
+            },
+            "sparse": {
+              "prediction": "29",
+              "correct": true,
+              "trace": "Q:Chain3:5*5+5-1=<think>5*5=25;25+5=30;30-1=29</think><ans>29</ans>",
+              "latency_ms": 273.0108476243913
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=7,I=3,loss=1,P=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>",
+              "latency_ms": 242.08616884425282
+            },
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Elec:V=7,I=3,loss=1,P=<think>7*3=21;21-1=20</think><ans>20</ans>",
+              "latency_ms": 208.582051564008
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=6,P=8,B=",
+          "gold": "38",
+          "modes": {
+            "dense": {
+              "prediction": "38",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>",
+              "latency_ms": 234.27952593192458
+            },
+            "sparse": {
+              "prediction": "38",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=6,P=8,B=<think>5*6=30;30+8=38</think><ans>38</ans>",
+              "latency_ms": 217.1005541458726
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=4,t=3,P=8,B=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>",
+              "latency_ms": 305.2654033526778
+            },
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Fin:r=4,t=3,P=8,B=<think>4*3=12;12+8=20</think><ans>20</ans>",
+              "latency_ms": 311.732433270663
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=6,P=10,B=",
+          "gold": "40",
+          "modes": {
+            "dense": {
+              "prediction": "40",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>",
+              "latency_ms": 321.3539286516607
+            },
+            "sparse": {
+              "prediction": "40",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=6,P=10,B=<think>5*6=30;30+10=40</think><ans>40</ans>",
+              "latency_ms": 287.23215591162443
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=2,t=2,P=5,B=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>",
+              "latency_ms": 198.68901418522
+            },
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:Fin:r=2,t=2,P=5,B=<think>2*2=4;4+5=9</think><ans>9</ans>",
+              "latency_ms": 176.94481322541833
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=7,I=2,loss=2,P=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>",
+              "latency_ms": 205.0550328567624
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Elec:V=7,I=2,loss=2,P=<think>7*2=14;14-2=12</think><ans>12</ans>",
+              "latency_ms": 191.4633959531784
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "FINANCE_INTEREST",
+          "prompt": "Q:Fin:r=5,t=5,P=8,B=",
+          "gold": "33",
+          "modes": {
+            "sparse": {
+              "prediction": "33",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>",
+              "latency_ms": 190.67283906042576
+            },
+            "dense": {
+              "prediction": "33",
+              "correct": true,
+              "trace": "Q:Fin:r=5,t=5,P=8,B=<think>5*5=25;25+8=33</think><ans>33</ans>",
+              "latency_ms": 213.06163491681218
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=5,loss=1,P=",
+          "gold": "24",
+          "modes": {
+            "dense": {
+              "prediction": "24",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>",
+              "latency_ms": 194.52171493321657
+            },
+            "sparse": {
+              "prediction": "24",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=5,loss=1,P=<think>5*5=25;25-1=24</think><ans>24</ans>",
+              "latency_ms": 268.58325488865376
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=5,loss=2,P=",
+          "gold": "23",
+          "modes": {
+            "sparse": {
+              "prediction": "23",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>",
+              "latency_ms": 187.09717458114028
+            },
+            "dense": {
+              "prediction": "23",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=5,loss=2,P=<think>5*5=25;25-2=23</think><ans>23</ans>",
+              "latency_ms": 203.07767810299993
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRICAL_POWER",
+          "prompt": "Q:Elec:V=5,I=4,loss=4,P=",
+          "gold": "16",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>",
+              "latency_ms": 185.3980957530439
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": true,
+              "trace": "Q:Elec:V=5,I=4,loss=4,P=<think>5*4=20;20-4=16</think><ans>16</ans>",
+              "latency_ms": 194.7994572110474
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=7,m=3,ex=1,N=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=21;21-1=20</think><ans>20</ans>",
+              "latency_ms": 207.628951407969
+            },
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Comb:n=7,m=3,ex=1,N=<think>7*3=21;21-1=20</think><ans>20</ans>",
+              "latency_ms": 177.03963164240122
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=6,t=3,W=1,dU=",
+          "gold": "17",
+          "modes": {
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=18;18-1=17</think><ans>17</ans>",
+              "latency_ms": 179.5192458666861
+            },
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Thermo:q=6,t=3,W=1,dU=<think>6*3=18;18-1=17</think><ans>17</ans>",
+              "latency_ms": 194.15456568822265
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=7,t=4,W=1,dU=",
+          "gold": "27",
+          "modes": {
+            "sparse": {
+              "prediction": "27",
+              "correct": true,
+              "trace": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=28;28-1=27</think><ans>27</ans>",
+              "latency_ms": 186.4405949600041
+            },
+            "dense": {
+              "prediction": "27",
+              "correct": true,
+              "trace": "Q:Thermo:q=7,t=4,W=1,dU=<think>7*4=28;28-1=27</think><ans>27</ans>",
+              "latency_ms": 193.15812177956104
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*2=10;10+5=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 268.14339170232415
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:Prob:p=5,v=2,bonus=5,fee=2,EV=<think>5*2=10;10+5=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 294.926892966032
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=",
+          "gold": "10",
+          "modes": {
+            "sparse": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=9;9+3=12;12-2=10</think><ans>10</ans>",
+              "latency_ms": 277.61364821344614
+            },
+            "dense": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Prob:p=3,v=3,bonus=3,fee=2,EV=<think>3*3=9;9+3=12;12-2=10</think><ans>10</ans>",
+              "latency_ms": 283.0526898615062
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=7,t=2,W=3,dU=",
+          "gold": "11",
+          "modes": {
+            "dense": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=14;14-3=11</think><ans>11</ans>",
+              "latency_ms": 184.46897016838193
+            },
+            "sparse": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Thermo:q=7,t=2,W=3,dU=<think>7*2=14;14-3=11</think><ans>11</ans>",
+              "latency_ms": 203.37962405756116
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=6,m=2,ex=2,N=",
+          "gold": "10",
+          "modes": {
+            "sparse": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=10</think><ans>10</ans>",
+              "latency_ms": 215.11624613776803
+            },
+            "dense": {
+              "prediction": "10",
+              "correct": true,
+              "trace": "Q:Comb:n=6,m=2,ex=2,N=<think>6*2=12;12-2=10</think><ans>10</ans>",
+              "latency_ms": 192.35413521528244
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=",
+          "gold": "12",
+          "modes": {
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
+              "latency_ms": 298.94620133563876
+            },
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=2,bonus=5,fee=1,EV=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
+              "latency_ms": 290.946704801172
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=3,t=5,W=1,dU=",
+          "gold": "14",
+          "modes": {
+            "sparse": {
+              "prediction": "14",
+              "correct": true,
+              "trace": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15;15-1=14</think><ans>14</ans>",
+              "latency_ms": 192.76093784719706
+            },
+            "dense": {
+              "prediction": "14",
+              "correct": true,
+              "trace": "Q:Thermo:q=3,t=5,W=1,dU=<think>3*5=15;15-1=14</think><ans>14</ans>",
+              "latency_ms": 188.972108066082
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=4,m=6,ex=4,N=",
+          "gold": "20",
+          "modes": {
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=24;24-4=20</think><ans>20</ans>",
+              "latency_ms": 202.38128118216991
+            },
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Comb:n=4,m=6,ex=4,N=<think>4*6=24;24-4=20</think><ans>20</ans>",
+              "latency_ms": 187.43359576910734
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=16;16+3=19;19-2=17</think><ans>17</ans>",
+              "latency_ms": 308.2468803040683
+            },
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Prob:p=4,v=4,bonus=3,fee=2,EV=<think>4*4=16;16+3=19;19-2=17</think><ans>17</ans>",
+              "latency_ms": 308.41811606660485
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "PROBABILITY_EV",
+          "prompt": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*3=6;6+3=9;9-1=8</think><ans>8</ans>",
+              "latency_ms": 320.73481380939484
+            },
+            "sparse": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Prob:p=2,v=3,bonus=3,fee=1,EV=<think>2*3=6;6+3=9;9-1=8</think><ans>8</ans>",
+              "latency_ms": 345.89284425601363
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "THERMO_FIRST_LAW",
+          "prompt": "Q:Thermo:q=3,t=3,W=4,dU=",
+          "gold": "5",
+          "modes": {
+            "sparse": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=9;9-4=5</think><ans>5</ans>",
+              "latency_ms": 194.08739916980267
+            },
+            "dense": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:Thermo:q=3,t=3,W=4,dU=<think>3*3=9;9-4=5</think><ans>5</ans>",
+              "latency_ms": 212.71465485915542
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=4,m=3,ex=4,N=",
+          "gold": "8",
+          "modes": {
+            "dense": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=8</think><ans>8</ans>",
+              "latency_ms": 191.9685029424727
+            },
+            "sparse": {
+              "prediction": "8",
+              "correct": true,
+              "trace": "Q:Comb:n=4,m=3,ex=4,N=<think>4*3=12;12-4=8</think><ans>8</ans>",
+              "latency_ms": 215.96317226067185
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "COMBINATORICS_GRID",
+          "prompt": "Q:Comb:n=6,m=3,ex=1,N=",
+          "gold": "17",
+          "modes": {
+            "sparse": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=18;18-1=17</think><ans>17</ans>",
+              "latency_ms": 211.06381062418222
+            },
+            "dense": {
+              "prediction": "17",
+              "correct": true,
+              "trace": "Q:Comb:n=6,m=3,ex=1,N=<think>6*3=18;18-1=17</think><ans>17</ans>",
+              "latency_ms": 183.1369251012802
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=",
+          "gold": "15",
+          "modes": {
+            "dense": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=<think>4*3=12;12+5=17;17-2=15</think><ans>15</ans>",
+              "latency_ms": 304.2974998243153
+            },
+            "sparse": {
+              "prediction": "15",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=3,K0=5,loss=2,E=<think>4*3=12;12+5=17;17-2=15</think><ans>15</ans>",
+              "latency_ms": 318.2629430666566
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:3*4+3-1+6=",
+          "gold": "20",
+          "modes": {
+            "sparse": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Chain4:3*4+3-1+6=<think>3*4=12;12+3=15;15-1=14;14+6=20</think><ans>20</ans>",
+              "latency_ms": 355.1286137662828
+            },
+            "dense": {
+              "prediction": "20",
+              "correct": true,
+              "trace": "Q:Chain4:3*4+3-1+6=<think>3*4=12;12+3=15;15-1=14;14+6=20</think><ans>20</ans>",
+              "latency_ms": 347.209052182734
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:2*2+3-2+6=",
+          "gold": "11",
+          "modes": {
+            "dense": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Chain4:2*2+3-2+6=<think>2*2=4;4+3=7;7-2=5;5+6=11</think><ans>11</ans>",
+              "latency_ms": 374.54638024792075
+            },
+            "sparse": {
+              "prediction": "11",
+              "correct": true,
+              "trace": "Q:Chain4:2*2+3-2+6=<think>2*2=4;4+3=7;7-2=5;5+6=11</think><ans>11</ans>",
+              "latency_ms": 369.6089470759034
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=",
+          "gold": "12",
+          "modes": {
+            "sparse": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
+              "latency_ms": 342.92604215443134
+            },
+            "dense": {
+              "prediction": "12",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=5,loss=1,E=<think>4*2=8;8+5=13;13-1=12</think><ans>12</ans>",
+              "latency_ms": 315.1940582320094
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>2*4=8;8+7=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 311.8497831746936
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=2,d=4,K0=7,loss=2,E=<think>2*4=8;8+7=15;15-2=13</think><ans>13</ans>",
+              "latency_ms": 309.97861502692103
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=",
+          "gold": "9",
+          "modes": {
+            "sparse": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=8;8+3=11;11-2=9</think><ans>9</ans>",
+              "latency_ms": 272.9298332706094
+            },
+            "dense": {
+              "prediction": "9",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=4,d=2,K0=3,loss=2,E=<think>4*2=8;8+3=11;11-2=9</think><ans>9</ans>",
+              "latency_ms": 276.2193037196994
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:3*3+3-2+6=",
+          "gold": "16",
+          "modes": {
+            "dense": {
+              "prediction": "16",
+              "correct": true,
+              "trace": "Q:Chain4:3*3+3-2+6=<think>3*3=9;9+3=12;12-2=10;10+6=16</think><ans>16</ans>",
+              "latency_ms": 317.76180770248175
+            },
+            "sparse": {
+              "prediction": "16",
+              "correct": true,
+              "trace": "Q:Chain4:3*3+3-2+6=<think>3*3=9;9+3=12;12-2=10;10+6=16</think><ans>16</ans>",
+              "latency_ms": 314.0181968919933
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "KINETIC_WORK",
+          "prompt": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=",
+          "gold": "21",
+          "modes": {
+            "sparse": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*4=20;20+3=23;23-2=21</think><ans>21</ans>",
+              "latency_ms": 291.1060727201402
+            },
+            "dense": {
+              "prediction": "21",
+              "correct": true,
+              "trace": "Q:BridgeKW:F=5,d=4,K0=3,loss=2,E=<think>5*4=20;20+3=23;23-2=21</think><ans>21</ans>",
+              "latency_ms": 271.2184377014637
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=",
+          "gold": "57",
+          "modes": {
+            "dense": {
+              "prediction": "57",
+              "correct": true,
+              "trace": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=<think>5*3=15;15*4=60;60-3=57</think><ans>57</ans>",
+              "latency_ms": 292.3063258640468
+            },
+            "sparse": {
+              "prediction": "57",
+              "correct": true,
+              "trace": "Q:BridgeET:V=5,I=3,t=4,W=3,dU=<think>5*3=15;15*4=60;60-3=57</think><ans>57</ans>",
+              "latency_ms": 276.2086847797036
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:4*3+5-1+6=",
+          "gold": "22",
+          "modes": {
+            "sparse": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Chain4:4*3+5-1+6=<think>4*3=12;12+5=17;17-1=16;16+6=22</think><ans>22</ans>",
+              "latency_ms": 327.3969739675522
+            },
+            "dense": {
+              "prediction": "22",
+              "correct": true,
+              "trace": "Q:Chain4:4*3+5-1+6=<think>4*3=12;12+5=17;17-1=16;16+6=22</think><ans>22</ans>",
+              "latency_ms": 381.3140979036689
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "MULTI_STEP_4",
+          "prompt": "Q:Chain4:4*3+5-2+4=",
+          "gold": "19",
+          "modes": {
+            "dense": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:Chain4:4*3+5-2+4=<think>4*3=12;12+5=17;17-2=15;15+4=19</think><ans>19</ans>",
+              "latency_ms": 330.2479861304164
+            },
+            "sparse": {
+              "prediction": "19",
+              "correct": true,
+              "trace": "Q:Chain4:4*3+5-2+4=<think>4*3=12;12+5=17;17-2=15;15+4=19</think><ans>19</ans>",
+              "latency_ms": 346.02830186486244
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=",
+          "gold": "31",
+          "modes": {
+            "sparse": {
+              "prediction": "31",
+              "correct": true,
+              "trace": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=<think>4*4=16;16*2=32;32-1=31</think><ans>31</ans>",
+              "latency_ms": 337.98570884391665
+            },
+            "dense": {
+              "prediction": "31",
+              "correct": true,
+              "trace": "Q:BridgeET:V=4,I=4,t=2,W=1,dU=<think>4*4=16;16*2=32;32-1=31</think><ans>31</ans>",
+              "latency_ms": 282.1458769030869
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=",
+          "gold": "13",
+          "modes": {
+            "dense": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=<think>2*2=4;4*4=16;16-3=13</think><ans>13</ans>",
+              "latency_ms": 279.69137392938137
+            },
+            "sparse": {
+              "prediction": "13",
+              "correct": true,
+              "trace": "Q:BridgeET:V=2,I=2,t=4,W=3,dU=<think>2*2=4;4*4=16;16-3=13</think><ans>13</ans>",
+              "latency_ms": 287.8732290118933
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=",
+          "gold": "47",
+          "modes": {
+            "sparse": {
+              "prediction": "47",
+              "correct": true,
+              "trace": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=<think>4*4=16;16*3=48;48-1=47</think><ans>47</ans>",
+              "latency_ms": 265.52488980814815
+            },
+            "dense": {
+              "prediction": "47",
+              "correct": true,
+              "trace": "Q:BridgeET:V=4,I=4,t=3,W=1,dU=<think>4*4=16;16*3=48;48-1=47</think><ans>47</ans>",
+              "latency_ms": 296.65507934987545
+            }
+          },
+          "same_trace": true
+        },
+        {
+          "domain": "ELECTRO_THERMAL",
+          "prompt": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=",
+          "gold": "5",
+          "modes": {
+            "dense": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=<think>2*2=4;4*2=8;8-3=5</think><ans>5</ans>",
+              "latency_ms": 261.10242772847414
+            },
+            "sparse": {
+              "prediction": "5",
+              "correct": true,
+              "trace": "Q:BridgeET:V=2,I=2,t=2,W=3,dU=<think>2*2=4;4*2=8;8-3=5</think><ans>5</ans>",
+              "latency_ms": 296.303256880492
+            }
+          },
+          "same_trace": true
+        }
+      ],
+      "same_traces": 105,
+      "total": 105,
+      "modes": {
+        "dense": {
+          "correct": 105,
+          "samples": 105,
+          "p50_ms": 203.07767810299993,
+          "p95_ms": 321.3539286516607
+        },
+        "sparse": {
+          "correct": 105,
+          "samples": 105,
+          "p50_ms": 215.08580818772316,
+          "p95_ms": 337.98570884391665
+        }
+      }
+    }
+  }
+}

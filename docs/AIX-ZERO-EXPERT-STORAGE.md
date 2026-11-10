@@ -57,4 +57,4 @@ Cache budgets exclude resident model weights, deserialization buffers, transfer 
 
 The REPL exposes `!expert <domain> [slot]` and cache status for its default `aix_zero/checkpoints/cartridges` directory. Importing the REPL does not create that directory. A vocabulary-expanded model requires configuration-compatible snapshots. `!save` retains its legacy behavior of writing the active checkpoint; the offline baseline never invokes it. Use a disposable checkpoint for REPL teaching/swap experiments.
 
-Sparse execution and the independently trained Bayesian pilot are separate follow-up changes. The unreviewed local v12 arithmetic prototype, extra tokenizer tokens, generated codex claims, and unrelated execution report are excluded from this baseline publication.
+Opt-in sparse execution is documented in `AIX-ZERO-SPARSE-DISPATCH.md`; it changes computation, not expert weight residency. The independently trained Bayesian pilot is a separate follow-up change. The unreviewed local v12 arithmetic prototype, extra tokenizer tokens, generated codex claims, and unrelated execution report are excluded from this baseline publication.
