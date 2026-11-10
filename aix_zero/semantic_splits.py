@@ -655,4 +655,310 @@ def analyze_bayesian_pilot_errors(pilot_results: Dict[str, Any]) -> Dict[str, An
     }
 
 
+def validate_metamorphic_relations(
+    item: Dict[str, Any],
+    *,
+    assume_conditional_iid: bool = True,
+) -> Dict[str, Any]:
+    """Validate metamorphic relations (`DATA-05` / Issue #63):
+    1. Hypothesis complement symmetry: swapping `p -> 1-p`, `a -> b`, `b -> a` transforms posterior `P -> 1-P`.
+    2. Observation sequence permutation invariance (for `BS`) under conditional IID: permuting `e` preserves `P`.
+    3. Rejects sequence permutation if `assume_conditional_iid=False`.
+    """
+    if not assume_conditional_iid:
+        raise ValueError("Cannot apply IID sequence-permutation metamorphic relation when assume_conditional_iid=False")
+
+    prompt = str(item["prompt"])
+    gold_frac = Fraction(str(item["gold"]))
+    if not (0 < gold_frac < 1):
+        raise ValueError("Metamorphic Bayesian check requires interior probability in (0, 1)")
+
+    compact = re.sub(r"\s+", "", prompt)
+    m = re.fullmatch(r"Q:(BP|BS):([a-zA-Z0-9/=;]+);P=", compact)
+    if not m:
+        raise ValueError(f"Unsupported prompt for metamorphic check: {prompt!r}")
+    task_kind, body = m.groups()
+    kv = dict(p.split("=", 1) for p in body.split(";") if "=" in p)
+
+    p_f = Fraction(kv["p"])
+    a_f = Fraction(kv["a"])
+    b_f = Fraction(kv["b"])
+    e_str = kv["e"]
+
+    # 1. Hypothesis complement transform: H' = not H -> p' = 1 - p, a' = b, b' = a -> P(H'|E) = 1 - P(H|E)
+    comp_p = 1 - p_f
+    comp_prompt = f"Q:{task_kind}:p={comp_p.numerator}/{comp_p.denominator};a={b_f.numerator}/{b_f.denominator};b={a_f.numerator}/{a_f.denominator};e={e_str};P="
+    comp_oracle = _independent_float_bayes_oracle(comp_prompt)
+    expected_comp = float(1 - gold_frac)
+    complement_ok = abs(comp_oracle - expected_comp) <= 1e-12
+
+    # 2. Sequence permutation invariance under conditional IID
+    perm_e = e_str[::-1]
+    perm_prompt = f"Q:{task_kind}:p={p_f.numerator}/{p_f.denominator};a={a_f.numerator}/{a_f.denominator};b={b_f.numerator}/{b_f.denominator};e={perm_e};P="
+    perm_oracle = _independent_float_bayes_oracle(perm_prompt)
+    permutation_ok = abs(perm_oracle - float(gold_frac)) <= 1e-12
+
+    return {
+        "complement_symmetry_passed": complement_ok,
+        "sequence_permutation_passed": permutation_ok,
+        "all_metamorphic_relations_passed": complement_ok and permutation_ok,
+        "complement_prompt": comp_prompt,
+        "permuted_prompt": perm_prompt,
+    }
+
+
+def encode_rational_representation(frac_str: str, mode: str = "reduced_fraction") -> str:
+    """Encode an exact probability/rational in one of three controlled representations (`DATA-09` / Issue #66)."""
+    f = Fraction(frac_str.strip())
+    if mode == "reduced_fraction":
+        return f"{f.numerator}/{f.denominator}" if f.denominator != 1 else str(f.numerator)
+    if mode == "num_den_fields":
+        return f"num={f.numerator};den={f.denominator}"
+    if mode == "scaled_integer_bps":
+        scaled = f * 10000
+        if scaled.denominator != 1:
+            raise ValueError(f"Fraction {frac_str!r} cannot be represented exactly in basis points (1/10000)")
+        return f"bps={scaled.numerator}"
+    raise ValueError(f"Unsupported rational representation mode: {mode!r}")
+
+
+def decode_rational_representation(encoded: str, mode: str = "reduced_fraction") -> str:
+    """Decode a rational representation back to canonical reduced fraction string (`DATA-09` / Issue #66)."""
+    s = encoded.strip()
+    if mode == "reduced_fraction":
+        f = Fraction(s)
+    elif mode == "num_den_fields":
+        m = re.fullmatch(r"num=(\-?\d+);den=([1-9]\d*)", s)
+        if not m:
+            raise ValueError(f"Malformed num_den_fields encoding: {s!r}")
+        f = Fraction(int(m.group(1)), int(m.group(2)))
+    elif mode == "scaled_integer_bps":
+        m = re.fullmatch(r"bps=(\-?\d+)", s)
+        if not m:
+            raise ValueError(f"Malformed scaled_integer_bps encoding: {s!r}")
+        f = Fraction(int(m.group(1)), 10000)
+    else:
+        raise ValueError(f"Unsupported rational representation mode: {mode!r}")
+    return f"{f.numerator}/{f.denominator}" if f.denominator != 1 else str(f.numerator)
+
+
+def verify_multistep_bayesian_derivation(
+    prompt: str,
+    step_posteriors: List[str],
+    final_answer: str,
+) -> Dict[str, Any]:
+    """Verify each sequential Bayesian update step independently (`DATA-10` / Issue #67).
+
+    Catches an incorrect intermediate step even when `final_answer` matches the final posterior.
+    """
+    compact = re.sub(r"\s+", "", prompt)
+    m = re.fullmatch(r"Q:(BP|BS):([a-zA-Z0-9/=;]+);P=", compact)
+    if not m:
+        raise ValueError(f"Unsupported Bayesian prompt: {prompt!r}")
+    task_kind, body = m.groups()
+    kv = dict(p.split("=", 1) for p in body.split(";") if "=" in p)
+    e_str = kv["e"]
+    if len(step_posteriors) != len(e_str):
+        raise ValueError(f"Expected {len(e_str)} step posteriors, got {len(step_posteriors)}")
+
+    step_results: List[Dict[str, Any]] = []
+    for i in range(1, len(e_str) + 1):
+        prefix_e = e_str[:i]
+        sub_prompt = f"Q:{task_kind}:p={kv['p']};a={kv['a']};b={kv['b']};e={prefix_e};P="
+        oracle_val = _independent_float_bayes_oracle(sub_prompt)
+        cand_f = Fraction(step_posteriors[i - 1].strip())
+        ok = abs(float(cand_f) - oracle_val) <= 1e-12
+        step_results.append(
+            {
+                "step_index": i,
+                "observation_prefix": prefix_e,
+                "candidate_posterior": f"{cand_f.numerator}/{cand_f.denominator}",
+                "step_verified": ok,
+            }
+        )
+
+    final_oracle = _independent_float_bayes_oracle(prompt)
+    final_f = Fraction(final_answer.strip())
+    final_ok = abs(float(final_f) - final_oracle) <= 1e-12
+    all_steps_ok = all(s["step_verified"] for s in step_results)
+
+    if final_ok and all_steps_ok:
+        status = "VALID_DERIVATION_AND_FINAL_ANSWER"
+    elif final_ok and not all_steps_ok:
+        status = "INTERMEDIATE_STEP_MISMATCH_DESPITE_CORRECT_FINAL"
+    else:
+        status = "FINAL_ANSWER_MISMATCH"
+
+    return {
+        "supervision_mode": "derivation_supervised",
+        "status": status,
+        "all_steps_verified": all_steps_ok,
+        "final_answer_verified": final_ok,
+        "steps": step_results,
+    }
+
+
+def generate_interpretable_negative_examples(item: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Generate verified negative examples with interpretable error categories (`DATA-11` / Issue #68).
+
+    Ensures no negative example is mathematically equal to the true `gold` answer.
+    """
+    prompt = str(item["prompt"])
+    gold_f = Fraction(str(item["gold"]))
+    compact = re.sub(r"\s+", "", prompt)
+    m = re.fullmatch(r"Q:(BP|BS):([a-zA-Z0-9/=;]+);P=", compact)
+    if not m:
+        raise ValueError(f"Unsupported prompt: {prompt!r}")
+    _, body = m.groups()
+    kv = dict(p.split("=", 1) for p in body.split(";") if "=" in p)
+    p_f = Fraction(kv["p"])
+    a_f = Fraction(kv["a"])
+    b_f = Fraction(kv["b"])
+    e_bit = kv["e"][0]
+
+    like_h1 = a_f if e_bit == "1" else (1 - a_f)
+    like_h0 = b_f if e_bit == "1" else (1 - b_f)
+
+    candidates = [
+        ("PRIOR_ONLY_BASE_RATE_COPY", p_f),
+        ("UNNORMALIZED_JOINT_NUMERATOR", p_f * like_h1),
+        ("EVIDENCE_COMPLEMENT_CONFUSION", (p_f * (1 - like_h1)) / (p_f * (1 - like_h1) + (1 - p_f) * (1 - like_h0))),
+        ("ARITHMETIC_DENOMINATOR_OFF_BY_ONE", Fraction(gold_f.numerator, gold_f.denominator + 1)),
+    ]
+
+    negatives: List[Dict[str, str]] = []
+    for err_type, val_f in candidates:
+        if val_f == gold_f:
+            val_f = Fraction(gold_f.numerator + 1, gold_f.denominator + 2)
+        negatives.append(
+            {
+                "prompt": prompt,
+                "correct_gold": f"{gold_f.numerator}/{gold_f.denominator}",
+                "negative_answer": f"{val_f.numerator}/{val_f.denominator}",
+                "error_category": err_type,
+            }
+        )
+    return negatives
+
+
+def validate_contributor_dataset_submission(package: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate an offline contributor dataset submission (`DATA-12` / Issue #70)
+    before it can enter any training or evaluation queue.
+    """
+    allowed_licenses = {"Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY-4.0", "CC0-1.0"}
+    lic = str(package.get("license_spdx", "")).strip()
+    if lic not in allowed_licenses:
+        raise ValueError(f"Rejected submission: unsupported or missing license_spdx {lic!r}")
+    if not str(package.get("generator_module_or_script", "")).strip():
+        raise ValueError("Rejected submission: missing generator_module_or_script provenance")
+
+    splits = package.get("splits")
+    if not isinstance(splits, dict) or not {"train", "validation", "test"}.issubset(splits):
+        raise ValueError("Rejected submission: package must provide disjoint train, validation, and test splits")
+
+    verify_disjoint_splits(splits)
+    for split_name in ("train", "validation", "test"):
+        rows = splits[split_name]
+        hashes = [semantic_identity_hash(r) for r in rows]
+        if len(hashes) != len(set(hashes)):
+            raise ValueError(f"Rejected submission: duplicate semantic problems inside {split_name!r} split")
+        oracle_check = cross_check_generator_with_independent_oracle(rows)
+        if not oracle_check["all_verified"]:
+            raise ValueError(f"Rejected submission: independent oracle failed on {split_name!r} split")
+
+    return {
+        "accepted_for_queue": True,
+        "dataset_id": package.get("dataset_id", "contributor-submission"),
+        "license_spdx": lic,
+        "split_counts": {k: len(splits[k]) for k in ("train", "validation", "test")},
+    }
+
+
+def build_reproducible_data_inspection_report(
+    splits: Dict[str, List[Dict[str, Any]]],
+    *,
+    dataset_id: str,
+) -> Dict[str, Any]:
+    """Generate a reproducible data inspection report (`DATA-14` / Issue #72) containing
+    split sizes, prompt length distributions, difficulty tiers, and shortcut accuracies,
+    while omitting all withheld final-test gold answers from public summaries.
+    """
+    verify_disjoint_splits(splits)
+    shortcuts = audit_answer_frequency_shortcuts(splits["train"], splits["test"])
+
+    split_summaries: Dict[str, Any] = {}
+    for split_name in ("train", "validation", "test"):
+        rows = splits[split_name]
+        lengths = [len(str(r["prompt"])) for r in rows]
+        tiers: Dict[str, int] = {}
+        for r in rows:
+            t = compute_difficulty_factors(r)["difficulty_tier"]
+            tiers[t] = tiers.get(t, 0) + 1
+        summary_entry: Dict[str, Any] = {
+            "sample_count": len(rows),
+            "min_prompt_length": min(lengths),
+            "max_prompt_length": max(lengths),
+            "difficulty_tier_counts": tiers,
+        }
+        if split_name != "test":
+            from collections import Counter
+            summary_entry["top_answers"] = dict(Counter(str(r["gold"]) for r in rows).most_common(3))
+        split_summaries[split_name] = summary_entry
+
+    return {
+        "schema_version": "1.0.0",
+        "dataset_id": dataset_id,
+        "contains_withheld_test_answers": False,
+        "splits": split_summaries,
+        "shortcut_audit": shortcuts,
+    }
+
+
+def build_cross_domain_composition_pilot() -> Dict[str, Any]:
+    """Combine two verified primitives (`BP` Bayesian posterior + 2-action expected utility)
+    into a held-out cross-domain composition family (`DATA-15` / Issue #74) with an independent
+    reference verifier.
+    """
+    cases = [
+        {"p": "1/2", "a": "2/3", "b": "1/3", "e": "1", "u_h1": 9, "u_h0": 3},
+        {"p": "1/3", "a": "3/4", "b": "1/4", "e": "1", "u_h1": 10, "u_h0": 2},
+        {"p": "2/5", "a": "1/2", "b": "1/4", "e": "0", "u_h1": 8, "u_h0": 4},
+    ]
+    built: List[Dict[str, Any]] = []
+    for c in cases:
+        bp_prompt = f"Q:BP:p={c['p']};a={c['a']};b={c['b']};e={c['e']};P="
+        post_float = _independent_float_bayes_oracle(bp_prompt)
+        # Exact Fraction computation for gold
+        p_f, a_f, b_f = Fraction(c["p"]), Fraction(c["a"]), Fraction(c["b"])
+        l1 = a_f if c["e"] == "1" else (1 - a_f)
+        l0 = b_f if c["e"] == "1" else (1 - b_f)
+        post_f = (p_f * l1) / (p_f * l1 + (1 - p_f) * l0)
+        eu_f = post_f * int(c["u_h1"]) + (1 - post_f) * int(c["u_h0"])
+        eu_oracle = post_float * float(c["u_h1"]) + (1.0 - post_float) * float(c["u_h0"])
+        if abs(float(eu_f) - eu_oracle) > 1e-12:
+            raise AssertionError("Independent composition oracle mismatch")
+
+        comp_prompt = (
+            f"Q:COMPOSE_BP_EU:p={c['p']};a={c['a']};b={c['b']};e={c['e']};"
+            f"u1={c['u_h1']};u0={c['u_h0']};EU="
+        )
+        gold_str = f"{eu_f.numerator}/{eu_f.denominator}" if eu_f.denominator != 1 else str(eu_f.numerator)
+        built.append(
+            {
+                "prompt": comp_prompt,
+                "primitive_1_posterior": f"{post_f.numerator}/{post_f.denominator}",
+                "gold": gold_str,
+                "primitives": ["BP_BAYESIAN_POSTERIOR", "EXPECTED_UTILITY_LINEAR"],
+                "generalization_type": "cross_domain_two_primitive_composition",
+            }
+        )
+
+    return {
+        "family_id": "compose-bp-expected-utility-v1",
+        "independent_oracle_verified": True,
+        "cases": built,
+    }
+
+
+
 

@@ -7,6 +7,8 @@ covers cached CPU tensors only, not model slots or temporary deserialization mem
 from __future__ import annotations
 
 from collections import OrderedDict
+import contextlib
+import copy
 from dataclasses import asdict
 import hashlib
 import json
@@ -305,3 +307,131 @@ class SparseExpertCartridgeBank:
                 target.load_state_dict(staged, strict=True)
             return dict(installed=True, domain=domain, slot=slot,
                         parameters=meta['parameters'], cache_hit=hit)
+
+    @contextlib.contextmanager
+    def temporary_specialist_session(
+        self,
+        model: AIXZeroModel,
+        domain: str,
+        *,
+        slot: Optional[int] = None,
+        active_base_checkpoint_sha256: Optional[str] = None,
+        force_explicit_route: bool = True,
+    ):
+        """Stable lifecycle context manager for temporary specialist sessions (`EXPERT-04` / Issue #91).
+
+        Guarantees:
+        - Prevents concurrent temporary sessions on the same `model` instance.
+        - Saves and restores target slot tensors, router state, `dispatch_mode`, and `training` mode
+          even if an exception is raised inside the `with` block.
+        """
+        if getattr(model, '_active_specialist_session', False):
+            raise RuntimeError('Concurrent temporary_specialist_session on the same model is prohibited')
+
+        moe = _moe(model)
+        manifest, meta, _, _ = self._load(domain)
+        target_slot = meta['source_expert_index'] if slot is None else slot
+        if type(target_slot) is not int or not 0 <= target_slot < len(moe.experts):
+            raise ValueError('Target expert slot out of range')
+
+        was_training = model.training
+        prev_dispatch_mode = moe.dispatch_mode
+        saved_slot_state = {
+            k: v.detach().clone()
+            for k, v in moe.experts[target_slot].state_dict().items()
+        }
+        saved_router_weight = moe.router.weight.detach().clone()
+        saved_router_bias = moe.router.bias.detach().clone() if moe.router.bias is not None else None
+        saved_top_k = moe.top_k
+
+        model._active_specialist_session = True
+        try:
+            model.eval()
+            install_info = self.install_cartridge(
+                model,
+                domain,
+                slot=target_slot,
+                active_base_checkpoint_sha256=active_base_checkpoint_sha256,
+            )
+            if force_explicit_route:
+                with torch.no_grad():
+                    moe.router.weight.zero_()
+                    if moe.router.bias is not None:
+                        moe.router.bias.fill_(-1e9)
+                        moe.router.bias[target_slot] = 1e9
+                moe.top_k = 1
+            yield install_info
+        finally:
+            with torch.no_grad():
+                moe.experts[target_slot].load_state_dict(saved_slot_state, strict=True)
+                moe.router.weight.copy_(saved_router_weight)
+                if saved_router_bias is not None and moe.router.bias is not None:
+                    moe.router.bias.copy_(saved_router_bias)
+            moe.top_k = saved_top_k
+            moe.dispatch_mode = prev_dispatch_mode
+            model.train(was_training)
+            model._active_specialist_session = False
+
+    def publish_verified_catalog_atomic(
+        self,
+        new_manifest: Dict[str, Any],
+        *,
+        simulate_interruption_before_manifest_swap: bool = False,
+    ) -> Dict[str, Any]:
+        """Crash-safe expert library publication (`EXPERT-13` / Issue #121).
+
+        Verifies every referenced immutable `.safetensors` object on disk before atomically
+        replacing `cartridge_manifest.json`, coordinates concurrent publishers via an exclusive
+        lockfile, and leaves the previous catalog usable if interrupted before the atomic swap.
+        """
+        self.cartridge_dir.mkdir(parents=True, exist_ok=True)
+        lock_path = self.cartridge_dir / '.publish.lock'
+        try:
+            lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            raise RuntimeError('Concurrent catalog publication rejected (.publish.lock is held)')
+
+        try:
+            os.write(lock_fd, f'pid={os.getpid()}'.encode('utf-8'))
+            os.close(lock_fd)
+            lock_fd = -1
+
+            if not isinstance(new_manifest, dict) or new_manifest.get('schema_version') != 1:
+                raise ValueError('Invalid manifest schema_version')
+            cartridges = new_manifest.get('cartridges')
+            if not isinstance(cartridges, dict) or len(cartridges) > self.max_manifest_entries:
+                raise ValueError('Invalid or oversized cartridges map')
+
+            for domain, entry in cartridges.items():
+                self.validate_specialist_provenance(entry)
+                fname = entry.get('cartridge_file', '')
+                fpath = self.cartridge_dir / fname
+                if Path(fname).name != fname or fpath.is_symlink() or not fpath.is_file():
+                    raise ValueError(f'Missing or invalid cartridge shard on disk for {domain}: {fname!r}')
+                raw = fpath.read_bytes()
+                if len(raw) != entry.get('serialized_bytes') or len(raw) > self.max_shard_bytes:
+                    raise ValueError(f'Byte length mismatch for {fname}')
+                if hashlib.sha256(raw).hexdigest() != entry.get('sha256'):
+                    raise ValueError(f'SHA-256 mismatch for {fname}')
+                tensors = load(raw)
+                if any(not v.is_floating_point() or not torch.isfinite(v).all() for v in tensors.values()):
+                    raise ValueError(f'Non-finite tensors in {fname}')
+
+            encoded = json.dumps(new_manifest, indent=2, allow_nan=False).encode('utf-8')
+            if len(encoded) > self.max_manifest_bytes:
+                raise ValueError('Serialized manifest exceeds max_manifest_bytes')
+
+            if simulate_interruption_before_manifest_swap:
+                raise InterruptedError('Simulated interruption before manifest replacement')
+
+            _atomic_write(self.manifest_path, encoded)
+            self._hot_cache.clear()
+            return {'published': True, 'entries': len(cartridges)}
+        finally:
+            if lock_fd != -1:
+                try:
+                    os.close(lock_fd)
+                except OSError:
+                    pass
+            if lock_path.exists():
+                lock_path.unlink()

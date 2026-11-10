@@ -12,6 +12,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -518,5 +519,222 @@ def make_network_job_contract(unsigned_contract: Dict[str, Any]) -> Dict[str, An
     c["contract_sha256"] = network_job_contract_digest(c)
     validate_network_job_contract(c)
     return c
+
+
+def plan_artifact_retention_cleanup(
+    scan_dir: Path | str,
+    *,
+    inventory_path: Path = DEFAULT_INVENTORY_PATH,
+    active_evaluation_paths: Optional[List[Path | str]] = None,
+    dry_run: bool = True,
+) -> Dict[str, Any]:
+    """Define and execute artifact retention and cleanup rules (`BASE-15` / Issue #38).
+
+    Guarantees:
+    - Never deletes any checkpoint listed in `research/checkpoint-inventory.json` or
+      referenced by `active_evaluation_paths`.
+    - Retains `recovery_manifest.json` (`recovery_model.safetensors`, `recovery_state.pt`) and
+      structured failure records (`record_type == "EXPERIMENT_FAILURE_OR_PARTIAL_RUN"`) so
+      interrupted/failed runs remain inspectable and recoverable.
+    - Reclaims only unreferenced scratch/temporary files (e.g. `*.tmp`, `.cartridge-*`, `scratch_*.safetensors`).
+    """
+    root_scan = Path(scan_dir)
+    inv = load_checkpoint_inventory(inventory_path, verify_files_on_disk=False)
+    protected_real = {_real_target_path(ROOT / c["path"]) for c in inv["checkpoints"]}
+    for p in active_evaluation_paths or []:
+        protected_real.add(_real_target_path(Path(p)))
+
+    # Protect any file referenced by a recovery_manifest.json inside scan_dir
+    recoverable_bundles: List[str] = []
+    for r_meta in root_scan.rglob("recovery_manifest.json"):
+        recoverable_bundles.append(str(r_meta))
+        protected_real.add(_real_target_path(r_meta))
+        try:
+            m_data = json.loads(r_meta.read_text(encoding="utf-8"))
+            for key in ("weights_file", "state_file"):
+                if key in m_data:
+                    protected_real.add(_real_target_path(r_meta.parent / m_data[key]))
+        except Exception:
+            pass
+
+    retained_protected: List[str] = []
+    retained_failures: List[str] = []
+    reclaimable: List[str] = []
+    deleted: List[str] = []
+
+    for fpath in sorted(root_scan.rglob("*")):
+        if not fpath.is_file():
+            continue
+        real_f = _real_target_path(fpath)
+        if real_f in protected_real:
+            retained_protected.append(str(fpath))
+            continue
+        if fpath.suffix == ".json":
+            try:
+                j = json.loads(fpath.read_text(encoding="utf-8"))
+                if isinstance(j, dict) and j.get("record_type") == "EXPERIMENT_FAILURE_OR_PARTIAL_RUN":
+                    retained_failures.append(str(fpath))
+                    continue
+            except Exception:
+                pass
+        if (
+            fpath.name.startswith(".cartridge-")
+            or fpath.name.startswith("scratch_")
+            or fpath.suffix in (".tmp", ".scratch")
+        ):
+            reclaimable.append(str(fpath))
+            if not dry_run:
+                fpath.unlink()
+                deleted.append(str(fpath))
+        else:
+            retained_protected.append(str(fpath))
+
+    return {
+        "dry_run": dry_run,
+        "retained_protected_files": retained_protected,
+        "retained_recoverable_bundles": recoverable_bundles,
+        "retained_failure_records": retained_failures,
+        "reclaimable_files": reclaimable,
+        "deleted_files": deleted,
+    }
+
+
+def decompose_fixed_route_vs_learned_weights(pilot_results: Dict[str, Any]) -> Dict[str, Any]:
+    """Quantify routing intervention effects vs. learned-weight effects under identical generation
+    budgets (`TRAIN-02` / Issue #77).
+
+    Compares:
+    1. `unchanged_base`: default learned router on frozen `v11`,
+    2. `untrained_forced_route`: forcing expert slot `k` BEFORE any gradient updates,
+    3. `trained_forced_route`: forcing expert slot `k` AFTER single-expert training.
+    """
+    out: Dict[str, Any] = {}
+    for task_name, task_data in pilot_results.get("tasks", {}).items():
+        controls = task_data["controls"]
+        base_acc = float(controls["base"]["accuracy"])
+        untrained_route_acc = float(controls["untrained_explicit_route"]["accuracy"])
+        trained_route_acc = float(task_data["candidate"]["accuracy"])
+
+        route_only_delta = round(untrained_route_acc - base_acc, 6)
+        learned_weight_delta = round(trained_route_acc - untrained_route_acc, 6)
+        net_delta_vs_base = round(trained_route_acc - base_acc, 6)
+
+        out[task_name] = {
+            "generation_budget": dict(pilot_results.get("settings", {})),
+            "unchanged_base_accuracy": base_acc,
+            "untrained_forced_route_accuracy": untrained_route_acc,
+            "trained_forced_route_accuracy": trained_route_acc,
+            "routing_intervention_effect_delta": route_only_delta,
+            "learned_weight_effect_delta": learned_weight_delta,
+            "net_delta_vs_unchanged_base": net_delta_vs_base,
+        }
+    return {
+        "schema_version": "1.0.0",
+        "tasks": out,
+    }
+
+
+def step_with_nonfinite_guard_and_recovery(
+    *,
+    model: AIXZeroModel,
+    optimizer: torch.optim.Optimizer,
+    loss: torch.Tensor,
+    step: int,
+    recovery_bundle_dir: Path | str,
+    experiment_config: Dict[str, Any],
+    failure_record_path: Path | str,
+    max_grad_norm: float = 1.0,
+) -> Dict[str, Any]:
+    """Execute one optimizer step with nonfinite loss/gradient/parameter detection and automatic
+    rollback to the last verified recovery bundle (`TRAIN-10` / Issue #85).
+
+    Never reports uninterrupted success after a numerical failure.
+    """
+    def _rollback_and_record(reason: str) -> Dict[str, Any]:
+        optimizer.zero_grad(set_to_none=True)
+        resumed = resume_training_from_bundle(
+            bundle_dir=recovery_bundle_dir,
+            expected_experiment_config=experiment_config,
+            model=model,
+            optimizer=optimizer,
+        )
+        rec = build_experiment_failure_record(
+            experiment_id=experiment_config["experiment_id"],
+            config_sha256=experiment_config["config_sha256"],
+            status="FAILED_NONFINITE",
+            step_reached=step,
+            reason=reason,
+            diagnostics={"rolled_back_to_step": resumed["step"]},
+        )
+        save_experiment_failure_record(rec, failure_record_path)
+        return {
+            "step_succeeded": False,
+            "uninterrupted_success": False,
+            "recovered_from_nonfinite_fault": True,
+            "rolled_back_to_step": resumed["step"],
+            "failure_record": rec,
+        }
+
+    if not torch.isfinite(loss).all():
+        return _rollback_and_record(f"Non-finite loss at step {step}")
+
+    loss.backward()
+    for name, p in model.named_parameters():
+        if p.grad is not None and not torch.isfinite(p.grad).all():
+            return _rollback_and_record(f"Non-finite gradient in {name} at step {step}")
+
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
+    optimizer.step()
+
+    for name, p in model.named_parameters():
+        if not torch.isfinite(p).all():
+            return _rollback_and_record(f"Non-finite parameter in {name} after optimizer.step at step {step}")
+
+    return {
+        "step_succeeded": True,
+        "uninterrupted_success": True,
+        "recovered_from_nonfinite_fault": False,
+        "step": step,
+    }
+
+
+def select_checkpoint_without_test_leakage(
+    *,
+    initial_validation_loss: float,
+    validation_logs: List[Dict[str, Any]],
+    criterion: str = "lowest_validation_loss",
+) -> Dict[str, Any]:
+    """Audit and reconstruct checkpoint selection strictly from step-0 and validation logs
+    without final-test leakage (`TRAIN-12` / Issue #87).
+    """
+    if criterion != "lowest_validation_loss":
+        raise ValueError(f"Unsupported selection criterion: {criterion!r}")
+    if not math.isfinite(initial_validation_loss):
+        raise ValueError("initial_validation_loss must be finite")
+
+    candidates: List[Tuple[float, int]] = [(float(initial_validation_loss), 0)]
+    for entry in validation_logs:
+        if any(k.startswith("test") or "final_test" in k for k in entry):
+            raise PermissionError(
+                "Final-test metrics are prohibited in validation checkpoint selection logs"
+            )
+        step = int(entry["step"])
+        val_loss = float(entry["validation_loss"])
+        if not math.isfinite(val_loss):
+            raise ValueError(f"Non-finite validation_loss at step {step}")
+        candidates.append((val_loss, step))
+
+    # Deterministic tie-breaking: lowest validation_loss, then earliest step
+    best_loss, best_step = min(candidates, key=lambda pair: (pair[0], pair[1]))
+    return {
+        "criterion": criterion,
+        "included_step_zero": True,
+        "evaluated_steps": [s for _, s in candidates],
+        "selected_step": best_step,
+        "selected_validation_loss": best_loss,
+        "Beat_initial_checkpoint": best_step > 0,
+        "used_final_test_results": False,
+    }
+
 
 

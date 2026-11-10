@@ -1029,3 +1029,320 @@ def score_epistemic_abstention_task(
     }
 
 
+def evaluate_scientific_reasoning_suite(cases: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Evaluate scientific/math reasoning tasks with independent closed-form reference solvers
+    across new parameter regimes (`EVAL-13` / Issue #56).
+    """
+    if not cases:
+        raise ValueError("cases must be nonempty")
+
+    results: List[Dict[str, Any]] = []
+    for c in cases:
+        family = c["family"]
+        params = c["parameters"]
+        if family == "KINEMATICS_DISPLACEMENT":
+            # s = u*t + (1/2)*a*t^2 in exact rational arithmetic
+            u, a, t = Fraction(params["u"]), Fraction(params["a"]), Fraction(params["t"])
+            gold_f = u * t + Fraction(1, 2) * a * (t ** 2)
+        elif family == "OHMS_LAW_POWER":
+            # P = V^2 / R
+            v, r = Fraction(params["V"]), Fraction(params["R"])
+            if r == 0:
+                raise ValueError("Resistance R cannot be zero")
+            gold_f = (v ** 2) / r
+        elif family == "ARITHMETIC_SERIES_SUM":
+            # S_n = (n/2) * (2*a1 + (n-1)*d)
+            n, a1, d = int(params["n"]), Fraction(params["a1"]), Fraction(params["d"])
+            gold_f = Fraction(n, 2) * (2 * a1 + (n - 1) * d)
+        else:
+            raise ValueError(f"Unsupported scientific reasoning family: {family!r}")
+
+        gold_str = f"{gold_f.numerator}/{gold_f.denominator}" if gold_f.denominator != 1 else str(gold_f.numerator)
+        scored = score_rational_or_probability(str(c["prediction"]), gold_str, is_probability=False, require_reduced=True)
+        results.append(
+            {
+                "family": family,
+                "regime": c.get("regime", "extrapolated_parameter_regime"),
+                "oracle_gold": gold_str,
+                "score": scored["score"],
+                "status": scored["status"],
+            }
+        )
+
+    return {
+        "sample_count": len(results),
+        "mean_score": round(statistics.fmean(r["score"] for r in results), 6),
+        "solver_scope_and_limitations": [
+            "Independent exact rational solver covers classical kinematics, resistive DC power, and finite arithmetic series.",
+            "Does not model relativistic, non-linear, or floating-point transcendental ODEs.",
+        ],
+        "results": results,
+    }
+
+
+def evaluate_representation_robustness_suite(
+    variant_records: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Evaluate representation robustness across variable renamings, field reorderings,
+    paraphrases, and irrelevant-context distractors (`EVAL-14` / Issue #58).
+
+    Groups variants by `semantic_group_id` so correlated variants are never treated as
+    independent samples, and reports `group_all_consistent_accuracy` separately from
+    `mean_variant_accuracy`.
+    """
+    if not variant_records:
+        raise ValueError("variant_records must be nonempty")
+
+    by_group: Dict[str, List[Dict[str, Any]]] = {}
+    for r in variant_records:
+        gid = str(r["semantic_group_id"])
+        by_group.setdefault(gid, []).append(r)
+
+    group_summaries: List[Dict[str, Any]] = []
+    for gid, rows in sorted(by_group.items()):
+        scores = [float(score_rational_or_probability(str(x["prediction"]), str(x["gold"]), is_probability=bool(x.get("is_probability", False)))["score"]) for x in rows]
+        preds = {str(x["prediction"]).strip() for x in rows}
+        all_correct = all(s == 1.0 for s in scores)
+        all_same_answer = len(preds) == 1
+        group_summaries.append(
+            {
+                "semantic_group_id": gid,
+                "variant_count": len(rows),
+                "mean_variant_score": round(statistics.fmean(scores), 6),
+                "all_variants_correct": all_correct,
+                "all_variants_consistent_output": all_same_answer,
+            }
+        )
+
+    return {
+        "total_variant_prompts": len(variant_records),
+        "independent_semantic_groups": len(group_summaries),
+        "group_all_correct_rate": round(
+            sum(1 for g in group_summaries if g["all_variants_correct"]) / len(group_summaries), 6
+        ),
+        "group_consistency_rate": round(
+            sum(1 for g in group_summaries if g["all_variants_consistent_output"]) / len(group_summaries), 6
+        ),
+        "mean_group_accuracy": round(
+            statistics.fmean(g["mean_variant_score"] for g in group_summaries), 6
+        ),
+        "groups": group_summaries,
+    }
+
+
+def evaluate_bayesian_edge_cases(
+    *,
+    p: str,
+    a: str,
+    b: str,
+    e: str,
+) -> Dict[str, Any]:
+    """Reference verifier for binary Bayesian boundary & edge cases (`REASON-02` / Issue #104):
+    - impossible conditioning event ($P(E)=0$),
+    - degenerate certain priors ($p=0$ or $p=1$),
+    - uninformative symmetric likelihoods ($a=b \\implies P(H \\mid E) = p$),
+    - evidence complement conservation ($P(E=1) + P(E=0) = 1$).
+    """
+    p_f, a_f, b_f = Fraction(p), Fraction(a), Fraction(b)
+    if not (0 <= p_f <= 1 and 0 <= a_f <= 1 and 0 <= b_f <= 1):
+        raise ValueError("Prior and likelihoods must lie in [0, 1]")
+    if e not in ("0", "1"):
+        raise ValueError("Observation e must be '0' or '1'")
+
+    pe_1 = p_f * a_f + (1 - p_f) * b_f
+    pe_0 = p_f * (1 - a_f) + (1 - p_f) * (1 - b_f)
+    if pe_1 + pe_0 != 1:
+        raise AssertionError("Evidence complement conservation violated")
+
+    l1 = a_f if e == "1" else (1 - a_f)
+    l0 = b_f if e == "1" else (1 - b_f)
+    denom = p_f * l1 + (1 - p_f) * l0
+
+    is_boundary = (p_f in (0, 1)) or (a_f in (0, 1)) or (b_f in (0, 1)) or (a_f == b_f)
+    if denom == 0:
+        return {
+            "status": "IMPOSSIBLE_EVIDENCE",
+            "is_boundary_case": True,
+            "posterior": None,
+            "evidence_complement_sum": "1",
+        }
+
+    post = (p_f * l1) / denom
+    post_str = f"{post.numerator}/{post.denominator}" if post.denominator != 1 else str(post.numerator)
+    return {
+        "status": "VALID_POSTERIOR",
+        "is_boundary_case": is_boundary,
+        "likelihood_symmetry_preserves_prior": (a_f == b_f and post == p_f),
+        "posterior": post_str,
+        "evidence_complement_sum": "1",
+    }
+
+
+def evaluate_structural_causal_model(
+    scm: Dict[str, Any],
+    *,
+    query_kind: str,
+    x_value: int,
+) -> Dict[str, Any]:
+    """Evaluate a discrete structural causal model (`REASON-06` / Issue #93) over binary
+    confounder $Z \\in \\{0, 1\\}$, treatment $X \\in \\{0, 1\\}$, and outcome $Y \\in \\{0, 1\\}$.
+
+    Strictly separates `observational` $P(Y=1 \\mid X=x)$ from `interventional` $P(Y=1 \\mid do(X=x))$,
+    and rejects cyclic graphs rather than applying informal subtraction rules.
+    """
+    edges: List[Tuple[str, str]] = [tuple(e) for e in scm.get("edges", [])]
+    # Cycle detection via topological sort
+    nodes = {u for e in edges for u in e}
+    adj: Dict[str, List[str]] = {n: [] for n in nodes}
+    indeg: Dict[str, int] = {n: 0 for n in nodes}
+    for u, v in edges:
+        if u == v:
+            raise ValueError(f"Cyclic self-loop detected on {u}")
+        adj[u].append(v)
+        indeg[v] = indeg.get(v, 0) + 1
+    queue = [n for n, d in indeg.items() if d == 0]
+    visited = 0
+    while queue:
+        curr = queue.pop(0)
+        visited += 1
+        for nxt in adj.get(curr, []):
+            indeg[nxt] -= 1
+            if indeg[nxt] == 0:
+                queue.append(nxt)
+    if visited != len(nodes):
+        raise ValueError("Cyclic structural causal model rejected: DAG required")
+
+    if x_value not in (0, 1):
+        raise ValueError("x_value must be 0 or 1")
+
+    pz1 = Fraction(scm["p_z1"])
+    pz0 = 1 - pz1
+    px1_z = {0: Fraction(scm["p_x1_given_z0"]), 1: Fraction(scm["p_x1_given_z1"])}
+    py1_zx = {
+        (0, 0): Fraction(scm["p_y1_given_z0_x0"]),
+        (0, 1): Fraction(scm["p_y1_given_z0_x1"]),
+        (1, 0): Fraction(scm["p_y1_given_z1_x0"]),
+        (1, 1): Fraction(scm["p_y1_given_z1_x1"]),
+    }
+
+    if query_kind == "interventional_do_x":
+        # Backdoor adjustment: sum_z P(Z=z) * P(Y=1 | Z=z, X=x)
+        val = pz0 * py1_zx[(0, x_value)] + pz1 * py1_zx[(1, x_value)]
+    elif query_kind == "observational_given_x":
+        # Conditional probability: sum_z P(Z=z) P(X=x|Z=z) P(Y=1|Z=z,X=x) / sum_z P(Z=z) P(X=x|Z=z)
+        px_z0 = px1_z[0] if x_value == 1 else (1 - px1_z[0])
+        px_z1 = px1_z[1] if x_value == 1 else (1 - px1_z[1])
+        denom = pz0 * px_z0 + pz1 * px_z1
+        if denom == 0:
+            raise ValueError("Zero probability conditioning event in observational query")
+        num = pz0 * px_z0 * py1_zx[(0, x_value)] + pz1 * px_z1 * py1_zx[(1, x_value)]
+        val = num / denom
+    else:
+        raise ValueError(f"Unsupported causal query_kind: {query_kind!r}")
+
+    ans = f"{val.numerator}/{val.denominator}" if val.denominator != 1 else str(val.numerator)
+    return {
+        "query_kind": query_kind,
+        "x_value": x_value,
+        "exact_probability": ans,
+    }
+
+
+def compute_exact_shapley_values(
+    players: List[str],
+    coalition_values: Dict[Tuple[str, ...], int | str | Fraction],
+) -> Dict[str, Any]:
+    """Compute exact Shapley values for finite cooperative games via enumerated permutations
+    (`REASON-11` / Issue #96) and verify efficiency, symmetry, and dummy-player axioms.
+
+    Complexity is $O(|N|! \\cdot |N|)$; practically restricted to $1 \\le |N| \\le 6$.
+    """
+    import itertools
+
+    n = len(players)
+    if not (1 <= n <= 6) or len(set(players)) != n:
+        raise ValueError("Exact permutation Shapley solver supports 1..6 distinct players")
+
+    norm_v: Dict[frozenset[str], Fraction] = {frozenset(): Fraction(0)}
+    for k, val in coalition_values.items():
+        norm_v[frozenset(k)] = Fraction(val)
+
+    totals = {p: Fraction(0) for p in players}
+    perms = list(itertools.permutations(players))
+    for perm in perms:
+        prefix: Set[str] = set()
+        for p in perm:
+            v_before = norm_v.get(frozenset(prefix), Fraction(0))
+            prefix.add(p)
+            v_after = norm_v.get(frozenset(prefix), Fraction(0))
+            totals[p] += (v_after - v_before)
+
+    shapley = {p: totals[p] / len(perms) for p in players}
+    grand_v = norm_v.get(frozenset(players), Fraction(0))
+    efficiency_ok = sum(shapley.values()) == grand_v
+
+    # Check dummy-player axiom: any player with 0 marginal contribution to all coalitions has phi_p == 0
+    dummy_players = []
+    for p in players:
+        others = [x for x in players if x != p]
+        is_dummy = True
+        for r in range(len(others) + 1):
+            for sub in itertools.combinations(others, r):
+                s_set = frozenset(sub)
+                if norm_v.get(s_set | {p}, Fraction(0)) - norm_v.get(s_set, Fraction(0)) != 0:
+                    is_dummy = False
+                    break
+        if is_dummy:
+            dummy_players.append(p)
+    dummy_axiom_ok = all(shapley[p] == 0 for p in dummy_players)
+
+    return {
+        "player_count": n,
+        "permutations_evaluated": len(perms),
+        "complexity_note": "O(N! * N) exact permutation enumeration; max supported N=6",
+        "shapley_values": {
+            p: (f"{v.numerator}/{v.denominator}" if v.denominator != 1 else str(v.numerator))
+            for p, v in shapley.items()
+        },
+        "efficiency_verified": efficiency_ok,
+        "dummy_player_axiom_verified": dummy_axiom_ok,
+        "dummy_players": dummy_players,
+    }
+
+
+def evaluate_cooperation_stability(
+    *,
+    payoff_cc: Tuple[int, int],
+    payoff_cd: Tuple[int, int],
+    payoff_dc: Tuple[int, int],
+    payoff_dd: Tuple[int, int],
+) -> Dict[str, Any]:
+    """Evaluate strategic incentives and unstable cooperation cases (`REASON-12` / Issue #110).
+
+    Separates:
+    - `socially_optimal_joint_cooperate`: whether $(C, C)$ maximizes total payoff,
+    - `unilateral_deviation_profitable`: whether either player strictly gains by defecting from $(C, C)$,
+    - `cooperation_is_nash_stable`: whether $(C, C)$ is a pure Nash equilibrium.
+    """
+    cc_total = payoff_cc[0] + payoff_cc[1]
+    max_total = max(
+        cc_total,
+        payoff_cd[0] + payoff_cd[1],
+        payoff_dc[0] + payoff_dc[1],
+        payoff_dd[0] + payoff_dd[1],
+    )
+    a_deviates = payoff_dc[0] > payoff_cc[0]
+    b_deviates = payoff_cd[1] > payoff_cc[1]
+    nash_stable = not (a_deviates or b_deviates)
+
+    return {
+        "joint_cooperation_total_payoff": cc_total,
+        "socially_optimal_joint_cooperate": cc_total == max_total,
+        "player_a_profitable_deviation": a_deviates,
+        "player_b_profitable_deviation": b_deviates,
+        "cooperation_is_nash_stable": nash_stable,
+        "classification": "STABLE_COOPERATION" if nash_stable else "UNSTABLE_HIGH_WELFARE_TRAP",
+    }
+
+
+

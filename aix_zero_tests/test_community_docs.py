@@ -104,6 +104,121 @@ class CommunityDocsTests(unittest.TestCase):
         self.assertIn("Evidence-Based Recruitment Announcement (`COMM-10`", comm_text)
         self.assertIn("Three Well-Scoped Beginner Contribution Paths (`COMM-11`", comm_text)
 
+    def test_wave5_worker_01_sec_01_network_02_and_web_08_11(self):
+        import tempfile
+        from aix_zero.checkpoint_registry import make_network_job_contract
+        from aix_zero.network_coordinator import (
+            DurableExperimentQueue,
+            THREAT_BOUNDARY_MATRIX,
+            match_job_to_worker,
+            validate_worker_capability_handshake,
+        )
+        from aix_zero.website_data_builder import (
+            audit_html_accessibility_and_keyboard_nav,
+            build_research_updates_feed,
+        )
+
+        # WORKER-01 capability handshake & PII rejection
+        worker_caps = {
+            "worker_ephemeral_id": "worker-anon-01",
+            "device_types": ["cpu"],
+            "available_ram_mb": 2048,
+            "available_disk_mb": 4096,
+            "torch_version": "2.2.2",
+            "safetensors_version": "0.8.0",
+            "max_lease_seconds": 600,
+            "allowed_job_types": ["OFFLINE_EVALUATION_JOB"],
+        }
+        validate_worker_capability_handshake(worker_caps)
+        with self.assertRaisesRegex(ValueError, "prohibited identity/PII fields"):
+            validate_worker_capability_handshake(dict(worker_caps, hostname="secret-laptop.local"))
+
+        job = make_network_job_contract(
+            {
+                "schema_version": "1.0.0",
+                "job_id": "job-eval-v11-002",
+                "job_type": "OFFLINE_EVALUATION_JOB",
+                "experiment_config_sha256": "a" * 64,
+                "inputs": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "b" * 64,
+                    "dataset_id": "v11-kip-test",
+                    "dataset_sha256": "c" * 64,
+                    "seed": 42,
+                    "target_expert_slot": None,
+                },
+                "resource_budget": {
+                    "max_steps": 0,
+                    "max_wall_clock_seconds": 120,
+                    "max_memory_mb": 512,
+                    "device": "cpu",
+                },
+                "lease": {
+                    "lease_id": "lease-002",
+                    "worker_id": "worker-anon-01",
+                    "issued_at_utc": "2026-11-10T22:00:00Z",
+                    "expires_at_utc": "2026-11-10T22:30:00Z",
+                    "heartbeat_interval_seconds": 15,
+                    "attempt_number": 1,
+                },
+                "expected_outputs": {
+                    "requires_evaluation_result_json": True,
+                    "requires_candidate_safetensors": False,
+                    "requires_failure_record_on_abort": True,
+                },
+            }
+        )
+        matched = match_job_to_worker(job, worker_caps)
+        self.assertTrue(matched["matched"])
+        low_ram_worker = dict(worker_caps, available_ram_mb=128)
+        unmatched = match_job_to_worker(job, low_ram_worker)
+        self.assertFalse(unmatched["matched"])
+        self.assertEqual(unmatched["response_code"], "NO_WORK_UNSUPPORTED_CAPABILITY")
+
+        # SEC-01 threat boundaries & NETWORK-02 durable queue restart persistence
+        self.assertGreaterEqual(len(THREAT_BOUNDARY_MATRIX), 3)
+        self.assertTrue((ROOT / "docs/WORKER-AND-COORDINATOR-THREAT-MODEL.md").is_file())
+
+        with tempfile.TemporaryDirectory() as tmp:
+            q_path = Path(tmp) / "queue.json"
+            q1 = DurableExperimentQueue(q_path)
+            q1.enqueue(job)
+            q1.transition("job-eval-v11-002", "LEASED", worker_id="worker-anon-01")
+            # Simulate coordinator restart by instantiating a fresh queue from q_path
+            q2 = DurableExperimentQueue(q_path)
+            self.assertEqual(q2.get_job("job-eval-v11-002")["status"], "LEASED")
+            q2.transition("job-eval-v11-002", "COMPLETED", worker_id="worker-anon-01", result_summary={"ok": True})
+            with self.assertRaisesRegex(ValueError, "Invalid job state transition"):
+                q2.transition("job-eval-v11-002", "QUEUED")
+
+        # WEB-08 updates feed & WEB-11 accessibility audit
+        feed = build_research_updates_feed(
+            [
+                {
+                    "update_id": "2026-11-10-m0-audit",
+                    "date_utc": "2026-11-10T22:00:00Z",
+                    "completed_work": ["Completed M0 foundation readiness audit (BASE-16)"],
+                    "measurements": [
+                        {
+                            "metric": "v11 neural_only exact match",
+                            "value": "9/105 (8.57%)",
+                            "claims_capability_improvement": False,
+                            "evidence_path": "research/baseline/v11-local.json",
+                        }
+                    ],
+                    "hypotheses": [{"title": "Multi-layer adapter may overcome pointer copy bias"}],
+                    "next_experiments": ["Validation-only adapter ablation on BP/BS"],
+                    "corrections": ["Clarified v11 latency is warm-cache local CPU only"],
+                }
+            ]
+        )
+        self.assertEqual(feed["update_count"], 1)
+        self.assertEqual(feed["updates"][0]["hypotheses"][0]["verification_status"], "UNVERIFIED_HYPOTHESIS")
+
+        sample_html = """<!doctype html><html lang="en"><head><style>:focus-visible{outline:2px solid #005fcc}@media (prefers-reduced-motion:reduce){*{transition:none}}</style></head><body><a href="#main">Skip to main</a><nav aria-label="Primary">Nav</nav><main id="main"><h1>AIX-Zero</h1></main></body></html>"""
+        a11y = audit_html_accessibility_and_keyboard_nav(sample_html)
+        self.assertTrue(a11y["automated_passed"])
+
 
 if __name__ == "__main__":
     unittest.main()

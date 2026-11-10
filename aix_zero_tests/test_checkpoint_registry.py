@@ -16,14 +16,18 @@ from aix_zero.checkpoint_registry import (
     CLI_COMMAND_CLASSIFICATION,
     DEFAULT_INVENTORY_PATH,
     build_experiment_failure_record,
+    decompose_fixed_route_vs_learned_weights,
     load_checkpoint_inventory,
     load_checkpoint_strict,
     make_experiment_config,
     make_network_job_contract,
+    plan_artifact_retention_cleanup,
     resume_training_from_bundle,
     save_checkpoint_protected,
     save_experiment_failure_record,
     save_training_recovery_bundle,
+    select_checkpoint_without_test_leakage,
+    step_with_nonfinite_guard_and_recovery,
     validate_checkpoint_inventory,
     validate_experiment_config,
     validate_network_job_contract,
@@ -271,7 +275,7 @@ class CheckpointRegistryAndSmokeTests(unittest.TestCase):
                 },
             }
         )
-        m_cfg = AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, n_experts=2, moe_top_k=1)
+        m_cfg = AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=2, moe_top_k=1)
         batches = [
             torch.tensor([[1, 2, 3, 4], [2, 3, 4, 5]], dtype=torch.long),
             torch.tensor([[3, 4, 5, 6], [4, 5, 6, 7]], dtype=torch.long),
@@ -428,6 +432,153 @@ class CheckpointRegistryAndSmokeTests(unittest.TestCase):
                 bank.install_cartridge(
                     model, "DOM_A", slot=0, active_base_checkpoint_sha256=info["sha256"]
                 )
+
+    def test_wave5_base_15_train_02_10_12_and_expert_04_13(self):
+        from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
+
+        # TRAIN-02 fixed-route vs learned-weight decomposition
+        pilot_json = json.loads((ROOT / "research/bayesian-pilot/results.json").read_text(encoding="utf-8"))
+        decomp = decompose_fixed_route_vs_learned_weights(pilot_json)
+        self.assertIn("BP", decomp["tasks"])
+        self.assertAlmostEqual(
+            decomp["tasks"]["BP"]["routing_intervention_effect_delta"]
+            + decomp["tasks"]["BP"]["learned_weight_effect_delta"],
+            decomp["tasks"]["BP"]["net_delta_vs_unchanged_base"],
+            places=5,
+        )
+
+        # TRAIN-12 checkpoint selection without test leakage
+        sel = select_checkpoint_without_test_leakage(
+            initial_validation_loss=8.5,
+            validation_logs=[
+                {"step": 60, "validation_loss": 2.1},
+                {"step": 120, "validation_loss": 0.9},
+                {"step": 180, "validation_loss": 1.1},
+            ],
+        )
+        self.assertEqual(sel["selected_step"], 120)
+        self.assertTrue(sel["included_step_zero"])
+        with self.assertRaisesRegex(PermissionError, "Final-test metrics are prohibited"):
+            select_checkpoint_without_test_leakage(
+                initial_validation_loss=8.5,
+                validation_logs=[{"step": 60, "validation_loss": 2.1, "test_accuracy": 0.5}],
+            )
+
+        # BASE-15 retention & TRAIN-10 nonfinite fault recovery
+        cfg = make_experiment_config(
+            {
+                "schema_version": "1.0.0",
+                "experiment_id": "exp-wave5-fault",
+                "hypothesis": "Fault injection preserves last verified recovery bundle.",
+                "seed": 42,
+                "model_identity": {
+                    "base_checkpoint_path": "aix_zero/checkpoints/aix_zero_v11_kip.safetensors",
+                    "base_checkpoint_sha256": "a" * 64,
+                    "tokenizer_vocab_size": 32,
+                    "tokenizer_vocab_sha256": "b" * 64,
+                    "trainable_scope": "full_model",
+                    "trainable_parameters": 1024,
+                },
+                "data_identity": {
+                    "dataset_id": "toy-dataset",
+                    "dataset_sha256": "c" * 64,
+                    "train_split": "train",
+                    "validation_split": "validation",
+                    "test_split": "test",
+                },
+                "optimizer": {
+                    "name": "AdamW",
+                    "lr": 0.01,
+                    "weight_decay": 0.0,
+                    "max_grad_norm": 1.0,
+                    "batch_size": 2,
+                    "max_steps": 2,
+                },
+                "hardware_budget": {
+                    "device": "cpu",
+                    "dtype": "float32",
+                    "threads": 1,
+                    "max_wall_clock_seconds": 60,
+                },
+                "selection_and_stop_rule": {
+                    "checkpoint_selection_metric": "validation_loss",
+                    "controls": ["uninterrupted_control"],
+                    "promotion_gate": "paired_hoeffding_union_bound",
+                },
+            }
+        )
+        m_cfg = AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=2, moe_top_k=1)
+        with tempfile.TemporaryDirectory() as tmp:
+            tdir = Path(tmp)
+            model = AIXZeroModel(m_cfg)
+            opt = torch.optim.AdamW(model.parameters(), lr=0.01)
+            bundle_dir = tdir / "bundle"
+            save_training_recovery_bundle(
+                bundle_dir=bundle_dir,
+                experiment_config=cfg,
+                step=1,
+                data_cursor=1,
+                model=model,
+                optimizer=opt,
+            )
+            saved_w = {k: v.detach().clone() for k, v in model.state_dict().items()}
+
+            # Inject NaN loss at step 2 -> rolls back to step 1 and writes failure record
+            nan_loss = torch.tensor(float("nan"), requires_grad=True)
+            fail_path = tdir / "nonfinite_fail.json"
+            step_res = step_with_nonfinite_guard_and_recovery(
+                model=model,
+                optimizer=opt,
+                loss=nan_loss,
+                step=2,
+                recovery_bundle_dir=bundle_dir,
+                experiment_config=cfg,
+                failure_record_path=fail_path,
+            )
+            self.assertFalse(step_res["uninterrupted_success"])
+            self.assertTrue(step_res["recovered_from_nonfinite_fault"])
+            self.assertEqual(step_res["rolled_back_to_step"], 1)
+            for k, v in model.state_dict().items():
+                torch.testing.assert_close(v, saved_w[k])
+
+            # BASE-15 dry-run and cleanup
+            scratch_file = tdir / "scratch_temp.tmp"
+            scratch_file.write_bytes(b"reclaim-me")
+            plan = plan_artifact_retention_cleanup(tdir, dry_run=True)
+            self.assertIn(str(scratch_file), plan["reclaimable_files"])
+            self.assertIn(str(fail_path), plan["retained_failure_records"])
+            self.assertTrue(scratch_file.exists())
+
+            exec_plan = plan_artifact_retention_cleanup(tdir, dry_run=False)
+            self.assertIn(str(scratch_file), exec_plan["deleted_files"])
+            self.assertFalse(scratch_file.exists())
+            self.assertTrue(fail_path.exists())
+
+            # EXPERT-04 temporary specialist session & EXPERT-13 crash-safe catalog publication
+            bank = SparseExpertCartridgeBank(tdir / "expert_bank")
+            manifest = bank.export_all_domain_cartridges(
+                model, {"DOM_0": {}}, {}, domain_expert_map={"DOM_0": 0}
+            )
+            orig_router_w = model.latent_reasoning_core.core_block.moe.router.weight.detach().clone()
+            with self.assertRaisesRegex(RuntimeError, "simulated error inside session"):
+                with bank.temporary_specialist_session(model, "DOM_0", slot=0, force_explicit_route=True):
+                    with self.assertRaisesRegex(RuntimeError, "Concurrent temporary_specialist_session"):
+                        with bank.temporary_specialist_session(model, "DOM_0", slot=0):
+                            pass
+                    raise RuntimeError("simulated error inside session")
+            # Router weight and session state are restored after exception
+            torch.testing.assert_close(
+                model.latent_reasoning_core.core_block.moe.router.weight, orig_router_w
+            )
+
+            # Simulated interruption during publish leaves previous catalog intact
+            with self.assertRaises(InterruptedError):
+                bank.publish_verified_catalog_atomic(
+                    manifest, simulate_interruption_before_manifest_swap=True
+                )
+            self.assertEqual(bank.get_manifest()["registered_cartridges"], 1)
+            pub_res = bank.publish_verified_catalog_atomic(manifest)
+            self.assertTrue(pub_res["published"])
 
 
 if __name__ == "__main__":

@@ -166,3 +166,71 @@ def build_roadmap_view_payload(
         "workstreams": workstreams,
         "ready_to_claim": ready_to_claim,
     }
+
+
+def build_research_updates_feed(updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Validate and format dated research updates (`WEB-08` / Issue #181).
+
+    Requires each update to separate `completed_work`, `measurements`, `hypotheses`, and
+    `next_experiments`, requires every claimed capability improvement to link to a reproducible
+    `evidence_path` (or be marked `UNVERIFIED_HYPOTHESIS`), and preserves visible `corrections`.
+    """
+    if not updates:
+        raise ValueError("updates list must be nonempty")
+
+    validated: List[Dict[str, Any]] = []
+    for entry in updates:
+        for req in ("update_id", "date_utc", "completed_work", "measurements", "hypotheses", "next_experiments"):
+            if req not in entry:
+                raise ValueError(f"Update entry missing required field {req!r}")
+        for m in entry["measurements"]:
+            if m.get("claims_capability_improvement") and not m.get("evidence_path"):
+                raise ValueError(
+                    f"Measurement in {entry['update_id']!r} claims capability improvement without a reproducible evidence_path"
+                )
+        validated.append(
+            {
+                "update_id": str(entry["update_id"]),
+                "date_utc": str(entry["date_utc"]),
+                "completed_work": list(entry["completed_work"]),
+                "measurements": list(entry["measurements"]),
+                "hypotheses": [
+                    dict(h, verification_status=h.get("verification_status", "UNVERIFIED_HYPOTHESIS"))
+                    for h in entry["hypotheses"]
+                ],
+                "next_experiments": list(entry["next_experiments"]),
+                "corrections": list(entry.get("corrections", [])),
+            }
+        )
+
+    return {
+        "schema_version": "1.0.0",
+        "update_count": len(validated),
+        "updates": validated,
+    }
+
+
+def audit_html_accessibility_and_keyboard_nav(html_text: str) -> Dict[str, Any]:
+    """Automated accessibility and keyboard-navigation audit (`WEB-11` / Issue #184)
+    supplemented with a documented manual review checklist.
+    """
+    checks = {
+        "has_lang_attribute": bool(re.search(r"<html[^>]*\blang=", html_text, flags=re.IGNORECASE)),
+        "has_skip_to_main_link": bool(re.search(r'href="#main', html_text, flags=re.IGNORECASE)),
+        "has_main_landmark": "<main" in html_text.lower(),
+        "has_nav_landmark": "<nav" in html_text.lower(),
+        "has_h1_heading": "<h1" in html_text.lower(),
+        "has_visible_focus_indicator_css": ":focus-visible" in html_text,
+        "has_prefers_reduced_motion_css": "prefers-reduced-motion" in html_text,
+    }
+    passed = all(checks.values())
+    return {
+        "automated_passed": passed,
+        "checks": checks,
+        "manual_review_checklist": [
+            "Tab through all interactive controls in DOM order without keyboard traps.",
+            "Verify screen-reader table headers (<th scope='col'>) on benchmark scorecards.",
+            "Verify WCAG AA 4.5:1 text contrast on status badges (ACTIVE, REJECTED, OFFLINE).",
+        ],
+    }
+

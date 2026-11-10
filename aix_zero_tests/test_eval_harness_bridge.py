@@ -20,7 +20,13 @@ from aix_zero.eval_harness_bridge import (
     build_latency_and_throughput_report,
     build_multidimensional_scorecard,
     compute_energy_and_useful_work,
+    compute_exact_shapley_values,
+    evaluate_bayesian_edge_cases,
+    evaluate_cooperation_stability,
     evaluate_probability_calibration,
+    evaluate_representation_robustness_suite,
+    evaluate_scientific_reasoning_suite,
+    evaluate_structural_causal_model,
     format_external_coding_fixture,
     group_clustered_paired_interval,
     measure_memory_and_cache_budget,
@@ -304,6 +310,83 @@ class EvalHarnessBridgeTests(unittest.TestCase):
         self.assertEqual(false_cert["epistemic_outcome"], "FALSE_CERTAINTY")
         self.assertTrue(false_cert["false_certainty"])
         self.assertEqual(false_cert["score"], 0.0)
+
+    def test_wave5_eval_13_14_and_reason_02_06_11_12(self):
+        # EVAL-13 scientific reasoning with independent solver
+        sci = evaluate_scientific_reasoning_suite(
+            [
+                {"family": "KINEMATICS_DISPLACEMENT", "parameters": {"u": "5", "a": "3", "t": "4"}, "prediction": "44"},
+                {"family": "OHMS_LAW_POWER", "parameters": {"V": "12", "R": "8"}, "prediction": "18"},
+            ]
+        )
+        self.assertEqual(sci["mean_score"], 1.0)
+
+        # EVAL-14 representation robustness grouped by semantic identity
+        rob = evaluate_representation_robustness_suite(
+            [
+                {"semantic_group_id": "g1", "prediction": "1/2", "gold": "1/2", "is_probability": True},
+                {"semantic_group_id": "g1", "prediction": "1/2", "gold": "1/2", "is_probability": True},
+                {"semantic_group_id": "g2", "prediction": "1/3", "gold": "1/3", "is_probability": True},
+                {"semantic_group_id": "g2", "prediction": "2/3", "gold": "1/3", "is_probability": True},
+            ]
+        )
+        self.assertEqual(rob["independent_semantic_groups"], 2)
+        self.assertEqual(rob["group_all_correct_rate"], 0.5)
+        self.assertEqual(rob["group_consistency_rate"], 0.5)
+
+        # REASON-02 Bayesian edge cases (impossible evidence, symmetric likelihoods)
+        imp = evaluate_bayesian_edge_cases(p="1/2", a="0", b="0", e="1")
+        self.assertEqual(imp["status"], "IMPOSSIBLE_EVIDENCE")
+        sym = evaluate_bayesian_edge_cases(p="2/5", a="1/3", b="1/3", e="1")
+        self.assertTrue(sym["likelihood_symmetry_preserves_prior"])
+        self.assertEqual(sym["posterior"], "2/5")
+
+        # REASON-06 structural causal model (observational vs interventional + cycle rejection)
+        scm = {
+            "edges": [("Z", "X"), ("Z", "Y"), ("X", "Y")],
+            "p_z1": "1/2",
+            "p_x1_given_z0": "1/4",
+            "p_x1_given_z1": "3/4",
+            "p_y1_given_z0_x0": "1/10",
+            "p_y1_given_z0_x1": "2/10",
+            "p_y1_given_z1_x0": "7/10",
+            "p_y1_given_z1_x1": "8/10",
+        }
+        do_x1 = evaluate_structural_causal_model(scm, query_kind="interventional_do_x", x_value=1)
+        obs_x1 = evaluate_structural_causal_model(scm, query_kind="observational_given_x", x_value=1)
+        self.assertEqual(do_x1["exact_probability"], "1/2")
+        self.assertNotEqual(do_x1["exact_probability"], obs_x1["exact_probability"])
+
+        cyclic_scm = dict(scm, edges=[("X", "Y"), ("Y", "X")])
+        with self.assertRaisesRegex(ValueError, "Cyclic"):
+            evaluate_structural_causal_model(cyclic_scm, query_kind="interventional_do_x", x_value=1)
+
+        # REASON-11 exact 3-player Shapley with dummy player C
+        shap = compute_exact_shapley_values(
+            ["A", "B", "C"],
+            {
+                ("A",): 2,
+                ("B",): 4,
+                ("C",): 0,
+                ("A", "B"): 10,
+                ("A", "C"): 2,
+                ("B", "C"): 4,
+                ("A", "B", "C"): 10,
+            },
+        )
+        self.assertTrue(shap["efficiency_verified"])
+        self.assertTrue(shap["dummy_player_axiom_verified"])
+        self.assertEqual(shap["shapley_values"]["C"], "0")
+        self.assertEqual(shap["shapley_values"]["A"], "4")
+        self.assertEqual(shap["shapley_values"]["B"], "6")
+
+        # REASON-12 unstable cooperation (Prisoner's Dilemma) vs stable coordination
+        pd = evaluate_cooperation_stability(
+            payoff_cc=(3, 3), payoff_cd=(0, 5), payoff_dc=(5, 0), payoff_dd=(1, 1)
+        )
+        self.assertTrue(pd["socially_optimal_joint_cooperate"])
+        self.assertFalse(pd["cooperation_is_nash_stable"])
+        self.assertEqual(pd["classification"], "UNSTABLE_HIGH_WELFARE_TRAP")
 
 
 if __name__ == "__main__":

@@ -12,16 +12,24 @@ from aix_zero.semantic_splits import (
     analyze_bayesian_pilot_errors,
     audit_answer_frequency_shortcuts,
     build_benchmark_exclusion_ledger,
+    build_cross_domain_composition_pilot,
+    build_reproducible_data_inspection_report,
     build_rotating_test_partition,
     build_validation_curriculum_experiment_set,
     canonical_problem_identity,
     compute_difficulty_factors,
     cross_check_generator_with_independent_oracle,
+    decode_rational_representation,
+    encode_rational_representation,
     export_training_split_safe,
     generate_generalization_taxonomy_manifest,
+    generate_interpretable_negative_examples,
     partition_by_semantic_identity,
     semantic_identity_hash,
+    validate_contributor_dataset_submission,
+    validate_metamorphic_relations,
     verify_disjoint_splits,
+    verify_multistep_bayesian_derivation,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -172,6 +180,66 @@ class SemanticSplitsTests(unittest.TestCase):
         self.assertFalse(err_analysis["used_consumed_test_set_for_hyperparameter_selection"])
         self.assertTrue(err_analysis["tasks"]["BP"]["root_cause_categories"]["below_prior_only_shortcut"])
         self.assertTrue((ROOT / "docs/BAYESIAN-PILOT-ERROR-ANALYSIS.md").is_file())
+
+    def test_wave5_data_05_09_10_11_12_14_15(self):
+        ds = build_dataset(seed=42)
+        bp_splits = ds["tasks"]["BP"]
+        bs_splits = ds["tasks"]["BS"]
+
+        # DATA-05 metamorphic relations
+        meta_res = validate_metamorphic_relations(bs_splits["test"][0])
+        self.assertTrue(meta_res["all_metamorphic_relations_passed"])
+        with self.assertRaisesRegex(ValueError, "assume_conditional_iid=False"):
+            validate_metamorphic_relations(bs_splits["test"][0], assume_conditional_iid=False)
+
+        # DATA-09 rational representations round-trip
+        for mode in ("reduced_fraction", "num_den_fields", "scaled_integer_bps"):
+            enc = encode_rational_representation("3/4", mode=mode)
+            dec = decode_rational_representation(enc, mode=mode)
+            self.assertEqual(dec, "3/4")
+        with self.assertRaisesRegex(ValueError, "cannot be represented exactly in basis points"):
+            encode_rational_representation("1/3", mode="scaled_integer_bps")
+
+        # DATA-10 multi-step derivation supervision catches wrong intermediate step even when final matches
+        # Q:BS:p=1/2;a=2/3;b=1/3;e=10;P= -> step 1 (e=1) is 2/3, step 2 (e=10) returns to 1/2
+        prompt_bs = "Q:BS:p=1/2;a=2/3;b=1/3;e=10;P="
+        good_deriv = verify_multistep_bayesian_derivation(prompt_bs, ["2/3", "1/2"], "1/2")
+        self.assertEqual(good_deriv["status"], "VALID_DERIVATION_AND_FINAL_ANSWER")
+        bad_inter = verify_multistep_bayesian_derivation(prompt_bs, ["1/5", "1/2"], "1/2")
+        self.assertEqual(bad_inter["status"], "INTERMEDIATE_STEP_MISMATCH_DESPITE_CORRECT_FINAL")
+        self.assertFalse(bad_inter["all_steps_verified"])
+
+        # DATA-11 negative examples are never equal to gold
+        negs = generate_interpretable_negative_examples(bp_splits["test"][0])
+        self.assertEqual(len(negs), 4)
+        self.assertTrue(all(n["negative_answer"] != n["correct_gold"] for n in negs))
+
+        # DATA-12 contributor dataset submission validation
+        clean_sub = {
+            "dataset_id": "contrib-bp-mini",
+            "license_spdx": "Apache-2.0",
+            "generator_module_or_script": "aix_zero/bayesian_tasks.py",
+            "splits": {
+                "train": [bp_splits["train"][0]],
+                "validation": [bp_splits["validation"][0]],
+                "test": [bp_splits["test"][0]],
+            },
+        }
+        self.assertTrue(validate_contributor_dataset_submission(clean_sub)["accepted_for_queue"])
+        bad_sub = dict(clean_sub, license_spdx="PROPRIETARY-RESTRICTED")
+        with self.assertRaisesRegex(ValueError, "unsupported or missing license_spdx"):
+            validate_contributor_dataset_submission(bad_sub)
+
+        # DATA-14 reproducible data inspection report without withheld test answers
+        rep = build_reproducible_data_inspection_report(bp_splits, dataset_id="bp-v1")
+        self.assertFalse(rep["contains_withheld_test_answers"])
+        self.assertNotIn("top_answers", rep["splits"]["test"])
+        self.assertIn("top_answers", rep["splits"]["train"])
+
+        # DATA-15 cross-domain composition pilot
+        comp = build_cross_domain_composition_pilot()
+        self.assertTrue(comp["independent_oracle_verified"])
+        self.assertEqual(len(comp["cases"]), 3)
 
 
 if __name__ == "__main__":
