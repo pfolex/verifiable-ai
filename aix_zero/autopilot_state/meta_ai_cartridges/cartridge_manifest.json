@@ -2,15 +2,15 @@
   "schema_version": 1,
   "architecture": "AIX-Zero routed expert snapshots",
   "model_config": {
-    "vocab_size": 134,
-    "d_model": 128,
-    "n_heads": 4,
+    "vocab_size": 128,
+    "d_model": 32,
+    "n_heads": 2,
     "n_kv_heads": 2,
-    "d_ff": 256,
+    "d_ff": 64,
     "n_encoder_layers": 1,
     "n_recurrent_steps": 3,
     "n_decoder_layers": 1,
-    "max_seq_len": 112,
+    "max_seq_len": 64,
     "rope_theta": 10000.0,
     "rms_eps": 1e-06,
     "dropout": 0.0,
@@ -18,15 +18,15 @@
     "use_shared_expert": true,
     "n_experts": 4,
     "moe_top_k": 2,
-    "use_memory_bank": true,
+    "use_memory_bank": false,
     "n_memory_slots": 8,
-    "use_prompt_pointer": true,
+    "use_prompt_pointer": false,
     "pointer_temperature": 0.35,
     "use_key_ngram_conv": false
   },
-  "active_core_physical_parameters": 817410,
+  "active_core_physical_parameters": 64546,
   "registered_cartridges": 4,
-  "total_cartridge_bank_parameters": 196608,
+  "total_cartridge_bank_parameters": 24576,
   "cartridges": {
     "META_SCALING_OPTIMIZER": {
       "domain": "META_SCALING_OPTIMIZER",
@@ -35,30 +35,30 @@
       "prefix": "Q:MetaScale:",
       "formula": "D_opt = C / (6 * N)",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_scaling_optimizer_e84c63cbbb024c75e563c7c7d0e9e6bf983c9a35a8122ffc32ed8293e75884df.safetensors",
-      "sha256": "e84c63cbbb024c75e563c7c7d0e9e6bf983c9a35a8122ffc32ed8293e75884df",
-      "serialized_bytes": 196864,
+      "cartridge_file": "expert_meta_scaling_optimizer_cb9a6e989fe67ab70c0bb19ea96a2ea2240fb97e4117721c82cb4ba698424e95.safetensors",
+      "sha256": "cb9a6e989fe67ab70c0bb19ea96a2ea2240fb97e4117721c82cb4ba698424e95",
+      "serialized_bytes": 24824,
       "source_expert_index": 0,
-      "parameters": 49152,
+      "parameters": 6144,
       "tensors": {
         "gate_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "up_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "down_proj.weight": {
           "shape": [
-            128,
-            128
+            32,
+            64
           ],
           "dtype": "torch.float32"
         }
@@ -75,30 +75,30 @@
       "prefix": "Q:MetaMoE:",
       "formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_lora_moe_architect_f7ae0915abc6faae42862c1f80332e846044d61de722a862d141aeb7f1575be2.safetensors",
-      "sha256": "f7ae0915abc6faae42862c1f80332e846044d61de722a862d141aeb7f1575be2",
-      "serialized_bytes": 196864,
+      "cartridge_file": "expert_meta_lora_moe_architect_13b9a4fc8bc09d6595c07822eff74a52f45826443b43cb5f6923cfc949e9089b.safetensors",
+      "sha256": "13b9a4fc8bc09d6595c07822eff74a52f45826443b43cb5f6923cfc949e9089b",
+      "serialized_bytes": 24824,
       "source_expert_index": 1,
-      "parameters": 49152,
+      "parameters": 6144,
       "tensors": {
         "gate_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "up_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "down_proj.weight": {
           "shape": [
-            128,
-            128
+            32,
+            64
           ],
           "dtype": "torch.float32"
         }
@@ -115,30 +115,30 @@
       "prefix": "Q:MetaKV:",
       "formula": "kv_compression_ratio = n_heads / n_kv_heads",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_gqa_kv_systems_edfe7ea9c6f4b589aa622a9a54079967bbfce5d0f267cd6f38f55635ef7d4055.safetensors",
-      "sha256": "edfe7ea9c6f4b589aa622a9a54079967bbfce5d0f267cd6f38f55635ef7d4055",
-      "serialized_bytes": 196864,
+      "cartridge_file": "expert_meta_gqa_kv_systems_f2458120699cf11437208747d3c406713d7d5fc6cbb383c68068888b9a2dcba2.safetensors",
+      "sha256": "f2458120699cf11437208747d3c406713d7d5fc6cbb383c68068888b9a2dcba2",
+      "serialized_bytes": 24824,
       "source_expert_index": 2,
-      "parameters": 49152,
+      "parameters": 6144,
       "tensors": {
         "gate_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "up_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "down_proj.weight": {
           "shape": [
-            128,
-            128
+            32,
+            64
           ],
           "dtype": "torch.float32"
         }
@@ -155,30 +155,30 @@
       "prefix": "Q:MetaRLVR:",
       "formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_rlvr_grpo_trainer_c8ca207218831fd2ef2901669f0886aaad7266f1733cb1c23d01a262eddd2e2a.safetensors",
-      "sha256": "c8ca207218831fd2ef2901669f0886aaad7266f1733cb1c23d01a262eddd2e2a",
-      "serialized_bytes": 196864,
+      "cartridge_file": "expert_meta_rlvr_grpo_trainer_f04bd59eafd897f2acf74affc0f5928ac92b87f628960dc74be576942f72110b.safetensors",
+      "sha256": "f04bd59eafd897f2acf74affc0f5928ac92b87f628960dc74be576942f72110b",
+      "serialized_bytes": 24824,
       "source_expert_index": 3,
-      "parameters": 49152,
+      "parameters": 6144,
       "tensors": {
         "gate_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "up_proj.weight": {
           "shape": [
-            128,
-            128
+            64,
+            32
           ],
           "dtype": "torch.float32"
         },
         "down_proj.weight": {
           "shape": [
-            128,
-            128
+            32,
+            64
           ],
           "dtype": "torch.float32"
         }

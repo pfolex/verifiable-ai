@@ -32,11 +32,19 @@ class MetaAIAutopilotTests(unittest.TestCase):
             tdir = Path(tmp)
             ctrl = AutonomousSelfImprovementController(tdir, max_cpu_threads=1)
 
-            # Run 1 cycle
-            res = ctrl.run_single_self_improvement_cycle(cartridge_bank_dir=tdir / "bank")
-            self.assertTrue(res["executed"])
-            self.assertEqual(res["curriculum_verified_count"], res["curriculum_total_count"])
-            self.assertEqual(len(res["exported_meta_shards"]), 4)
+            # Run Cycle 1 and Cycle 2 and verify progressive, distinct work each cycle
+            res1 = ctrl.run_single_self_improvement_cycle(cartridge_bank_dir=tdir / "bank")
+            res2 = ctrl.run_single_self_improvement_cycle(cartridge_bank_dir=tdir / "bank")
+            self.assertTrue(res1["executed"])
+            self.assertTrue(res2["executed"])
+            self.assertEqual(res1["curriculum_verified_count"], res1["curriculum_total_count"])
+            self.assertEqual(res2["curriculum_verified_count"], res2["curriculum_total_count"])
+            self.assertNotEqual(res1["curriculum_sha256"], res2["curriculum_sha256"])
+            self.assertNotEqual(res1["cycle_focused_files"], res2["cycle_focused_files"])
+            self.assertLess(res1["expert_post_update_loss"], res1["expert_pre_update_loss"])
+            self.assertLess(res2["expert_post_update_loss"], res2["expert_pre_update_loss"])
+            self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
+            self.assertEqual(len(res2["exported_meta_shards"]), 4)
 
             # Trigger stop via CLI (`aix_ctl stop`)
             rc = aix_ctl_main(["--state-dir", str(tdir), "stop", "--reason", "USER_SHUTTING_DOWN_MAC"])

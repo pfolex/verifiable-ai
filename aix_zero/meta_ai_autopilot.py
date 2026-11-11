@@ -85,15 +85,19 @@ META_AI_EXPERT_DOMAINS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def build_meta_ai_self_improvement_curriculum() -> List[Dict[str, Any]]:
+def build_meta_ai_self_improvement_curriculum(cycle_index: int = 1) -> List[Dict[str, Any]]:
     """Build deterministic, reference-verified training and evaluation tasks focused on
     making AI smarter, optimizing architectures, and verifying RLVR updates.
+    Each `cycle_index` shifts the frontier of model scales, expert counts, KV ratios,
+    and GRPO group sizes so every cycle trains and verifies on genuinely new problems.
     """
+    c_idx = max(1, int(cycle_index))
     samples: List[Dict[str, Any]] = []
 
     # 1. META_SCALING_OPTIMIZER: Given compute C (in FLOP units) and model size N, optimal tokens D = C / (6*N)
-    for n_params in (2, 4, 8):
-        for d_mult in (3, 6, 9):
+    base_n = c_idx * 2
+    for n_params in (base_n, base_n + 2, base_n + 4):
+        for d_mult in (3 + c_idx, 6 + c_idx, 9 + c_idx):
             c_flops = 6 * n_params * d_mult
             gold = str(Fraction(c_flops, 6 * n_params))
             prompt = f"Q:MetaScale:C={c_flops};N={n_params}->D_opt?"
@@ -104,12 +108,14 @@ def build_meta_ai_self_improvement_curriculum() -> List[Dict[str, Any]]:
                     "prompt": prompt,
                     "completion": trace,
                     "gold": gold,
+                    "cycle_index": c_idx,
                 }
             )
 
     # 2. META_LORA_MOE_ARCHITECT: Active routed parameter fraction = top_k / n_experts
-    for n_exp in (4, 8, 16):
-        for top_k in (1, 2):
+    exp_offset = (c_idx - 1) * 4
+    for n_exp in (4 + exp_offset, 8 + exp_offset, 16 + exp_offset):
+        for top_k in (1 + (c_idx % 2), 2 + (c_idx % 3)):
             f_val = Fraction(top_k, n_exp)
             gold = f"{f_val.numerator}/{f_val.denominator}"
             prompt = f"Q:MetaMoE:top_k={top_k};n_experts={n_exp}->active_fraction?"
@@ -120,12 +126,14 @@ def build_meta_ai_self_improvement_curriculum() -> List[Dict[str, Any]]:
                     "prompt": prompt,
                     "completion": trace,
                     "gold": gold,
+                    "cycle_index": c_idx,
                 }
             )
 
     # 3. META_GQA_KV_SYSTEMS: KV-cache reduction ratio = n_kv_heads / n_heads
-    for n_heads in (8, 16, 32):
-        for n_kv in (1, 2, 4):
+    head_mult = 1 + ((c_idx - 1) % 4)
+    for n_heads in (8 * head_mult, 16 * head_mult, 32 * head_mult):
+        for n_kv in (1 + (c_idx % 2), 2 + (c_idx % 2), 4 + (c_idx % 3)):
             f_val = Fraction(n_kv, n_heads)
             gold = f"{f_val.numerator}/{f_val.denominator}"
             prompt = f"Q:MetaKV:n_kv={n_kv};n_heads={n_heads}->kv_ratio?"
@@ -136,12 +144,14 @@ def build_meta_ai_self_improvement_curriculum() -> List[Dict[str, Any]]:
                     "prompt": prompt,
                     "completion": trace,
                     "gold": gold,
+                    "cycle_index": c_idx,
                 }
             )
 
     # 4. META_RLVR_GRPO_TRAINER: Exact GRPO advantage of a verified rollout r_1=1 among G rollouts with k successes
-    for g_size in (4, 8):
-        for k_succ in (1, 2, 3):
+    g_base = 4 + ((c_idx - 1) * 2)
+    for g_size in (g_base, g_base + 4):
+        for k_succ in (1 + (c_idx % 2), 2 + (c_idx % 2), 3 + (c_idx % 2)):
             mean_r = Fraction(k_succ, g_size)
             adv_pos = Fraction(1, 1) - mean_r
             gold = f"{adv_pos.numerator}/{adv_pos.denominator}"
@@ -153,29 +163,33 @@ def build_meta_ai_self_improvement_curriculum() -> List[Dict[str, Any]]:
                     "prompt": prompt,
                     "completion": trace,
                     "gold": gold,
+                    "cycle_index": c_idx,
                 }
             )
 
     return samples
 
 
-def scan_open_source_ai_codebase_patterns(repo_root: Path = REPO_ROOT) -> Dict[str, Any]:
+def scan_open_source_ai_codebase_patterns(repo_root: Path = REPO_ROOT, *, cycle_index: int = 1) -> Dict[str, Any]:
     """Scan local open-source AI packages (`aix_zero`, `rlvr-forge`, `branchbox`, `mlx-tree`,
-    `steerlens`, `verisci`, `everbench`) to index algorithmic primitives that make AI systems smarter.
+    `steerlens`, `verisci`, `everbench`) to index algorithmic primitives that make AI systems smarter,
+    and rotate through specific source files each cycle for deep AST inspection.
     """
+    import ast
+
     packages = ("aix_zero", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "verisci", "everbench")
     indexed_modules: List[Dict[str, Any]] = []
+    all_py_files: List[Path] = []
 
     for pkg in packages:
         pkg_dir = repo_root / pkg
         if not pkg_dir.exists():
             continue
-        py_files = sorted(pkg_dir.rglob("*.py"))
+        py_files = [pf for pf in sorted(pkg_dir.rglob("*.py")) if "__pycache__" not in pf.parts]
+        all_py_files.extend(py_files)
         total_lines = 0
         classes_and_funcs: List[str] = []
         for pf in py_files[:25]:
-            if "__pycache__" in pf.parts:
-                continue
             txt = pf.read_text(encoding="utf-8", errors="ignore")
             lines = txt.splitlines()
             total_lines += len(lines)
@@ -194,11 +208,36 @@ def scan_open_source_ai_codebase_patterns(repo_root: Path = REPO_ROOT) -> Dict[s
             }
         )
 
+    # Rotate through a slice of 3 specific Python files per cycle for deep AST analysis
+    focused_files_report: List[Dict[str, Any]] = []
+    if all_py_files:
+        start_idx = ((max(1, int(cycle_index)) - 1) * 3) % len(all_py_files)
+        selected = [all_py_files[(start_idx + offset) % len(all_py_files)] for offset in range(min(3, len(all_py_files)))]
+        for pf in selected:
+            src = pf.read_text(encoding="utf-8", errors="ignore")
+            fn_count = 0
+            cls_count = 0
+            try:
+                tree = ast.parse(src)
+                fn_count = sum(1 for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)))
+                cls_count = sum(1 for node in ast.walk(tree) if isinstance(node, ast.ClassDef))
+            except SyntaxError:
+                pass
+            focused_files_report.append(
+                {
+                    "rel_path": str(pf.relative_to(repo_root)),
+                    "functions": fn_count,
+                    "classes": cls_count,
+                    "lines": len(src.splitlines()),
+                }
+            )
+
     digest = hashlib.sha256(canonical_json(indexed_modules).encode("utf-8")).hexdigest()
     return {
         "codebase_index_sha256": digest,
         "indexed_package_count": len(indexed_modules),
         "packages": indexed_modules,
+        "cycle_focused_files": focused_files_report,
     }
 
 
@@ -325,8 +364,12 @@ class AutonomousSelfImprovementController:
         torch.set_num_threads(self.max_cpu_threads)
         self.pid_path.write_text(str(os.getpid()), encoding="utf-8")
 
-        code_index = scan_open_source_ai_codebase_patterns(self.repo_root)
-        curriculum = build_meta_ai_self_improvement_curriculum()
+        prev = self.get_status()
+        cycles = int(prev.get("cycles_completed", 0)) + 1
+
+        code_index = scan_open_source_ai_codebase_patterns(self.repo_root, cycle_index=cycles)
+        curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles)
+        curriculum_sha256 = hashlib.sha256(canonical_json(curriculum).encode("utf-8")).hexdigest()
 
         verified_count = 0
         for item in curriculum:
@@ -340,18 +383,66 @@ class AutonomousSelfImprovementController:
             if sc["score"] == 1.0:
                 verified_count += 1
 
-        peer_prompt = synthesize_peer_ai_improvement_prompt(code_index, target_domain="META_RLVR_GRPO_TRAINER")
+        domain_keys = list(META_AI_EXPERT_DOMAINS.keys())
+        active_coaching_domain = domain_keys[(cycles - 1) % len(domain_keys)]
+        peer_prompt = synthesize_peer_ai_improvement_prompt(code_index, target_domain=active_coaching_domain)
 
-        # Export dedicated Meta-AI expert shards using a tiny MoE model or loaded v11 snapshot
+        # Load or initialize persistent evolving Meta-AI MoE model (never overwriting immutable v11 checkpoint)
         bdir = Path(cartridge_bank_dir) if cartridge_bank_dir is not None else (self.state_dir / "meta_ai_cartridges")
-        ckpt_path = self.repo_root / "aix_zero/checkpoints/aix_zero_v11_kip.safetensors"
-        if ckpt_path.exists():
-            model, _ = load_v11(ckpt_path)
-        else:
-            model = AIXZeroModel(
-                AIXZeroConfig(vocab_size=32, d_model=16, n_heads=2, n_kv_heads=2, d_ff=32, max_seq_len=16, use_moe=True, n_experts=4, moe_top_k=2)
+        live_backbone_path = self.state_dir / "meta_ai_live_backbone.pt"
+        torch.manual_seed(20260410 + cycles)
+        model = AIXZeroModel(
+            AIXZeroConfig(
+                vocab_size=128,
+                d_model=32,
+                n_heads=2,
+                n_kv_heads=2,
+                d_ff=64,
+                max_seq_len=64,
+                use_moe=True,
+                n_experts=4,
+                moe_top_k=2,
             )
+        )
+        if live_backbone_path.exists():
+            try:
+                model.load_state_dict(torch.load(live_backbone_path, map_location="cpu", weights_only=True))
+            except Exception:
+                pass
+
+        # Encode this cycle's unique verified curriculum into token sequences and optimize routed expert weights
+        batch_seqs: List[List[int]] = []
+        for item in curriculum[:12]:
+            text = f"{item['prompt']}{item['completion']}"
+            ids = [min(127, max(1, ord(ch) % 128)) for ch in text[:48]]
+            if len(ids) < 48:
+                ids = ids + [0] * (48 - len(ids))
+            batch_seqs.append(ids)
+        input_ids = torch.tensor(batch_seqs, dtype=torch.long)
+
+        for name, param in model.named_parameters():
+            param.requires_grad = "experts." in name or "router." in name
+
+        model.train()
+        with torch.no_grad():
+            pre_loss = float(model(input_ids, labels=input_ids)["loss"].item())
+
+        optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=4e-3)
+        for _ in range(4):
+            if self.should_stop():
+                break
+            optimizer.zero_grad()
+            loss = model(input_ids, labels=input_ids)["loss"]
+            loss.backward()
+            optimizer.step()
+
         model.eval()
+        with torch.no_grad():
+            post_loss = float(model(input_ids, labels=input_ids)["loss"].item())
+
+        if post_loss <= pre_loss:
+            torch.save(model.state_dict(), live_backbone_path)
+
         bank = SparseExpertCartridgeBank(bdir)
         domain_map = {dom: int(meta["expert_slot"]) for dom, meta in META_AI_EXPERT_DOMAINS.items()}
         manifest = bank.export_all_domain_cartridges(
@@ -360,17 +451,23 @@ class AutonomousSelfImprovementController:
             {dom: None for dom in META_AI_EXPERT_DOMAINS},
             domain_expert_map=domain_map,
         )
+        shard_hashes = {
+            dom: str(meta.get("sha256", ""))[:16]
+            for dom, meta in manifest.get("cartridges", {}).items()
+        }
+        focused_paths = [f["rel_path"] for f in code_index.get("cycle_focused_files", [])]
 
         gh_issue_url: Optional[str] = None
         if sync_github_issue and not self.should_stop():
-            title = "[AIX AUTO-META-01] Autonomous Meta-AI expert shard & open-source curriculum cycle"
+            title = f"[AIX AUTO-META-CYCLE-{cycles:03d}] Progressive Meta-AI shard training & AST audit (cycle {cycles})"
             body = (
-                "## Autonomous Self-Improvement Cycle\n\n"
-                f"- **Codebase Index SHA-256:** `{code_index['codebase_index_sha256']}`\n"
-                f"- **Indexed Open-Source Packages:** `{code_index['indexed_package_count']}`\n"
-                f"- **Verified Meta-AI Curriculum Items:** `{verified_count}/{len(curriculum)}`\n"
-                f"- **Exported Meta-AI Expert Shards:** `{manifest['registered_cartridges']}` (`META_SCALING_OPTIMIZER`, `META_LORA_MOE_ARCHITECT`, `META_GQA_KV_SYSTEMS`, `META_RLVR_GRPO_TRAINER`)\n"
-                "- **Scientific Honesty Disclosure:** Shards package routed expert slots with verified meta-AI reference solvers; immutable `v11` checkpoint remains untouched."
+                f"## Autonomous Self-Improvement Cycle #{cycles}\n\n"
+                f"- **Cycle Curriculum SHA-256:** `{curriculum_sha256}` (`{verified_count}/{len(curriculum)}` new tasks verified)\n"
+                f"- **Rotating Open-Source AST Deep-Dive Files:** `{', '.join(focused_paths)}`\n"
+                f"- **Routed MoE Expert Shard Loss (Cycle #{cycles} Curriculum):** `{pre_loss:.4f} -> {post_loss:.4f}` (delta `{post_loss - pre_loss:+.4f}`)\n"
+                f"- **Updated Meta-AI Cartridge Digest Prefixes:** `{json.dumps(shard_hashes, sort_keys=True)}`\n"
+                f"- **Active Peer-AI Coaching Domain:** `{active_coaching_domain}`\n"
+                "- **Scientific Honesty Disclosure:** Evolving MoE expert weights are trained and persisted in `meta_ai_live_backbone.pt` and exported as content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
             )
             create_out = subprocess.check_output(
                 [gh_binary, "issue", "create", "--repo", repo_slug, "--title", title, "--body", body],
@@ -387,12 +484,10 @@ class AutonomousSelfImprovementController:
                     "--repo",
                     repo_slug,
                     "--comment",
-                    f"Autonomous Meta-AI cycle verified (`{verified_count}/{len(curriculum)}` exact reference checks passed; `{manifest['registered_cartridges']}` meta-AI shards exported).",
+                    f"Autonomous Meta-AI Cycle #{cycles} verified (`{verified_count}/{len(curriculum)}` new reference checks passed; expert loss `{pre_loss:.4f} -> {post_loss:.4f}`; `{manifest['registered_cartridges']}` updated meta-AI shards exported).",
                 ]
             )
 
-        prev = self.get_status()
-        cycles = int(prev.get("cycles_completed", 0)) + 1
         report = {
             "executed": True,
             "halted_by_kill_switch": False,
@@ -401,12 +496,21 @@ class AutonomousSelfImprovementController:
             "max_cpu_threads": self.max_cpu_threads,
             "codebase_index_sha256": code_index["codebase_index_sha256"],
             "indexed_package_count": code_index["indexed_package_count"],
+            "cycle_focused_files": code_index.get("cycle_focused_files", []),
+            "curriculum_sha256": curriculum_sha256,
             "curriculum_verified_count": verified_count,
             "curriculum_total_count": len(curriculum),
+            "expert_pre_update_loss": round(pre_loss, 6),
+            "expert_post_update_loss": round(post_loss, 6),
             "exported_meta_shards": list(META_AI_EXPERT_DOMAINS.keys()),
+            "shard_hash_prefixes": shard_hashes,
+            "active_coaching_domain": active_coaching_domain,
             "peer_coaching_prompt": peer_prompt["peer_coaching_prompt"],
             "github_issue_url": gh_issue_url,
             "updated_at_utc": datetime.now(timezone.utc).isoformat(),
         }
         write_json(report, self.status_path)
+        history_path = self.state_dir / "autopilot_history.jsonl"
+        with history_path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(report, sort_keys=True) + "\n")
         return report
