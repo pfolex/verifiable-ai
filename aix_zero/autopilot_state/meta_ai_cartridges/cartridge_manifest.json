@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "architecture": "AIX-Zero routed expert snapshots",
+  "model_config": {
+    "vocab_size": 134,
+    "d_model": 128,
+    "n_heads": 4,
+    "n_kv_heads": 2,
+    "d_ff": 256,
+    "n_encoder_layers": 1,
+    "n_recurrent_steps": 3,
+    "n_decoder_layers": 1,
+    "max_seq_len": 112,
+    "rope_theta": 10000.0,
+    "rms_eps": 1e-06,
+    "dropout": 0.0,
+    "use_moe": true,
+    "use_shared_expert": true,
+    "n_experts": 4,
+    "moe_top_k": 2,
+    "use_memory_bank": true,
+    "n_memory_slots": 8,
+    "use_prompt_pointer": true,
+    "pointer_temperature": 0.35,
+    "use_key_ngram_conv": false
+  },
+  "active_core_physical_parameters": 817410,
+  "registered_cartridges": 4,
+  "total_cartridge_bank_parameters": 196608,
+  "cartridges": {
+    "META_SCALING_OPTIMIZER": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "title": "Compute-Optimal Scaling & Hyperparameter Optimizer",
+      "category": "meta_ai_self_improvement",
+      "prefix": "Q:MetaScale:",
+      "formula": "D_opt = C / (6 * N)",
+      "introduced_in": "v12_meta_autopilot",
+      "cartridge_file": "expert_meta_scaling_optimizer_e84c63cbbb024c75e563c7c7d0e9e6bf983c9a35a8122ffc32ed8293e75884df.safetensors",
+      "sha256": "e84c63cbbb024c75e563c7c7d0e9e6bf983c9a35a8122ffc32ed8293e75884df",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_LORA_MOE_ARCHITECT": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "title": "LoRA & Sparse MoE Parameter Efficiency Architect",
+      "category": "meta_ai_self_improvement",
+      "prefix": "Q:MetaMoE:",
+      "formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
+      "introduced_in": "v12_meta_autopilot",
+      "cartridge_file": "expert_meta_lora_moe_architect_f7ae0915abc6faae42862c1f80332e846044d61de722a862d141aeb7f1575be2.safetensors",
+      "sha256": "f7ae0915abc6faae42862c1f80332e846044d61de722a862d141aeb7f1575be2",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_GQA_KV_SYSTEMS": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "title": "GQA KV-Cache Compression & Systems Kernel Analyzer",
+      "category": "meta_ai_self_improvement",
+      "prefix": "Q:MetaKV:",
+      "formula": "kv_compression_ratio = n_heads / n_kv_heads",
+      "introduced_in": "v12_meta_autopilot",
+      "cartridge_file": "expert_meta_gqa_kv_systems_edfe7ea9c6f4b589aa622a9a54079967bbfce5d0f267cd6f38f55635ef7d4055.safetensors",
+      "sha256": "edfe7ea9c6f4b589aa622a9a54079967bbfce5d0f267cd6f38f55635ef7d4055",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_RLVR_GRPO_TRAINER": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "title": "RLVR & Group-Relative Policy Optimization Verifier",
+      "category": "meta_ai_self_improvement",
+      "prefix": "Q:MetaRLVR:",
+      "formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
+      "introduced_in": "v12_meta_autopilot",
+      "cartridge_file": "expert_meta_rlvr_grpo_trainer_c8ca207218831fd2ef2901669f0886aaad7266f1733cb1c23d01a262eddd2e2a.safetensors",
+      "sha256": "c8ca207218831fd2ef2901669f0886aaad7266f1733cb1c23d01a262eddd2e2a",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    }
+  },
+  "limitations": "Snapshots duplicate existing experts; no added learned capacity or specialist validation."
+}
