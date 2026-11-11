@@ -32,16 +32,15 @@ import os
 from pathlib import Path
 import signal
 import subprocess
-import time
 from typing import Any, Dict, List, Optional
 
 import torch
 
 from artifact_io import canonical_json, write_json
 from aix_zero.architecture import AIXZeroConfig, AIXZeroModel
-from aix_zero.benchmark_baseline import load_v11
 from aix_zero.eval_harness_bridge import score_rational_or_probability
 from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
+from aix_zero.tokenizer import AIXZeroTokenizer, build_v11_tokenizer
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_STATE_DIR = REPO_ROOT / "aix_zero/autopilot_state"
@@ -267,6 +266,42 @@ def synthesize_peer_ai_improvement_prompt(
     }
 
 
+def build_meta_training_batch(
+    curriculum: List[Dict[str, Any]],
+    tokenizer: AIXZeroTokenizer,
+    *,
+    max_seq_len: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Encode every verified example and score only its complete response."""
+    if not curriculum:
+        raise ValueError("Meta-AI training requires a nonempty curriculum")
+
+    sequences = []
+    prompt_lengths = []
+    for item in curriculum:
+        prompt = tokenizer.encode(item["prompt"])
+        completion = tokenizer.encode(item["completion"], add_bos=False, add_eos=True)
+        if (
+            tokenizer.decode(prompt, skip_special=True) != item["prompt"]
+            or tokenizer.decode(completion, skip_special=True) != item["completion"]
+        ):
+            raise ValueError("Tokenizer dropped Meta-AI curriculum content")
+        sequence = prompt + completion
+        if len(sequence) > max_seq_len:
+            raise ValueError("Meta-AI example exceeds the model sequence length")
+        sequences.append(sequence)
+        prompt_lengths.append(len(prompt))
+
+    input_ids = torch.full(
+        (len(sequences), max(map(len, sequences))), tokenizer.pad_id, dtype=torch.long
+    )
+    labels = torch.zeros_like(input_ids)  # AIXZeroModel ignores label ID 0.
+    for index, (sequence, prompt_length) in enumerate(zip(sequences, prompt_lengths)):
+        input_ids[index, :len(sequence)] = torch.tensor(sequence)
+        labels[index, prompt_length:len(sequence)] = input_ids[index, prompt_length:len(sequence)]
+    return input_ids, labels
+
+
 class AutonomousSelfImprovementController:
     """Daemon controller with immediate stop/pause kill-switch, bounded CPU/memory resource caps,
     meta-AI expert shard export, and optional autonomous GitHub issue creation & resolution.
@@ -383,62 +418,59 @@ class AutonomousSelfImprovementController:
             if sc["score"] == 1.0:
                 verified_count += 1
 
+        if verified_count != len(curriculum):
+            raise ValueError("Meta-AI curriculum failed reference verification")
+
         domain_keys = list(META_AI_EXPERT_DOMAINS.keys())
         active_coaching_domain = domain_keys[(cycles - 1) % len(domain_keys)]
         peer_prompt = synthesize_peer_ai_improvement_prompt(code_index, target_domain=active_coaching_domain)
 
         # Load or initialize persistent evolving Meta-AI MoE model (never overwriting immutable v11 checkpoint)
         bdir = Path(cartridge_bank_dir) if cartridge_bank_dir is not None else (self.state_dir / "meta_ai_cartridges")
-        live_backbone_path = self.state_dir / "meta_ai_live_backbone.pt"
+        # The legacy character IDs are incompatible with this tokenizer.
+        live_backbone_path = self.state_dir / "meta_ai_completion_backbone.pt"
+        tokenizer = build_v11_tokenizer()
         torch.manual_seed(20260410 + cycles)
         model = AIXZeroModel(
             AIXZeroConfig(
-                vocab_size=128,
+                vocab_size=tokenizer.vocab_size,
                 d_model=32,
                 n_heads=2,
                 n_kv_heads=2,
                 d_ff=64,
-                max_seq_len=64,
+                max_seq_len=256,
                 use_moe=True,
                 n_experts=4,
                 moe_top_k=2,
             )
         )
         if live_backbone_path.exists():
-            try:
-                model.load_state_dict(torch.load(live_backbone_path, map_location="cpu", weights_only=True))
-            except Exception:
-                pass
+            model.load_state_dict(torch.load(live_backbone_path, map_location="cpu", weights_only=True))
 
-        # Encode this cycle's unique verified curriculum into token sequences and optimize routed expert weights
-        batch_seqs: List[List[int]] = []
-        for item in curriculum[:12]:
-            text = f"{item['prompt']}{item['completion']}"
-            ids = [min(127, max(1, ord(ch) % 128)) for ch in text[:48]]
-            if len(ids) < 48:
-                ids = ids + [0] * (48 - len(ids))
-            batch_seqs.append(ids)
-        input_ids = torch.tensor(batch_seqs, dtype=torch.long)
+        input_ids, labels = build_meta_training_batch(
+            curriculum, tokenizer, max_seq_len=model.config.max_seq_len
+        )
 
         for name, param in model.named_parameters():
             param.requires_grad = "experts." in name or "router." in name
 
-        model.train()
+        model.eval()
         with torch.no_grad():
-            pre_loss = float(model(input_ids, labels=input_ids)["loss"].item())
+            pre_loss = float(model(input_ids, labels=labels)["ce_loss"].item())
 
+        model.train()
         optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=4e-3)
         for _ in range(4):
             if self.should_stop():
                 break
             optimizer.zero_grad()
-            loss = model(input_ids, labels=input_ids)["loss"]
+            loss = model(input_ids, labels=labels)["loss"]
             loss.backward()
             optimizer.step()
 
         model.eval()
         with torch.no_grad():
-            post_loss = float(model(input_ids, labels=input_ids)["loss"].item())
+            post_loss = float(model(input_ids, labels=labels)["ce_loss"].item())
 
         if post_loss <= pre_loss:
             torch.save(model.state_dict(), live_backbone_path)
@@ -467,7 +499,7 @@ class AutonomousSelfImprovementController:
                 f"- **Routed MoE Expert Shard Loss (Cycle #{cycles} Curriculum):** `{pre_loss:.4f} -> {post_loss:.4f}` (delta `{post_loss - pre_loss:+.4f}`)\n"
                 f"- **Updated Meta-AI Cartridge Digest Prefixes:** `{json.dumps(shard_hashes, sort_keys=True)}`\n"
                 f"- **Active Peer-AI Coaching Domain:** `{active_coaching_domain}`\n"
-                "- **Scientific Honesty Disclosure:** Evolving MoE expert weights are trained and persisted in `meta_ai_live_backbone.pt` and exported as content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
+                "- **Scientific Honesty Disclosure:** Evolving MoE expert weights are trained and persisted in `meta_ai_completion_backbone.pt` and exported as content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
             )
             create_out = subprocess.check_output(
                 [gh_binary, "issue", "create", "--repo", repo_slug, "--title", title, "--body", body],
@@ -500,6 +532,9 @@ class AutonomousSelfImprovementController:
             "curriculum_sha256": curriculum_sha256,
             "curriculum_verified_count": verified_count,
             "curriculum_total_count": len(curriculum),
+            "training_objective": "completion_token_cross_entropy",
+            "training_example_count": len(curriculum),
+            "training_tokenizer_sha256": tokenizer.vocab_sha256,
             "expert_pre_update_loss": round(pre_loss, 6),
             "expert_post_update_loss": round(post_loss, 6),
             "exported_meta_shards": list(META_AI_EXPERT_DOMAINS.keys()),
