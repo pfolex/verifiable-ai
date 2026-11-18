@@ -67,6 +67,26 @@ A local 105-case template-family evaluation measured **9/105 neural-only** and *
 
 See the [offline baseline and expert-storage guide](docs/AIX-ZERO-EXPERT-STORAGE.md) for installation, reproducible commands, measured evidence, and limitations. Expert snapshots copy existing weights; storing more copies adds no learned capacity. Legacy web/council and codex descriptions are experimental mechanisms, not independently validated capability claims.
 
+### Meta-AI Autonomous Self-Improvement Engine (`aix_zero.aix_ctl`)
+
+See the full [**Meta-AI Autopilot & Control Guide**](docs/META-AI-AUTOPILOT-GUIDE.md) for step-by-step commands to run progressive self-improvement cycles, query the evolving `v12` model, coach conversing peer AIs, and engage the immediate kill-switch (`stop`):
+
+```bash
+# Run one progressive self-improvement cycle (and sync with GitHub Issues)
+python -m aix_zero.aix_ctl run-once --sync-github
+
+# Run unattended continuous autopilot (bounded to 1 CPU thread)
+python -m aix_zero.aix_ctl start --max-cycles 20 --interval-seconds 10 --threads 1 --sync-github
+
+# Turn OFF immediately before shutting down your machine
+python -m aix_zero.aix_ctl stop
+
+# Check live status, query the evolving model, or coach a peer AI
+python -m aix_zero.aix_ctl status
+python -m aix_zero.aix_ctl query --prompt "Q:MetaScale:C=144;N=4->D_opt?"
+python -m aix_zero.aix_ctl coach --prompt "Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?" --peer-response "<think>mean=2/8;adv=1-1/4=3/4</think><ans>3/4</ans>"
+```
+
 ---
 
 ## Quickstart: Clone & Run the Full "Parameter Pull Request" Loop
