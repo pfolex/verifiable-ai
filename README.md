@@ -2,47 +2,20 @@
 
 [![Fishtest Parameter PR Pipeline](https://github.com/pfolex/verifiable-ai/actions/workflows/fishtest-ci.yml/badge.svg)](https://github.com/pfolex/verifiable-ai/actions/workflows/fishtest-ci.yml)
 
-A modular ecosystem of **6 standalone, Unix-style repositories** that connect **ground-truth scientific verifiers**, **synthetic RLVR environments**, **copy-on-write agent sandboxes**, **Apple Silicon prefix-tree inference**, **mechanistic interpretability steering**, and **Stockfish-style statistical parameter merging**.
+AIX is an experimental open-source toolkit for evaluating AI systems and researching verifiable model improvements. It is for developers who want reproducible model comparisons, executable verifiers, and inspectable expert-storage experiments.
 
-Together, they solve a foundational problem in open-source AI: **allowing anyone on consumer hardware (like a Mac) to train, steer, statistically verify, and submit a Pull Request of model parameters (`ΔW`) across 4 rigorous scientific domains.**
+Start with the committed 817,410-parameter AIX-Zero model and an offline demonstration that loads two expert snapshots, restores the base output, and rejects a corrupted cartridge. Follow the [CPU installation walkthrough](docs/GETTING-STARTED.md), including the environment check and demo command.
 
----
-
-## Architecture: How the 6 Repositories Interlock
-
+```sh
+.venv/bin/python scripts/aix_doctor.py
+.venv/bin/python -m aix_zero.demo_cartridges
 ```
-+-----------------------------------------------------------------------------------+
-| 6. verisci          Universal Ground-Truth Scientific & Formal Cartridges         |
-|                     [Logic/SMT]  [Silicon/RTL]  [Systems/Concurrency]  [Matter]   |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-| 2. rlvr-forge       Seed-Locked Procedural Task Generator & GRPO Environment      |
-|                     Infinite curriculum tasks + deterministic verifiable rewards  |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-| 3. branchbox        Deterministic Copy-on-Write Execution DAG                     |
-|                     Sub-ms fork(), step(), rollback() & contrastive pair mining   |
-+--------------------+-----------------------------------------+--------------------+
-                     |                                         |
-                     v                                         v
-+-----------------------------------------+   +-------------------------------------+
-| 4. mlx-tree        Apple Silicon Tree   |   | 5. steerlens   Mech-Interp, SAEs &  |
-|                    Radix KV-Cache &     |<->|                Contrastive Steering |
-|                    Local GRPO LoRA ΔW   |   |                Vectors (CAA)        |
-+--------------------+--------------------+   +------------------+------------------+
-                     |                                           |
-                     +---------------------+---------------------+
-                                           |
-                                           v
-+-----------------------------------------------------------------------------------+
-| 1. everbench        Contamination-Proof Benchmark, SPRT Gate & TIES/DARE Merger   |
-|                     Verifies ΔElo on unseen seeds & merges winning parameter PRs  |
-+-----------------------------------------------------------------------------------+
-```
+
+The [evidence scorecard](docs/EVIDENCE-SCORECARD.md) links measured outcomes and limitations. The historical arithmetic baseline scored 9/105 neural-only and 105/105 with its arithmetic helper. The next research milestone is to train on verified AI engineering patches and evaluate unseen programming tasks.
+
+See the [three-milestone sponsorship roadmap](docs/SPONSORSHIP-ROADMAP.md), [contributor guide](CONTRIBUTING.md), and [pfolex Sponsors page](https://github.com/sponsors/pfolex). The initial compute funding target is pending a measured pilot and dated provider quotes.
+
+The wider suite connects six repositories for scientific verification, synthetic learning environments, execution state management, inference experiments, interpretability, and evaluation. Their interfaces and scope are listed below.
 
 ---
 
@@ -89,7 +62,7 @@ python -m aix_zero.aix_ctl coach --prompt "Q:MetaRLVR:r=1;successes=2;group=8->g
 
 ---
 
-## Quickstart: Clone & Run the Full "Parameter Pull Request" Loop
+## Extended six-repository research loop
 
 ```bash
 git clone https://github.com/pfolex/verifiable-ai.git
