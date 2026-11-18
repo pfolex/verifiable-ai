@@ -43,6 +43,10 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertNotEqual(res1["cycle_focused_files"], res2["cycle_focused_files"])
             self.assertLess(res1["expert_post_update_loss"], res1["expert_pre_update_loss"])
             self.assertLess(res2["expert_post_update_loss"], res2["expert_pre_update_loss"])
+            self.assertLessEqual(res1["heldout_val_post_loss"], res1["heldout_val_pre_loss"])
+            self.assertLessEqual(res2["heldout_val_post_loss"], res2["heldout_val_pre_loss"])
+            self.assertTrue(res1["promoted_on_heldout_val"])
+            self.assertTrue(res2["promoted_on_heldout_val"])
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
             self.assertEqual(len(res2["exported_meta_shards"]), 4)
 
