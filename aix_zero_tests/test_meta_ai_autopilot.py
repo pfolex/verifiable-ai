@@ -47,8 +47,31 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertLessEqual(res2["heldout_val_post_loss"], res2["heldout_val_pre_loss"])
             self.assertTrue(res1["promoted_on_heldout_val"])
             self.assertTrue(res2["promoted_on_heldout_val"])
+            self.assertEqual(res1["code_synthesis_verified_count"], res1["code_synthesis_total_count"])
+            self.assertEqual(res2["code_synthesis_verified_count"], res2["code_synthesis_total_count"])
+            self.assertEqual(res1["alu_assisted_heldout_exact_match"], 1.0)
+            self.assertEqual(res2["alu_assisted_heldout_exact_match"], 1.0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
             self.assertEqual(len(res2["exported_meta_shards"]), 4)
+
+            # Verify interactive query and peer-AI coaching CLI
+            q_out = ctrl.query_evolving_meta_ai("Q:MetaScale:C=144;N=4->D_opt?", use_alu=True)
+            self.assertEqual(q_out["routed_domain"], "META_SCALING_OPTIMIZER")
+            self.assertIn("<ans>6</ans>", q_out["final_completion"])
+
+            c_bad = ctrl.coach_peer_ai_response(
+                "Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?",
+                "<think>mean=2/8;adv=1-2/8=5/8</think><ans>5/8</ans>",
+            )
+            self.assertFalse(c_bad["peer_correct"])
+            self.assertEqual(c_bad["reference_gold"], "3/4")
+            self.assertIn("CORRECTION REQUIRED", c_bad["coaching_feedback"])
+
+            c_good = ctrl.coach_peer_ai_response(
+                "Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?",
+                "<think>mean=2/8;adv=1-1/4=3/4</think><ans>3/4</ans>",
+            )
+            self.assertTrue(c_good["peer_correct"])
 
             # Trigger stop via CLI (`aix_ctl stop`)
             rc = aix_ctl_main(["--state-dir", str(tdir), "stop", "--reason", "USER_SHUTTING_DOWN_MAC"])

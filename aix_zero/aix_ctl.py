@@ -59,6 +59,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_start.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
     p_start.add_argument("--sync-github", action="store_true", help="Open and close auditable GitHub issues")
 
+    p_query = sub.add_parser("query", help="Query the evolving v12 Meta-AI model on a math or Meta-AI prompt")
+    p_query.add_argument("--prompt", required=True, help="Prompt string (e.g. 'Q:MetaScale:C=144;N=4->D_opt?' or '14*23=')")
+    p_query.add_argument("--no-alu", action="store_true", help="Disable neuro-symbolic ALU assistance")
+    p_query.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
+
+    p_coach = sub.add_parser("coach", help="Grade a conversing peer AI's response and generate corrective coaching feedback")
+    p_coach.add_argument("--prompt", required=True, help="Meta-AI prompt string (e.g. 'Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?')")
+    p_coach.add_argument("--peer-response", required=True, help="Peer AI response containing <think>...</think><ans>...</ans>")
+
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
         args.state_dir,
@@ -102,6 +111,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             if completed < args.max_cycles and not ctrl.should_stop():
                 time.sleep(max(0.0, float(args.interval_seconds)))
         print(json.dumps(ctrl.get_status(), indent=2))
+        return 0
+
+    if args.command == "query":
+        res = ctrl.query_evolving_meta_ai(args.prompt, use_alu=not args.no_alu)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "coach":
+        res = ctrl.coach_peer_ai_response(args.prompt, args.peer_response)
+        print(json.dumps(res, indent=2))
         return 0
 
     return 1
