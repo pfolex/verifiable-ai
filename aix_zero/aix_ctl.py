@@ -31,6 +31,7 @@ from typing import List, Optional
 from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
     DEFAULT_STATE_DIR,
+    export_peer_ai_coaching_pack,
 )
 
 
@@ -52,12 +53,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_once = sub.add_parser("run-once", help="Run a single Meta-AI self-improvement cycle")
     p_once.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
     p_once.add_argument("--sync-github", action="store_true", help="Open and close an auditable GitHub issue")
+    p_once.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
 
     p_start = sub.add_parser("start", help="Run unattended self-improvement loop until stopped")
     p_start.add_argument("--max-cycles", type=int, default=3, help="Maximum cycles before pausing")
     p_start.add_argument("--interval-seconds", type=float, default=2.0, help="Sleep interval between cycles")
     p_start.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
     p_start.add_argument("--sync-github", action="store_true", help="Open and close auditable GitHub issues")
+    p_start.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
 
     p_query = sub.add_parser("query", help="Query the evolving v12 Meta-AI model on a math or Meta-AI prompt")
     p_query.add_argument("--prompt", required=True, help="Prompt string (e.g. 'Q:MetaScale:C=144;N=4->D_opt?' or '14*23=')")
@@ -67,6 +70,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_coach = sub.add_parser("coach", help="Grade a conversing peer AI's response and generate corrective coaching feedback")
     p_coach.add_argument("--prompt", required=True, help="Meta-AI prompt string (e.g. 'Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?')")
     p_coach.add_argument("--peer-response", required=True, help="Peer AI response containing <think>...</think><ans>...</ans>")
+
+    p_pack = sub.add_parser("export-coaching-pack", help="Export portable 8-domain Peer-AI Symbiotic Coaching Pack JSON")
+    p_pack.add_argument("--cycle", type=int, default=1, help="Cycle index for worked examples")
+
+    p_backlog = sub.add_parser("backlog", help="Discover and inspect autonomous self-improvement backlog issues")
+    p_backlog.add_argument("--sync-github", action="store_true", help="Open GitHub issues for newly discovered backlog items")
 
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
@@ -94,7 +103,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "run-once":
         ctrl.clear_stop_sentinel()
         ctrl.install_signal_handlers()
-        res = ctrl.run_single_self_improvement_cycle(sync_github_issue=args.sync_github)
+        res = ctrl.run_single_self_improvement_cycle(
+            sync_github_issue=args.sync_github,
+            auto_push=args.auto_push,
+        )
         print(json.dumps(res, indent=2))
         return 0
 
@@ -104,7 +116,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         completed = 0
         last_res = {}
         while completed < args.max_cycles and not ctrl.should_stop():
-            last_res = ctrl.run_single_self_improvement_cycle(sync_github_issue=args.sync_github)
+            last_res = ctrl.run_single_self_improvement_cycle(
+                sync_github_issue=args.sync_github,
+                auto_push=args.auto_push,
+            )
             if not last_res.get("executed", False):
                 break
             completed += 1
@@ -120,6 +135,16 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.command == "coach":
         res = ctrl.coach_peer_ai_response(args.prompt, args.peer_response)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "export-coaching-pack":
+        pack = export_peer_ai_coaching_pack(ctrl.state_dir / "peer_ai_coaching_pack.json", cycle_index=args.cycle)
+        print(json.dumps(pack, indent=2))
+        return 0
+
+    if args.command == "backlog":
+        res = ctrl.discover_and_file_improvement_issues(sync_github=args.sync_github)
         print(json.dumps(res, indent=2))
         return 0
 

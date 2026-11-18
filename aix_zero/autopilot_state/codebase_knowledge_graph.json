@@ -1,0 +1,2532 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_graph_sha256": "b07548114728c05c386f403ee74d810ebd547adc8b7754185949937e6c8933b1",
+  "indexed_module_count": 62,
+  "total_functions_indexed": 559,
+  "total_classes_indexed": 71,
+  "modules": [
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/__init__.py",
+      "summary_docstring": "AIX-Zero: From-Scratch Latent-Recurrent Verifiable Reasoning Architecture.",
+      "lines": 31,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/ablate_architectures.py",
+      "summary_docstring": "Head-to-Head Multi-Architecture Ablation & Evolution Benchmark for AIX-Zero.",
+      "lines": 329,
+      "cyclomatic_branches": 16,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "verify_and_repair_prompt_grounded_alu",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "eval_variant",
+          "arg_count": 5,
+          "has_docstring": false
+        },
+        {
+          "name": "train_and_evaluate_architecture",
+          "arg_count": 7,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/aix_ctl.py",
+      "summary_docstring": "AIX-Zero Autopilot Control CLI (`aix_zero/aix_ctl.py`)",
+      "lines": 155,
+      "cyclomatic_branches": 15,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/architecture.py",
+      "summary_docstring": "AIX-Zero v4 Neural Network Architecture written 100% from scratch in PyTorch.",
+      "lines": 903,
+      "cyclomatic_branches": 106,
+      "classes": [
+        "AIXZeroConfig",
+        "RMSNorm",
+        "RotaryEmbedding",
+        "GroupedQueryAttention",
+        "PromptPointerAttention",
+        "SwiGLUFFN",
+        "MixtureOfReasoningExperts",
+        "DifferentiableMemoryBank",
+        "TransformerBlock",
+        "RecurrentReasoningBlock"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_inflight_subexpr",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "profile_moe_dispatch_breakdown",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "apply_rotary",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "set_expert_dispatch",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "count_parameters",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "resize_token_embeddings",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/autonomous_symbiont.py",
+      "summary_docstring": "AIX-Symbiont (`aix_zero/autonomous_symbiont.py`)",
+      "lines": 391,
+      "cyclomatic_branches": 22,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "query_ollama_quick",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "conduct_multi_llm_discovery_dialogue",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/bayesian_tasks.py",
+      "summary_docstring": "Exact binary Bayesian tasks; probability tuples and layouts are held out.",
+      "lines": 155,
+      "cyclomatic_branches": 29,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "fraction_text",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_prompt",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "reference_joint",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "solve_prompt",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "render",
+          "arg_count": 6,
+          "has_docstring": false
+        },
+        {
+          "name": "build_dataset",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "score_answer",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "empirical_gate",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/benchmark_baseline.py",
+      "summary_docstring": "[STABLE RELEASE INTERFACE] Offline v11 baseline and optional expert snapshot export (no training/network calls).",
+      "lines": 148,
+      "cyclomatic_branches": 9,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "load_v11",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "run_baseline",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "query",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/benchmark_dispatch.py",
+      "summary_docstring": "Paired dense/sparse CPU experiments; no training or automatic disk routing.",
+      "lines": 211,
+      "cyclomatic_branches": 22,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "summary",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "timed",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "memory_worker",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "kernel_experiments",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "storage_experiments",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "accuracy_experiment",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "rss_peak",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/checkpoint_registry.py",
+      "summary_docstring": "Side-effect-free checkpoint loading and checkpoint provenance inventory (`BASE-05`, `BASE-06`).",
+      "lines": 740,
+      "cyclomatic_branches": 69,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "infer_config_from_state_dict",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "load_checkpoint_strict",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "inventory_digest",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_checkpoint_inventory",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "load_checkpoint_inventory",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "save_checkpoint_inventory",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "save_checkpoint_protected",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "experiment_config_digest",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_experiment_config",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "make_experiment_config",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "save_experiment_config",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "load_experiment_config",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "save_training_recovery_bundle",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "resume_training_from_bundle",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "build_experiment_failure_record",
+          "arg_count": 0,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/continuous_time_trainer.py",
+      "summary_docstring": "AIX-Zero Time-Budgeted Continuous Self-Training Daemon (`aix_zero/continuous_time_trainer.py`)",
+      "lines": 420,
+      "cyclomatic_branches": 24,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_12_domain_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "mine_hard_examples",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/data_provenance.py",
+      "summary_docstring": "Dataset licensing and provenance validation and eligibility gate (`DATA-01` / Issue #51).",
+      "lines": 118,
+      "cyclomatic_branches": 10,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "catalog_digest",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_provenance_record",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_provenance_catalog",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "assert_public_volunteer_eligible",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "make_provenance_catalog",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "load_provenance_catalog",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "save_provenance_catalog",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/eval_harness_bridge.py",
+      "summary_docstring": "Bridge connecting AIX-Zero checkpoints and baseline reports to EVAL-001..006 (`EVAL-01`, `EVAL-02`, `EVAL-03`, `EVAL-06`",
+      "lines": 2156,
+      "cyclomatic_branches": 154,
+      "classes": [
+        "AIXZeroProvider"
+      ],
+      "public_functions": [
+        {
+          "name": "mode_to_answer_source",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "score_aix_trace",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "rational_scorer_metadata",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "score_rational_or_probability",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "run_aix_benchmark",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "baseline_report_to_eval_results",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "assert_comparable_conditions",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_aix_scorecard",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_multidimensional_scorecard",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "assess_aix_paired_results",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "group_clustered_paired_interval",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_probability_calibration",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_latency_and_throughput_report",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_energy_and_useful_work",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "measure_memory_and_cache_budget",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/interactive_repl.py",
+      "summary_docstring": "AIX-Zero v8 Interactive Live REPL & Real-Time Teaching Shell (`aix_zero/interactive_repl.py`)",
+      "lines": 273,
+      "cyclomatic_branches": 24,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "load_v8_model",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "run_query",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "run_live_teach",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/knowledge_is_power.py",
+      "summary_docstring": "AIX-Zero: \"Knowledge Is Power\" (`aix_zero/knowledge_is_power.py`)",
+      "lines": 1366,
+      "cyclomatic_branches": 94,
+      "classes": [
+        "WebKnowledgeFetcher",
+        "CodexRetriever"
+      ],
+      "public_functions": [
+        {
+          "name": "build_15_domain_kip_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_18_domain_kip_v10_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_21_domain_kip_v11_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "conduct_kip_scholar_research",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "write_knowledge_codex",
+          "arg_count": 10,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "fetch_wikipedia_summary",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "fetch_arxiv_paper",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "lookup",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/meta_ai_autopilot.py",
+      "summary_docstring": "AIX Meta-AI Autonomous Self-Improvement Engine (`aix_zero/meta_ai_autopilot.py`)",
+      "lines": 1388,
+      "cyclomatic_branches": 104,
+      "classes": [
+        "AutonomousSelfImprovementController"
+      ],
+      "public_functions": [
+        {
+          "name": "build_meta_ai_self_improvement_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_open_source_knowledge_graph",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "scan_open_source_ai_codebase_patterns",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "synthesize_peer_ai_improvement_prompt",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "export_peer_ai_coaching_pack",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "solve_meta_ai_prompt_symbolic",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_executable_code_synthesis_tasks",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_executable_code_tasks",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "install_signal_handlers",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "should_stop",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "request_stop",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "clear_stop_sentinel",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_status",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "update_and_sample_replay_buffer",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "run_grpo_self_play_step",
+          "arg_count": 4,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/network_coordinator.py",
+      "summary_docstring": "Volunteer worker capability handshake, threat boundaries, and durable experiment queue",
+      "lines": 2042,
+      "cyclomatic_branches": 147,
+      "classes": [
+        "DurableExperimentQueue",
+        "WorkerHeartbeatAndCancellationTracker",
+        "ImmutableArtifactStore",
+        "WorkerEnrollmentRegistry",
+        "PublicEndpointRateAndStorageQuotaGuard"
+      ],
+      "public_functions": [
+        {
+          "name": "validate_worker_capability_handshake",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "match_job_to_worker",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "execute_allowlisted_local_job",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_remote_artifact_stream",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "sign_release_manifest",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_release_manifest_signature",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "probe_worker_accelerator_capabilities",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_worker_sandbox_isolation",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "sanitize_public_telemetry_and_logs",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "enforce_worker_resource_limits",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "manage_worker_schedule_and_pause",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "manage_worker_disk_quota",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_constrained_job_arguments",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_independent_result_replication",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "match_job_to_worker_capabilities",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/semantic_splits.py",
+      "summary_docstring": "Semantic problem identity canonicalization and disjoint split verification (`DATA-02` / Issue #43).",
+      "lines": 964,
+      "cyclomatic_branches": 96,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "canonical_problem_identity",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "semantic_identity_hash",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_disjoint_splits",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "partition_by_semantic_identity",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_rotating_test_partition",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "export_training_split_safe",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_difficulty_factors",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "cross_check_generator_with_independent_oracle",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "classify_generalization_category",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_generalization_taxonomy_manifest",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "audit_answer_frequency_shortcuts",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "build_validation_curriculum_experiment_set",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_benchmark_exclusion_ledger",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "analyze_bayesian_pilot_errors",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_metamorphic_relations",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/sparse_cartridge_bank.py",
+      "summary_docstring": "Versioned storage and explicit installation of existing routed expert snapshots.",
+      "lines": 914,
+      "cyclomatic_branches": 112,
+      "classes": [
+        "SparseExpertCartridgeBank",
+        "DeviceResidentExpertSlotManager"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_learned_vs_explicit_routing",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "measure_expert_locality_and_prefetch",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "audit_m3_expert_library_release_readiness",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_sparse_capacity_scaling",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_specialist_provenance",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "cached_bytes",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "cache_info",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_manifest",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "export_all_domain_cartridges",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "page_in_cartridge",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "install_cartridge",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "temporary_specialist_session",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "publish_verified_catalog_atomic",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "route_explicit_task_schema",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "cleanup_unreferenced_shards",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/tokenizer.py",
+      "summary_docstring": "From-scratch Hybrid Word + Atomic-Digit Tokenizer for AIX-Zero v4.",
+      "lines": 234,
+      "cyclomatic_branches": 32,
+      "classes": [
+        "AIXZeroTokenizer"
+      ],
+      "public_functions": [
+        {
+          "name": "build_v11_tokenizer",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "vocab_size",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "prefix_sha256",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "vocab_sha256",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "append_token",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "to_metadata",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_checkpoint_compatibility",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "encode",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "decode",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_bayesian_pilot.py",
+      "summary_docstring": "[EXPERIMENTAL RESEARCH INTERFACE] Frozen-v11 specialist pilot with explicit routes and held-out probability structures.",
+      "lines": 315,
+      "cyclomatic_branches": 29,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "tensor_digest",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "explicit_route",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "temporary_specialist",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "make_batch",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "completion_loss",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "validation_loss",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "train_expert",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "evaluate",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "fallback_audit",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "run",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_from_scratch.py",
+      "summary_docstring": "Train AIX-Zero 100% from scratch (random Gaussian weights -> verified reasoning model).",
+      "lines": 451,
+      "cyclomatic_branches": 42,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_reasoning_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_answer",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "verify_and_repair_trace_alu",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "make_batch",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_model",
+          "arg_count": 5,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_v3_from_scratch.py",
+      "summary_docstring": "Train AIX-Zero v3 100% from scratch across 6 reasoning domains (including English Word Problems & Calculus).",
+      "lines": 427,
+      "cyclomatic_branches": 35,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_v3_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_and_repair_v3_grounded_alu",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_v3",
+          "arg_count": 6,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_v4_from_scratch.py",
+      "summary_docstring": "Train AIX-Zero v4 100% from scratch across 8 reasoning domains (including 2x2 Linear Systems & Python Code Traces).",
+      "lines": 588,
+      "cyclomatic_branches": 54,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_v4_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "make_v4_weighted_batch",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_and_repair_v4_grounded_alu",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_v4",
+          "arg_count": 6,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_v5_from_scratch.py",
+      "summary_docstring": "Train AIX-Zero v5 100% from scratch with Causal 3-Gram Key Convolution & Domain-Agnostic In-Flight ALU.",
+      "lines": 195,
+      "cyclomatic_branches": 8,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_v5_balanced_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/train_v8_stratified.py",
+      "summary_docstring": "AIX-Zero v8: Stratified 13-Domain Self-Trainer + Arbitrary K-Step Reasoning Chains",
+      "lines": 294,
+      "cyclomatic_branches": 15,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_13_domain_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "sample_stratified_stream",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/validation_training_studies.py",
+      "summary_docstring": "Controlled validation-only training studies and ablations (`TRAIN-03` #78, `TRAIN-04` #79,",
+      "lines": 730,
+      "cyclomatic_branches": 57,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "compare_answer_only_vs_derivation_supervision",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "compare_rational_output_representations",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compare_curriculum_order_vs_shuffled_control",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "ablate_frozen_backbone_adaptation_scopes",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_frozen_verifier_head_ranking",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "run_bounded_multiseed_study",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_completion_and_reasoning_loss_weighting",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compare_specialist_initialization_strategies",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "run_fresh_final_specialist_evaluation",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_experiment_stopping_policy",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "audit_m2_measured_learning_gain_before_scaling",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_specialist_interactions_under_composition",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "gate_v12_capability_naming_on_evidence",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_verified_teacher_distillation",
+          "arg_count": 0,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "aix_zero",
+      "rel_path": "aix_zero/website_data_builder.py",
+      "summary_docstring": "Evidence-based website overview and GitHub-issues-backed roadmap view builder (`WEB-02`, `WEB-03`).",
+      "lines": 552,
+      "cyclomatic_branches": 29,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "build_project_overview_payload",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "build_roadmap_view_payload",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_research_updates_feed",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "audit_html_accessibility_and_keyboard_nav",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_public_metrics_api_projection",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_website_and_api_access_controls",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "build_network_status_page_payload",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "build_reproducible_results_page_payload",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_rejected_experiment_archive_payload",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_contributor_local_progress_view",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_low_bandwidth_website_behavior",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_preview_deployment_and_rollback",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_public_download_and_release_provenance",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_contributor_installation_and_consent_page",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_privacy_aware_analytics_and_retention",
+          "arg_count": 0,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "rlvr-forge",
+      "rel_path": "rlvr-forge/src/rlvr_forge/__init__.py",
+      "summary_docstring": "`rlvr_forge`: Procedural Synthetic Environment & RLVR Generator.",
+      "lines": 26,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "rlvr-forge",
+      "rel_path": "rlvr-forge/src/rlvr_forge/env.py",
+      "summary_docstring": "Gymnasium-style Verifiable Reasoning Environment (`rlvr_forge.env`).",
+      "lines": 93,
+      "cyclomatic_branches": 11,
+      "classes": [
+        "StepOutcome",
+        "RLVREnv"
+      ],
+      "public_functions": [
+        {
+          "name": "reset",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "step",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "current_submission",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "rlvr-forge",
+      "rel_path": "rlvr-forge/src/rlvr_forge/generator.py",
+      "summary_docstring": "Deterministic Procedural Task & Reference Trajectory Generator (`rlvr_forge.generator`).",
+      "lines": 471,
+      "cyclomatic_branches": 45,
+      "classes": [
+        "TaskForge"
+      ],
+      "public_functions": [
+        {
+          "name": "solve_reference",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "sample_exploratory_submission",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "generate",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "lit",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "rlvr-forge",
+      "rel_path": "rlvr-forge/src/rlvr_forge/grpo.py",
+      "summary_docstring": "Group Relative Policy Optimization (GRPO) & Verifiable Rollout Batching (`rlvr_forge.grpo`).",
+      "lines": 111,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "RolloutSample",
+        "GRPOGroupBatch"
+      ],
+      "public_functions": [
+        {
+          "name": "compute_grpo_advantages",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "build_rlvr_group_batch",
+          "arg_count": 6,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "rlvr-forge",
+      "rel_path": "rlvr-forge/tests/test_rlvr_forge.py",
+      "summary_docstring": "Unit test suite for `rlvr-forge` procedural generation, reference solving, env stepping, and GRPO.",
+      "lines": 72,
+      "cyclomatic_branches": 6,
+      "classes": [
+        "TestRLVRForge"
+      ],
+      "public_functions": [
+        {
+          "name": "test_deterministic_seed_and_train_eval_disjointness",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_reference_solver_achieves_100_percent_verification_across_all_domains",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_gym_environment_step_by_step_replay",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_grpo_advantage_normalization_and_batch_builder",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "branchbox",
+      "rel_path": "branchbox/src/branchbox/__init__.py",
+      "summary_docstring": "branchbox: Deterministic Copy-on-Write Agent Execution DAG.",
+      "lines": 20,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "branchbox",
+      "rel_path": "branchbox/src/branchbox/dag.py",
+      "summary_docstring": "Copy-on-Write Agent Execution DAG (`BranchBoxDAG`) and `ExecutionNode`.",
+      "lines": 347,
+      "cyclomatic_branches": 29,
+      "classes": [
+        "ExecutionNode",
+        "ContrastivePair",
+        "BranchBoxDAG"
+      ],
+      "public_functions": [
+        {
+          "name": "compute_state_hash",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "q_value",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "create_root",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_node",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "get_state_copy",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "fork",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "step",
+          "arg_count": 7,
+          "has_docstring": true
+        },
+        {
+          "name": "rollback",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "get_lineage",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "get_shared_prefix_length",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_contrastive_pairs",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "summary",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "branchbox",
+      "rel_path": "branchbox/src/branchbox/search.py",
+      "summary_docstring": "Tree Search Controller (`TreeSearchController`) supporting PUCT (MCTS) and Beam Search",
+      "lines": 224,
+      "cyclomatic_branches": 20,
+      "classes": [
+        "SearchResult",
+        "TreeSearchController"
+      ],
+      "public_functions": [
+        {
+          "name": "select_puct_child",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "select_leaf",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "run_puct_search",
+          "arg_count": 7,
+          "has_docstring": true
+        },
+        {
+          "name": "run_beam_search",
+          "arg_count": 6,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "branchbox",
+      "rel_path": "branchbox/tests/test_branchbox.py",
+      "summary_docstring": "Unit tests for `branchbox`: Copy-on-Write isolation, cryptographic state hashing,",
+      "lines": 126,
+      "cyclomatic_branches": 4,
+      "classes": [
+        "TestBranchBoxDAG"
+      ],
+      "public_functions": [
+        {
+          "name": "test_cow_isolation_and_state_hashing",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "test_rollback_prunes_subtree_and_returns_viable_ancestor",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_extract_contrastive_pairs",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_puct_and_beam_search_find_verified_solution",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "policy_fn",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "step_fn",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "mlx-tree",
+      "rel_path": "mlx-tree/src/mlx_tree/__init__.py",
+      "summary_docstring": "mlx_tree: Apple Silicon Prefix-Shared Tree Inference & Local Parameter Delta Trainer.",
+      "lines": 28,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "mlx-tree",
+      "rel_path": "mlx-tree/src/mlx_tree/model.py",
+      "summary_docstring": "`VerifiablePolicyModel` and `LoRALayer`.",
+      "lines": 191,
+      "cyclomatic_branches": 11,
+      "classes": [
+        "LoRALayer",
+        "VerifiablePolicyModel"
+      ],
+      "public_functions": [
+        {
+          "name": "detect_compute_backend",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "softmax",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "delta_weight",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "effective_weight",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "register_hook",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "clear_hooks",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "encode_state",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "get_lora_parameters",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "set_lora_parameters",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "mlx-tree",
+      "rel_path": "mlx-tree/src/mlx_tree/radix_kv.py",
+      "summary_docstring": "`RadixKVCache`: Tree-structured Copy-on-Write KV-cache manager.",
+      "lines": 163,
+      "cyclomatic_branches": 8,
+      "classes": [
+        "KVBlock",
+        "RadixKVCache"
+      ],
+      "public_functions": [
+        {
+          "name": "nbytes",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "allocate_or_share_prefix",
+          "arg_count": 5,
+          "has_docstring": true
+        },
+        {
+          "name": "fork_branch",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "append_tokens",
+          "arg_count": 5,
+          "has_docstring": true
+        },
+        {
+          "name": "get_branch_kv",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "free_branch",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "cache_hit_ratio",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "telemetry",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "mlx-tree",
+      "rel_path": "mlx-tree/src/mlx_tree/trainer.py",
+      "summary_docstring": "`GRPOLoRATrainer` and `ParameterDelta`.",
+      "lines": 305,
+      "cyclomatic_branches": 9,
+      "classes": [
+        "ParameterDelta",
+        "GRPOUpdateMetrics",
+        "GRPOLoRATrainer"
+      ],
+      "public_functions": [
+        {
+          "name": "digest",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "save",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "load",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_group_advantages",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "step_group",
+          "arg_count": 6,
+          "has_docstring": true
+        },
+        {
+          "name": "export_parameter_delta",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "apply_parameter_delta",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "mlx-tree",
+      "rel_path": "mlx-tree/tests/test_mlx_tree.py",
+      "summary_docstring": "Unit tests for `mlx-tree`:",
+      "lines": 150,
+      "cyclomatic_branches": 2,
+      "classes": [
+        "TestMLXTree"
+      ],
+      "public_functions": [
+        {
+          "name": "test_radix_kv_cache_prefix_sharing_and_ref_counting",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_model_forward_and_activation_steering_hooks",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_grpo_lora_update_strictly_increases_winning_action_probability",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_parameter_delta_serialization_roundtrip",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "steer_hook",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/src/steerlens/__init__.py",
+      "summary_docstring": "steerlens: Mechanistic Interpretability, Sparse Autoencoder (SAE) Probes &",
+      "lines": 28,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/src/steerlens/inspector.py",
+      "summary_docstring": "Glass-box Reasoning Telemetry Analyzer (`ReasoningTelemetry`).",
+      "lines": 113,
+      "cyclomatic_branches": 5,
+      "classes": [
+        "TelemetryReport",
+        "ReasoningTelemetry"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_trajectory",
+          "arg_count": 4,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/src/steerlens/sae.py",
+      "summary_docstring": "Sparse Autoencoder (Top-K & L1 ReLU SAE) for Mechanistic Interpretability.",
+      "lines": 243,
+      "cyclomatic_branches": 24,
+      "classes": [
+        "FeatureDiagnostic",
+        "SparseAutoencoder"
+      ],
+      "public_functions": [
+        {
+          "name": "encode",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "encode_batch",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "decode",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "reconstruction_loss",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "fit",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "top_diagnostic_features",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "feature_steering_vector",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/src/steerlens/steering.py",
+      "summary_docstring": "Contrastive Activation Addition (CAA) and Subspace Steering Vectors.",
+      "lines": 205,
+      "cyclomatic_branches": 13,
+      "classes": [
+        "SteeringVector",
+        "SubspaceProjector"
+      ],
+      "public_functions": [
+        {
+          "name": "compute_caa_vector",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_subspace_projector",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "fold_steering_into_linear_bias",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "fold_steering_into_lora_delta",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "d_model",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "apply",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "apply_batch",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "project_alignment",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "erase_bad_subspace",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/tests/__init__.py",
+      "summary_docstring": "",
+      "lines": 1,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "steerlens",
+      "rel_path": "steerlens/tests/test_steerlens.py",
+      "summary_docstring": "",
+      "lines": 132,
+      "cyclomatic_branches": 5,
+      "classes": [
+        "TestSteerLens"
+      ],
+      "public_functions": [
+        {
+          "name": "setUp",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_sae_training_and_sparsity",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_caa_steering_and_logit_intervention",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_fold_steering_into_parameters",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_subspace_projector_and_telemetry",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/__init__.py",
+      "summary_docstring": "`verisci`: Universal Scientific & Formal Verification Cartridges.",
+      "lines": 32,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "verify_submission",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cartridges/__init__.py",
+      "summary_docstring": "Cartridge Registry (`verisci.cartridges`).",
+      "lines": 36,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "get_cartridge",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cartridges/logic.py",
+      "summary_docstring": "Formal Logic & SMT Verification Cartridge (`verisci.cartridges.logic`).",
+      "lines": 222,
+      "cyclomatic_branches": 21,
+      "classes": [
+        "LogicCartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cartridges/matter.py",
+      "summary_docstring": "Computational Matter & Chemistry Cartridge (`verisci.cartridges.matter`).",
+      "lines": 219,
+      "cyclomatic_branches": 19,
+      "classes": [
+        "MatterCartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cartridges/silicon.py",
+      "summary_docstring": "Hardware & Digital Logic Cartridge (`verisci.cartridges.silicon`).",
+      "lines": 242,
+      "cyclomatic_branches": 27,
+      "classes": [
+        "SiliconCartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "simulate_netlist",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cartridges/systems.py",
+      "summary_docstring": "Systems & Concurrency Cartridge (`verisci.cartridges.systems`).",
+      "lines": 183,
+      "cyclomatic_branches": 18,
+      "classes": [
+        "SystemsCartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/cli.py",
+      "summary_docstring": "CLI entrypoint for `verisci` formal verification cartridges.",
+      "lines": 48,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/protocol.py",
+      "summary_docstring": "Universal Verifiable Cartridge Protocol (`verisci.protocol`).",
+      "lines": 101,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "ActionStep",
+        "DomainTask",
+        "VerificationResult",
+        "Cartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "from_dict",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/tests/test_verisci.py",
+      "summary_docstring": "Comprehensive unit test suite for `verisci` across all 4 domains.",
+      "lines": 218,
+      "cyclomatic_branches": 4,
+      "classes": [
+        "TestVeriSciCartridges"
+      ],
+      "public_functions": [
+        {
+          "name": "test_registry_contains_four_domains",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_logic_cartridge_valid_and_invalid_proofs",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_silicon_cartridge_full_adder_equivalence",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_systems_cartridge_mutex_and_lamport_verification",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_matter_cartridge_ethanol_and_invalid_valence",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_incremental_evaluate_step_protocol",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/src/everbench/__init__.py",
+      "summary_docstring": "everbench: Contamination-Proof Benchmark, Stockfish Fishtest-style SPRT Gate,",
+      "lines": 38,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/src/everbench/merger.py",
+      "summary_docstring": "Orthogonal Parameter Merging (`TIESMerger` and `DAREMerger`).",
+      "lines": 223,
+      "cyclomatic_branches": 24,
+      "classes": [
+        "ParameterDelta",
+        "TIESMerger",
+        "DAREMerger"
+      ],
+      "public_functions": [
+        {
+          "name": "l2_norm",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "trim_vector",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "merge",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "dare_drop_and_rescale",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "merge",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "domain_orthogonality_matrix",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/src/everbench/seed_protocol.py",
+      "summary_docstring": "Contamination-Proof Procedural Evaluation Seed Derivation (`EpochSeedProtocol`).",
+      "lines": 155,
+      "cyclomatic_branches": 7,
+      "classes": [
+        "BenchmarkInstanceSpec",
+        "EpochSeedProtocol"
+      ],
+      "public_functions": [
+        {
+          "name": "derive_seed",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_instance_spec",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_domain_suite",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_instance_commitment",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/src/everbench/sprt.py",
+      "summary_docstring": "Stockfish Fishtest-style Sequential Probability Ratio Test (`SPRTGate`) and",
+      "lines": 321,
+      "cyclomatic_branches": 14,
+      "classes": [
+        "SPRTStatus",
+        "SPRTConfig",
+        "SPRTResult",
+        "MultiDomainGateReport",
+        "SPRTGate"
+      ],
+      "public_functions": [
+        {
+          "name": "estimate_elo_difference",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "lower_bound",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "upper_bound",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "total_games",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "compute_llr",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_counts",
+          "arg_count": 6,
+          "has_docstring": true
+        },
+        {
+          "name": "run_sequential_match",
+          "arg_count": 7,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_multi_domain_pr",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/tests/__init__.py",
+      "summary_docstring": "",
+      "lines": 1,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "everbench",
+      "rel_path": "everbench/tests/test_everbench.py",
+      "summary_docstring": "",
+      "lines": 175,
+      "cyclomatic_branches": 5,
+      "classes": [
+        "TestEverBench"
+      ],
+      "public_functions": [
+        {
+          "name": "test_cryptographic_seed_isolation_and_verification",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_sprt_hypothesis_acceptance_and_rejection",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_multi_domain_non_regression_gate",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_sequential_early_stopping",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_ties_and_dare_multi_contributor_parameter_merging",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    }
+  ]
+}

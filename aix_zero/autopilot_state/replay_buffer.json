@@ -1,0 +1,114 @@
+[
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=1;n_experts=120->active_fraction?",
+    "completion": "<think>active=1/120=1/120</think><ans>1/120</ans>",
+    "gold": "1/120",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=1;n_experts=124->active_fraction?",
+    "completion": "<think>active=1/124=1/124</think><ans>1/124</ans>",
+    "gold": "1/124",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=1;n_experts=132->active_fraction?",
+    "completion": "<think>active=1/132=1/132</think><ans>1/132</ans>",
+    "gold": "1/132",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=11880;N=60->D_opt?",
+    "completion": "<think>6*60=360;11880/360=33</think><ans>33</ans>",
+    "gold": "33",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=12276;N=62->D_opt?",
+    "completion": "<think>6*62=372;12276/372=33</think><ans>33</ans>",
+    "gold": "33",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=12672;N=64->D_opt?",
+    "completion": "<think>6*64=384;12672/384=33</think><ans>33</ans>",
+    "gold": "33",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=12960;N=60->D_opt?",
+    "completion": "<think>6*60=360;12960/360=36</think><ans>36</ans>",
+    "gold": "36",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=13392;N=62->D_opt?",
+    "completion": "<think>6*62=372;13392/372=36</think><ans>36</ans>",
+    "gold": "36",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=13824;N=64->D_opt?",
+    "completion": "<think>6*64=384;13824/384=36</think><ans>36</ans>",
+    "gold": "36",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=14040;N=60->D_opt?",
+    "completion": "<think>6*60=360;14040/360=39</think><ans>39</ans>",
+    "gold": "39",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=14508;N=62->D_opt?",
+    "completion": "<think>6*62=372;14508/372=39</think><ans>39</ans>",
+    "gold": "39",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_SCALING_OPTIMIZER",
+    "prompt": "Q:MetaScale:C=14976;N=64->D_opt?",
+    "completion": "<think>6*64=384;14976/384=39</think><ans>39</ans>",
+    "gold": "39",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=2;n_experts=120->active_fraction?",
+    "completion": "<think>active=2/120=1/60</think><ans>1/60</ans>",
+    "gold": "1/60",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=2;n_experts=124->active_fraction?",
+    "completion": "<think>active=2/124=1/62</think><ans>1/62</ans>",
+    "gold": "1/62",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_LORA_MOE_ARCHITECT",
+    "prompt": "Q:MetaMoE:top_k=2;n_experts=132->active_fraction?",
+    "completion": "<think>active=2/132=1/66</think><ans>1/66</ans>",
+    "gold": "1/66",
+    "cycle_index": 30
+  },
+  {
+    "domain": "META_GQA_KV_SYSTEMS",
+    "prompt": "Q:MetaKV:n_kv=1;n_heads=16->kv_ratio?",
+    "completion": "<think>ratio=1/16=1/16</think><ans>1/16</ans>",
+    "gold": "1/16",
+    "cycle_index": 30
+  }
+]

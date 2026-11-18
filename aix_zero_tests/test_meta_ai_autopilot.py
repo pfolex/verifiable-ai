@@ -51,8 +51,30 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertEqual(res2["code_synthesis_verified_count"], res2["code_synthesis_total_count"])
             self.assertEqual(res1["alu_assisted_heldout_exact_match"], 1.0)
             self.assertEqual(res2["alu_assisted_heldout_exact_match"], 1.0)
+            self.assertGreater(res1["grpo_positive_trajectories"], 0)
+            self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 4)
+            self.assertEqual(len(res2["exported_meta_shards"]), 8)
+            self.assertIn("resolved_backlog_item", res1)
+            self.assertTrue((tdir / "codebase_knowledge_graph.json").exists())
+            self.assertTrue((tdir / "peer_ai_coaching_pack.json").exists())
+            self.assertTrue((tdir / "autopilot_live.json").exists())
+
+            # Verify dry-run auto-push command construction (`AUTOGH-03`)
+            push_plan = ctrl.auto_push_verified_state("chore: test push", dry_run=True)
+            self.assertTrue(push_plan["dry_run"])
+            self.assertEqual(len(push_plan["commands"]), 3)
+
+            # Verify new 4 Phase-II Meta-AI domains via symbolic query (`OSS-01`)
+            for prompt_str, expected_dom, expected_ans in [
+                ("Q:MetaFlash:seq_len=2048;tile_block=128->io_reduction?", "META_FLASH_ATTENTION_TILING", "<ans>16</ans>"),
+                ("Q:MetaSpec:accepted=3;window=4->accept_ratio?", "META_SPECULATIVE_DECODING", "<ans>3/4</ans>"),
+                ("Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?", "META_QUANTIZATION_FP8_INT4", "<ans>4</ans>"),
+                ("Q:MetaDist:stages=4;microbatches=12->bubble_fraction?", "META_DISTRIBUTED_TP_PP_DP", "<ans>1/5</ans>"),
+            ]:
+                q_dom = ctrl.query_evolving_meta_ai(prompt_str, use_alu=True)
+                self.assertEqual(q_dom["routed_domain"], expected_dom)
+                self.assertIn(expected_ans, q_dom["final_completion"])
 
             # Verify interactive query and peer-AI coaching CLI
             q_out = ctrl.query_evolving_meta_ai("Q:MetaScale:C=144;N=4->D_opt?", use_alu=True)

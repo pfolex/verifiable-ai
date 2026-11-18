@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "backlog_id": "AIX-BACKLOG-01-META_SCALING_OPTIMIZER",
+      "domain": "META_SCALING_OPTIMIZER",
+      "title": "[AIX-BACKLOG-01-META_SCALING_OPTIMIZER] Autonomous mastery & held-out validation gate for META_SCALING_OPTIMIZER",
+      "status": "COMPLETED",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null,
+      "completed_in_cycle": 30,
+      "heldout_val_post_loss": 6.10837
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-02-META_LORA_MOE_ARCHITECT",
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "title": "[AIX-BACKLOG-02-META_LORA_MOE_ARCHITECT] Autonomous mastery & held-out validation gate for META_LORA_MOE_ARCHITECT",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-03-META_GQA_KV_SYSTEMS",
+      "domain": "META_GQA_KV_SYSTEMS",
+      "title": "[AIX-BACKLOG-03-META_GQA_KV_SYSTEMS] Autonomous mastery & held-out validation gate for META_GQA_KV_SYSTEMS",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-04-META_RLVR_GRPO_TRAINER",
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "title": "[AIX-BACKLOG-04-META_RLVR_GRPO_TRAINER] Autonomous mastery & held-out validation gate for META_RLVR_GRPO_TRAINER",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-05-META_FLASH_ATTENTION_TILING",
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "title": "[AIX-BACKLOG-05-META_FLASH_ATTENTION_TILING] Autonomous mastery & held-out validation gate for META_FLASH_ATTENTION_TILING",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-06-META_SPECULATIVE_DECODING",
+      "domain": "META_SPECULATIVE_DECODING",
+      "title": "[AIX-BACKLOG-06-META_SPECULATIVE_DECODING] Autonomous mastery & held-out validation gate for META_SPECULATIVE_DECODING",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-07-META_QUANTIZATION_FP8_INT4",
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "title": "[AIX-BACKLOG-07-META_QUANTIZATION_FP8_INT4] Autonomous mastery & held-out validation gate for META_QUANTIZATION_FP8_INT4",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    },
+    {
+      "backlog_id": "AIX-BACKLOG-08-META_DISTRIBUTED_TP_PP_DP",
+      "domain": "META_DISTRIBUTED_TP_PP_DP",
+      "title": "[AIX-BACKLOG-08-META_DISTRIBUTED_TP_PP_DP] Autonomous mastery & held-out validation gate for META_DISTRIBUTED_TP_PP_DP",
+      "status": "OPEN",
+      "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+      "github_issue_url": null
+    }
+  ]
+}

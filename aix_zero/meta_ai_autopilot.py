@@ -83,14 +83,46 @@ META_AI_EXPERT_DOMAINS: Dict[str, Dict[str, Any]] = {
         "introduced_in": "v12_meta_autopilot",
         "expert_slot": 3,
     },
+    "META_FLASH_ATTENTION_TILING": {
+        "title": "FlashAttention SRAM Tiling & HBM I/O Reduction Architect",
+        "category": "meta_ai_self_improvement",
+        "prefix": "Q:MetaFlash:",
+        "formula": "hbm_io_reduction = seq_len / tile_block_size",
+        "introduced_in": "v12_phase2_autopilot",
+        "expert_slot": 0,
+    },
+    "META_SPECULATIVE_DECODING": {
+        "title": "Speculative Decoding Acceptance & Verification Throughput Optimizer",
+        "category": "meta_ai_self_improvement",
+        "prefix": "Q:MetaSpec:",
+        "formula": "expected_accepted_ratio = accepted_drafts / draft_window",
+        "introduced_in": "v12_phase2_autopilot",
+        "expert_slot": 1,
+    },
+    "META_QUANTIZATION_FP8_INT4": {
+        "title": "FP8/INT4 Weight & KV-Cache Quantization Compression Analyzer",
+        "category": "meta_ai_self_improvement",
+        "prefix": "Q:MetaQuant:",
+        "formula": "compression_ratio = fp16_bits / quant_bits",
+        "introduced_in": "v12_phase2_autopilot",
+        "expert_slot": 2,
+    },
+    "META_DISTRIBUTED_TP_PP_DP": {
+        "title": "3D Distributed Parallelism & Pipeline Bubble Minimizer",
+        "category": "meta_ai_self_improvement",
+        "prefix": "Q:MetaDist:",
+        "formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
+        "introduced_in": "v12_phase2_autopilot",
+        "expert_slot": 3,
+    },
 }
 
 
 def build_meta_ai_self_improvement_curriculum(cycle_index: int = 1) -> List[Dict[str, Any]]:
-    """Build deterministic, reference-verified training and evaluation tasks focused on
-    making AI smarter, optimizing architectures, and verifying RLVR updates.
+    """Build deterministic, reference-verified training and evaluation tasks across all 8 Meta-AI
+    self-improvement domains (`OSS-01` / Issue #254).
     Each `cycle_index` shifts the frontier of model scales, expert counts, KV ratios,
-    and GRPO group sizes so every cycle trains and verifies on genuinely new problems.
+    GRPO group sizes, SRAM tile sizes, speculative windows, quantization bits, and pipeline stages.
     """
     c_idx = max(1, int(cycle_index))
     samples: List[Dict[str, Any]] = []
@@ -168,7 +200,160 @@ def build_meta_ai_self_improvement_curriculum(cycle_index: int = 1) -> List[Dict
                 }
             )
 
+    # 5. META_FLASH_ATTENTION_TILING: HBM I/O reduction ratio = seq_len / tile_block
+    for tile_block in (64, 128):
+        for seq_mult in (4 + c_idx, 8 + c_idx):
+            seq_len = tile_block * seq_mult
+            f_val = Fraction(seq_len, tile_block)
+            gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+            prompt = f"Q:MetaFlash:seq_len={seq_len};tile_block={tile_block}->io_reduction?"
+            trace = f"<think>ratio={seq_len}/{tile_block}={gold}</think><ans>{gold}</ans>"
+            samples.append(
+                {
+                    "domain": "META_FLASH_ATTENTION_TILING",
+                    "prompt": prompt,
+                    "completion": trace,
+                    "gold": gold,
+                    "cycle_index": c_idx,
+                }
+            )
+
+    # 6. META_SPECULATIVE_DECODING: Accepted draft ratio = accepted / window
+    for window in (4 + (c_idx % 3), 6 + (c_idx % 4)):
+        for accepted in (2, 3):
+            f_val = Fraction(accepted, window)
+            gold = f"{f_val.numerator}/{f_val.denominator}"
+            prompt = f"Q:MetaSpec:accepted={accepted};window={window}->accept_ratio?"
+            trace = f"<think>accept={accepted}/{window}={gold}</think><ans>{gold}</ans>"
+            samples.append(
+                {
+                    "domain": "META_SPECULATIVE_DECODING",
+                    "prompt": prompt,
+                    "completion": trace,
+                    "gold": gold,
+                    "cycle_index": c_idx,
+                }
+            )
+
+    # 7. META_QUANTIZATION_FP8_INT4: Memory compression ratio = fp16_bits / quant_bits
+    for fp_bits in (16 + 16 * (c_idx % 2), 32):
+        for q_bits in (4, 8):
+            f_val = Fraction(fp_bits, q_bits)
+            gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+            prompt = f"Q:MetaQuant:fp16_bits={fp_bits};quant_bits={q_bits}->compression?"
+            trace = f"<think>comp={fp_bits}/{q_bits}={gold}</think><ans>{gold}</ans>"
+            samples.append(
+                {
+                    "domain": "META_QUANTIZATION_FP8_INT4",
+                    "prompt": prompt,
+                    "completion": trace,
+                    "gold": gold,
+                    "cycle_index": c_idx,
+                }
+            )
+
+    # 8. META_DISTRIBUTED_TP_PP_DP: Pipeline bubble fraction = (stages - 1) / (microbatches + stages - 1)
+    for stages in (2 + (c_idx % 3), 4 + (c_idx % 3)):
+        for microbatches in (8 + c_idx, 12 + c_idx):
+            num = stages - 1
+            den = microbatches + stages - 1
+            f_val = Fraction(num, den)
+            gold = f"{f_val.numerator}/{f_val.denominator}"
+            prompt = f"Q:MetaDist:stages={stages};microbatches={microbatches}->bubble_fraction?"
+            trace = f"<think>num={stages}-1={num};den={microbatches}+{stages}-1={den};bubble={num}/{den}={gold}</think><ans>{gold}</ans>"
+            samples.append(
+                {
+                    "domain": "META_DISTRIBUTED_TP_PP_DP",
+                    "prompt": prompt,
+                    "completion": trace,
+                    "gold": gold,
+                    "cycle_index": c_idx,
+                }
+            )
+
     return samples
+
+
+def build_open_source_knowledge_graph(
+    repo_root: Path = REPO_ROOT,
+    *,
+    output_path: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Build a persistent AST symbol, docstring, argument-count, and cyclomatic branching knowledge
+    graph across all 7 local open-source AI packages plus any external repos in `open_source_corpus/`
+    (`OSS-02` / Issue #255).
+    """
+    import ast
+
+    base_packages = ["aix_zero", "rlvr-forge", "branchbox", "mlx-tree", "steerlens", "verisci", "everbench"]
+    corpus_dir = repo_root / "open_source_corpus"
+    if corpus_dir.exists():
+        for child in sorted(corpus_dir.iterdir()):
+            if child.is_dir() and not child.name.startswith("."):
+                base_packages.append(f"open_source_corpus/{child.name}")
+
+    modules_graph: List[Dict[str, Any]] = []
+    total_functions = 0
+    total_classes = 0
+
+    for pkg in base_packages:
+        pkg_dir = repo_root / pkg
+        if not pkg_dir.exists():
+            continue
+        py_files = [pf for pf in sorted(pkg_dir.rglob("*.py")) if "__pycache__" not in pf.parts]
+        for pf in py_files[:40]:
+            src = pf.read_text(encoding="utf-8", errors="ignore")
+            rel_path = str(pf.relative_to(repo_root))
+            functions_meta: List[Dict[str, Any]] = []
+            classes_meta: List[str] = []
+            branch_nodes = 0
+            mod_doc = ""
+            try:
+                tree = ast.parse(src)
+                mod_doc = (ast.get_docstring(tree) or "").splitlines()[0] if ast.get_docstring(tree) else ""
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        total_functions += 1
+                        if not node.name.startswith("_") and len(functions_meta) < 15:
+                            functions_meta.append(
+                                {
+                                    "name": node.name,
+                                    "arg_count": len(node.args.args),
+                                    "has_docstring": bool(ast.get_docstring(node)),
+                                }
+                            )
+                    elif isinstance(node, ast.ClassDef):
+                        total_classes += 1
+                        if len(classes_meta) < 10:
+                            classes_meta.append(node.name)
+                    elif isinstance(node, (ast.If, ast.For, ast.While, ast.Try)):
+                        branch_nodes += 1
+            except SyntaxError:
+                pass
+            modules_graph.append(
+                {
+                    "package": pkg,
+                    "rel_path": rel_path,
+                    "summary_docstring": mod_doc[:120],
+                    "lines": len(src.splitlines()),
+                    "cyclomatic_branches": branch_nodes,
+                    "classes": classes_meta,
+                    "public_functions": functions_meta,
+                }
+            )
+
+    graph_sha = hashlib.sha256(canonical_json(modules_graph).encode("utf-8")).hexdigest()
+    payload = {
+        "schema_version": "1.0.0",
+        "knowledge_graph_sha256": graph_sha,
+        "indexed_module_count": len(modules_graph),
+        "total_functions_indexed": total_functions,
+        "total_classes_indexed": total_classes,
+        "modules": modules_graph,
+    }
+    if output_path is not None:
+        write_json(payload, Path(output_path))
+    return payload
 
 
 def scan_open_source_ai_codebase_patterns(repo_root: Path = REPO_ROOT, *, cycle_index: int = 1) -> Dict[str, Any]:
@@ -268,8 +453,48 @@ def synthesize_peer_ai_improvement_prompt(
     }
 
 
+def export_peer_ai_coaching_pack(
+    output_path: Path,
+    *,
+    cycle_index: int = 1,
+) -> Dict[str, Any]:
+    """Export a portable multi-domain verifier-backed coaching pack across all 8 Meta-AI domains
+    so any conversing external LLM can upgrade its mathematical & systems reasoning (`SYMBIOSIS-01` / Issue #257).
+    """
+    curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index)
+    by_domain: Dict[str, List[Dict[str, str]]] = {dom: [] for dom in META_AI_EXPERT_DOMAINS}
+    for item in curr:
+        dom = item["domain"]
+        if len(by_domain.get(dom, [])) < 2:
+            by_domain[dom].append(
+                {
+                    "prompt": item["prompt"],
+                    "verified_trace": item["completion"],
+                    "gold_answer": item["gold"],
+                }
+            )
+
+    domains_pack: Dict[str, Any] = {}
+    for dom, meta in META_AI_EXPERT_DOMAINS.items():
+        domains_pack[dom] = {
+            "title": meta["title"],
+            "prefix": meta["prefix"],
+            "reference_formula": meta["formula"],
+            "worked_examples": by_domain.get(dom, []),
+        }
+
+    pack = {
+        "schema_version": "1.0.0",
+        "domain_count": len(domains_pack),
+        "verification_protocol": "Emit step-by-step rational equations inside <think>...</think> and exact simplified fraction/integer inside <ans>...</ans>.",
+        "domains": domains_pack,
+    }
+    write_json(pack, Path(output_path))
+    return pack
+
+
 def solve_meta_ai_prompt_symbolic(prompt: str) -> Optional[Dict[str, str]]:
-    """Deterministic symbolic ALU solver for the 4 Meta-AI self-improvement domains.
+    """Deterministic symbolic ALU solver for all 8 Meta-AI self-improvement domains (`OSS-01` / Issue #254).
     Used for in-flight neuro-symbolic ALU assistance, held-out verification, and peer-AI coaching.
     """
     import re
@@ -308,6 +533,40 @@ def solve_meta_ai_prompt_symbolic(prompt: str) -> Optional[Dict[str, str]]:
         trace = f"<think>mean={k_succ}/{g_size};adv={r_val}-{mean_r}={gold}</think><ans>{gold}</ans>"
         return {"domain": "META_RLVR_GRPO_TRAINER", "completion": trace, "gold": gold}
 
+    m_flash = re.match(r"^Q:MetaFlash:seq_len=(\d+);tile_block=(\d+)->io_reduction\?$", s)
+    if m_flash:
+        seq_len, tile_block = int(m_flash.group(1)), int(m_flash.group(2))
+        f_val = Fraction(seq_len, tile_block)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>ratio={seq_len}/{tile_block}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_FLASH_ATTENTION_TILING", "completion": trace, "gold": gold}
+
+    m_spec = re.match(r"^Q:MetaSpec:accepted=(\d+);window=(\d+)->accept_ratio\?$", s)
+    if m_spec:
+        accepted, window = int(m_spec.group(1)), int(m_spec.group(2))
+        f_val = Fraction(accepted, window)
+        gold = f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>accept={accepted}/{window}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_SPECULATIVE_DECODING", "completion": trace, "gold": gold}
+
+    m_quant = re.match(r"^Q:MetaQuant:fp16_bits=(\d+);quant_bits=(\d+)->compression\?$", s)
+    if m_quant:
+        fp_bits, q_bits = int(m_quant.group(1)), int(m_quant.group(2))
+        f_val = Fraction(fp_bits, q_bits)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>comp={fp_bits}/{q_bits}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_QUANTIZATION_FP8_INT4", "completion": trace, "gold": gold}
+
+    m_dist = re.match(r"^Q:MetaDist:stages=(\d+);microbatches=(\d+)->bubble_fraction\?$", s)
+    if m_dist:
+        stages, microbatches = int(m_dist.group(1)), int(m_dist.group(2))
+        num = stages - 1
+        den = microbatches + stages - 1
+        f_val = Fraction(num, den)
+        gold = f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>num={stages}-1={num};den={microbatches}+{stages}-1={den};bubble={num}/{den}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_DISTRIBUTED_TP_PP_DP", "completion": trace, "gold": gold}
+
     return None
 
 
@@ -317,7 +576,7 @@ def build_executable_code_synthesis_tasks(
     cycle_index: int = 1,
 ) -> List[Dict[str, Any]]:
     """Synthesize executable Python code tasks from the AST metrics of the cycle's inspected
-    open-source files (`cycle_focused_files`) and Meta-AI architectural invariants.
+    open-source files (`cycle_focused_files`) and all 8 Meta-AI architectural invariants (`OSS-03` / Issue #256).
     """
     c_idx = max(1, int(cycle_index))
     tasks: List[Dict[str, Any]] = []
@@ -344,7 +603,7 @@ def build_executable_code_synthesis_tasks(
             }
         )
 
-    # Also synthesize executable reference solvers for the 4 Meta-AI domains parameterized by cycle_index
+    # Synthesize executable reference solvers across the 8 Meta-AI domains parameterized by cycle_index
     n_p = 2 * c_idx
     c_f = 6 * n_p * (3 + c_idx)
     tasks.append(
@@ -358,6 +617,23 @@ def build_executable_code_synthesis_tasks(
                 f"assert solve_chinchilla_d_opt({c_f}, {n_p}) == Fraction({3 + c_idx}, 1)\n"
             ),
             "expected_rational": str(3 + c_idx),
+        }
+    )
+
+    stages = 4 + (c_idx % 3)
+    micro = 8 + c_idx
+    bub = Fraction(stages - 1, micro + stages - 1)
+    tasks.append(
+        {
+            "task_id": f"META_CODE_PIPELINE_BUBBLE_{c_idx}",
+            "source_file": "aix_zero/meta_ai_autopilot.py",
+            "code": (
+                "from fractions import Fraction\n"
+                "def solve_pipeline_bubble(stages: int, microbatches: int) -> Fraction:\n"
+                "    return Fraction(stages - 1, microbatches + stages - 1)\n"
+                f"assert solve_pipeline_bubble({stages}, {micro}) == Fraction({bub.numerator}, {bub.denominator})\n"
+            ),
+            "expected_rational": f"{bub.numerator}/{bub.denominator}",
         }
     )
     return tasks
@@ -459,22 +735,286 @@ class AutonomousSelfImprovementController:
         data["stop_sentinel_present"] = self.stop_sentinel_path.exists()
         return data
 
+    def update_and_sample_replay_buffer(
+        self,
+        current_items: List[Dict[str, Any]],
+        *,
+        max_buffer_size: int = 64,
+        sample_k: int = 8,
+    ) -> List[Dict[str, Any]]:
+        """Maintain a persistent prioritized replay buffer across autopilot cycles (`NEURAL-01` / Issue #248)."""
+        replay_path = self.state_dir / "replay_buffer.json"
+        existing: List[Dict[str, Any]] = []
+        if replay_path.exists():
+            try:
+                existing = json.loads(replay_path.read_text(encoding="utf-8"))
+            except Exception:
+                existing = []
+
+        sampled = existing[:sample_k]
+        by_prompt: Dict[str, Dict[str, Any]] = {it["prompt"]: it for it in existing}
+        for it in current_items[:16]:
+            by_prompt[it["prompt"]] = it
+
+        # Prioritize longer / multi-step derivations so the replay buffer retains challenging traces
+        merged = sorted(
+            by_prompt.values(),
+            key=lambda x: (-len(str(x.get("completion", ""))), str(x.get("prompt", ""))),
+        )[:max_buffer_size]
+        write_json(merged, replay_path)
+        return sampled
+
+    def run_grpo_self_play_step(
+        self,
+        model: AIXZeroModel,
+        tokenizer: Any,
+        items: List[Dict[str, Any]],
+        *,
+        group_size: int = 4,
+    ) -> Dict[str, Any]:
+        """Execute a verifiable GRPO self-play policy gradient step over sampled candidate rollouts
+        (`NEURAL-03` / Issue #250).
+        Computes exact group-relative advantages `A_i = r_i - mean(r)` and reinforces positive-advantage traces.
+        """
+        G = max(2, int(group_size))
+        positive_traces: List[Dict[str, Any]] = []
+        group_reports: List[Dict[str, Any]] = []
+
+        model.eval()
+        for it in items[:4]:
+            p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
+            candidates: List[str] = []
+            # Sample G-1 neural rollouts + 1 symbolic ALU exploration rollout
+            for c_idx in range(G - 1):
+                gen_ids, _, _ = model.generate_verified(
+                    p_ids,
+                    eos_id=tokenizer.eos_id,
+                    max_new_tokens=32,
+                    num_candidates=1,
+                    temperature=0.0 if c_idx == 0 else 0.4,
+                    tokenizer=tokenizer,
+                    inflight_alu=False,
+                )
+                candidates.append(tokenizer.decode(gen_ids[len(p_ids) :], skip_special=False))
+            sym = solve_meta_ai_prompt_symbolic(it["prompt"])
+            candidates.append(sym["completion"] if sym is not None else it["completion"])
+
+            rewards: List[Fraction] = []
+            for cand in candidates:
+                sc = score_rational_or_probability(cand, it["gold"], is_probability=False)
+                rewards.append(Fraction(1, 1) if sc["score"] == 1.0 else Fraction(0, 1))
+
+            mean_r = sum(rewards, Fraction(0, 1)) / Fraction(G, 1)
+            advantages = [r - mean_r for r in rewards]
+            for cand, adv in zip(candidates, advantages):
+                if adv > 0:
+                    positive_traces.append(
+                        {
+                            "prompt": it["prompt"],
+                            "completion": cand,
+                            "gold": it["gold"],
+                            "advantage": float(adv),
+                        }
+                    )
+            group_reports.append(
+                {
+                    "prompt": it["prompt"],
+                    "mean_reward_rational": f"{mean_r.numerator}/{mean_r.denominator}",
+                    "max_advantage_rational": f"{max(advantages).numerator}/{max(advantages).denominator}",
+                    "positive_rollout_count": sum(1 for a in advantages if a > 0),
+                }
+            )
+
+        return {
+            "group_size": G,
+            "prompts_evaluated": len(group_reports),
+            "positive_advantage_trajectories": len(positive_traces),
+            "positive_traces": positive_traces,
+            "groups": group_reports,
+        }
+
+    def discover_and_file_improvement_issues(
+        self,
+        *,
+        sync_github: bool = False,
+        gh_binary: str = "/Users/alexpfeil/.local/bin/gh",
+        repo_slug: str = "pfolex/verifiable-ai",
+    ) -> Dict[str, Any]:
+        """Autonomously scan all 8 Meta-AI domains and AST coverage to maintain a prioritized
+        self-improvement backlog in `autopilot_backlog.json` (`AUTOGH-01` / Issue #251).
+        """
+        backlog_path = self.state_dir / "autopilot_backlog.json"
+        if backlog_path.exists():
+            try:
+                backlog = json.loads(backlog_path.read_text(encoding="utf-8"))
+            except Exception:
+                backlog = {"items": []}
+        else:
+            backlog = {"items": []}
+
+        existing_ids = {item["backlog_id"] for item in backlog.get("items", [])}
+        new_items = 0
+        for idx, (dom, meta) in enumerate(META_AI_EXPERT_DOMAINS.items(), start=1):
+            b_id = f"AIX-BACKLOG-{idx:02d}-{dom}"
+            if b_id in existing_ids:
+                continue
+            gh_url: Optional[str] = None
+            title = f"[{b_id}] Autonomous mastery & held-out validation gate for {dom}"
+            if sync_github:
+                body = (
+                    f"## Autonomous Backlog Target: `{dom}`\n\n"
+                    f"- **Formula:** `{meta['formula']}`\n"
+                    "- **Acceptance Gate:** `promoted_on_heldout_val == True` and `alu_assisted_heldout_exact_match == 1.0`."
+                )
+                create_out = subprocess.check_output(
+                    [gh_binary, "issue", "create", "--repo", repo_slug, "--title", title, "--body", body],
+                    text=True,
+                ).strip()
+                gh_url = create_out.splitlines()[-1].strip()
+            backlog.setdefault("items", []).append(
+                {
+                    "backlog_id": b_id,
+                    "domain": dom,
+                    "title": title,
+                    "status": "OPEN",
+                    "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
+                    "github_issue_url": gh_url,
+                }
+            )
+            new_items += 1
+
+        write_json(backlog, backlog_path)
+        open_items = [it for it in backlog.get("items", []) if it.get("status") == "OPEN"]
+        return {
+            "total_backlog_items": len(backlog.get("items", [])),
+            "open_backlog_items": len(open_items),
+            "newly_discovered_items": new_items,
+            "backlog_path": str(backlog_path.name),
+        }
+
+    def work_on_active_backlog_issue(
+        self,
+        cycle_report: Dict[str, Any],
+        *,
+        sync_github: bool = False,
+        gh_binary: str = "/Users/alexpfeil/.local/bin/gh",
+        repo_slug: str = "pfolex/verifiable-ai",
+    ) -> Optional[Dict[str, Any]]:
+        """Target the highest-priority OPEN backlog issue and automatically close it once its
+        quantitative validation & exact-match gate passes (`AUTOGH-02` / Issue #252).
+        """
+        backlog_path = self.state_dir / "autopilot_backlog.json"
+        if not backlog_path.exists():
+            self.discover_and_file_improvement_issues(sync_github=False)
+        backlog = json.loads(backlog_path.read_text(encoding="utf-8"))
+        open_items = [it for it in backlog.get("items", []) if it.get("status") == "OPEN"]
+        if not open_items:
+            return None
+
+        active = open_items[0]
+        gate_passed = bool(
+            cycle_report.get("promoted_on_heldout_val", False)
+            and float(cycle_report.get("alu_assisted_heldout_exact_match", 0.0)) >= 1.0
+        )
+        if gate_passed:
+            active["status"] = "COMPLETED"
+            active["completed_in_cycle"] = cycle_report.get("cycles_completed")
+            active["heldout_val_post_loss"] = cycle_report.get("heldout_val_post_loss")
+            if sync_github and active.get("github_issue_url"):
+                issue_num = str(active["github_issue_url"]).rstrip("/").split("/")[-1]
+                subprocess.check_call(
+                    [
+                        gh_binary,
+                        "issue",
+                        "close",
+                        issue_num,
+                        "--repo",
+                        repo_slug,
+                        "--comment",
+                        f"Backlog acceptance gate passed in Cycle #{cycle_report.get('cycles_completed')} (`heldout_val_post_loss={cycle_report.get('heldout_val_post_loss')}`).",
+                    ]
+                )
+        write_json(backlog, backlog_path)
+        return active
+
+    def auto_push_verified_state(
+        self,
+        commit_message: str,
+        *,
+        dry_run: bool = False,
+    ) -> Dict[str, Any]:
+        """Stage, commit, and push verified autopilot state & `.safetensors` shards to `origin/main`
+        (`AUTOGH-03` / Issue #253).
+        """
+        cmds = [
+            ["git", "add", "aix_zero/autopilot_state/autopilot_status.json", "aix_zero/autopilot_state/autopilot_history.jsonl", "aix_zero/autopilot_state/meta_ai_cartridges/"],
+            ["git", "commit", "-m", commit_message],
+            ["git", "push", "origin", "main"],
+        ]
+        if dry_run:
+            return {"executed": False, "dry_run": True, "commands": cmds}
+        for cmd in cmds:
+            subprocess.run(cmd, cwd=str(self.repo_root), check=False, capture_output=True, text=True)
+        return {"executed": True, "dry_run": False, "commands": cmds}
+
+    def export_website_autopilot_telemetry(
+        self,
+        output_path: Optional[Path] = None,
+    ) -> Dict[str, Any]:
+        """Export sanitized autopilot progress, 8-shard manifest digests, and validation loss trajectory
+        to `website/data/autopilot_live.json` with zero absolute home paths (`SYMBIOSIS-02` / Issue #258).
+        """
+        out_p = Path(output_path) if output_path is not None else (self.repo_root / "website/data/autopilot_live.json")
+        status = self.get_status()
+        history_path = self.state_dir / "autopilot_history.jsonl"
+        loss_curve: List[Dict[str, Any]] = []
+        if history_path.exists():
+            lines = history_path.read_text(encoding="utf-8").splitlines()[-20:]
+            for ln in lines:
+                if not ln.strip():
+                    continue
+                row = json.loads(ln)
+                loss_curve.append(
+                    {
+                        "cycle": row.get("cycles_completed"),
+                        "train_post_loss": row.get("expert_post_update_loss"),
+                        "heldout_val_post_loss": row.get("heldout_val_post_loss"),
+                        "alu_heldout_acc": row.get("alu_assisted_heldout_exact_match", 1.0),
+                    }
+                )
+        payload = {
+            "schema_version": "1.0.0",
+            "daemon_state": status.get("daemon_state", "IDLE"),
+            "cycles_completed": int(status.get("cycles_completed", 0)),
+            "meta_ai_shard_count": len(META_AI_EXPERT_DOMAINS),
+            "meta_ai_domains": list(META_AI_EXPERT_DOMAINS.keys()),
+            "shard_hash_prefixes": status.get("shard_hash_prefixes", {}),
+            "latest_heldout_val_loss": status.get("heldout_val_post_loss"),
+            "latest_alu_heldout_accuracy": status.get("alu_assisted_heldout_exact_match", 1.0),
+            "recent_loss_trajectory": loss_curve,
+        }
+        write_json(payload, out_p)
+        return payload
+
     def run_single_self_improvement_cycle(
         self,
         *,
         cartridge_bank_dir: Optional[Path] = None,
         sync_github_issue: bool = False,
+        auto_push: bool = False,
         gh_binary: str = "/Users/alexpfeil/.local/bin/gh",
         repo_slug: str = "pfolex/verifiable-ai",
     ) -> Dict[str, Any]:
-        """Execute one bounded, verifiable self-improvement cycle:
+        """Execute one bounded, verifiable self-improvement cycle across all 8 Meta-AI domains:
         1. Check kill-switch (`should_stop()`) before starting.
         2. Enforce CPU thread limit (`torch.set_num_threads`).
-        3. Index local open-source AI modules and build the 4 Meta-AI self-improvement domains.
-        4. Verify 100% reference solver accuracy across all generated Meta-AI curriculum items.
-        5. Export content-addressed Meta-AI expert shards into a dedicated cartridge bank without
-           touching the immutable `v11` base checkpoint.
-        6. Optionally open and close an auditable self-improvement issue on GitHub.
+        3. Index local open-source AI modules, update `codebase_knowledge_graph.json`, and build the 8 Meta-AI domains.
+        4. Mix current cycle curriculum with the persistent prioritized replay buffer (`NEURAL-01`),
+           apply `3x` token-weighted `<think>`/`<ans>` supervision (`NEURAL-02`), and run a GRPO self-play
+           verification step (`NEURAL-03`).
+        5. Gate promotion on unseen held-out validation loss, export all 8 Meta-AI expert shards,
+           update the autonomous issue backlog (`AUTOGH-01..02`), export the Peer-AI Coaching Pack
+           (`SYMBIOSIS-01`) and Website Telemetry (`SYMBIOSIS-02`), and optionally sync/push to GitHub (`AUTOGH-03`).
         """
         if self.should_stop():
             return {
@@ -490,6 +1030,10 @@ class AutonomousSelfImprovementController:
         cycles = int(prev.get("cycles_completed", 0)) + 1
 
         code_index = scan_open_source_ai_codebase_patterns(self.repo_root, cycle_index=cycles)
+        kg_report = build_open_source_knowledge_graph(
+            self.repo_root,
+            output_path=self.state_dir / "codebase_knowledge_graph.json",
+        )
         curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles)
         curriculum_sha256 = hashlib.sha256(canonical_json(curriculum).encode("utf-8")).hexdigest()
 
@@ -508,6 +1052,7 @@ class AutonomousSelfImprovementController:
         domain_keys = list(META_AI_EXPERT_DOMAINS.keys())
         active_coaching_domain = domain_keys[(cycles - 1) % len(domain_keys)]
         peer_prompt = synthesize_peer_ai_improvement_prompt(code_index, target_domain=active_coaching_domain)
+        export_peer_ai_coaching_pack(self.state_dir / "peer_ai_coaching_pack.json", cycle_index=cycles)
 
         # Load or initialize persistent evolving Meta-AI MoE model from real v11 checkpoint (never overwriting v11)
         bdir = Path(cartridge_bank_dir) if cartridge_bank_dir is not None else (self.state_dir / "meta_ai_cartridges")
@@ -537,50 +1082,74 @@ class AutonomousSelfImprovementController:
             except Exception:
                 pass
 
-        def _encode_masked_batch(items: List[Dict[str, Any]], max_len: int = 80) -> tuple[torch.Tensor, torch.Tensor]:
+        high_weight_token_ids = {
+            tokenizer.ans_id,
+            tokenizer.end_ans_id,
+            *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
+        }
+
+        def _encode_masked_batch(
+            items: List[Dict[str, Any]],
+            max_len: int = 80,
+        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
             seqs: List[List[int]] = []
             lbls: List[List[int]] = []
+            wgts: List[List[float]] = []
             for it in items:
                 p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
                 c_ids = tokenizer.encode(it["completion"], add_bos=False, add_eos=True)
                 full = (p_ids + c_ids)[:max_len]
-                # Mask prompt tokens with 0 (pad_id / ignore_index) so loss only supervises <think>...</think><ans>...</ans>
-                masked = ([0] * min(len(p_ids), len(full))) + full[min(len(p_ids), len(full)) :]
+                p_cut = min(len(p_ids), len(full))
+                masked = ([0] * p_cut) + full[p_cut:]
+                # NEURAL-02 (#249): Weight <ans>, digits, and operators 3.0x inside completion
+                w_row = ([0.0] * p_cut) + [3.0 if tid in high_weight_token_ids else 1.0 for tid in full[p_cut:]]
                 if len(full) < max_len:
                     pad_n = max_len - len(full)
                     full = full + [0] * pad_n
                     masked = masked + [0] * pad_n
+                    w_row = w_row + [0.0] * pad_n
                 seqs.append(full)
                 lbls.append(masked)
-            return torch.tensor(seqs, dtype=torch.long), torch.tensor(lbls, dtype=torch.long)
+                wgts.append(w_row)
+            return (
+                torch.tensor(seqs, dtype=torch.long),
+                torch.tensor(lbls, dtype=torch.long),
+                torch.tensor(wgts, dtype=torch.float32),
+            )
 
-        # Build training batch (current cycle) and disjoint held-out validation batch (cycle + 1000)
+        # NEURAL-01 (#248) & NEURAL-03 (#250): Mix current curriculum, replay buffer, and GRPO self-play positive rollouts
+        replay_samples = self.update_and_sample_replay_buffer(curriculum, max_buffer_size=64, sample_k=6)
+        grpo_report = self.run_grpo_self_play_step(model, tokenizer, curriculum[:4], group_size=4)
+        combined_train_items = curriculum[:16] + replay_samples + grpo_report["positive_traces"][:4]
+
         heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
-        input_ids, train_labels = _encode_masked_batch(curriculum[:16])
-        val_ids, val_labels = _encode_masked_batch(heldout_val_curriculum[:16])
+        input_ids, train_labels, train_weights = _encode_masked_batch(combined_train_items)
+        val_ids, val_labels, val_weights = _encode_masked_batch(heldout_val_curriculum[:16])
 
         for name, param in model.named_parameters():
             param.requires_grad = ("experts." in name) or ("router." in name) or ("lm_head." in name)
 
         model.eval()
         with torch.no_grad():
-            pre_loss = float(model(input_ids, labels=train_labels)["loss"].item())
-            val_pre_loss = float(model(val_ids, labels=val_labels)["loss"].item())
+            pre_loss = float(model(input_ids, labels=train_labels, token_weights=train_weights)["loss"].item())
+            val_pre_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
 
         model.train()
         optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=2e-3)
-        for _ in range(4):
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=5e-4)
+        for _ in range(5):
             if self.should_stop():
                 break
             optimizer.zero_grad()
-            loss = model(input_ids, labels=train_labels)["loss"]
+            loss = model(input_ids, labels=train_labels, token_weights=train_weights)["loss"]
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
         model.eval()
         with torch.no_grad():
-            post_loss = float(model(input_ids, labels=train_labels)["loss"].item())
-            val_post_loss = float(model(val_ids, labels=val_labels)["loss"].item())
+            post_loss = float(model(input_ids, labels=train_labels, token_weights=train_weights)["loss"].item())
+            val_post_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
 
         promoted_on_heldout_val = bool(val_post_loss <= val_pre_loss and post_loss <= pre_loss)
         if promoted_on_heldout_val:
@@ -590,8 +1159,8 @@ class AutonomousSelfImprovementController:
         code_tasks = build_executable_code_synthesis_tasks(code_index, cycle_index=cycles)
         code_eval = verify_executable_code_tasks(code_tasks)
 
-        # Evaluate live autoregressive generation (raw neural vs. ALU-assisted) across all 4 held-out domains
-        heldout_eval_subset = [heldout_val_curriculum[i] for i in (0, 10, 16, 25) if i < len(heldout_val_curriculum)]
+        # Evaluate live autoregressive generation (raw neural vs. ALU-assisted) across held-out domains
+        heldout_eval_subset = [heldout_val_curriculum[i] for i in (0, 10, 16, 25, 31, 35, 39, 43) if i < len(heldout_val_curriculum)]
         raw_neural_matches = 0
         alu_assisted_matches = 0
         for h_item in heldout_eval_subset:
@@ -632,18 +1201,20 @@ class AutonomousSelfImprovementController:
 
         gh_issue_url: Optional[str] = None
         if sync_github_issue and not self.should_stop():
-            title = f"[AIX AUTO-META-CYCLE-{cycles:03d}] Progressive Meta-AI shard training & AST audit (cycle {cycles})"
+            title = f"[AIX AUTO-META-CYCLE-{cycles:03d}] Progressive 8-Shard Meta-AI training & AST audit (cycle {cycles})"
             body = (
                 f"## Autonomous Self-Improvement Cycle #{cycles}\n\n"
-                f"- **Cycle Curriculum SHA-256:** `{curriculum_sha256}` (`{verified_count}/{len(curriculum)}` new tasks verified)\n"
+                f"- **Cycle Curriculum SHA-256:** `{curriculum_sha256}` (`{verified_count}/{len(curriculum)}` tasks across 8 Meta-AI domains verified)\n"
+                f"- **Open-Source AST Knowledge Graph:** `{kg_report['indexed_module_count']}` modules (`{kg_report['total_functions_indexed']}` functions, SHA-256 `{kg_report['knowledge_graph_sha256'][:16]}`)\n"
                 f"- **Rotating Open-Source AST Deep-Dive Files:** `{', '.join(focused_paths)}`\n"
                 f"- **Executable AST Code-Synthesis Verification:** `{code_eval['verified_tasks']}/{code_eval['total_tasks']}` (`{code_eval['pass_rate'] * 100:.1f}%` pass rate)\n"
-                f"- **Completion-Masked Training Loss (`v11 -> v12_evolving`):** `{pre_loss:.4f} -> {post_loss:.4f}` (delta `{post_loss - pre_loss:+.4f}`)\n"
+                f"- **GRPO Self-Play Rollouts:** `{grpo_report['positive_advantage_trajectories']}` positive-advantage trajectories reinforced (`G={grpo_report['group_size']}`)\n"
+                f"- **Token-Weighted Completion Training Loss (`v11 -> v12_evolving`):** `{pre_loss:.4f} -> {post_loss:.4f}` (delta `{post_loss - pre_loss:+.4f}`)\n"
                 f"- **Unseen Held-Out Validation Loss (Cycle #{cycles + 1000}):** `{val_pre_loss:.4f} -> {val_post_loss:.4f}` (delta `{val_post_loss - val_pre_loss:+.4f}`, promoted: `{promoted_on_heldout_val}`)\n"
-                f"- **Held-Out Generation Accuracy:** Raw Neural `{raw_neural_acc * 100:.1f}%` | Neuro-Symbolic ALU `{alu_assisted_acc * 100:.1f}%`\n"
-                f"- **Updated Meta-AI Cartridge Digest Prefixes:** `{json.dumps(shard_hashes, sort_keys=True)}`\n"
+                f"- **Held-Out Generation Accuracy (8 Domains):** Raw Neural `{raw_neural_acc * 100:.1f}%` | Neuro-Symbolic ALU `{alu_assisted_acc * 100:.1f}%`\n"
+                f"- **Updated 8-Shard Meta-AI Cartridge Digest Prefixes:** `{json.dumps(shard_hashes, sort_keys=True)}`\n"
                 f"- **Active Peer-AI Coaching Domain:** `{active_coaching_domain}`\n"
-                "- **Scientific Honesty Disclosure:** Evolving 817K-parameter MoE weights are initialized from `v11`, trained with completion-masked cross-entropy, gated on unseen held-out validation loss (`aix_zero_v12_evolving.pt`), and exported as content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
+                "- **Scientific Honesty Disclosure:** Evolving 817K-parameter MoE weights are initialized from `v11`, trained with 3x token-weighted completion-masked cross-entropy + prioritized replay + GRPO self-play, gated on unseen held-out validation loss (`aix_zero_v12_evolving.pt`), and exported as 8 content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
             )
             create_out = subprocess.check_output(
                 [gh_binary, "issue", "create", "--repo", repo_slug, "--title", title, "--body", body],
@@ -660,7 +1231,7 @@ class AutonomousSelfImprovementController:
                     "--repo",
                     repo_slug,
                     "--comment",
-                    f"Autonomous Meta-AI Cycle #{cycles} verified (`{verified_count}/{len(curriculum)}` curriculum + `{code_eval['verified_tasks']}/{code_eval['total_tasks']}` executable AST code tasks passed; train loss `{pre_loss:.4f} -> {post_loss:.4f}`; held-out val loss `{val_pre_loss:.4f} -> {val_post_loss:.4f}`; ALU held-out accuracy `{alu_assisted_acc * 100:.1f}%`).",
+                    f"Autonomous Meta-AI Cycle #{cycles} verified (`{verified_count}/{len(curriculum)}` 8-domain curriculum + `{code_eval['verified_tasks']}/{code_eval['total_tasks']}` executable AST code tasks passed; train loss `{pre_loss:.4f} -> {post_loss:.4f}`; held-out val loss `{val_pre_loss:.4f} -> {val_post_loss:.4f}`; 8 meta-AI shards exported).",
                 ]
             )
 
@@ -671,10 +1242,13 @@ class AutonomousSelfImprovementController:
             "cycles_completed": cycles,
             "max_cpu_threads": self.max_cpu_threads,
             "codebase_index_sha256": code_index["codebase_index_sha256"],
+            "knowledge_graph_sha256": kg_report["knowledge_graph_sha256"],
             "indexed_package_count": code_index["indexed_package_count"],
             "cycle_focused_files": code_index.get("cycle_focused_files", []),
             "code_synthesis_verified_count": code_eval["verified_tasks"],
             "code_synthesis_total_count": code_eval["total_tasks"],
+            "replay_buffer_sampled_count": len(replay_samples),
+            "grpo_positive_trajectories": grpo_report["positive_advantage_trajectories"],
             "curriculum_sha256": curriculum_sha256,
             "curriculum_verified_count": verified_count,
             "curriculum_total_count": len(curriculum),
@@ -692,10 +1266,16 @@ class AutonomousSelfImprovementController:
             "github_issue_url": gh_issue_url,
             "updated_at_utc": datetime.now(timezone.utc).isoformat(),
         }
+        active_backlog = self.work_on_active_backlog_issue(report, sync_github=False, gh_binary=gh_binary, repo_slug=repo_slug)
+        if active_backlog is not None:
+            report["resolved_backlog_item"] = active_backlog["backlog_id"]
         write_json(report, self.status_path)
         history_path = self.state_dir / "autopilot_history.jsonl"
         with history_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(report, sort_keys=True) + "\n")
+        self.export_website_autopilot_telemetry(self.state_dir / "autopilot_live.json")
+        if auto_push and promoted_on_heldout_val:
+            self.auto_push_verified_state(f"chore(autopilot): sync verified cycle #{cycles} shards and telemetry")
         return report
 
     def query_evolving_meta_ai(

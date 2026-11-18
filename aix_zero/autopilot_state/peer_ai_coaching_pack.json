@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "domain_count": 8,
+  "verification_protocol": "Emit step-by-step rational equations inside <think>...</think> and exact simplified fraction/integer inside <ans>...</ans>.",
+  "domains": {
+    "META_SCALING_OPTIMIZER": {
+      "title": "Compute-Optimal Scaling & Hyperparameter Optimizer",
+      "prefix": "Q:MetaScale:",
+      "reference_formula": "D_opt = C / (6 * N)",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaScale:C=11880;N=60->D_opt?",
+          "verified_trace": "<think>6*60=360;11880/360=33</think><ans>33</ans>",
+          "gold_answer": "33"
+        },
+        {
+          "prompt": "Q:MetaScale:C=12960;N=60->D_opt?",
+          "verified_trace": "<think>6*60=360;12960/360=36</think><ans>36</ans>",
+          "gold_answer": "36"
+        }
+      ]
+    },
+    "META_LORA_MOE_ARCHITECT": {
+      "title": "LoRA & Sparse MoE Parameter Efficiency Architect",
+      "prefix": "Q:MetaMoE:",
+      "reference_formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaMoE:top_k=1;n_experts=120->active_fraction?",
+          "verified_trace": "<think>active=1/120=1/120</think><ans>1/120</ans>",
+          "gold_answer": "1/120"
+        },
+        {
+          "prompt": "Q:MetaMoE:top_k=2;n_experts=120->active_fraction?",
+          "verified_trace": "<think>active=2/120=1/60</think><ans>1/60</ans>",
+          "gold_answer": "1/60"
+        }
+      ]
+    },
+    "META_GQA_KV_SYSTEMS": {
+      "title": "GQA KV-Cache Compression & Systems Kernel Analyzer",
+      "prefix": "Q:MetaKV:",
+      "reference_formula": "kv_compression_ratio = n_heads / n_kv_heads",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaKV:n_kv=1;n_heads=16->kv_ratio?",
+          "verified_trace": "<think>ratio=1/16=1/16</think><ans>1/16</ans>",
+          "gold_answer": "1/16"
+        },
+        {
+          "prompt": "Q:MetaKV:n_kv=2;n_heads=16->kv_ratio?",
+          "verified_trace": "<think>ratio=2/16=1/8</think><ans>1/8</ans>",
+          "gold_answer": "1/8"
+        }
+      ]
+    },
+    "META_RLVR_GRPO_TRAINER": {
+      "title": "RLVR & Group-Relative Policy Optimization Verifier",
+      "prefix": "Q:MetaRLVR:",
+      "reference_formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaRLVR:r=1;successes=1;group=62->grpo_advantage?",
+          "verified_trace": "<think>mean=1/62;adv=1-1/62=61/62</think><ans>61/62</ans>",
+          "gold_answer": "61/62"
+        },
+        {
+          "prompt": "Q:MetaRLVR:r=1;successes=2;group=62->grpo_advantage?",
+          "verified_trace": "<think>mean=2/62;adv=1-1/31=30/31</think><ans>30/31</ans>",
+          "gold_answer": "30/31"
+        }
+      ]
+    },
+    "META_FLASH_ATTENTION_TILING": {
+      "title": "FlashAttention SRAM Tiling & HBM I/O Reduction Architect",
+      "prefix": "Q:MetaFlash:",
+      "reference_formula": "hbm_io_reduction = seq_len / tile_block_size",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaFlash:seq_len=2176;tile_block=64->io_reduction?",
+          "verified_trace": "<think>ratio=2176/64=34</think><ans>34</ans>",
+          "gold_answer": "34"
+        },
+        {
+          "prompt": "Q:MetaFlash:seq_len=2432;tile_block=64->io_reduction?",
+          "verified_trace": "<think>ratio=2432/64=38</think><ans>38</ans>",
+          "gold_answer": "38"
+        }
+      ]
+    },
+    "META_SPECULATIVE_DECODING": {
+      "title": "Speculative Decoding Acceptance & Verification Throughput Optimizer",
+      "prefix": "Q:MetaSpec:",
+      "reference_formula": "expected_accepted_ratio = accepted_drafts / draft_window",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaSpec:accepted=2;window=4->accept_ratio?",
+          "verified_trace": "<think>accept=2/4=1/2</think><ans>1/2</ans>",
+          "gold_answer": "1/2"
+        },
+        {
+          "prompt": "Q:MetaSpec:accepted=3;window=4->accept_ratio?",
+          "verified_trace": "<think>accept=3/4=3/4</think><ans>3/4</ans>",
+          "gold_answer": "3/4"
+        }
+      ]
+    },
+    "META_QUANTIZATION_FP8_INT4": {
+      "title": "FP8/INT4 Weight & KV-Cache Quantization Compression Analyzer",
+      "prefix": "Q:MetaQuant:",
+      "reference_formula": "compression_ratio = fp16_bits / quant_bits",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?",
+          "verified_trace": "<think>comp=16/4=4</think><ans>4</ans>",
+          "gold_answer": "4"
+        },
+        {
+          "prompt": "Q:MetaQuant:fp16_bits=16;quant_bits=8->compression?",
+          "verified_trace": "<think>comp=16/8=2</think><ans>2</ans>",
+          "gold_answer": "2"
+        }
+      ]
+    },
+    "META_DISTRIBUTED_TP_PP_DP": {
+      "title": "3D Distributed Parallelism & Pipeline Bubble Minimizer",
+      "prefix": "Q:MetaDist:",
+      "reference_formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaDist:stages=2;microbatches=38->bubble_fraction?",
+          "verified_trace": "<think>num=2-1=1;den=38+2-1=39;bubble=1/39=1/39</think><ans>1/39</ans>",
+          "gold_answer": "1/39"
+        },
+        {
+          "prompt": "Q:MetaDist:stages=2;microbatches=42->bubble_fraction?",
+          "verified_trace": "<think>num=2-1=1;den=42+2-1=43;bubble=1/43=1/43</think><ans>1/43</ans>",
+          "gold_answer": "1/43"
+        }
+      ]
+    }
+  }
+}

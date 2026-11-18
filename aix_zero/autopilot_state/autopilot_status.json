@@ -2,39 +2,42 @@
   "executed": true,
   "halted_by_kill_switch": false,
   "daemon_state": "RUNNING_IDLE_BETWEEN_CYCLES",
-  "cycles_completed": 29,
+  "cycles_completed": 30,
   "max_cpu_threads": 1,
-  "codebase_index_sha256": "9e9b2368791b97e13ffef5dd5dce2411ed2e48538736cd04f97a97db552727f7",
+  "codebase_index_sha256": "eab966adb13224b3e4482b8cc82b08783c4581dfa872dfecaa3a18ff858881aa",
+  "knowledge_graph_sha256": "b07548114728c05c386f403ee74d810ebd547adc8b7754185949937e6c8933b1",
   "indexed_package_count": 7,
   "cycle_focused_files": [
     {
-      "rel_path": "aix_zero/train_v4_from_scratch.py",
-      "functions": 5,
+      "rel_path": "aix_zero/validation_training_studies.py",
+      "functions": 15,
       "classes": 0,
-      "lines": 588
+      "lines": 730
     },
     {
-      "rel_path": "aix_zero/train_v5_from_scratch.py",
-      "functions": 2,
+      "rel_path": "aix_zero/website_data_builder.py",
+      "functions": 16,
       "classes": 0,
-      "lines": 195
+      "lines": 552
     },
     {
-      "rel_path": "aix_zero/train_v8_stratified.py",
-      "functions": 3,
+      "rel_path": "rlvr-forge/src/rlvr_forge/__init__.py",
+      "functions": 0,
       "classes": 0,
-      "lines": 294
+      "lines": 26
     }
   ],
-  "code_synthesis_verified_count": 4,
-  "code_synthesis_total_count": 4,
-  "curriculum_sha256": "2f3f674e03e343802e127e6434a652957f871f29108d9e202e642f3450a6049e",
-  "curriculum_verified_count": 30,
-  "curriculum_total_count": 30,
-  "expert_pre_update_loss": 6.02307,
-  "expert_post_update_loss": 4.762907,
-  "heldout_val_pre_loss": 7.462953,
-  "heldout_val_post_loss": 6.654203,
+  "code_synthesis_verified_count": 5,
+  "code_synthesis_total_count": 5,
+  "replay_buffer_sampled_count": 0,
+  "grpo_positive_trajectories": 4,
+  "curriculum_sha256": "84f946184a4f6ac3e4b68a7995108cb9cfb747cabac17924ed87b637215c6af4",
+  "curriculum_verified_count": 46,
+  "curriculum_total_count": 46,
+  "expert_pre_update_loss": 4.440485,
+  "expert_post_update_loss": 3.426407,
+  "heldout_val_pre_loss": 6.73409,
+  "heldout_val_post_loss": 6.10837,
   "promoted_on_heldout_val": true,
   "raw_neural_heldout_exact_match": 0.0,
   "alu_assisted_heldout_exact_match": 1.0,
@@ -42,16 +45,25 @@
     "META_SCALING_OPTIMIZER",
     "META_LORA_MOE_ARCHITECT",
     "META_GQA_KV_SYSTEMS",
-    "META_RLVR_GRPO_TRAINER"
+    "META_RLVR_GRPO_TRAINER",
+    "META_FLASH_ATTENTION_TILING",
+    "META_SPECULATIVE_DECODING",
+    "META_QUANTIZATION_FP8_INT4",
+    "META_DISTRIBUTED_TP_PP_DP"
   ],
   "shard_hash_prefixes": {
-    "META_SCALING_OPTIMIZER": "4f4a8cd2fda5c336",
-    "META_LORA_MOE_ARCHITECT": "11589f4fc6de3082",
-    "META_GQA_KV_SYSTEMS": "5493df17d4cb091e",
-    "META_RLVR_GRPO_TRAINER": "961a3fdd214f6c76"
+    "META_SCALING_OPTIMIZER": "c1acb04a9de01803",
+    "META_LORA_MOE_ARCHITECT": "1d62321448b9c60a",
+    "META_GQA_KV_SYSTEMS": "29f38b0a71b1e6c7",
+    "META_RLVR_GRPO_TRAINER": "653e3e9f756a65e4",
+    "META_FLASH_ATTENTION_TILING": "c1acb04a9de01803",
+    "META_SPECULATIVE_DECODING": "1d62321448b9c60a",
+    "META_QUANTIZATION_FP8_INT4": "29f38b0a71b1e6c7",
+    "META_DISTRIBUTED_TP_PP_DP": "653e3e9f756a65e4"
   },
-  "active_coaching_domain": "META_SCALING_OPTIMIZER",
-  "peer_coaching_prompt": "[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: META_SCALING_OPTIMIZER]\nObjective: Improve peer AI reasoning using exact reference formula `D_opt = C / (6 * N)`.\nProtocol: Emit step-by-step rational equations inside `<think>...</think>` so every intermediate claim can be checked by a deterministic verifier before emitting `<ans>...</ans>`.",
-  "github_issue_url": "https://github.com/pfolex/verifiable-ai/issues/247",
-  "updated_at_utc": "2026-11-18T21:36:21.293668+00:00"
+  "active_coaching_domain": "META_SPECULATIVE_DECODING",
+  "peer_coaching_prompt": "[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: META_SPECULATIVE_DECODING]\nObjective: Improve peer AI reasoning using exact reference formula `expected_accepted_ratio = accepted_drafts / draft_window`.\nProtocol: Emit step-by-step rational equations inside `<think>...</think>` so every intermediate claim can be checked by a deterministic verifier before emitting `<ans>...</ans>`.",
+  "github_issue_url": "https://github.com/pfolex/verifiable-ai/issues/272",
+  "updated_at_utc": "2026-11-18T23:14:31.896034+00:00",
+  "resolved_backlog_item": "AIX-BACKLOG-01-META_SCALING_OPTIMIZER"
 }
