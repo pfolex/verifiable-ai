@@ -32,6 +32,7 @@ from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
     DEFAULT_STATE_DIR,
     export_peer_ai_coaching_pack,
+    harvest_external_open_source_projects,
 )
 
 
@@ -71,11 +72,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_coach.add_argument("--prompt", required=True, help="Meta-AI prompt string (e.g. 'Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?')")
     p_coach.add_argument("--peer-response", required=True, help="Peer AI response containing <think>...</think><ans>...</ans>")
 
-    p_pack = sub.add_parser("export-coaching-pack", help="Export portable 8-domain Peer-AI Symbiotic Coaching Pack JSON")
+    p_pack = sub.add_parser("export-coaching-pack", help="Export portable 12-domain Peer-AI Symbiotic Coaching Pack JSON")
     p_pack.add_argument("--cycle", type=int, default=1, help="Cycle index for worked examples")
 
     p_backlog = sub.add_parser("backlog", help="Discover and inspect autonomous self-improvement backlog issues")
     p_backlog.add_argument("--sync-github", action="store_true", help="Open GitHub issues for newly discovered backlog items")
+
+    p_harvest = sub.add_parser("harvest-external", help="Catalog and optionally shallow-clone external open-source AI repositories")
+    p_harvest.add_argument("--clone", nargs="*", default=[], help="Optional GitHub repo slugs to shallow-clone into open_source_corpus/")
+
+    p_peer = sub.add_parser("peer-session", help="Run a multi-turn Peer-AI Symbiosis coaching & mutual-distillation session")
+    p_peer.add_argument("--endpoint", default=None, help="Optional Ollama or OpenAI-compatible HTTP endpoint URL")
+    p_peer.add_argument("--model", default="simulated-peer-ai", help="Peer AI model name")
+    p_peer.add_argument("--max-prompts", type=int, default=4, help="Number of prompts to evaluate and coach")
 
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
@@ -145,6 +154,24 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.command == "backlog":
         res = ctrl.discover_and_file_improvement_issues(sync_github=args.sync_github)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "harvest-external":
+        res = harvest_external_open_source_projects(
+            ctrl.repo_root,
+            clone_slugs=args.clone,
+            output_path=ctrl.state_dir / "external_open_source_harvest.json",
+        )
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "peer-session":
+        res = ctrl.run_peer_ai_symbiosis_session(
+            endpoint_url=args.endpoint,
+            model_name=args.model,
+            max_prompts=args.max_prompts,
+        )
         print(json.dumps(res, indent=2))
         return 0
 

@@ -43,22 +43,48 @@ Runs interactive neuro-symbolic inference on the evolving `aix_zero_v12_evolving
 /Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl query \
   --prompt "Q:MetaScale:C=144;N=4->D_opt?"
 ```
-Supported Meta-AI prompt templates:
-- **Chinchilla Compute-Optimal Scaling (`META_SCALING_OPTIMIZER`):**
-  `Q:MetaScale:C=144;N=4->D_opt?`
-- **LoRA & Sparse MoE Active Fraction (`META_LORA_MOE_ARCHITECT`):**
-  `Q:MetaMoE:top_k=2;n_experts=8->active_fraction?`
-- **Grouped-Query Attention KV-Cache Compression (`META_GQA_KV_SYSTEMS`):**
-  `Q:MetaKV:n_kv=2;n_heads=16->kv_ratio?`
-- **RLVR Group-Relative Policy Optimization Advantage (`META_RLVR_GRPO_TRAINER`):**
-  `Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?`
+Supported 12-Domain Meta-AI & External Open-Source Breakthrough prompt templates:
+1. **Chinchilla Compute-Optimal Scaling (`META_SCALING_OPTIMIZER` / `karpathy/llm.c`):**
+   `Q:MetaScale:C=144;N=4->D_opt?`
+2. **LoRA & Sparse MoE Active Fraction (`META_LORA_MOE_ARCHITECT`):**
+   `Q:MetaMoE:top_k=2;n_experts=8->active_fraction?`
+3. **Grouped-Query Attention KV-Cache Compression (`META_GQA_KV_SYSTEMS` / `ml-explore/mlx`):**
+   `Q:MetaKV:n_kv=2;n_heads=16->kv_ratio?`
+4. **RLVR Group-Relative Policy Optimization Advantage (`META_RLVR_GRPO_TRAINER` / `deepseek-ai/DeepSeek-R1`):**
+   `Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?`
+5. **FlashAttention SRAM Tiling & HBM I/O Reduction (`META_FLASH_ATTENTION_TILING` / `Dao-AILab/flash-attention`):**
+   `Q:MetaFlash:seq_len=2048;tile_block=128->io_reduction?`
+6. **Speculative Decoding Draft Acceptance Ratio (`META_SPECULATIVE_DECODING`):**
+   `Q:MetaSpec:accepted=3;window=4->accept_ratio?`
+7. **FP8/INT4 Weight & KV-Cache Quantization Compression (`META_QUANTIZATION_FP8_INT4` / `ggml-org/llama.cpp`):**
+   `Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?`
+8. **3D Distributed Parallelism Pipeline Bubble Fraction (`META_DISTRIBUTED_TP_PP_DP`):**
+   `Q:MetaDist:stages=4;microbatches=12->bubble_fraction?`
+9. **DeepSeek-V3 Multi-Head Latent Attention KV Compression (`META_DEEPSEEK_MLA_LATENT_KV` / `deepseek-ai/DeepSeek-V3`):**
+   `Q:MetaMLA:latent=512;n_heads=32;head_dim=64->mla_ratio?`
+10. **vLLM PagedAttention KV-Block Utilization (`META_VLLM_PAGED_ATTENTION` / `vllm-project/vllm`):**
+    `Q:MetaPaged:tokens=50;blocks=4;block_size=16->utilization?`
+11. **Hugging Face TRL Leave-One-Out Policy Gradient Advantage (`META_TRL_RLOO_LEAVE_ONE_OUT` / `huggingface/trl`):**
+    `Q:MetaRLOO:r1=1;other_sum=1;k=4->rloo_advantage?`
+12. **MergeKit TIES/DARE Effective Parameter Density (`META_MERGEKIT_TIES_DARE` / `arcee-ai/mergekit`):**
+    `Q:MetaMerge:keep_num=3;keep_den=4;topk_num=1;topk_den=5->effective_density?`
 
-### F. Grade & Coach Another Conversing AI (`coach`)
-Evaluates a peer AI's `<think>...</think><ans>...</ans>` response against the deterministic reference verifier and generates a targeted corrective coaching prompt:
+### F. Grade & Coach Another Conversing AI (`coach` & `peer-session`)
+Evaluates a peer AI's `<think>...</think><ans>...</ans>` response against the deterministic reference verifier (`verify_r1_reasoning_trace`) and generates a targeted corrective coaching prompt:
 ```bash
 /Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl coach \
   --prompt "Q:MetaRLVR:r=1;successes=2;group=8->grpo_advantage?" \
   --peer-response "<think>mean=2/8;adv=1-2/8=5/8</think><ans>5/8</ans>"
+```
+Or run a multi-turn **Peer-AI Symbiosis & Mutual Distillation Session** (`peer-session`) against a local Ollama endpoint (`http://localhost:11434/api/generate`), an OpenAI-compatible endpoint, or the built-in simulated peer AI (which coaches the peer to 100% accuracy and ingests verified peer trajectories into AIX's replay buffer):
+```bash
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl peer-session
+```
+
+### G. Harvest External Open-Source AI Projects (`harvest-external`)
+Catalogs and indexes external frontier open-source AI repositories (`deepseek-ai/DeepSeek-V3`, `deepseek-ai/DeepSeek-R1`, `vllm-project/vllm`, `Dao-AILab/flash-attention`, `huggingface/trl`, `arcee-ai/mergekit`, `karpathy/llm.c`, `KellerJordan/Muon`, `ml-explore/mlx`, `ggml-org/llama.cpp`) plus all 10 sibling open-source AI repositories in your workspace (`aix-evolver`, `r1-verifiers`, `r1_reward_lab`, `math-verify`, `mergekit`, `model_merging`, `trl`, `smolagents`, `lighteval`, `ollama-python`), and optionally shallow-clones new GitHub repositories into `open_source_corpus/`:
+```bash
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl harvest-external
 ```
 
 ---

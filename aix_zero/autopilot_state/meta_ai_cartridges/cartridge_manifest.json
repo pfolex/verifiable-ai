@@ -25,8 +25,8 @@
     "use_key_ngram_conv": false
   },
   "active_core_physical_parameters": 817410,
-  "registered_cartridges": 8,
-  "total_cartridge_bank_parameters": 393216,
+  "registered_cartridges": 12,
+  "total_cartridge_bank_parameters": 589824,
   "cartridges": {
     "META_SCALING_OPTIMIZER": {
       "domain": "META_SCALING_OPTIMIZER",
@@ -35,8 +35,8 @@
       "prefix": "Q:MetaScale:",
       "formula": "D_opt = C / (6 * N)",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_scaling_optimizer_c1acb04a9de018039329944748aa989f7410b602febe71bbd4d06e0e78c41c35.safetensors",
-      "sha256": "c1acb04a9de018039329944748aa989f7410b602febe71bbd4d06e0e78c41c35",
+      "cartridge_file": "expert_meta_scaling_optimizer_ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7.safetensors",
+      "sha256": "ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -75,8 +75,8 @@
       "prefix": "Q:MetaMoE:",
       "formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_lora_moe_architect_1d62321448b9c60af1902162e302a1bd242bdb3475adde326bc391c1974f18d8.safetensors",
-      "sha256": "1d62321448b9c60af1902162e302a1bd242bdb3475adde326bc391c1974f18d8",
+      "cartridge_file": "expert_meta_lora_moe_architect_7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571.safetensors",
+      "sha256": "7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -115,8 +115,8 @@
       "prefix": "Q:MetaKV:",
       "formula": "kv_compression_ratio = n_heads / n_kv_heads",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_gqa_kv_systems_29f38b0a71b1e6c73c2d303c38beb45e8a25c5c4d25ee8f400a728594432d0f1.safetensors",
-      "sha256": "29f38b0a71b1e6c73c2d303c38beb45e8a25c5c4d25ee8f400a728594432d0f1",
+      "cartridge_file": "expert_meta_gqa_kv_systems_eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e.safetensors",
+      "sha256": "eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e",
       "serialized_bytes": 196864,
       "source_expert_index": 2,
       "parameters": 49152,
@@ -155,8 +155,8 @@
       "prefix": "Q:MetaRLVR:",
       "formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_rlvr_grpo_trainer_653e3e9f756a65e45754f846a35555458d30dfe10fc5120b7a63a9bcc139c16b.safetensors",
-      "sha256": "653e3e9f756a65e45754f846a35555458d30dfe10fc5120b7a63a9bcc139c16b",
+      "cartridge_file": "expert_meta_rlvr_grpo_trainer_00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9.safetensors",
+      "sha256": "00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -195,8 +195,8 @@
       "prefix": "Q:MetaFlash:",
       "formula": "hbm_io_reduction = seq_len / tile_block_size",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_flash_attention_tiling_c1acb04a9de018039329944748aa989f7410b602febe71bbd4d06e0e78c41c35.safetensors",
-      "sha256": "c1acb04a9de018039329944748aa989f7410b602febe71bbd4d06e0e78c41c35",
+      "cartridge_file": "expert_meta_flash_attention_tiling_ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7.safetensors",
+      "sha256": "ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -235,8 +235,8 @@
       "prefix": "Q:MetaSpec:",
       "formula": "expected_accepted_ratio = accepted_drafts / draft_window",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_speculative_decoding_1d62321448b9c60af1902162e302a1bd242bdb3475adde326bc391c1974f18d8.safetensors",
-      "sha256": "1d62321448b9c60af1902162e302a1bd242bdb3475adde326bc391c1974f18d8",
+      "cartridge_file": "expert_meta_speculative_decoding_7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571.safetensors",
+      "sha256": "7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -275,8 +275,8 @@
       "prefix": "Q:MetaQuant:",
       "formula": "compression_ratio = fp16_bits / quant_bits",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_quantization_fp8_int4_29f38b0a71b1e6c73c2d303c38beb45e8a25c5c4d25ee8f400a728594432d0f1.safetensors",
-      "sha256": "29f38b0a71b1e6c73c2d303c38beb45e8a25c5c4d25ee8f400a728594432d0f1",
+      "cartridge_file": "expert_meta_quantization_fp8_int4_eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e.safetensors",
+      "sha256": "eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e",
       "serialized_bytes": 196864,
       "source_expert_index": 2,
       "parameters": 49152,
@@ -315,8 +315,168 @@
       "prefix": "Q:MetaDist:",
       "formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_distributed_tp_pp_dp_653e3e9f756a65e45754f846a35555458d30dfe10fc5120b7a63a9bcc139c16b.safetensors",
-      "sha256": "653e3e9f756a65e45754f846a35555458d30dfe10fc5120b7a63a9bcc139c16b",
+      "cartridge_file": "expert_meta_distributed_tp_pp_dp_00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9.safetensors",
+      "sha256": "00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_DEEPSEEK_MLA_LATENT_KV": {
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "title": "DeepSeek-V3/R1 Multi-Head Latent Attention (MLA) KV-Cache Compressor",
+      "category": "external_open_source_breakthrough",
+      "prefix": "Q:MetaMLA:",
+      "formula": "mla_compression = latent_dim / (2 * n_heads * head_dim)",
+      "introduced_in": "v12_phase3_external_oss",
+      "cartridge_file": "expert_meta_deepseek_mla_latent_kv_ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7.safetensors",
+      "sha256": "ef886885dda70f63f2a116b4069cd780448498ee4575cf6ac128af3ce4a566a7",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_VLLM_PAGED_ATTENTION": {
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "title": "vLLM PagedAttention KV-Block Memory Utilization Optimizer",
+      "category": "external_open_source_breakthrough",
+      "prefix": "Q:MetaPaged:",
+      "formula": "block_utilization = used_tokens / (allocated_blocks * block_size)",
+      "introduced_in": "v12_phase3_external_oss",
+      "cartridge_file": "expert_meta_vllm_paged_attention_7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571.safetensors",
+      "sha256": "7844de62d1cf46e9db89ce54544f8bd6ed618df5c02274d7c207f4e161d8f571",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_TRL_RLOO_LEAVE_ONE_OUT": {
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "title": "Hugging Face TRL Leave-One-Out (RLOO) Unbiased Policy Gradient Verifier",
+      "category": "external_open_source_breakthrough",
+      "prefix": "Q:MetaRLOO:",
+      "formula": "rloo_adv_1 = r_1 - (sum_other_rewards / (K - 1))",
+      "introduced_in": "v12_phase3_external_oss",
+      "cartridge_file": "expert_meta_trl_rloo_leave_one_out_eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e.safetensors",
+      "sha256": "eb8f87a6683d657f65370c4555e0574693fedf12425e9c1bde0bd5ea8db4912e",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "NOT_EVALUATED",
+      "provenance": "existing_routed_expert_snapshot"
+    },
+    "META_MERGEKIT_TIES_DARE": {
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "title": "MergeKit & Model-Merging TIES/DARE Effective Parameter Density Analyzer",
+      "category": "external_open_source_breakthrough",
+      "prefix": "Q:MetaMerge:",
+      "formula": "effective_density = (1 - drop_rate) * top_k_density",
+      "introduced_in": "v12_phase3_external_oss",
+      "cartridge_file": "expert_meta_mergekit_ties_dare_00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9.safetensors",
+      "sha256": "00e70ebc4633b9edefc1c9edfb07ea8c98f8d8ffb360a12d4297d08d760dadf9",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,

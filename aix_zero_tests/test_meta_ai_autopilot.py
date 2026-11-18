@@ -10,8 +10,10 @@ from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
     META_AI_EXPERT_DOMAINS,
     build_meta_ai_self_improvement_curriculum,
+    reflect_and_repair_rollout,
     scan_open_source_ai_codebase_patterns,
     synthesize_peer_ai_improvement_prompt,
+    verify_r1_reasoning_trace,
 )
 
 
@@ -51,26 +53,53 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertEqual(res2["code_synthesis_verified_count"], res2["code_synthesis_total_count"])
             self.assertEqual(res1["alu_assisted_heldout_exact_match"], 1.0)
             self.assertEqual(res2["alu_assisted_heldout_exact_match"], 1.0)
+            self.assertEqual(res1["reflected_heldout_exact_match"], 1.0)
+            self.assertEqual(res2["reflected_heldout_exact_match"], 1.0)
             self.assertGreater(res1["grpo_positive_trajectories"], 0)
             self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 8)
+            self.assertEqual(len(res2["exported_meta_shards"]), 12)
             self.assertIn("resolved_backlog_item", res1)
             self.assertTrue((tdir / "codebase_knowledge_graph.json").exists())
+            self.assertTrue((tdir / "external_open_source_harvest.json").exists())
+            self.assertTrue((tdir / "harvested_open_source_curriculum.json").exists())
             self.assertTrue((tdir / "peer_ai_coaching_pack.json").exists())
             self.assertTrue((tdir / "autopilot_live.json").exists())
+
+            # Verify ElasticBrain plateau detection (`ELASTIC-01`)
+            plat_yes = ctrl.detect_domain_plateaus(window=4, min_improvement=0.05, loss_series_override=[6.10, 6.09, 6.08, 6.08])
+            self.assertTrue(plat_yes["plateau_detected"])
+            plat_no = ctrl.detect_domain_plateaus(window=4, min_improvement=0.05, loss_series_override=[7.20, 6.80, 6.40, 6.00])
+            self.assertFalse(plat_no["plateau_detected"])
+
+            # Verify DeepSeek-R1 multi-stage trace verifier and reflection repair (`R1VERIFY-01..02`)
+            bad_eq = verify_r1_reasoning_trace("<think>6*4=99;144/24=6</think><ans>6</ans>", "6")
+            self.assertFalse(bad_eq["equations_ok"])
+            self.assertFalse(bad_eq["fully_verified"])
+            rep = reflect_and_repair_rollout("Q:MetaScale:C=144;N=4->D_opt?", "<think>6*4=99</think><ans>99</ans>", "6")
+            self.assertTrue(rep["reflection_triggered"])
+            self.assertTrue(rep["final_verified"])
+
+            # Verify Peer-AI Symbiosis Bridge & mutual distillation ingestion (`BRIDGE-01..02`)
+            peer_sess = ctrl.run_peer_ai_symbiosis_session(max_prompts=4)
+            self.assertEqual(peer_sess["peer_post_coaching_accuracy"], 1.0)
+            self.assertGreater(peer_sess["verified_peer_traces_ingested"], 0)
 
             # Verify dry-run auto-push command construction (`AUTOGH-03`)
             push_plan = ctrl.auto_push_verified_state("chore: test push", dry_run=True)
             self.assertTrue(push_plan["dry_run"])
             self.assertEqual(len(push_plan["commands"]), 3)
 
-            # Verify new 4 Phase-II Meta-AI domains via symbolic query (`OSS-01`)
+            # Verify all 8 Phase-II & Phase-III external open-source domains via symbolic query (`OSS-01` & `ELASTIC-02`)
             for prompt_str, expected_dom, expected_ans in [
                 ("Q:MetaFlash:seq_len=2048;tile_block=128->io_reduction?", "META_FLASH_ATTENTION_TILING", "<ans>16</ans>"),
                 ("Q:MetaSpec:accepted=3;window=4->accept_ratio?", "META_SPECULATIVE_DECODING", "<ans>3/4</ans>"),
                 ("Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?", "META_QUANTIZATION_FP8_INT4", "<ans>4</ans>"),
                 ("Q:MetaDist:stages=4;microbatches=12->bubble_fraction?", "META_DISTRIBUTED_TP_PP_DP", "<ans>1/5</ans>"),
+                ("Q:MetaMLA:latent=512;n_heads=32;head_dim=64->mla_ratio?", "META_DEEPSEEK_MLA_LATENT_KV", "<ans>1/8</ans>"),
+                ("Q:MetaPaged:tokens=50;blocks=4;block_size=16->utilization?", "META_VLLM_PAGED_ATTENTION", "<ans>25/32</ans>"),
+                ("Q:MetaRLOO:r1=1;other_sum=1;k=4->rloo_advantage?", "META_TRL_RLOO_LEAVE_ONE_OUT", "<ans>2/3</ans>"),
+                ("Q:MetaMerge:keep_num=3;keep_den=4;topk_num=1;topk_den=5->effective_density?", "META_MERGEKIT_TIES_DARE", "<ans>3/20</ans>"),
             ]:
                 q_dom = ctrl.query_evolving_meta_ai(prompt_str, use_alu=True)
                 self.assertEqual(q_dom["routed_domain"], expected_dom)

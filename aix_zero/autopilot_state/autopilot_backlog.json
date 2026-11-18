@@ -14,9 +14,11 @@
       "backlog_id": "AIX-BACKLOG-02-META_LORA_MOE_ARCHITECT",
       "domain": "META_LORA_MOE_ARCHITECT",
       "title": "[AIX-BACKLOG-02-META_LORA_MOE_ARCHITECT] Autonomous mastery & held-out validation gate for META_LORA_MOE_ARCHITECT",
-      "status": "OPEN",
+      "status": "COMPLETED",
       "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
-      "github_issue_url": null
+      "github_issue_url": null,
+      "completed_in_cycle": 31,
+      "heldout_val_post_loss": 4.899554
     },
     {
       "backlog_id": "AIX-BACKLOG-03-META_GQA_KV_SYSTEMS",

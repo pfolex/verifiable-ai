@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "harvested_item_count": 5,
+  "verified_item_count": 5,
+  "sibling_aix_evolver_problems_detected": 12,
+  "external_frontier_projects_cataloged": 10,
+  "items": [
+    {
+      "source_project": "aix-evolver/dataset.py::CRT-01",
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "prompt": "Q:MetaScale:C=120;N=4->D_opt?",
+      "completion": "<think>6*4=24;120/24=5</think><ans>5</ans>",
+      "gold": "5",
+      "origin_note": "Normalized from cognitive reflection & exact rational solver benchmark"
+    },
+    {
+      "source_project": "deepseek-ai/DeepSeek-V3::MLA",
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "prompt": "Q:MetaMLA:latent=512;n_heads=32;head_dim=64->mla_ratio?",
+      "completion": "<think>full_kv=4096;ratio=512/4096=1/8</think><ans>1/8</ans>",
+      "gold": "1/8",
+      "origin_note": "DeepSeek-V3 Multi-Head Latent Attention low-rank KV compression factor"
+    },
+    {
+      "source_project": "vllm-project/vllm::PagedAttention",
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "prompt": "Q:MetaPaged:tokens=50;blocks=4;block_size=16->utilization?",
+      "completion": "<think>cap=4*16=64;util=50/64=25/32</think><ans>25/32</ans>",
+      "gold": "25/32",
+      "origin_note": "vLLM PagedAttention non-contiguous KV block utilization"
+    },
+    {
+      "source_project": "huggingface/trl::RLOOTrainer",
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "prompt": "Q:MetaRLOO:r1=1;other_sum=1;k=4->rloo_advantage?",
+      "completion": "<think>base=1/3;adv=1-1/3=2/3</think><ans>2/3</ans>",
+      "gold": "2/3",
+      "origin_note": "Hugging Face TRL Leave-One-Out unbiased policy gradient baseline"
+    },
+    {
+      "source_project": "arcee-ai/mergekit::TIES_DARE",
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "prompt": "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=1;topk_den=5->effective_density?",
+      "completion": "<think>eff=(3/4)*(1/5)=3/20</think><ans>3/20</ans>",
+      "gold": "3/20",
+      "origin_note": "MergeKit DARE drop-and-rescale + TIES top-k parameter pruning density"
+    }
+  ]
+}

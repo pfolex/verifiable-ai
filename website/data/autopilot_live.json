@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "daemon_state": "RUNNING_IDLE_BETWEEN_CYCLES",
-  "cycles_completed": 30,
-  "meta_ai_shard_count": 8,
+  "cycles_completed": 31,
+  "meta_ai_shard_count": 12,
   "meta_ai_domains": [
     "META_SCALING_OPTIMIZER",
     "META_LORA_MOE_ARCHITECT",
@@ -11,27 +11,32 @@
     "META_FLASH_ATTENTION_TILING",
     "META_SPECULATIVE_DECODING",
     "META_QUANTIZATION_FP8_INT4",
-    "META_DISTRIBUTED_TP_PP_DP"
+    "META_DISTRIBUTED_TP_PP_DP",
+    "META_DEEPSEEK_MLA_LATENT_KV",
+    "META_VLLM_PAGED_ATTENTION",
+    "META_TRL_RLOO_LEAVE_ONE_OUT",
+    "META_MERGEKIT_TIES_DARE"
   ],
+  "external_frontier_projects_cataloged": 10,
+  "sibling_open_source_repos_indexed": 10,
   "shard_hash_prefixes": {
-    "META_SCALING_OPTIMIZER": "c1acb04a9de01803",
-    "META_LORA_MOE_ARCHITECT": "1d62321448b9c60a",
-    "META_GQA_KV_SYSTEMS": "29f38b0a71b1e6c7",
-    "META_RLVR_GRPO_TRAINER": "653e3e9f756a65e4",
-    "META_FLASH_ATTENTION_TILING": "c1acb04a9de01803",
-    "META_SPECULATIVE_DECODING": "1d62321448b9c60a",
-    "META_QUANTIZATION_FP8_INT4": "29f38b0a71b1e6c7",
-    "META_DISTRIBUTED_TP_PP_DP": "653e3e9f756a65e4"
+    "META_SCALING_OPTIMIZER": "ef886885dda70f63",
+    "META_LORA_MOE_ARCHITECT": "7844de62d1cf46e9",
+    "META_GQA_KV_SYSTEMS": "eb8f87a6683d657f",
+    "META_RLVR_GRPO_TRAINER": "00e70ebc4633b9ed",
+    "META_FLASH_ATTENTION_TILING": "ef886885dda70f63",
+    "META_SPECULATIVE_DECODING": "7844de62d1cf46e9",
+    "META_QUANTIZATION_FP8_INT4": "eb8f87a6683d657f",
+    "META_DISTRIBUTED_TP_PP_DP": "00e70ebc4633b9ed",
+    "META_DEEPSEEK_MLA_LATENT_KV": "ef886885dda70f63",
+    "META_VLLM_PAGED_ATTENTION": "7844de62d1cf46e9",
+    "META_TRL_RLOO_LEAVE_ONE_OUT": "eb8f87a6683d657f",
+    "META_MERGEKIT_TIES_DARE": "00e70ebc4633b9ed"
   },
-  "latest_heldout_val_loss": 6.10837,
+  "latest_heldout_val_loss": 4.899554,
+  "latest_reflected_heldout_accuracy": 1.0,
   "latest_alu_heldout_accuracy": 1.0,
   "recent_loss_trajectory": [
-    {
-      "cycle": 11,
-      "train_post_loss": 4.482685,
-      "heldout_val_post_loss": null,
-      "alu_heldout_acc": 1.0
-    },
     {
       "cycle": 12,
       "train_post_loss": 4.471497,
@@ -144,6 +149,12 @@
       "cycle": 30,
       "train_post_loss": 3.426407,
       "heldout_val_post_loss": 6.10837,
+      "alu_heldout_acc": 1.0
+    },
+    {
+      "cycle": 31,
+      "train_post_loss": 2.206677,
+      "heldout_val_post_loss": 4.899554,
       "alu_heldout_acc": 1.0
     }
   ]

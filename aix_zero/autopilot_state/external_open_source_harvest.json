@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "external_frontier_projects": [
+    {
+      "slug": "deepseek-ai/DeepSeek-V3",
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "breakthrough": "Multi-Head Latent Attention (MLA) & Auxiliary-Loss-Free MoE Load Balancing",
+      "key_equation": "mla_compression = d_c / (2 * n_heads * d_head)"
+    },
+    {
+      "slug": "deepseek-ai/DeepSeek-R1",
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "breakthrough": "Pure RLVR via GRPO with rule-based format & accuracy rewards",
+      "key_equation": "A_i = r_i - mean(r_1..r_G)"
+    },
+    {
+      "slug": "vllm-project/vllm",
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "breakthrough": "PagedAttention non-contiguous KV-cache block tables & prefix caching",
+      "key_equation": "block_utilization = used_tokens / (allocated_blocks * block_size)"
+    },
+    {
+      "slug": "Dao-AILab/flash-attention",
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "breakthrough": "IO-aware SRAM tiling & online softmax rescaling",
+      "key_equation": "hbm_io_reduction = seq_len / tile_block_size"
+    },
+    {
+      "slug": "huggingface/trl",
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "breakthrough": "RLOO Leave-One-Out & GRPO post-training alignment",
+      "key_equation": "rloo_adv_1 = r_1 - (sum_other_rewards / (K - 1))"
+    },
+    {
+      "slug": "arcee-ai/mergekit",
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "breakthrough": "TIES-Merging, DARE random drop-and-rescale, SLERP & FrankenMoE fusion",
+      "key_equation": "effective_density = (1 - drop_rate) * top_k_density"
+    },
+    {
+      "slug": "karpathy/llm.c",
+      "domain": "META_SCALING_OPTIMIZER",
+      "breakthrough": "Zero-dependency C/CUDA GPT-2/3 pretraining & compute-optimal scaling",
+      "key_equation": "D_opt = C / (6 * N)"
+    },
+    {
+      "slug": "KellerJordan/Muon",
+      "domain": "META_SCALING_OPTIMIZER",
+      "breakthrough": "Newton-Schulz orthogonalized momentum optimizer for hidden layers",
+      "key_equation": "G_orth = NewtonSchulz5(G)"
+    },
+    {
+      "slug": "ml-explore/mlx",
+      "domain": "META_GQA_KV_SYSTEMS",
+      "breakthrough": "Apple Silicon unified-memory array graph & lazy evaluation",
+      "key_equation": "kv_compression_ratio = n_heads / n_kv_heads"
+    },
+    {
+      "slug": "ggml-org/llama.cpp",
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "breakthrough": "GGUF k-quant super-block integer quantization for CPU/Metal inference",
+      "key_equation": "compression_ratio = fp16_bits / quant_bits"
+    }
+  ],
+  "detected_sibling_open_source_repos": [
+    {
+      "repository": "aix-evolver",
+      "portable_ref": "external_workspace/aix-evolver",
+      "python_files_detected": 12
+    },
+    {
+      "repository": "r1-verifiers",
+      "portable_ref": "external_workspace/r1-verifiers",
+      "python_files_detected": 13
+    },
+    {
+      "repository": "r1_reward_lab",
+      "portable_ref": "external_workspace/r1_reward_lab",
+      "python_files_detected": 2
+    },
+    {
+      "repository": "math-verify",
+      "portable_ref": "external_workspace/math-verify",
+      "python_files_detected": 24
+    },
+    {
+      "repository": "mergekit",
+      "portable_ref": "external_workspace/mergekit",
+      "python_files_detected": 100
+    },
+    {
+      "repository": "model_merging",
+      "portable_ref": "external_workspace/model_merging",
+      "python_files_detected": 100
+    },
+    {
+      "repository": "trl",
+      "portable_ref": "external_workspace/trl",
+      "python_files_detected": 100
+    },
+    {
+      "repository": "smolagents",
+      "portable_ref": "external_workspace/smolagents",
+      "python_files_detected": 75
+    },
+    {
+      "repository": "lighteval",
+      "portable_ref": "external_workspace/lighteval",
+      "python_files_detected": 100
+    },
+    {
+      "repository": "ollama-python",
+      "portable_ref": "external_workspace/ollama-python",
+      "python_files_detected": 43
+    }
+  ],
+  "detected_sibling_repo_count": 10,
+  "cloned_into_open_source_corpus": []
+}

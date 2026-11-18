@@ -1,9 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "knowledge_graph_sha256": "b07548114728c05c386f403ee74d810ebd547adc8b7754185949937e6c8933b1",
-  "indexed_module_count": 62,
-  "total_functions_indexed": 559,
-  "total_classes_indexed": 71,
+  "knowledge_graph_sha256": "38f00e6f2b6dc216b73d2cc7fefc40b1ffe6fbdc021989d76214d9fb4bffa132",
+  "indexed_package_or_repo_count": 17,
+  "indexed_module_count": 194,
+  "total_functions_indexed": 1100,
+  "total_classes_indexed": 159,
+  "external_frontier_catalog_count": 10,
   "modules": [
     {
       "package": "aix_zero",
@@ -48,8 +50,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/aix_ctl.py",
       "summary_docstring": "AIX-Zero Autopilot Control CLI (`aix_zero/aix_ctl.py`)",
-      "lines": 155,
-      "cyclomatic_branches": 15,
+      "lines": 182,
+      "cyclomatic_branches": 17,
       "classes": [],
       "public_functions": [
         {
@@ -644,14 +646,24 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/meta_ai_autopilot.py",
       "summary_docstring": "AIX Meta-AI Autonomous Self-Improvement Engine (`aix_zero/meta_ai_autopilot.py`)",
-      "lines": 1388,
-      "cyclomatic_branches": 104,
+      "lines": 2087,
+      "cyclomatic_branches": 162,
       "classes": [
         "AutonomousSelfImprovementController"
       ],
       "public_functions": [
         {
           "name": "build_meta_ai_self_improvement_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "build_harvested_open_source_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "harvest_external_open_source_projects",
           "arg_count": 1,
           "has_docstring": true
         },
@@ -681,6 +693,16 @@
           "has_docstring": true
         },
         {
+          "name": "verify_r1_reasoning_trace",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "reflect_and_repair_rollout",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
           "name": "build_executable_code_synthesis_tasks",
           "arg_count": 1,
           "has_docstring": true
@@ -703,26 +725,6 @@
         {
           "name": "request_stop",
           "arg_count": 1,
-          "has_docstring": true
-        },
-        {
-          "name": "clear_stop_sentinel",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "get_status",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "update_and_sample_replay_buffer",
-          "arg_count": 2,
-          "has_docstring": true
-        },
-        {
-          "name": "run_grpo_self_play_step",
-          "arg_count": 4,
           "has_docstring": true
         }
       ]
@@ -2132,6 +2134,66 @@
     },
     {
       "package": "verisci",
+      "rel_path": "verisci/src/verisci/cli.py",
+      "summary_docstring": "CLI entrypoint for `verisci` formal verification cartridges.",
+      "lines": 48,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "verisci",
+      "rel_path": "verisci/src/verisci/protocol.py",
+      "summary_docstring": "Universal Verifiable Cartridge Protocol (`verisci.protocol`).",
+      "lines": 101,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "ActionStep",
+        "DomainTask",
+        "VerificationResult",
+        "Cartridge"
+      ],
+      "public_functions": [
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "from_dict",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "to_dict",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_step",
+          "arg_count": 4,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "verisci",
       "rel_path": "verisci/src/verisci/cartridges/__init__.py",
       "summary_docstring": "Cartridge Registry (`verisci.cartridges`).",
       "lines": 36,
@@ -2235,66 +2297,6 @@
           "name": "verify",
           "arg_count": 3,
           "has_docstring": false
-        }
-      ]
-    },
-    {
-      "package": "verisci",
-      "rel_path": "verisci/src/verisci/cli.py",
-      "summary_docstring": "CLI entrypoint for `verisci` formal verification cartridges.",
-      "lines": 48,
-      "cyclomatic_branches": 3,
-      "classes": [],
-      "public_functions": [
-        {
-          "name": "main",
-          "arg_count": 1,
-          "has_docstring": false
-        }
-      ]
-    },
-    {
-      "package": "verisci",
-      "rel_path": "verisci/src/verisci/protocol.py",
-      "summary_docstring": "Universal Verifiable Cartridge Protocol (`verisci.protocol`).",
-      "lines": 101,
-      "cyclomatic_branches": 0,
-      "classes": [
-        "ActionStep",
-        "DomainTask",
-        "VerificationResult",
-        "Cartridge"
-      ],
-      "public_functions": [
-        {
-          "name": "to_dict",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "from_dict",
-          "arg_count": 2,
-          "has_docstring": false
-        },
-        {
-          "name": "to_dict",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "to_dict",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "verify",
-          "arg_count": 3,
-          "has_docstring": true
-        },
-        {
-          "name": "evaluate_step",
-          "arg_count": 4,
-          "has_docstring": true
         }
       ]
     },
@@ -2527,6 +2529,3500 @@
           "has_docstring": false
         }
       ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/__init__.py",
+      "summary_docstring": "AIX-Evolver: Elastic Reasoning Self-Improvement Engine",
+      "lines": 24,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/__version__.py",
+      "summary_docstring": "Version information for aix-evolver.",
+      "lines": 3,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/cli.py",
+      "summary_docstring": "Command-Line Interface and Rich Dashboard for AIX-Evolver.",
+      "lines": 188,
+      "cyclomatic_branches": 11,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "render_banner",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "run_status",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "run_evolution",
+          "arg_count": 5,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/dataset.py",
+      "summary_docstring": "Problem management and curriculum dataset engine for AIX-Evolver.",
+      "lines": 254,
+      "cyclomatic_branches": 20,
+      "classes": [
+        "Problem",
+        "ProblemManager"
+      ],
+      "public_functions": [
+        {
+          "name": "total_attempts",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "success_rate",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "is_plateaued",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "load_gsm8k",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "load_reasoning_gym",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "load_open_r1",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "load_by_source",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_batch",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "record_attempt",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_plateaued_problems",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/elastic_brain.py",
+      "summary_docstring": "Elastic Brain Engine: Tracks parameter frugality, detects capacity plateaus,",
+      "lines": 192,
+      "cyclomatic_branches": 10,
+      "classes": [
+        "ExpansionEvent",
+        "ModularExpert",
+        "ElasticBrain"
+      ],
+      "public_functions": [
+        {
+          "name": "total_active_parameters",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "added_parameter_footprint_mb",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "record_performance",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "detect_plateau",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "spawn_modular_expert",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "prune_inactive_experts",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/generator.py",
+      "summary_docstring": "Rollout generator interfacing with local Ollama runtime for multi-path reasoning exploration.",
+      "lines": 124,
+      "cyclomatic_branches": 8,
+      "classes": [
+        "RolloutResult",
+        "RolloutGenerator"
+      ],
+      "public_functions": [
+        {
+          "name": "full_text",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "generate_single",
+          "arg_count": 6,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_group",
+          "arg_count": 6,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/trainer.py",
+      "summary_docstring": "Lightweight CPU-optimized LoRA training engine for modular reasoning adaptation.",
+      "lines": 119,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "TrainingMetrics",
+        "ElasticTrainer"
+      ],
+      "public_functions": [
+        {
+          "name": "train_on_rollouts",
+          "arg_count": 6,
+          "has_docstring": true
+        },
+        {
+          "name": "save_checkpoint",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/aix_evolver/verifier.py",
+      "summary_docstring": "Multi-signal verification engine: Evaluates correctness, reflection intensity, repetition, and consensus.",
+      "lines": 167,
+      "cyclomatic_branches": 16,
+      "classes": [
+        "VerificationScore",
+        "ReasoningVerifier"
+      ],
+      "public_functions": [
+        {
+          "name": "extract_answer",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_reflection_intensity",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_repetition_ratio",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "is_equivalent",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "score_rollout",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "find_consensus",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/tests/test_dataset.py",
+      "summary_docstring": "Tests for ProblemManager and curriculum logic.",
+      "lines": 48,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_problem_plateau_detection",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_problem_manager_curated_load",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_problem_manager_record_attempt",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_problem_manager_reasoning_gym",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_problem_manager_open_r1",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/tests/test_elastic_brain.py",
+      "summary_docstring": "Tests for ElasticBrain plateau detection, dynamic modular growth, and pruning.",
+      "lines": 53,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_elastic_brain_initial_state",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_plateau_detection_and_spawn",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_expert_pruning",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/tests/test_trainer.py",
+      "summary_docstring": "Tests for ElasticTrainer.",
+      "lines": 24,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_dry_run_training_step",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/aix-evolver",
+      "rel_path": "external_workspace/aix-evolver/tests/test_verifier.py",
+      "summary_docstring": "Tests for ReasoningVerifier, reflection scoring, and consensus.",
+      "lines": 51,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_extract_boxed_answer",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_extract_hash_answer",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_reflection_intensity",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_repetition_ratio",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_consensus",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/__init__.py",
+      "summary_docstring": "r1-verifiers: Lightweight reasoning verifiers & GRPO-LEAD length-scaled rewards.",
+      "lines": 41,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/cli.py",
+      "summary_docstring": "Command line interface for r1-verifiers (`r1-verify`).",
+      "lines": 198,
+      "cyclomatic_branches": 14,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "run_single",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "run_batch",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/format.py",
+      "summary_docstring": "Format verifier for reasoning rollouts (e.g. DeepSeek-R1, QwQ).",
+      "lines": 135,
+      "cyclomatic_branches": 16,
+      "classes": [
+        "FormatResult",
+        "FormatVerifier"
+      ],
+      "public_functions": [
+        {
+          "name": "extract_boxed_content",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/grpo.py",
+      "summary_docstring": "GRPO and GRPO-LEAD length-scaled reward functions for reasoning models.",
+      "lines": 147,
+      "cyclomatic_branches": 7,
+      "classes": [
+        "GRPORolloutScore",
+        "GRPOGroupResult",
+        "LengthLeadReward"
+      ],
+      "public_functions": [
+        {
+          "name": "compute_grpo_advantages",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "score_group",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/math.py",
+      "summary_docstring": "Mathematical equivalence verifier for reasoning rollouts.",
+      "lines": 149,
+      "cyclomatic_branches": 13,
+      "classes": [
+        "MathResult",
+        "MathVerifier"
+      ],
+      "public_functions": [
+        {
+          "name": "normalize_latex_str",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/pipeline.py",
+      "summary_docstring": "End-to-end verification pipeline combining format, math, and reflection checks.",
+      "lines": 74,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "VerificationReport",
+        "ReasoningVerificationPipeline"
+      ],
+      "public_functions": [
+        {
+          "name": "verify_reasoning",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "verify",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/src/r1_verifiers/reflection.py",
+      "summary_docstring": "Reflection and reasoning depth verifier for thinking chains.",
+      "lines": 116,
+      "cyclomatic_branches": 9,
+      "classes": [
+        "ReflectionResult",
+        "ReflectionVerifier"
+      ],
+      "public_functions": [
+        {
+          "name": "verify",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_cli.py",
+      "summary_docstring": "",
+      "lines": 33,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_cli_run_single",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "test_cli_run_batch",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_format.py",
+      "summary_docstring": "",
+      "lines": 46,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_extract_boxed_content_simple",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_extract_boxed_content_nested_braces",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_extract_boxed_content_none",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_format_verifier_valid",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_format_verifier_missing_think",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_format_verifier_unclosed_think",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_grpo.py",
+      "summary_docstring": "",
+      "lines": 44,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_length_lead_reward_ranking",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "test_compute_grpo_advantages_helper",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_zero_variance_lengths",
+          "arg_count": 0,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_math.py",
+      "summary_docstring": "",
+      "lines": 47,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_normalize_latex_str",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_verifier_exact",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_verifier_numeric_float",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_verifier_fraction_symbolic",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_verifier_wrong",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_verifier_none",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_pipeline.py",
+      "summary_docstring": "",
+      "lines": 28,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_pipeline_verify_correct",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_pipeline_verify_incorrect",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1-verifiers",
+      "rel_path": "external_workspace/r1-verifiers/tests/test_reflection.py",
+      "summary_docstring": "",
+      "lines": 33,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_reflection_verifier_detected",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_reflection_verifier_empty",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_reflection_verifier_direct_no_reflection",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1_reward_lab",
+      "rel_path": "external_workspace/r1_reward_lab/grpo_reward_lab.py",
+      "summary_docstring": "DeepSeek-R1 GRPO Reward & Verifier Lab with Length-Scaled Shaping (GRPO-LEAD).",
+      "lines": 389,
+      "cyclomatic_branches": 29,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "think_format_reward",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_boxed_content",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "clean_numerical_value",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "accuracy_reward",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "self_reflection_reward",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "repetition_penalty_reward",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_lead_length_rewards",
+          "arg_count": 5,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_rollout",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "compute_grpo_advantages",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "run_grpo_simulation",
+          "arg_count": 5,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/r1_reward_lab",
+      "rel_path": "external_workspace/r1_reward_lab/reward_demo.py",
+      "summary_docstring": "DeepSeek-R1 Reward Function Lab.",
+      "lines": 156,
+      "cyclomatic_branches": 12,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "format_reward_func",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_boxed_answer",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "accuracy_reward_func",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "self_reflection_reward_func",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "query_local_r1",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/evaluate_model.py",
+      "summary_docstring": "",
+      "lines": 71,
+      "cyclomatic_branches": 2,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/evaluate_model_outputs.py",
+      "summary_docstring": "",
+      "lines": 141,
+      "cyclomatic_branches": 14,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "load_csv_data",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "serialize_sympy_object",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "compare_answers",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "process_answers",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/extract_answers.py",
+      "summary_docstring": "",
+      "lines": 97,
+      "cyclomatic_branches": 12,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "load_csv_data",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "serialize_sympy_object",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "process_answers",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/__init__.py",
+      "summary_docstring": "",
+      "lines": 22,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/errors.py",
+      "summary_docstring": "",
+      "lines": 2,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "TimeoutException"
+      ],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/few_shots.py",
+      "summary_docstring": "",
+      "lines": 69,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/grader.py",
+      "summary_docstring": "",
+      "lines": 951,
+      "cyclomatic_branches": 91,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "safe_sympy_doit",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "get_pct_val",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "is_atomic_or_pct_atomic",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_numeric_eq",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_symbolic_eq",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "unwrap_eq",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "sort_key",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "sympy_deep_compare_set_and_tuple",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_compare_interval",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_solve_and_compare",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "sympy_compare_relational",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_str_eq",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_compare_sets",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "sympy_compare_symbols",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "is_relation",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/metric.py",
+      "summary_docstring": "",
+      "lines": 98,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "math_metric",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "get_str_preds_with_timeout",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "sample_level_fn",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/parser.py",
+      "summary_docstring": "",
+      "lines": 730,
+      "cyclomatic_branches": 41,
+      "classes": [
+        "LatexExtractionConfig",
+        "ExprExtractionConfig",
+        "StringExtractionConfig"
+      ],
+      "public_functions": [
+        {
+          "name": "lazy_string_regex",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "lazy_expr_regex",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "make_latex_env_pattern",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "lazy_latex_regex",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_extraction_regexes",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_latex_cached",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_expr_cached",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "extract_expr",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_last_eq",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "extract_latex",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "extract_string",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "extract_match",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_target_from_pred",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "parse",
+          "arg_count": 6,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/tasks.py",
+      "summary_docstring": "",
+      "lines": 323,
+      "cyclomatic_branches": 7,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "as_lighteval_metric",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "math_hard_prompt_function",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "math_prompt_function",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "math_aime24_prompt_function",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "math_amc23_prompt_function",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "gsm8k_prompt_function",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "sample_level_fn",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/src/math_verify/utils.py",
+      "summary_docstring": "",
+      "lines": 108,
+      "cyclomatic_branches": 6,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "timeout",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "no_timeout_decorator",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "decorator",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "decorator",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "handler",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "wrapper",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "wrapper",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "run_func",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/tests/__init__.py",
+      "summary_docstring": "",
+      "lines": 0,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/tests/test_all.py",
+      "summary_docstring": "",
+      "lines": 966,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "compare_strings",
+          "arg_count": 6,
+          "has_docstring": true
+        },
+        {
+          "name": "test_number_extraction",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_simple_fraction_notation",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_sets_handling",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_latex_notation",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_percent_notation",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_latex_notation_math",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_relations_math",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_matrix_extraction",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_precision",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_complex_math_expressions",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_extraction_edge_cases",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_math_extraction_additional_cases",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "test_set_rel_assymetry",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "test_float_precision",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/tests/test_boxed.py",
+      "summary_docstring": "",
+      "lines": 22,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_boxed",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/math-verify",
+      "rel_path": "external_workspace/math-verify/tests/test_configs.py",
+      "summary_docstring": "",
+      "lines": 72,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "test_boxed_match_priority",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "test_normalization_config",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/__init__.py",
+      "summary_docstring": "",
+      "lines": 0,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/card.py",
+      "summary_docstring": "",
+      "lines": 222,
+      "cyclomatic_branches": 17,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "is_hf",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_hf_paths",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "method_md",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "maybe_link_hf",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "modelref_md",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_card",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "generate_card_lora",
+          "arg_count": 6,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/common.py",
+      "summary_docstring": "",
+      "lines": 425,
+      "cyclomatic_branches": 49,
+      "classes": [
+        "ModelPath",
+        "ModelReference",
+        "ImmutableMap",
+        "AutoClassProtocol"
+      ],
+      "public_functions": [
+        {
+          "name": "set_config_value",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_config_value",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "dtype_from_name",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_kmb",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_auto_cls",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "get_torch_accelerator_module",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_torch_accelerator_count",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_torch_accelerator_type",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_string",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "merged",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "config",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "local_path",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "tensor_index",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "lazy_loader",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_string",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/config.py",
+      "summary_docstring": "",
+      "lines": 219,
+      "cyclomatic_branches": 33,
+      "classes": [
+        "ConditionalParameter",
+        "InputSliceDefinition",
+        "InputModelDefinition",
+        "OutputSliceDefinition",
+        "OutputModuleDefinition",
+        "MergeConfiguration",
+        "ConfigReader",
+        "ConfigYamlDumper"
+      ],
+      "public_functions": [
+        {
+          "name": "evaluate_setting",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "validate_inputs",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "referenced_models",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_inputs",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_tokenizer",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "to_yaml",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "base_model",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "for_out_slice",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "with_t",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "parameter_sources",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "represent_list",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/graph.py",
+      "summary_docstring": "Module for computational graph execution.",
+      "lines": 545,
+      "cyclomatic_branches": 45,
+      "classes": [
+        "Task",
+        "TaskUniverse",
+        "TaskHandle",
+        "ExecutionSchedule",
+        "Executor"
+      ],
+      "public_functions": [
+        {
+          "name": "build_schedule",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "arguments",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "execute",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "priority",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "group_label",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "uses_accelerator",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "main_thread_only",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "duplicate_per_gpu",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "add_task",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_handle",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "task",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "arguments",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "run",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "execute",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/merge.py",
+      "summary_docstring": "",
+      "lines": 369,
+      "cyclomatic_branches": 45,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "run_merge",
+          "arg_count": 4,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/multigpu_executor.py",
+      "summary_docstring": "Implementation of multi-GPU parallel task execution.",
+      "lines": 377,
+      "cyclomatic_branches": 32,
+      "classes": [
+        "MultiGPUExecutor"
+      ],
+      "public_functions": [
+        {
+          "name": "run",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "execute",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "update_progress",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/options.py",
+      "summary_docstring": "",
+      "lines": 230,
+      "cyclomatic_branches": 27,
+      "classes": [
+        "MergeOptions",
+        "ShardSizeParamType",
+        "PrettyPrintHelp"
+      ],
+      "public_functions": [
+        {
+          "name": "add_merge_options",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "apply_global_options",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "handle_gpu_rich",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "handle_device_setting",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "convert",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "wrapper",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "format_options",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/parameter_resolver.py",
+      "summary_docstring": "Resolve parameter filters, gradients, and defaults in descending precedence.",
+      "lines": 66,
+      "cyclomatic_branches": 5,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "resolve_parameter",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "resolve_parameters",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/plan.py",
+      "summary_docstring": "",
+      "lines": 386,
+      "cyclomatic_branches": 30,
+      "classes": [
+        "MergePlanner"
+      ],
+      "public_functions": [
+        {
+          "name": "normalize_config",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "plan_tensor",
+          "arg_count": 5,
+          "has_docstring": false
+        },
+        {
+          "name": "plan_layer",
+          "arg_count": 6,
+          "has_docstring": false
+        },
+        {
+          "name": "plan_slice",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "plan_module",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "plan_to_disk",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "plan_in_memory",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/sparsify.py",
+      "summary_docstring": "",
+      "lines": 198,
+      "cyclomatic_branches": 20,
+      "classes": [
+        "SparsificationMethod",
+        "RescaleNorm"
+      ],
+      "public_functions": [
+        {
+          "name": "rescaled_masked_tensor",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "magnitude",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "magnitude_outliers",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "bernoulli",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "della_magprune",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "sparsify",
+          "arg_count": 6,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/vocabulary.py",
+      "summary_docstring": "Layout validation shared by vocabulary alignment and truncation.",
+      "lines": 26,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "vocabulary_views",
+          "arg_count": 3,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/_data/__init__.py",
+      "summary_docstring": "",
+      "lines": 0,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/_data/architectures/__init__.py",
+      "summary_docstring": "",
+      "lines": 0,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/mergekit",
+      "rel_path": "external_workspace/mergekit/mergekit/_data/chat_templates/__init__.py",
+      "summary_docstring": "",
+      "lines": 0,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/aix_cognitive_engine.py",
+      "summary_docstring": "AIX Cognitive Reasoning Engine \u2014 Full 5-Upgrade Integration",
+      "lines": 568,
+      "cyclomatic_branches": 43,
+      "classes": [
+        "CandidateBranch"
+      ],
+      "public_functions": [
+        {
+          "name": "safe_eval_arith",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "verify_trace_arithmetic_in_sandbox",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_clean_answer",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "query_ollama_chat_branch",
+          "arg_count": 5,
+          "has_docstring": true
+        },
+        {
+          "name": "score_branches_grpo_lead",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "solve_with_cognitive_engine",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/benchmark_models.py",
+      "summary_docstring": "Automated comparative benchmark between base DeepSeek-R1 and merged pfolex-r1-coder.",
+      "lines": 92,
+      "cyclomatic_branches": 6,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "query_ollama",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "run_benchmark",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/chat_with_aix.py",
+      "summary_docstring": "Interactive Conversation Shell for AIX-Chat-1.5B",
+      "lines": 121,
+      "cyclomatic_branches": 20,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "stream_chat",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/convert_hf_to_gguf.py",
+      "summary_docstring": "",
+      "lines": 316,
+      "cyclomatic_branches": 30,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "split_str_to_n_bytes",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/dare_ties_merge.py",
+      "summary_docstring": "AIX-2.0-Apex: Tri-Model DARE-TIES Merge",
+      "lines": 147,
+      "cyclomatic_branches": 10,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "dare_mask_and_rescale",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "ties_sign_agreement",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/fast_merge.py",
+      "summary_docstring": "Fast streaming SLERP merge for AIX-Chat-1.5B with Special Token Embedding Protection.",
+      "lines": 106,
+      "cyclomatic_branches": 9,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "slerp",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/hierarchical_slerp_merge.py",
+      "summary_docstring": "AIX-2.0-Apex: Hierarchical Tri-Model SLERP Merge",
+      "lines": 155,
+      "cyclomatic_branches": 16,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "slerp",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/run_aix3_vs_aix2_benchmark.py",
+      "summary_docstring": "Head-to-Head Autoregressive Benchmark: AIX-3.0-Verifiable (aix3) vs. AIX-2.0-Apex (aix-2)",
+      "lines": 272,
+      "cyclomatic_branches": 27,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "extract_clean_answer",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "query_ollama_boxed",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "eval_suite",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/run_benchmark.py",
+      "summary_docstring": "AIX Benchmark Suite (AIX-Bench)",
+      "lines": 201,
+      "cyclomatic_branches": 11,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "query_ollama",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "evaluate_response",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "run_benchmark",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/run_gsm8k_benchmark.py",
+      "summary_docstring": "Official OpenAI GSM8K Benchmark Harness for Local Models",
+      "lines": 180,
+      "cyclomatic_branches": 19,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "ensure_dataset",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "load_dataset",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "query_ollama",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "extract_numeric_answer",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "evaluate_gsm8k",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/test_verisci_clean.py",
+      "summary_docstring": "",
+      "lines": 55,
+      "cyclomatic_branches": 6,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "query_chat_clean",
+          "arg_count": 4,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/llama.cpp/convert_hf_to_gguf.py",
+      "summary_docstring": "",
+      "lines": 316,
+      "cyclomatic_branches": 30,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "split_str_to_n_bytes",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/llama.cpp/convert_hf_to_gguf_update.py",
+      "summary_docstring": "",
+      "lines": 515,
+      "cyclomatic_branches": 33,
+      "classes": [
+        "TOKENIZER_TYPE"
+      ],
+      "public_functions": [
+        {
+          "name": "download_file_with_auth",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "download_model",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "get_existing_models",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/llama.cpp/convert_llama_ggml_to_gguf.py",
+      "summary_docstring": "",
+      "lines": 450,
+      "cyclomatic_branches": 42,
+      "classes": [
+        "GGMLFormat",
+        "GGMLFType",
+        "Hyperparameters",
+        "Vocab",
+        "Tensor",
+        "GGMLModel",
+        "GGMLToGGUF"
+      ],
+      "public_functions": [
+        {
+          "name": "handle_metadata",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "handle_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "set_n_ff",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "load",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "load",
+          "arg_count": 4,
+          "has_docstring": false
+        },
+        {
+          "name": "load",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_header",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "validate_conversion",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "load",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "save",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "add_params",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "add_vocab",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "add_tensors",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/model_merging",
+      "rel_path": "external_workspace/model_merging/llama.cpp/convert_lora_to_gguf.py",
+      "summary_docstring": "",
+      "lines": 549,
+      "cyclomatic_branches": 55,
+      "classes": [
+        "PartialLoraTensor",
+        "LoraTorchTensor",
+        "LoraModel"
+      ],
+      "public_functions": [
+        {
+          "name": "get_base_tensor_name",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "load_hparams_from_hf",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "get_lora_A_B",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "dtype",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "shape",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "size",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "dim",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "contiguous",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "reshape",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "reshape_as",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "view",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "permute",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "transpose",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "swapaxes",
+          "arg_count": 3,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_distillation_math/async_distillation_math.py",
+      "summary_docstring": "Async on-policy distillation: a background rollout worker generates the student's own completions and scores them",
+      "lines": 82,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "format_sample",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_distillation_math/async_distillation_mopd.py",
+      "summary_docstring": "MOPD (multi-teacher on-policy distillation): [`~trl.experimental.async_distillation.AsyncDistillationTrainer`] with",
+      "lines": 100,
+      "cyclomatic_branches": 2,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "format_math",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "format_code",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_grpo_harbor/async_grpo_harbor.py",
+      "summary_docstring": "AsyncGRPO on Harbor tasks, with an off-the-shelf coding agent, served through OpenEnv.",
+      "lines": 273,
+      "cyclomatic_branches": 9,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "tool_efficiency",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "harbor_reward",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "task_indices",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_grpo_harbor/launcher.py",
+      "summary_docstring": "Run `async_grpo_harbor.py` on Hugging Face Jobs: one job, one command.",
+      "lines": 411,
+      "cyclomatic_branches": 36,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "wait_for_public_proxy",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "start_harbor_server",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "supervise_tunnel",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "wait_for_vllm",
+          "arg_count": 4,
+          "has_docstring": true
+        },
+        {
+          "name": "warm_sandbox_template",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "parse_args",
+          "arg_count": 0,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_grpo_math/async_grpo_lora_math.py",
+      "summary_docstring": "LoRA AsyncGRPO on GSM8K with an 8B policy, on two GPUs: vLLM on GPU 0, the trainer on GPU 1.",
+      "lines": 105,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "format_sample",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/async_grpo_math/async_grpo_math.py",
+      "summary_docstring": "pip install math_verify",
+      "lines": 78,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "format_sample",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/deepmath_103k.py",
+      "summary_docstring": "",
+      "lines": 98,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "process_example",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/hh-rlhf-helpful-base.py",
+      "summary_docstring": "",
+      "lines": 132,
+      "cyclomatic_branches": 6,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "common_start",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "extract_dialogue",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/llava_instruct_mix.py",
+      "summary_docstring": "",
+      "lines": 118,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "process_example",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "filter_long_examples",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "split_prompt_completion",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/lm-human-preferences-descriptiveness.py",
+      "summary_docstring": "",
+      "lines": 119,
+      "cyclomatic_branches": 4,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "samples_not_all_same",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "to_prompt_completion",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/lm-human-preferences-sentiment.py",
+      "summary_docstring": "",
+      "lines": 112,
+      "cyclomatic_branches": 4,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "to_prompt_completion",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/rlaif-v.py",
+      "summary_docstring": "",
+      "lines": 112,
+      "cyclomatic_branches": 2,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "to_conversational",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/tldr.py",
+      "summary_docstring": "",
+      "lines": 104,
+      "cyclomatic_branches": 2,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "to_prompt_completion",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/tldr_preference.py",
+      "summary_docstring": "",
+      "lines": 110,
+      "cyclomatic_branches": 4,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "to_preference",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/trl",
+      "rel_path": "external_workspace/trl/examples/datasets/ultrafeedback-prompt.py",
+      "summary_docstring": "",
+      "lines": 102,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "ScriptArguments"
+      ],
+      "public_functions": [
+        {
+          "name": "to_unpaired_preference",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "drop_long_prompt",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/docs/source/en/_config.py",
+      "summary_docstring": "",
+      "lines": 14,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/docs/source/es/_config.py",
+      "summary_docstring": "",
+      "lines": 14,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/docs/source/hi/_config.py",
+      "summary_docstring": "",
+      "lines": 14,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/docs/source/ko/_config.py",
+      "summary_docstring": "",
+      "lines": 14,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/docs/source/zh/_config.py",
+      "summary_docstring": "",
+      "lines": 14,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/agent_from_any_llm.py",
+      "summary_docstring": "",
+      "lines": 61,
+      "cyclomatic_branches": 5,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "get_weather",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/gradio_ui.py",
+      "summary_docstring": "",
+      "lines": 16,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/inspect_multiagent_run.py",
+      "summary_docstring": "",
+      "lines": 39,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/multi_llm_agent.py",
+      "summary_docstring": "",
+      "lines": 46,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/multiple_tools.py",
+      "summary_docstring": "",
+      "lines": 256,
+      "cyclomatic_branches": 12,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "get_weather",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "convert_currency",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_news_headlines",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "get_joke",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "get_time_in_timezone",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "get_random_fact",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "search_wikipedia",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/rag.py",
+      "summary_docstring": "",
+      "lines": 70,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "RetrieverTool"
+      ],
+      "public_functions": [
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/rag_using_chromadb.py",
+      "summary_docstring": "",
+      "lines": 131,
+      "cyclomatic_branches": 3,
+      "classes": [
+        "RetrieverTool"
+      ],
+      "public_functions": [
+        {
+          "name": "forward",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/sandboxed_execution.py",
+      "summary_docstring": "",
+      "lines": 24,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/structured_output_tool.py",
+      "summary_docstring": "",
+      "lines": 77,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "weather_server_script",
+          "arg_count": 0,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/smolagents",
+      "rel_path": "external_workspace/smolagents/examples/text_to_sql.py",
+      "summary_docstring": "",
+      "lines": 79,
+      "cyclomatic_branches": 2,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "sql_engine",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/setup.py",
+      "summary_docstring": "",
+      "lines": 26,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_tasks_tests.py",
+      "summary_docstring": "",
+      "lines": 59,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_models/google_translate_model.py",
+      "summary_docstring": "",
+      "lines": 177,
+      "cyclomatic_branches": 8,
+      "classes": [
+        "GoogleTranslateClient"
+      ],
+      "public_functions": [
+        {
+          "name": "greedy_until",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "tokenizer",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "tok_encode",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "add_special_tokens",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "max_length",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "loglikelihood",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "loglikelihood_rolling",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_models/local_mt_model.py",
+      "summary_docstring": "",
+      "lines": 262,
+      "cyclomatic_branches": 15,
+      "classes": [
+        "LocalMTClient"
+      ],
+      "public_functions": [
+        {
+          "name": "greedy_until",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "cleanup",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "tokenizer",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "tok_encode",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "add_special_tokens",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "max_length",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "loglikelihood",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "loglikelihood_rolling",
+          "arg_count": 3,
+          "has_docstring": true
+        },
+        {
+          "name": "get_langs",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_tasks_templates/custom_yourbench_task.py",
+      "summary_docstring": "",
+      "lines": 264,
+      "cyclomatic_branches": 2,
+      "classes": [
+        "JudgeLLMYourBench"
+      ],
+      "public_functions": [
+        {
+          "name": "get_judge_prompt",
+          "arg_count": 3,
+          "has_docstring": false
+        },
+        {
+          "name": "process_judge_response_yourbench",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "yourbench_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "compute",
+          "arg_count": 4,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_tasks_templates/custom_yourbench_task_from_files.py",
+      "summary_docstring": "",
+      "lines": 105,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/custom_tasks_templates/custom_yourbench_task_mcq.py",
+      "summary_docstring": "",
+      "lines": 92,
+      "cyclomatic_branches": 2,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "yourbench_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/nanotron/custom_evaluation_tasks.py",
+      "summary_docstring": "Custom evaluation tasks for lighteval",
+      "lines": 712,
+      "cyclomatic_branches": 1,
+      "classes": [
+        "CustomMathEvaluationTask",
+        "CustomMMLUEvaluationTask",
+        "CustomBBHEvaluationTask",
+        "CustomAGIEvalEvaluationTask"
+      ],
+      "public_functions": [
+        {
+          "name": "commonsense_qa_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "siqa_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "hellaswag_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "natural_questions_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "boolq_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "mmlu_harness",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "mmlu_prompt",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "bbh_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "agi_eval_math_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "agi_eval_prompt",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "agi_eval_prompt_no_letters",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "preprocess",
+          "arg_count": 1,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/examples/nanotron/custom_task.py",
+      "summary_docstring": "",
+      "lines": 98,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "mmlu_signs",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "mmlu_anatomy_signs",
+          "arg_count": 1,
+          "has_docstring": false
+        },
+        {
+          "name": "mmlu_numbers",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "mmlu_anatomy",
+          "arg_count": 1,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/__init__.py",
+      "summary_docstring": "",
+      "lines": 26,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/__main__.py",
+      "summary_docstring": "",
+      "lines": 90,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/cli_args.py",
+      "summary_docstring": "Common CLI argument types for LightEval main files.",
+      "lines": 260,
+      "cyclomatic_branches": 0,
+      "classes": [
+        "Arg"
+      ],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/data.py",
+      "summary_docstring": "",
+      "lines": 299,
+      "cyclomatic_branches": 14,
+      "classes": [
+        "DynamicBatchDataset",
+        "LoglikelihoodDataset",
+        "GenerativeTaskDataset",
+        "GenerativeTaskDatasetNanotron",
+        "GenDistributedSampler"
+      ],
+      "public_functions": [
+        {
+          "name": "init_split_limits",
+          "arg_count": 2,
+          "has_docstring": false
+        },
+        {
+          "name": "get_original_order",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "splits_iterator",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "init_split_limits",
+          "arg_count": 2,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/main_accelerate.py",
+      "summary_docstring": "",
+      "lines": 156,
+      "cyclomatic_branches": 4,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "accelerate",
+          "arg_count": 20,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/lighteval",
+      "rel_path": "external_workspace/lighteval/src/lighteval/main_baseline.py",
+      "summary_docstring": "",
+      "lines": 94,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "baseline",
+          "arg_count": 6,
+          "has_docstring": true
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/async-chat.py",
+      "summary_docstring": "",
+      "lines": 20,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/async-generate.py",
+      "summary_docstring": "",
+      "lines": 16,
+      "cyclomatic_branches": 2,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/async-structured-outputs.py",
+      "summary_docstring": "",
+      "lines": 34,
+      "cyclomatic_branches": 1,
+      "classes": [
+        "FriendInfo",
+        "FriendList"
+      ],
+      "public_functions": [
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/async-tools.py",
+      "summary_docstring": "",
+      "lines": 94,
+      "cyclomatic_branches": 5,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "add_two_numbers",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "subtract_two_numbers",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
+          "name": "main",
+          "arg_count": 0,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/chat-logprobs.py",
+      "summary_docstring": "",
+      "lines": 31,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "print_logprobs",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/chat-stream.py",
+      "summary_docstring": "",
+      "lines": 11,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/chat-with-history.py",
+      "summary_docstring": "",
+      "lines": 35,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/chat.py",
+      "summary_docstring": "",
+      "lines": 11,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/create.py",
+      "summary_docstring": "",
+      "lines": 10,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/embed.py",
+      "summary_docstring": "",
+      "lines": 4,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/fill-in-middle.py",
+      "summary_docstring": "",
+      "lines": 22,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/generate-image.py",
+      "summary_docstring": "",
+      "lines": 18,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/generate-logprobs.py",
+      "summary_docstring": "",
+      "lines": 24,
+      "cyclomatic_branches": 3,
+      "classes": [],
+      "public_functions": [
+        {
+          "name": "print_logprobs",
+          "arg_count": 2,
+          "has_docstring": false
+        }
+      ]
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/generate-stream.py",
+      "summary_docstring": "",
+      "lines": 4,
+      "cyclomatic_branches": 1,
+      "classes": [],
+      "public_functions": []
+    },
+    {
+      "package": "external_workspace/ollama-python",
+      "rel_path": "external_workspace/ollama-python/examples/generate.py",
+      "summary_docstring": "",
+      "lines": 4,
+      "cyclomatic_branches": 0,
+      "classes": [],
+      "public_functions": []
     }
   ]
 }
