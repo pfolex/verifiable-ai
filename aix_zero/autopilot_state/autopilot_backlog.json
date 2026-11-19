@@ -34,9 +34,11 @@
       "backlog_id": "AIX-BACKLOG-04-META_RLVR_GRPO_TRAINER",
       "domain": "META_RLVR_GRPO_TRAINER",
       "title": "[AIX-BACKLOG-04-META_RLVR_GRPO_TRAINER] Autonomous mastery & held-out validation gate for META_RLVR_GRPO_TRAINER",
-      "status": "OPEN",
+      "status": "COMPLETED",
       "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
-      "github_issue_url": null
+      "github_issue_url": null,
+      "completed_in_cycle": 33,
+      "heldout_val_post_loss": 3.70737
     },
     {
       "backlog_id": "AIX-BACKLOG-05-META_FLASH_ATTENTION_TILING",

@@ -10,9 +10,14 @@ from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
     ElasticLoRAAdapterBank,
     META_AI_EXPERT_DOMAINS,
+    analyze_python_code_quality_and_ast,
     build_meta_ai_self_improvement_curriculum,
+    detect_python_antipatterns_ast,
+    grade_and_merge_python_patches,
+    refactor_and_verify_python_code,
     reflect_and_repair_rollout,
     scan_open_source_ai_codebase_patterns,
+    solve_python_repo_task_and_emit_diff,
     synthesize_peer_ai_improvement_prompt,
     verify_r1_reasoning_trace,
 )
@@ -59,8 +64,10 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertGreater(res1["grpo_positive_trajectories"], 0)
             self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 16)
+            self.assertEqual(len(res2["exported_meta_shards"]), 20)
             self.assertEqual(res1["swe_patch_verified_count"], res1["swe_patch_total_count"])
+            self.assertTrue(res1["python_refactor_verified"])
+            self.assertTrue(res1["repo_task_execute_routed_request_verified"])
             self.assertEqual(res1["arena_overall_accuracy"], 1.0)
             self.assertGreater(res1["streamed_hf_verified_count"], 0)
             self.assertIn("resolved_backlog_item", res1)
@@ -73,6 +80,20 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertTrue((tdir / "frontier_arena_scorecard.json").exists())
             self.assertTrue((tdir / "peer_ai_coaching_pack.json").exists())
             self.assertTrue((tdir / "autopilot_live.json").exists())
+
+            # Verify Master Python AST/bytecode analyzer, anti-pattern detector, refactorer, and repo-task solver
+            py_qual = analyze_python_code_quality_and_ast("def add(a: int, b: int) -> int:\n    return a + b\n")
+            self.assertTrue(py_qual["syntax_valid"])
+            self.assertEqual(py_qual["type_annotation_ratio"], 1.0)
+            anti = detect_python_antipatterns_ast("def bad(x=[]):\n    try:\n        return 1/0\n    except:\n        return 0\n")
+            self.assertEqual(anti["antipattern_count"], 3)
+            ref_res = refactor_and_verify_python_code()
+            self.assertEqual(ref_res["post_refactor_antipatterns"], 0)
+            self.assertTrue(ref_res["unit_tests_passed"])
+            rt_res = solve_python_repo_task_and_emit_diff()
+            self.assertTrue(rt_res["all_contract_checks_passed"])
+            gm_res = grade_and_merge_python_patches()
+            self.assertTrue(gm_res["collaborative_merged_patch_passed"])
 
             # Verify ElasticLoRAAdapterBank dynamic rank expansion (`GROWTH-01`)
             eb = ElasticLoRAAdapterBank(d_model=128, d_ff=128, initial_rank=4)
@@ -107,7 +128,7 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertTrue(push_plan["dry_run"])
             self.assertEqual(len(push_plan["commands"]), 3)
 
-            # Verify all 12 Phase-II, Phase-III & Phase-IV domains via symbolic query (`OSS-01`, `ELASTIC-02`, `FRONTIER-01`)
+            # Verify all 16 Phase-II, Phase-III, Phase-IV & Phase-V domains via symbolic query
             for prompt_str, expected_dom, expected_ans in [
                 ("Q:MetaFlash:seq_len=2048;tile_block=128->io_reduction?", "META_FLASH_ATTENTION_TILING", "<ans>16</ans>"),
                 ("Q:MetaSpec:accepted=3;window=4->accept_ratio?", "META_SPECULATIVE_DECODING", "<ans>3/4</ans>"),
@@ -121,6 +142,10 @@ class MetaAIAutopilotTests(unittest.TestCase):
                 ("Q:MetaLenR1:acc=1;used_toks=200;max_toks=1000->len_reward?", "META_OPENR1_LENGTH_PENALTY_REWARD", "<ans>4/5</ans>"),
                 ("Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?", "META_DSPY_MIPRO_PROMPT_OPT", "<ans>7/8</ans>"),
                 ("Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?", "META_SWE_PATCH_TEST_COVERAGE", "<ans>15/16</ans>"),
+                ("Q:MetaPyAST:branches=5;functions=2->cyclomatic_ratio?", "META_PYTHON_AST_COMPLEXITY", "<ans>3</ans>"),
+                ("Q:MetaPyAlgo:hash_ops=8;scan_ops=64->speedup_ratio?", "META_PYTHON_ALGORITHMIC_BIG_O", "<ans>8</ans>"),
+                ("Q:MetaPyTorch:ckpt_layers=4;total_layers=16->mem_ratio?", "META_PYTORCH_TENSOR_MEMORY_STRIDES", "<ans>1/4</ans>"),
+                ("Q:MetaPyAsync:seq_ms=120;async_ms=30->concurrency_gain?", "META_PYTHON_TYPE_CONCURRENCY_ASYNC", "<ans>4</ans>"),
             ]:
                 q_dom = ctrl.query_evolving_meta_ai(prompt_str, use_alu=True)
                 self.assertEqual(q_dom["routed_domain"], expected_dom)

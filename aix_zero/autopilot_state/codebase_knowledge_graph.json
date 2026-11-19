@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "knowledge_graph_sha256": "6b7ab6a38db4009c814e72896df6725ce13a81563c2218b9ed75a4bbb119f63c",
+  "knowledge_graph_sha256": "65dae844456d019332586102e5052d1cb529bd55105c396460cdff81d3de1bfd",
   "indexed_package_or_repo_count": 17,
   "indexed_module_count": 194,
-  "total_functions_indexed": 1110,
+  "total_functions_indexed": 1120,
   "total_classes_indexed": 160,
   "external_frontier_catalog_count": 10,
   "modules": [
@@ -50,8 +50,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/aix_ctl.py",
       "summary_docstring": "AIX-Zero Autopilot Control CLI (`aix_zero/aix_ctl.py`)",
-      "lines": 215,
-      "cyclomatic_branches": 19,
+      "lines": 243,
+      "cyclomatic_branches": 23,
       "classes": [],
       "public_functions": [
         {
@@ -65,8 +65,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/architecture.py",
       "summary_docstring": "AIX-Zero v4 Neural Network Architecture written 100% from scratch in PyTorch.",
-      "lines": 903,
-      "cyclomatic_branches": 106,
+      "lines": 909,
+      "cyclomatic_branches": 108,
       "classes": [
         "AIXZeroConfig",
         "RMSNorm",
@@ -646,8 +646,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/meta_ai_autopilot.py",
       "summary_docstring": "AIX Meta-AI Autonomous Self-Improvement Engine (`aix_zero/meta_ai_autopilot.py`)",
-      "lines": 2708,
-      "cyclomatic_branches": 206,
+      "lines": 3168,
+      "cyclomatic_branches": 232,
       "classes": [
         "ElasticLoRAAdapterBank",
         "AutonomousSelfImprovementController"
@@ -709,22 +709,22 @@
           "has_docstring": true
         },
         {
-          "name": "apply_ties_dare_parameter_delta",
-          "arg_count": 2,
+          "name": "build_python_mastery_coding_curriculum",
+          "arg_count": 1,
           "has_docstring": true
         },
         {
-          "name": "verify_r1_reasoning_trace",
-          "arg_count": 2,
+          "name": "detect_python_antipatterns_ast",
+          "arg_count": 1,
           "has_docstring": true
         },
         {
-          "name": "reflect_and_repair_rollout",
-          "arg_count": 3,
+          "name": "analyze_python_code_quality_and_ast",
+          "arg_count": 1,
           "has_docstring": true
         },
         {
-          "name": "build_executable_code_synthesis_tasks",
+          "name": "refactor_and_verify_python_code",
           "arg_count": 1,
           "has_docstring": true
         }
@@ -910,8 +910,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/sparse_cartridge_bank.py",
       "summary_docstring": "Versioned storage and explicit installation of existing routed expert snapshots.",
-      "lines": 914,
-      "cyclomatic_branches": 112,
+      "lines": 988,
+      "cyclomatic_branches": 126,
       "classes": [
         "SparseExpertCartridgeBank",
         "DeviceResidentExpertSlotManager"
@@ -988,8 +988,8 @@
           "has_docstring": true
         },
         {
-          "name": "cleanup_unreferenced_shards",
-          "arg_count": 1,
+          "name": "execute_routed_request",
+          "arg_count": 4,
           "has_docstring": true
         }
       ]

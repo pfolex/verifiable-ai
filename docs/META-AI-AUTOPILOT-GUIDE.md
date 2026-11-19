@@ -76,6 +76,14 @@ Supported 12-Domain Meta-AI & External Open-Source Breakthrough prompt templates
     `Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?`
 16. **Autonomous SWE Bug-Fix Patch Verification Coverage (`META_SWE_PATCH_TEST_COVERAGE`):**
     `Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?`
+17. **Python AST Cyclomatic Complexity & Symbol Density (`META_PYTHON_AST_COMPLEXITY`):**
+    `Q:MetaPyAST:branches=5;functions=2->cyclomatic_ratio?`
+18. **Python Algorithmic Big-O & Hash/Memoization Speedup (`META_PYTHON_ALGORITHMIC_BIG_O`):**
+    `Q:MetaPyAlgo:hash_ops=8;scan_ops=64->speedup_ratio?`
+19. **PyTorch Tensor Contiguous Memory & Activation Checkpointing (`META_PYTORCH_TENSOR_MEMORY_STRIDES`):**
+    `Q:MetaPyTorch:ckpt_layers=4;total_layers=16->mem_ratio?`
+20. **Python Asyncio, Contextlib & Concurrency Throughput (`META_PYTHON_TYPE_CONCURRENCY_ASYNC`):**
+    `Q:MetaPyAsync:seq_ms=120;async_ms=30->concurrency_gain?`
 
 ### F. Grade & Coach Another Conversing AI (`coach` & `peer-session`)
 Evaluates a peer AI's `<think>...</think><ans>...</ans>` response against the deterministic reference verifier (`verify_r1_reasoning_trace`) and generates a targeted corrective coaching prompt:
@@ -104,10 +112,18 @@ Streams micro-batches over HTTPS from Hugging Face (`open-r1/OpenR1-Math-220k`, 
   --limit 4
 ```
 
-### I. Run the 16-Domain Frontier Benchmark Arena (`arena`)
-Benchmarks AIX across all 16 Meta-AI & External Open-Source domains plus autonomous SWE code-patching tasks and writes `aix_zero/autopilot_state/frontier_arena_scorecard.json`:
+### I. Run the 20-Domain Frontier Benchmark Arena (`arena`)
+Benchmarks AIX across all 20 Meta-AI, External Open-Source & Master Python domains plus autonomous SWE code-patching tasks and writes `aix_zero/autopilot_state/frontier_arena_scorecard.json`:
 ```bash
 /Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl arena
+```
+
+### J. Master Python & PyTorch Code Analyzer, Repo-Task Solver & Patch Grader (`py-analyze`, `solve-task`, `grade-patch`)
+Inspect Python files or snippets with Python's `ast` and `dis` (bytecode disassembler) modules, verify `SparseExpertCartridgeBank.execute_routed_request` against all routed-request contract invariants, or grade collaborative patches:
+```bash
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl py-analyze --file aix_zero/sparse_cartridge_bank.py
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl solve-task
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl grade-patch
 ```
 
 ---

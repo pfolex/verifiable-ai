@@ -18,7 +18,7 @@ import re
 import tempfile
 import threading
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 from safetensors.torch import load, save
@@ -336,6 +336,7 @@ class SparseExpertCartridgeBank:
 
         was_training = model.training
         prev_dispatch_mode = moe.dispatch_mode
+        prev_forced_expert = getattr(moe, 'forced_expert_index', None)
         saved_slot_state = {
             k: v.detach().clone()
             for k, v in moe.experts[target_slot].state_dict().items()
@@ -360,6 +361,7 @@ class SparseExpertCartridgeBank:
                         moe.router.bias.fill_(-1e9)
                         moe.router.bias[target_slot] = 1e9
                 moe.top_k = 1
+                moe.forced_expert_index = target_slot
             yield install_info
         finally:
             with torch.no_grad():
@@ -369,6 +371,7 @@ class SparseExpertCartridgeBank:
                     moe.router.bias.copy_(saved_router_bias)
             moe.top_k = saved_top_k
             moe.dispatch_mode = prev_dispatch_mode
+            moe.forced_expert_index = prev_forced_expert
             model.train(was_training)
             model._active_specialist_session = False
 
@@ -436,6 +439,31 @@ class SparseExpertCartridgeBank:
             if lock_path.exists():
                 lock_path.unlink()
 
+    def _resolve_domain_from_prompt(self, prompt: str, cartridges: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[Dict[str, Any]]]:
+        s = prompt.strip() if isinstance(prompt, str) else ''
+        m = re.match(r'^Q:([A-Za-z0-9_]+):', s)
+        if not m:
+            return None, None, None
+        raw_tag = m.group(1)
+        upper_tag = raw_tag.upper()
+        if raw_tag in cartridges and isinstance(cartridges[raw_tag], dict):
+            return raw_tag, upper_tag, cartridges[raw_tag]
+        if upper_tag in cartridges and isinstance(cartridges[upper_tag], dict):
+            return upper_tag, upper_tag, cartridges[upper_tag]
+        for dom, meta in cartridges.items():
+            if isinstance(dom, str) and dom.upper() == upper_tag and isinstance(meta, dict):
+                return dom, dom, meta
+        full_prefix_lower = f'q:{raw_tag.lower()}:'
+        prefix_matches = [
+            (dom, meta)
+            for dom, meta in cartridges.items()
+            if isinstance(meta, dict) and str(meta.get('prefix', '')).strip().lower() == full_prefix_lower
+        ]
+        if len(prefix_matches) == 1:
+            dom, meta = prefix_matches[0]
+            return dom, dom, meta
+        return None, upper_tag, None
+
     def route_explicit_task_schema(self, prompt: str) -> Dict[str, Any]:
         """Deterministic explicit task router (`EXPERT-05` / Issue #92).
 
@@ -443,9 +471,16 @@ class SparseExpertCartridgeBank:
         Unknown, malformed, or unpromoted (`REJECTED` / `NOT_EVALUATED_SNAPSHOT`) domains fall back
         to the base model without activating a specialist.
         """
-        s = prompt.strip() if isinstance(prompt, str) else ''
-        m = re.match(r'^Q:([A-Za-z0-9_]+):', s)
-        if not m:
+        try:
+            manifest = self.get_manifest()
+        except Exception:
+            manifest = {}
+        cartridges = manifest.get('cartridges', {}) if isinstance(manifest, dict) else {}
+        if not isinstance(cartridges, dict):
+            cartridges = {}
+
+        matched_domain, display_domain, entry = self._resolve_domain_from_prompt(prompt, cartridges)
+        if display_domain is None:
             return {
                 'specialist_activated': False,
                 'selected_domain': None,
@@ -453,14 +488,10 @@ class SparseExpertCartridgeBank:
                 'reason': 'unrecognized_or_malformed_task_prefix',
             }
 
-        prefix_tag = m.group(1).upper()
-        manifest = self.get_manifest()
-        cartridges = manifest.get('cartridges', {})
-        entry = cartridges.get(prefix_tag)
-        if not entry:
+        if not entry or matched_domain is None:
             return {
                 'specialist_activated': False,
-                'selected_domain': prefix_tag,
+                'selected_domain': display_domain,
                 'route_target': 'BASE_MODEL_DEFAULT',
                 'reason': 'no_registered_cartridge_for_prefix',
             }
@@ -469,18 +500,61 @@ class SparseExpertCartridgeBank:
         if status != 'APPROVED_ACTIVE':
             return {
                 'specialist_activated': False,
-                'selected_domain': prefix_tag,
+                'selected_domain': matched_domain,
                 'route_target': 'BASE_MODEL_DEFAULT',
                 'reason': f'cartridge_not_promoted_{status}',
             }
 
-        self.validate_specialist_provenance(entry)
+        prov = entry.get('provenance', 'existing_routed_expert_snapshot')
+        if prov not in self.VALID_PROVENANCE_TYPES:
+            raise ValueError(f'Invalid cartridge provenance type: {prov!r}')
+        if prov == 'frozen_v11_single_expert_training_candidate':
+            self.validate_specialist_provenance(entry)
         return {
             'specialist_activated': True,
-            'selected_domain': prefix_tag,
+            'selected_domain': matched_domain,
             'route_target': entry['cartridge_file'],
             'reason': 'approved_active_specialist_matched',
         }
+
+    def execute_routed_request(
+        self,
+        model: AIXZeroModel,
+        prompt: str,
+        generate,
+        *,
+        active_base_checkpoint_sha256: Optional[str] = None,
+    ):
+        """Route approved `Q:<domain>:` prompts through their matching disk-backed cartridge
+        and force its registered expert slot via `temporary_specialist_session` (`REPOTASK-01` / Issue #307).
+
+        Unknown, unapproved, missing, invalid, and incompatible cartridges fall back to the base route.
+        Any exception raised by `generate(model, prompt)` propagates immediately after restoring `model`
+        without retrying `generate`.
+        """
+        try:
+            route = self.route_explicit_task_schema(prompt)
+        except Exception:
+            route = {'specialist_activated': False}
+
+        if not route.get('specialist_activated'):
+            return generate(model, prompt)
+
+        domain = route['selected_domain']
+        callback_invoked = False
+        try:
+            with self.temporary_specialist_session(
+                model,
+                domain,
+                active_base_checkpoint_sha256=active_base_checkpoint_sha256,
+                force_explicit_route=True,
+            ):
+                callback_invoked = True
+                return generate(model, prompt)
+        except Exception:
+            if callback_invoked:
+                raise
+        return generate(model, prompt)
 
     def cleanup_unreferenced_shards(
         self,

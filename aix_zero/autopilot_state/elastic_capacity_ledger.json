@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0.0",
-  "cycle_index": 32,
+  "cycle_index": 33,
   "physical_core_parameters": 817410,
   "active_routed_experts_per_token": 2,
   "total_routed_experts_in_core": 4,
-  "registered_meta_ai_shards": 16,
-  "total_cartridge_bank_parameters": 786432,
+  "registered_meta_ai_shards": 20,
+  "total_cartridge_bank_parameters": 983040,
   "current_lora_rank": 4,
   "active_lora_adapter_parameters": 12288,
-  "effective_system_parameters": 1616130,
+  "effective_system_parameters": 1812738,
   "expansion_events": []
 }

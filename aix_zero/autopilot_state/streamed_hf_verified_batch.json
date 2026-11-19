@@ -1,41 +1,41 @@
 {
   "schema_version": "1.0.0",
   "dataset": "open-r1/OpenR1-Math-220k",
-  "source_mode": "live_huggingface_https_stream",
+  "source_mode": "offline_deterministic_fallback",
   "streamed_row_count": 4,
   "verified_retained_count": 4,
   "verification_pass_rate": 1.0,
   "items": [
     {
       "dataset": "open-r1/OpenR1-Math-220k",
-      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
-      "prompt": "Q:MetaLenR1:acc=1;used_toks=100;max_toks=1000->len_reward?",
-      "completion": "<think>pen=100/1000=1/10;rew=1-1/10=9/10</think><ans>9/10</ans>",
-      "gold": "9/10",
+      "domain": "META_SCALING_OPTIMIZER",
+      "prompt": "Q:MetaScale:C=205884;N=258->D_opt?",
+      "completion": "<think>6*258=1548;205884/1548=133</think><ans>133</ans>",
+      "gold": "133",
       "r1_composite_reward": 1.0
     },
     {
       "dataset": "open-r1/OpenR1-Math-220k",
-      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
-      "prompt": "Q:MetaLenR1:acc=1;used_toks=150;max_toks=1000->len_reward?",
-      "completion": "<think>pen=150/1000=3/20;rew=1-3/20=17/20</think><ans>17/20</ans>",
-      "gold": "17/20",
+      "domain": "META_SCALING_OPTIMIZER",
+      "prompt": "Q:MetaScale:C=209040;N=260->D_opt?",
+      "completion": "<think>6*260=1560;209040/1560=134</think><ans>134</ans>",
+      "gold": "134",
       "r1_composite_reward": 1.0
     },
     {
       "dataset": "open-r1/OpenR1-Math-220k",
-      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
-      "prompt": "Q:MetaLenR1:acc=1;used_toks=200;max_toks=1000->len_reward?",
-      "completion": "<think>pen=200/1000=1/5;rew=1-1/5=4/5</think><ans>4/5</ans>",
-      "gold": "4/5",
+      "domain": "META_SCALING_OPTIMIZER",
+      "prompt": "Q:MetaScale:C=212220;N=262->D_opt?",
+      "completion": "<think>6*262=1572;212220/1572=135</think><ans>135</ans>",
+      "gold": "135",
       "r1_composite_reward": 1.0
     },
     {
       "dataset": "open-r1/OpenR1-Math-220k",
-      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
-      "prompt": "Q:MetaLenR1:acc=1;used_toks=250;max_toks=1000->len_reward?",
-      "completion": "<think>pen=250/1000=1/4;rew=1-1/4=3/4</think><ans>3/4</ans>",
-      "gold": "3/4",
+      "domain": "META_SCALING_OPTIMIZER",
+      "prompt": "Q:MetaScale:C=215424;N=264->D_opt?",
+      "completion": "<think>6*264=1584;215424/1584=136</think><ans>136</ans>",
+      "gold": "136",
       "r1_composite_reward": 1.0
     }
   ]

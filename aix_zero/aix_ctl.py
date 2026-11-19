@@ -31,9 +31,12 @@ from typing import List, Optional
 from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
     DEFAULT_STATE_DIR,
+    analyze_python_code_quality_and_ast,
     export_peer_ai_coaching_pack,
+    grade_and_merge_python_patches,
     harvest_external_open_source_projects,
     normalize_and_verify_streamed_rows,
+    solve_python_repo_task_and_emit_diff,
     stream_huggingface_open_source_rows,
 )
 
@@ -94,8 +97,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_stream.add_argument("--limit", type=int, default=4, help="Number of rows to stream")
     p_stream.add_argument("--offline", action="store_true", help="Force deterministic offline fallback")
 
-    p_arena = sub.add_parser("arena", help="Run 16-Domain Frontier Benchmark Arena & SWE patch verification scorecard")
+    p_arena = sub.add_parser("arena", help="Run 20-Domain Frontier Benchmark Arena & SWE patch verification scorecard")
     p_arena.add_argument("--cycle", type=int, default=1, help="Cycle index for benchmark generation")
+
+    p_py = sub.add_parser("py-analyze", help="Analyze Python source file or inline snippet with AST & bytecode disassembler")
+    p_py.add_argument("--file", default=None, help="Path to Python file to analyze")
+    p_py.add_argument("--code", default=None, help="Inline Python code string to analyze")
+
+    sub.add_parser("solve-task", help="Verify SparseExpertCartridgeBank.execute_routed_request contract and emit unified diff")
+    sub.add_parser("grade-patch", help="Grade AIX, peer, and collaborative patches on the routed-request contract suite")
 
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
@@ -205,6 +215,24 @@ def main(argv: Optional[List[str]] = None) -> int:
             cycle_index=args.cycle,
             output_path=ctrl.state_dir / "frontier_arena_scorecard.json",
         )
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "py-analyze":
+        if args.file:
+            res = analyze_python_code_quality_and_ast(args.file, is_file_path=True)
+        else:
+            res = analyze_python_code_quality_and_ast(args.code or "def f(x: int) -> int:\n    return x + 1\n", is_file_path=False)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "solve-task":
+        res = solve_python_repo_task_and_emit_diff(ctrl.repo_root)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "grade-patch":
+        res = grade_and_merge_python_patches(ctrl.repo_root)
         print(json.dumps(res, indent=2))
         return 0
 
