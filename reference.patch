@@ -1,0 +1,40 @@
+diff --git a/aix_zero/sparse_cartridge_bank.py b/aix_zero/sparse_cartridge_bank.py
+index eacef2a..83cf0b2 100644
+--- a/aix_zero/sparse_cartridge_bank.py
++++ b/aix_zero/sparse_cartridge_bank.py
+@@ -482,6 +482,35 @@ class SparseExpertCartridgeBank:
+             'reason': 'approved_active_specialist_matched',
+         }
+ 
++    def execute_routed_request(
++        self,
++        model: AIXZeroModel,
++        prompt: str,
++        generate,
++        *,
++        active_base_checkpoint_sha256: Optional[str] = None,
++    ) -> Any:
++        """Generate once via the approved cartridge or the restored base model.
++
++        The caller must hold exclusive access to the model throughout the request.
++        """
++        with contextlib.ExitStack() as session:
++            try:
++                route = self.route_explicit_task_schema(prompt)
++                if route['specialist_activated']:
++                    info = session.enter_context(self.temporary_specialist_session(
++                        model,
++                        route['selected_domain'],
++                        active_base_checkpoint_sha256=active_base_checkpoint_sha256,
++                        force_explicit_route=False,
++                    ))
++                    moe = _moe(model)
++                    session.callback(setattr, moe, 'forced_expert_index', moe.forced_expert_index)
++                    moe.forced_expert_index = info['slot']
++            except (OSError, ValueError, TypeError, KeyError, AttributeError):
++                session.close()
++            return generate(model, prompt)
++
+     def cleanup_unreferenced_shards(
+         self,
+         *,
