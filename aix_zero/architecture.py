@@ -541,7 +541,13 @@ def evaluate_inflight_subexpr(
 
     # Carry accumulator from the immediately preceding step
     prev_rhs = prev_steps[-1].split("=")[-1].split("->")[-1].strip()
-    acc_val = int(last_alu_result) if last_alu_result is not None else int(prev_rhs)
+    try:
+        acc_val = int(last_alu_result) if last_alu_result is not None else int(prev_rhs)
+    except ValueError:
+        m_digits = re.findall(r"\-?\d+", prev_rhs)
+        if not m_digits:
+            return None
+        acc_val = int(m_digits[-1])
 
     # Relational check in Step k (or prompted relational check `>...`)
     m_rel = re.match(r"^(\-?\d+)>(\-?\d+)\->$", curr_seg)
