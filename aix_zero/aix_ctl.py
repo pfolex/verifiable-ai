@@ -105,7 +105,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_stream.add_argument("--limit", type=int, default=4, help="Number of rows to stream")
     p_stream.add_argument("--offline", action="store_true", help="Force deterministic offline fallback")
 
-    p_arena = sub.add_parser("arena", help="Run 20-Domain Frontier Benchmark Arena & SWE patch verification scorecard")
+    p_arena = sub.add_parser("arena", help="Score neural diagnostic probes with symbolic controls and reference SWE fixture results")
     p_arena.add_argument("--cycle", type=int, default=1, help="Cycle index for benchmark generation")
 
     p_py = sub.add_parser("py-analyze", help="Analyze Python source file or inline snippet with AST & bytecode disassembler")
