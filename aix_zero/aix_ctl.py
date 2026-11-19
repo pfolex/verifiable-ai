@@ -24,6 +24,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import subprocess
 import sys
 import time
 from typing import List, Optional
@@ -62,11 +63,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_once.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
 
     p_start = sub.add_parser("start", help="Run unattended self-improvement loop until stopped")
-    p_start.add_argument("--max-cycles", type=int, default=3, help="Maximum cycles before pausing")
-    p_start.add_argument("--interval-seconds", type=float, default=2.0, help="Sleep interval between cycles")
+    p_start.add_argument("--max-cycles", type=int, default=1000, help="Maximum cycles before pausing")
+    p_start.add_argument("--interval-seconds", "--interval", dest="interval_seconds", type=float, default=2.0, help="Sleep interval between cycles")
     p_start.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
     p_start.add_argument("--sync-github", action="store_true", help="Open and close auditable GitHub issues")
     p_start.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
+
+    p_daemon = sub.add_parser("start-daemon", help="Launch detached background self-improvement daemon and return immediately")
+    p_daemon.add_argument("--max-cycles", type=int, default=1000, help="Maximum cycles before pausing")
+    p_daemon.add_argument("--interval-seconds", "--interval", dest="interval_seconds", type=float, default=120.0, help="Sleep interval between cycles")
+    p_daemon.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
+    p_daemon.add_argument("--sync-github", action="store_true", help="Open and close auditable GitHub issues")
+    p_daemon.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
 
     p_query = sub.add_parser("query", help="Query the evolving v12 Meta-AI model on a math or Meta-AI prompt")
     p_query.add_argument("--prompt", required=True, help="Prompt string (e.g. 'Q:MetaScale:C=144;N=4->D_opt?' or '14*23=')")
@@ -105,7 +113,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_py.add_argument("--code", default=None, help="Inline Python code string to analyze")
 
     sub.add_parser("solve-task", help="Verify SparseExpertCartridgeBank.execute_routed_request contract and emit unified diff")
-    sub.add_parser("grade-patch", help="Grade AIX, peer, and collaborative patches on the routed-request contract suite")
+    p_grade = sub.add_parser("grade-patch", help="Grade AIX, peer, and collaborative patches on the routed-request contract suite")
+    p_grade.add_argument("--aix", default=None, help="Optional path to AIX patch file")
+    p_grade.add_argument("--peer", default=None, help="Optional path to peer patch file")
+    p_grade.add_argument("--collaborative", default=None, help="Optional path to collaborative patch file")
+    p_grade.add_argument("--reference", default=None, help="Optional path to reference patch file")
 
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
@@ -156,6 +168,54 @@ def main(argv: Optional[List[str]] = None) -> int:
             if completed < args.max_cycles and not ctrl.should_stop():
                 time.sleep(max(0.0, float(args.interval_seconds)))
         print(json.dumps(ctrl.get_status(), indent=2))
+        return 0
+
+    if args.command == "start-daemon":
+        ctrl.clear_stop_sentinel()
+        ctrl.state_dir.mkdir(parents=True, exist_ok=True)
+        log_path = ctrl.state_dir / "autopilot_daemon.log"
+        cmd = [
+            sys.executable,
+            "-m",
+            "aix_zero.aix_ctl",
+            "--state-dir",
+            str(ctrl.state_dir),
+            "start",
+            "--max-cycles",
+            str(args.max_cycles),
+            "--interval-seconds",
+            str(args.interval_seconds),
+            "--threads",
+            str(args.threads),
+        ]
+        if args.sync_github:
+            cmd.append("--sync-github")
+        if args.auto_push:
+            cmd.append("--auto-push")
+        with open(log_path, "a", encoding="utf-8") as log_f:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(ctrl.repo_root),
+                stdout=log_f,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+            )
+        ctrl.pid_path.write_text(str(proc.pid), encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "daemon_started": True,
+                    "pid": proc.pid,
+                    "max_cpu_threads": args.threads,
+                    "interval_seconds": args.interval_seconds,
+                    "sync_github": bool(args.sync_github),
+                    "auto_push": bool(args.auto_push),
+                    "log_path": str(log_path),
+                    "stop_command": f"{sys.executable} -m aix_zero.aix_ctl stop",
+                },
+                indent=2,
+            )
+        )
         return 0
 
     if args.command == "query":
