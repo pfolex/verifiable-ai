@@ -8,6 +8,7 @@ import unittest
 from aix_zero.aix_ctl import main as aix_ctl_main
 from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
+    ElasticLoRAAdapterBank,
     META_AI_EXPERT_DOMAINS,
     build_meta_ai_self_improvement_curriculum,
     reflect_and_repair_rollout,
@@ -58,13 +59,29 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertGreater(res1["grpo_positive_trajectories"], 0)
             self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 12)
+            self.assertEqual(len(res2["exported_meta_shards"]), 16)
+            self.assertEqual(res1["swe_patch_verified_count"], res1["swe_patch_total_count"])
+            self.assertEqual(res1["arena_overall_accuracy"], 1.0)
+            self.assertGreater(res1["streamed_hf_verified_count"], 0)
             self.assertIn("resolved_backlog_item", res1)
             self.assertTrue((tdir / "codebase_knowledge_graph.json").exists())
             self.assertTrue((tdir / "external_open_source_harvest.json").exists())
             self.assertTrue((tdir / "harvested_open_source_curriculum.json").exists())
+            self.assertTrue((tdir / "streamed_hf_verified_batch.json").exists())
+            self.assertTrue((tdir / "elastic_capacity_ledger.json").exists())
+            self.assertTrue((tdir / "episodic_verified_memory.json").exists())
+            self.assertTrue((tdir / "frontier_arena_scorecard.json").exists())
             self.assertTrue((tdir / "peer_ai_coaching_pack.json").exists())
             self.assertTrue((tdir / "autopilot_live.json").exists())
+
+            # Verify ElasticLoRAAdapterBank dynamic rank expansion (`GROWTH-01`)
+            eb = ElasticLoRAAdapterBank(d_model=128, d_ff=128, initial_rank=4)
+            e1 = eb.maybe_expand_rank(True, cycle_index=1)
+            self.assertTrue(e1["expanded"])
+            self.assertEqual(e1["current_rank"], 8)
+            e2 = eb.maybe_expand_rank(True, cycle_index=2)
+            self.assertTrue(e2["expanded"])
+            self.assertEqual(e2["current_rank"], 16)
 
             # Verify ElasticBrain plateau detection (`ELASTIC-01`)
             plat_yes = ctrl.detect_domain_plateaus(window=4, min_improvement=0.05, loss_series_override=[6.10, 6.09, 6.08, 6.08])
@@ -90,7 +107,7 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertTrue(push_plan["dry_run"])
             self.assertEqual(len(push_plan["commands"]), 3)
 
-            # Verify all 8 Phase-II & Phase-III external open-source domains via symbolic query (`OSS-01` & `ELASTIC-02`)
+            # Verify all 12 Phase-II, Phase-III & Phase-IV domains via symbolic query (`OSS-01`, `ELASTIC-02`, `FRONTIER-01`)
             for prompt_str, expected_dom, expected_ans in [
                 ("Q:MetaFlash:seq_len=2048;tile_block=128->io_reduction?", "META_FLASH_ATTENTION_TILING", "<ans>16</ans>"),
                 ("Q:MetaSpec:accepted=3;window=4->accept_ratio?", "META_SPECULATIVE_DECODING", "<ans>3/4</ans>"),
@@ -100,6 +117,10 @@ class MetaAIAutopilotTests(unittest.TestCase):
                 ("Q:MetaPaged:tokens=50;blocks=4;block_size=16->utilization?", "META_VLLM_PAGED_ATTENTION", "<ans>25/32</ans>"),
                 ("Q:MetaRLOO:r1=1;other_sum=1;k=4->rloo_advantage?", "META_TRL_RLOO_LEAVE_ONE_OUT", "<ans>2/3</ans>"),
                 ("Q:MetaMerge:keep_num=3;keep_den=4;topk_num=1;topk_den=5->effective_density?", "META_MERGEKIT_TIES_DARE", "<ans>3/20</ans>"),
+                ("Q:MetaMuon:muon_states=1;adam_states=2->state_ratio?", "META_MUON_ORTHOGONAL_OPTIMIZER", "<ans>1/2</ans>"),
+                ("Q:MetaLenR1:acc=1;used_toks=200;max_toks=1000->len_reward?", "META_OPENR1_LENGTH_PENALTY_REWARD", "<ans>4/5</ans>"),
+                ("Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?", "META_DSPY_MIPRO_PROMPT_OPT", "<ans>7/8</ans>"),
+                ("Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?", "META_SWE_PATCH_TEST_COVERAGE", "<ans>15/16</ans>"),
             ]:
                 q_dom = ctrl.query_evolving_meta_ai(prompt_str, use_alu=True)
                 self.assertEqual(q_dom["routed_domain"], expected_dom)

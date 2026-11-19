@@ -33,6 +33,8 @@ from aix_zero.meta_ai_autopilot import (
     DEFAULT_STATE_DIR,
     export_peer_ai_coaching_pack,
     harvest_external_open_source_projects,
+    normalize_and_verify_streamed_rows,
+    stream_huggingface_open_source_rows,
 )
 
 
@@ -85,6 +87,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_peer.add_argument("--endpoint", default=None, help="Optional Ollama or OpenAI-compatible HTTP endpoint URL")
     p_peer.add_argument("--model", default="simulated-peer-ai", help="Peer AI model name")
     p_peer.add_argument("--max-prompts", type=int, default=4, help="Number of prompts to evaluate and coach")
+
+    p_stream = sub.add_parser("stream-hf", help="Stream and R1-verify open-source training rows from Hugging Face Datasets Server")
+    p_stream.add_argument("--dataset", default="open-r1/OpenR1-Math-220k", help="Hugging Face dataset slug")
+    p_stream.add_argument("--offset", type=int, default=0, help="Row offset")
+    p_stream.add_argument("--limit", type=int, default=4, help="Number of rows to stream")
+    p_stream.add_argument("--offline", action="store_true", help="Force deterministic offline fallback")
+
+    p_arena = sub.add_parser("arena", help="Run 16-Domain Frontier Benchmark Arena & SWE patch verification scorecard")
+    p_arena.add_argument("--cycle", type=int, default=1, help="Cycle index for benchmark generation")
 
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
@@ -171,6 +182,28 @@ def main(argv: Optional[List[str]] = None) -> int:
             endpoint_url=args.endpoint,
             model_name=args.model,
             max_prompts=args.max_prompts,
+        )
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "stream-hf":
+        raw = stream_huggingface_open_source_rows(
+            args.dataset,
+            offset=args.offset,
+            limit=args.limit,
+            allow_network=not args.offline,
+        )
+        verified = normalize_and_verify_streamed_rows(
+            raw,
+            output_path=ctrl.state_dir / "streamed_hf_verified_batch.json",
+        )
+        print(json.dumps(verified, indent=2))
+        return 0
+
+    if args.command == "arena":
+        res = ctrl.run_frontier_arena_evaluation(
+            cycle_index=args.cycle,
+            output_path=ctrl.state_dir / "frontier_arena_scorecard.json",
         )
         print(json.dumps(res, indent=2))
         return 0

@@ -1,0 +1,451 @@
+{
+  "schema_version": "1.0.0",
+  "entry_count": 89,
+  "entries": {
+    "Q:MetaScale:C=13440;N=64->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*64=384;13440/384=35</think><ans>35</ans>",
+      "gold": "35"
+    },
+    "Q:MetaScale:C=14592;N=64->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*64=384;14592/384=38</think><ans>38</ans>",
+      "gold": "38"
+    },
+    "Q:MetaScale:C=15744;N=64->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*64=384;15744/384=41</think><ans>41</ans>",
+      "gold": "41"
+    },
+    "Q:MetaScale:C=13860;N=66->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*66=396;13860/396=35</think><ans>35</ans>",
+      "gold": "35"
+    },
+    "Q:MetaScale:C=15048;N=66->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*66=396;15048/396=38</think><ans>38</ans>",
+      "gold": "38"
+    },
+    "Q:MetaScale:C=16236;N=66->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*66=396;16236/396=41</think><ans>41</ans>",
+      "gold": "41"
+    },
+    "Q:MetaScale:C=14280;N=68->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*68=408;14280/408=35</think><ans>35</ans>",
+      "gold": "35"
+    },
+    "Q:MetaScale:C=15504;N=68->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*68=408;15504/408=38</think><ans>38</ans>",
+      "gold": "38"
+    },
+    "Q:MetaScale:C=16728;N=68->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*68=408;16728/408=41</think><ans>41</ans>",
+      "gold": "41"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=128->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/128=1/128</think><ans>1/128</ans>",
+      "gold": "1/128"
+    },
+    "Q:MetaMoE:top_k=4;n_experts=128->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=4/128=1/32</think><ans>1/32</ans>",
+      "gold": "1/32"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=132->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/132=1/132</think><ans>1/132</ans>",
+      "gold": "1/132"
+    },
+    "Q:MetaMoE:top_k=4;n_experts=132->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=4/132=1/33</think><ans>1/33</ans>",
+      "gold": "1/33"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=140->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/140=1/140</think><ans>1/140</ans>",
+      "gold": "1/140"
+    },
+    "Q:MetaMoE:top_k=4;n_experts=140->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=4/140=1/35</think><ans>1/35</ans>",
+      "gold": "1/35"
+    },
+    "Q:MetaKV:n_kv=1;n_heads=32->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=1/32=1/32</think><ans>1/32</ans>",
+      "gold": "1/32"
+    },
+    "Q:MetaKV:n_kv=2;n_heads=32->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=2/32=1/16</think><ans>1/16</ans>",
+      "gold": "1/16"
+    },
+    "Q:MetaKV:n_kv=6;n_heads=32->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=6/32=3/16</think><ans>3/16</ans>",
+      "gold": "3/16"
+    },
+    "Q:MetaKV:n_kv=1;n_heads=64->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=1/64=1/64</think><ans>1/64</ans>",
+      "gold": "1/64"
+    },
+    "Q:MetaKV:n_kv=2;n_heads=64->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=2/64=1/32</think><ans>1/32</ans>",
+      "gold": "1/32"
+    },
+    "Q:MetaKV:n_kv=6;n_heads=64->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=6/64=3/32</think><ans>3/32</ans>",
+      "gold": "3/32"
+    },
+    "Q:MetaKV:n_kv=1;n_heads=128->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=1/128=1/128</think><ans>1/128</ans>",
+      "gold": "1/128"
+    },
+    "Q:MetaKV:n_kv=2;n_heads=128->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=2/128=1/64</think><ans>1/64</ans>",
+      "gold": "1/64"
+    },
+    "Q:MetaKV:n_kv=6;n_heads=128->kv_ratio?": {
+      "domain": "META_GQA_KV_SYSTEMS",
+      "completion": "<think>ratio=6/128=3/64</think><ans>3/64</ans>",
+      "gold": "3/64"
+    },
+    "Q:MetaRLVR:r=1;successes=1;group=66->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=1/66;adv=1-1/66=65/66</think><ans>65/66</ans>",
+      "gold": "65/66"
+    },
+    "Q:MetaRLVR:r=1;successes=2;group=66->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=2/66;adv=1-1/33=32/33</think><ans>32/33</ans>",
+      "gold": "32/33"
+    },
+    "Q:MetaRLVR:r=1;successes=3;group=66->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=3/66;adv=1-1/22=21/22</think><ans>21/22</ans>",
+      "gold": "21/22"
+    },
+    "Q:MetaRLVR:r=1;successes=1;group=70->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=1/70;adv=1-1/70=69/70</think><ans>69/70</ans>",
+      "gold": "69/70"
+    },
+    "Q:MetaRLVR:r=1;successes=2;group=70->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=2/70;adv=1-1/35=34/35</think><ans>34/35</ans>",
+      "gold": "34/35"
+    },
+    "Q:MetaRLVR:r=1;successes=3;group=70->grpo_advantage?": {
+      "domain": "META_RLVR_GRPO_TRAINER",
+      "completion": "<think>mean=3/70;adv=1-3/70=67/70</think><ans>67/70</ans>",
+      "gold": "67/70"
+    },
+    "Q:MetaFlash:seq_len=2304;tile_block=64->io_reduction?": {
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "completion": "<think>ratio=2304/64=36</think><ans>36</ans>",
+      "gold": "36"
+    },
+    "Q:MetaFlash:seq_len=2560;tile_block=64->io_reduction?": {
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "completion": "<think>ratio=2560/64=40</think><ans>40</ans>",
+      "gold": "40"
+    },
+    "Q:MetaFlash:seq_len=4608;tile_block=128->io_reduction?": {
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "completion": "<think>ratio=4608/128=36</think><ans>36</ans>",
+      "gold": "36"
+    },
+    "Q:MetaFlash:seq_len=5120;tile_block=128->io_reduction?": {
+      "domain": "META_FLASH_ATTENTION_TILING",
+      "completion": "<think>ratio=5120/128=40</think><ans>40</ans>",
+      "gold": "40"
+    },
+    "Q:MetaSpec:accepted=2;window=6->accept_ratio?": {
+      "domain": "META_SPECULATIVE_DECODING",
+      "completion": "<think>accept=2/6=1/3</think><ans>1/3</ans>",
+      "gold": "1/3"
+    },
+    "Q:MetaSpec:accepted=3;window=6->accept_ratio?": {
+      "domain": "META_SPECULATIVE_DECODING",
+      "completion": "<think>accept=3/6=1/2</think><ans>1/2</ans>",
+      "gold": "1/2"
+    },
+    "Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?": {
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "completion": "<think>comp=16/4=4</think><ans>4</ans>",
+      "gold": "4"
+    },
+    "Q:MetaQuant:fp16_bits=16;quant_bits=8->compression?": {
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "completion": "<think>comp=16/8=2</think><ans>2</ans>",
+      "gold": "2"
+    },
+    "Q:MetaQuant:fp16_bits=32;quant_bits=4->compression?": {
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "completion": "<think>comp=32/4=8</think><ans>8</ans>",
+      "gold": "8"
+    },
+    "Q:MetaQuant:fp16_bits=32;quant_bits=8->compression?": {
+      "domain": "META_QUANTIZATION_FP8_INT4",
+      "completion": "<think>comp=32/8=4</think><ans>4</ans>",
+      "gold": "4"
+    },
+    "Q:MetaDist:stages=4;microbatches=40->bubble_fraction?": {
+      "domain": "META_DISTRIBUTED_TP_PP_DP",
+      "completion": "<think>num=4-1=3;den=40+4-1=43;bubble=3/43=3/43</think><ans>3/43</ans>",
+      "gold": "3/43"
+    },
+    "Q:MetaDist:stages=4;microbatches=44->bubble_fraction?": {
+      "domain": "META_DISTRIBUTED_TP_PP_DP",
+      "completion": "<think>num=4-1=3;den=44+4-1=47;bubble=3/47=3/47</think><ans>3/47</ans>",
+      "gold": "3/47"
+    },
+    "Q:MetaDist:stages=6;microbatches=40->bubble_fraction?": {
+      "domain": "META_DISTRIBUTED_TP_PP_DP",
+      "completion": "<think>num=6-1=5;den=40+6-1=45;bubble=5/45=1/9</think><ans>1/9</ans>",
+      "gold": "1/9"
+    },
+    "Q:MetaDist:stages=6;microbatches=44->bubble_fraction?": {
+      "domain": "META_DISTRIBUTED_TP_PP_DP",
+      "completion": "<think>num=6-1=5;den=44+6-1=49;bubble=5/49=5/49</think><ans>5/49</ans>",
+      "gold": "5/49"
+    },
+    "Q:MetaMLA:latent=256;n_heads=32;head_dim=64->mla_ratio?": {
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "completion": "<think>full_kv=4096;ratio=256/4096=1/16</think><ans>1/16</ans>",
+      "gold": "1/16"
+    },
+    "Q:MetaMLA:latent=256;n_heads=48;head_dim=64->mla_ratio?": {
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "completion": "<think>full_kv=6144;ratio=256/6144=1/24</think><ans>1/24</ans>",
+      "gold": "1/24"
+    },
+    "Q:MetaMLA:latent=512;n_heads=32;head_dim=64->mla_ratio?": {
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "completion": "<think>full_kv=4096;ratio=512/4096=1/8</think><ans>1/8</ans>",
+      "gold": "1/8"
+    },
+    "Q:MetaMLA:latent=512;n_heads=48;head_dim=64->mla_ratio?": {
+      "domain": "META_DEEPSEEK_MLA_LATENT_KV",
+      "completion": "<think>full_kv=6144;ratio=512/6144=1/12</think><ans>1/12</ans>",
+      "gold": "1/12"
+    },
+    "Q:MetaPaged:tokens=91;blocks=6;block_size=16->utilization?": {
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "completion": "<think>cap=6*16=96;util=91/96=91/96</think><ans>91/96</ans>",
+      "gold": "91/96"
+    },
+    "Q:MetaPaged:tokens=123;blocks=8;block_size=16->utilization?": {
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "completion": "<think>cap=8*16=128;util=123/128=123/128</think><ans>123/128</ans>",
+      "gold": "123/128"
+    },
+    "Q:MetaPaged:tokens=187;blocks=6;block_size=32->utilization?": {
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "completion": "<think>cap=6*32=192;util=187/192=187/192</think><ans>187/192</ans>",
+      "gold": "187/192"
+    },
+    "Q:MetaPaged:tokens=251;blocks=8;block_size=32->utilization?": {
+      "domain": "META_VLLM_PAGED_ATTENTION",
+      "completion": "<think>cap=8*32=256;util=251/256=251/256</think><ans>251/256</ans>",
+      "gold": "251/256"
+    },
+    "Q:MetaRLOO:r1=1;other_sum=1;k=6->rloo_advantage?": {
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "completion": "<think>base=1/5;adv=1-1/5=4/5</think><ans>4/5</ans>",
+      "gold": "4/5"
+    },
+    "Q:MetaRLOO:r1=1;other_sum=2;k=6->rloo_advantage?": {
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "completion": "<think>base=2/5;adv=1-2/5=3/5</think><ans>3/5</ans>",
+      "gold": "3/5"
+    },
+    "Q:MetaRLOO:r1=1;other_sum=1;k=8->rloo_advantage?": {
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "completion": "<think>base=1/7;adv=1-1/7=6/7</think><ans>6/7</ans>",
+      "gold": "6/7"
+    },
+    "Q:MetaRLOO:r1=1;other_sum=2;k=8->rloo_advantage?": {
+      "domain": "META_TRL_RLOO_LEAVE_ONE_OUT",
+      "completion": "<think>base=2/7;adv=1-2/7=5/7</think><ans>5/7</ans>",
+      "gold": "5/7"
+    },
+    "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=7->effective_density?": {
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "completion": "<think>eff=(3/4)*(2/7)=3/14</think><ans>3/14</ans>",
+      "gold": "3/14"
+    },
+    "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=10->effective_density?": {
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "completion": "<think>eff=(3/4)*(2/10)=3/20</think><ans>3/20</ans>",
+      "gold": "3/20"
+    },
+    "Q:MetaMerge:keep_num=4;keep_den=5;topk_num=2;topk_den=7->effective_density?": {
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "completion": "<think>eff=(4/5)*(2/7)=8/35</think><ans>8/35</ans>",
+      "gold": "8/35"
+    },
+    "Q:MetaMerge:keep_num=4;keep_den=5;topk_num=2;topk_den=10->effective_density?": {
+      "domain": "META_MERGEKIT_TIES_DARE",
+      "completion": "<think>eff=(4/5)*(2/10)=4/25</think><ans>4/25</ans>",
+      "gold": "4/25"
+    },
+    "Q:MetaMuon:muon_states=1;adam_states=2->state_ratio?": {
+      "domain": "META_MUON_ORTHOGONAL_OPTIMIZER",
+      "completion": "<think>ratio=1/2=1/2</think><ans>1/2</ans>",
+      "gold": "1/2"
+    },
+    "Q:MetaMuon:muon_states=1;adam_states=4->state_ratio?": {
+      "domain": "META_MUON_ORTHOGONAL_OPTIMIZER",
+      "completion": "<think>ratio=1/4=1/4</think><ans>1/4</ans>",
+      "gold": "1/4"
+    },
+    "Q:MetaLenR1:acc=1;used_toks=100;max_toks=700->len_reward?": {
+      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
+      "completion": "<think>pen=100/700=1/7;rew=1-1/7=6/7</think><ans>6/7</ans>",
+      "gold": "6/7"
+    },
+    "Q:MetaLenR1:acc=1;used_toks=200;max_toks=700->len_reward?": {
+      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
+      "completion": "<think>pen=200/700=2/7;rew=1-2/7=5/7</think><ans>5/7</ans>",
+      "gold": "5/7"
+    },
+    "Q:MetaLenR1:acc=1;used_toks=100;max_toks=1000->len_reward?": {
+      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
+      "completion": "<think>pen=100/1000=1/10;rew=1-1/10=9/10</think><ans>9/10</ans>",
+      "gold": "9/10"
+    },
+    "Q:MetaLenR1:acc=1;used_toks=200;max_toks=1000->len_reward?": {
+      "domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
+      "completion": "<think>pen=200/1000=1/5;rew=1-1/5=4/5</think><ans>4/5</ans>",
+      "gold": "4/5"
+    },
+    "Q:MetaDSPy:passed_demos=6;total_demos=8->mipro_score?": {
+      "domain": "META_DSPY_MIPRO_PROMPT_OPT",
+      "completion": "<think>score=6/8=3/4</think><ans>3/4</ans>",
+      "gold": "3/4"
+    },
+    "Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?": {
+      "domain": "META_DSPY_MIPRO_PROMPT_OPT",
+      "completion": "<think>score=7/8=7/8</think><ans>7/8</ans>",
+      "gold": "7/8"
+    },
+    "Q:MetaDSPy:passed_demos=10;total_demos=12->mipro_score?": {
+      "domain": "META_DSPY_MIPRO_PROMPT_OPT",
+      "completion": "<think>score=10/12=5/6</think><ans>5/6</ans>",
+      "gold": "5/6"
+    },
+    "Q:MetaDSPy:passed_demos=11;total_demos=12->mipro_score?": {
+      "domain": "META_DSPY_MIPRO_PROMPT_OPT",
+      "completion": "<think>score=11/12=11/12</think><ans>11/12</ans>",
+      "gold": "11/12"
+    },
+    "Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?": {
+      "domain": "META_SWE_PATCH_TEST_COVERAGE",
+      "completion": "<think>rate=15/16=15/16</think><ans>15/16</ans>",
+      "gold": "15/16"
+    },
+    "Q:MetaSWE:passed_tests=16;total_tests=16->patch_pass_rate?": {
+      "domain": "META_SWE_PATCH_TEST_COVERAGE",
+      "completion": "<think>rate=16/16=1</think><ans>1</ans>",
+      "gold": "1"
+    },
+    "Q:MetaSWE:passed_tests=19;total_tests=20->patch_pass_rate?": {
+      "domain": "META_SWE_PATCH_TEST_COVERAGE",
+      "completion": "<think>rate=19/20=19/20</think><ans>19/20</ans>",
+      "gold": "19/20"
+    },
+    "Q:MetaSWE:passed_tests=20;total_tests=20->patch_pass_rate?": {
+      "domain": "META_SWE_PATCH_TEST_COVERAGE",
+      "completion": "<think>rate=20/20=1</think><ans>1</ans>",
+      "gold": "1"
+    },
+    "Q:MetaScale:C=12817440;N=2064->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2064=12384;12817440/12384=1035</think><ans>1035</ans>",
+      "gold": "1035"
+    },
+    "Q:MetaScale:C=12854592;N=2064->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2064=12384;12854592/12384=1038</think><ans>1038</ans>",
+      "gold": "1038"
+    },
+    "Q:MetaScale:C=12891744;N=2064->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2064=12384;12891744/12384=1041</think><ans>1041</ans>",
+      "gold": "1041"
+    },
+    "Q:MetaScale:C=12829860;N=2066->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2066=12396;12829860/12396=1035</think><ans>1035</ans>",
+      "gold": "1035"
+    },
+    "Q:MetaScale:C=12867048;N=2066->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2066=12396;12867048/12396=1038</think><ans>1038</ans>",
+      "gold": "1038"
+    },
+    "Q:MetaScale:C=12904236;N=2066->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2066=12396;12904236/12396=1041</think><ans>1041</ans>",
+      "gold": "1041"
+    },
+    "Q:MetaScale:C=12842280;N=2068->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2068=12408;12842280/12408=1035</think><ans>1035</ans>",
+      "gold": "1035"
+    },
+    "Q:MetaScale:C=12879504;N=2068->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2068=12408;12879504/12408=1038</think><ans>1038</ans>",
+      "gold": "1038"
+    },
+    "Q:MetaScale:C=12916728;N=2068->D_opt?": {
+      "domain": "META_SCALING_OPTIMIZER",
+      "completion": "<think>6*2068=12408;12916728/12408=1041</think><ans>1041</ans>",
+      "gold": "1041"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=4128->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/4128=1/4128</think><ans>1/4128</ans>",
+      "gold": "1/4128"
+    },
+    "Q:MetaMoE:top_k=2;n_experts=4128->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=2/4128=1/2064</think><ans>1/2064</ans>",
+      "gold": "1/2064"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=4132->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/4132=1/4132</think><ans>1/4132</ans>",
+      "gold": "1/4132"
+    },
+    "Q:MetaMoE:top_k=2;n_experts=4132->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=2/4132=1/2066</think><ans>1/2066</ans>",
+      "gold": "1/2066"
+    },
+    "Q:MetaMoE:top_k=1;n_experts=4140->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=1/4140=1/4140</think><ans>1/4140</ans>",
+      "gold": "1/4140"
+    },
+    "Q:MetaMoE:top_k=2;n_experts=4140->active_fraction?": {
+      "domain": "META_LORA_MOE_ARCHITECT",
+      "completion": "<think>active=2/4140=1/2070</think><ans>1/2070</ans>",
+      "gold": "1/2070"
+    }
+  }
+}

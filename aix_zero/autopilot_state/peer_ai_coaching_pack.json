@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "domain_count": 12,
+  "domain_count": 16,
   "verification_protocol": "Emit step-by-step rational equations inside <think>...</think> and exact simplified fraction/integer inside <ans>...</ans>.",
   "domains": {
     "META_SCALING_OPTIMIZER": {
@@ -9,14 +9,14 @@
       "reference_formula": "D_opt = C / (6 * N)",
       "worked_examples": [
         {
-          "prompt": "Q:MetaScale:C=12648;N=62->D_opt?",
-          "verified_trace": "<think>6*62=372;12648/372=34</think><ans>34</ans>",
-          "gold_answer": "34"
+          "prompt": "Q:MetaScale:C=13440;N=64->D_opt?",
+          "verified_trace": "<think>6*64=384;13440/384=35</think><ans>35</ans>",
+          "gold_answer": "35"
         },
         {
-          "prompt": "Q:MetaScale:C=13764;N=62->D_opt?",
-          "verified_trace": "<think>6*62=372;13764/372=37</think><ans>37</ans>",
-          "gold_answer": "37"
+          "prompt": "Q:MetaScale:C=14592;N=64->D_opt?",
+          "verified_trace": "<think>6*64=384;14592/384=38</think><ans>38</ans>",
+          "gold_answer": "38"
         }
       ]
     },
@@ -26,14 +26,14 @@
       "reference_formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
       "worked_examples": [
         {
-          "prompt": "Q:MetaMoE:top_k=2;n_experts=124->active_fraction?",
-          "verified_trace": "<think>active=2/124=1/62</think><ans>1/62</ans>",
-          "gold_answer": "1/62"
+          "prompt": "Q:MetaMoE:top_k=1;n_experts=128->active_fraction?",
+          "verified_trace": "<think>active=1/128=1/128</think><ans>1/128</ans>",
+          "gold_answer": "1/128"
         },
         {
-          "prompt": "Q:MetaMoE:top_k=3;n_experts=124->active_fraction?",
-          "verified_trace": "<think>active=3/124=3/124</think><ans>3/124</ans>",
-          "gold_answer": "3/124"
+          "prompt": "Q:MetaMoE:top_k=4;n_experts=128->active_fraction?",
+          "verified_trace": "<think>active=4/128=1/32</think><ans>1/32</ans>",
+          "gold_answer": "1/32"
         }
       ]
     },
@@ -43,14 +43,14 @@
       "reference_formula": "kv_compression_ratio = n_heads / n_kv_heads",
       "worked_examples": [
         {
-          "prompt": "Q:MetaKV:n_kv=2;n_heads=24->kv_ratio?",
-          "verified_trace": "<think>ratio=2/24=1/12</think><ans>1/12</ans>",
-          "gold_answer": "1/12"
+          "prompt": "Q:MetaKV:n_kv=1;n_heads=32->kv_ratio?",
+          "verified_trace": "<think>ratio=1/32=1/32</think><ans>1/32</ans>",
+          "gold_answer": "1/32"
         },
         {
-          "prompt": "Q:MetaKV:n_kv=3;n_heads=24->kv_ratio?",
-          "verified_trace": "<think>ratio=3/24=1/8</think><ans>1/8</ans>",
-          "gold_answer": "1/8"
+          "prompt": "Q:MetaKV:n_kv=2;n_heads=32->kv_ratio?",
+          "verified_trace": "<think>ratio=2/32=1/16</think><ans>1/16</ans>",
+          "gold_answer": "1/16"
         }
       ]
     },
@@ -60,14 +60,14 @@
       "reference_formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
       "worked_examples": [
         {
-          "prompt": "Q:MetaRLVR:r=1;successes=2;group=64->grpo_advantage?",
-          "verified_trace": "<think>mean=2/64;adv=1-1/32=31/32</think><ans>31/32</ans>",
-          "gold_answer": "31/32"
+          "prompt": "Q:MetaRLVR:r=1;successes=1;group=66->grpo_advantage?",
+          "verified_trace": "<think>mean=1/66;adv=1-1/66=65/66</think><ans>65/66</ans>",
+          "gold_answer": "65/66"
         },
         {
-          "prompt": "Q:MetaRLVR:r=1;successes=3;group=64->grpo_advantage?",
-          "verified_trace": "<think>mean=3/64;adv=1-3/64=61/64</think><ans>61/64</ans>",
-          "gold_answer": "61/64"
+          "prompt": "Q:MetaRLVR:r=1;successes=2;group=66->grpo_advantage?",
+          "verified_trace": "<think>mean=2/66;adv=1-1/33=32/33</think><ans>32/33</ans>",
+          "gold_answer": "32/33"
         }
       ]
     },
@@ -77,14 +77,14 @@
       "reference_formula": "hbm_io_reduction = seq_len / tile_block_size",
       "worked_examples": [
         {
-          "prompt": "Q:MetaFlash:seq_len=2240;tile_block=64->io_reduction?",
-          "verified_trace": "<think>ratio=2240/64=35</think><ans>35</ans>",
-          "gold_answer": "35"
+          "prompt": "Q:MetaFlash:seq_len=2304;tile_block=64->io_reduction?",
+          "verified_trace": "<think>ratio=2304/64=36</think><ans>36</ans>",
+          "gold_answer": "36"
         },
         {
-          "prompt": "Q:MetaFlash:seq_len=2496;tile_block=64->io_reduction?",
-          "verified_trace": "<think>ratio=2496/64=39</think><ans>39</ans>",
-          "gold_answer": "39"
+          "prompt": "Q:MetaFlash:seq_len=2560;tile_block=64->io_reduction?",
+          "verified_trace": "<think>ratio=2560/64=40</think><ans>40</ans>",
+          "gold_answer": "40"
         }
       ]
     },
@@ -94,14 +94,14 @@
       "reference_formula": "expected_accepted_ratio = accepted_drafts / draft_window",
       "worked_examples": [
         {
-          "prompt": "Q:MetaSpec:accepted=2;window=5->accept_ratio?",
-          "verified_trace": "<think>accept=2/5=2/5</think><ans>2/5</ans>",
-          "gold_answer": "2/5"
+          "prompt": "Q:MetaSpec:accepted=2;window=6->accept_ratio?",
+          "verified_trace": "<think>accept=2/6=1/3</think><ans>1/3</ans>",
+          "gold_answer": "1/3"
         },
         {
-          "prompt": "Q:MetaSpec:accepted=3;window=5->accept_ratio?",
-          "verified_trace": "<think>accept=3/5=3/5</think><ans>3/5</ans>",
-          "gold_answer": "3/5"
+          "prompt": "Q:MetaSpec:accepted=3;window=6->accept_ratio?",
+          "verified_trace": "<think>accept=3/6=1/2</think><ans>1/2</ans>",
+          "gold_answer": "1/2"
         }
       ]
     },
@@ -111,14 +111,14 @@
       "reference_formula": "compression_ratio = fp16_bits / quant_bits",
       "worked_examples": [
         {
-          "prompt": "Q:MetaQuant:fp16_bits=32;quant_bits=4->compression?",
-          "verified_trace": "<think>comp=32/4=8</think><ans>8</ans>",
-          "gold_answer": "8"
+          "prompt": "Q:MetaQuant:fp16_bits=16;quant_bits=4->compression?",
+          "verified_trace": "<think>comp=16/4=4</think><ans>4</ans>",
+          "gold_answer": "4"
         },
         {
-          "prompt": "Q:MetaQuant:fp16_bits=32;quant_bits=8->compression?",
-          "verified_trace": "<think>comp=32/8=4</think><ans>4</ans>",
-          "gold_answer": "4"
+          "prompt": "Q:MetaQuant:fp16_bits=16;quant_bits=8->compression?",
+          "verified_trace": "<think>comp=16/8=2</think><ans>2</ans>",
+          "gold_answer": "2"
         }
       ]
     },
@@ -128,14 +128,14 @@
       "reference_formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
       "worked_examples": [
         {
-          "prompt": "Q:MetaDist:stages=3;microbatches=39->bubble_fraction?",
-          "verified_trace": "<think>num=3-1=2;den=39+3-1=41;bubble=2/41=2/41</think><ans>2/41</ans>",
-          "gold_answer": "2/41"
+          "prompt": "Q:MetaDist:stages=4;microbatches=40->bubble_fraction?",
+          "verified_trace": "<think>num=4-1=3;den=40+4-1=43;bubble=3/43=3/43</think><ans>3/43</ans>",
+          "gold_answer": "3/43"
         },
         {
-          "prompt": "Q:MetaDist:stages=3;microbatches=43->bubble_fraction?",
-          "verified_trace": "<think>num=3-1=2;den=43+3-1=45;bubble=2/45=2/45</think><ans>2/45</ans>",
-          "gold_answer": "2/45"
+          "prompt": "Q:MetaDist:stages=4;microbatches=44->bubble_fraction?",
+          "verified_trace": "<think>num=4-1=3;den=44+4-1=47;bubble=3/47=3/47</think><ans>3/47</ans>",
+          "gold_answer": "3/47"
         }
       ]
     },
@@ -145,14 +145,14 @@
       "reference_formula": "mla_compression = latent_dim / (2 * n_heads * head_dim)",
       "worked_examples": [
         {
-          "prompt": "Q:MetaMLA:latent=256;n_heads=24;head_dim=64->mla_ratio?",
-          "verified_trace": "<think>full_kv=3072;ratio=256/3072=1/12</think><ans>1/12</ans>",
-          "gold_answer": "1/12"
+          "prompt": "Q:MetaMLA:latent=256;n_heads=32;head_dim=64->mla_ratio?",
+          "verified_trace": "<think>full_kv=4096;ratio=256/4096=1/16</think><ans>1/16</ans>",
+          "gold_answer": "1/16"
         },
         {
-          "prompt": "Q:MetaMLA:latent=256;n_heads=40;head_dim=64->mla_ratio?",
-          "verified_trace": "<think>full_kv=5120;ratio=256/5120=1/20</think><ans>1/20</ans>",
-          "gold_answer": "1/20"
+          "prompt": "Q:MetaMLA:latent=256;n_heads=48;head_dim=64->mla_ratio?",
+          "verified_trace": "<think>full_kv=6144;ratio=256/6144=1/24</think><ans>1/24</ans>",
+          "gold_answer": "1/24"
         }
       ]
     },
@@ -162,14 +162,14 @@
       "reference_formula": "block_utilization = used_tokens / (allocated_blocks * block_size)",
       "worked_examples": [
         {
-          "prompt": "Q:MetaPaged:tokens=76;blocks=5;block_size=16->utilization?",
-          "verified_trace": "<think>cap=5*16=80;util=76/80=19/20</think><ans>19/20</ans>",
-          "gold_answer": "19/20"
+          "prompt": "Q:MetaPaged:tokens=91;blocks=6;block_size=16->utilization?",
+          "verified_trace": "<think>cap=6*16=96;util=91/96=91/96</think><ans>91/96</ans>",
+          "gold_answer": "91/96"
         },
         {
-          "prompt": "Q:MetaPaged:tokens=108;blocks=7;block_size=16->utilization?",
-          "verified_trace": "<think>cap=7*16=112;util=108/112=27/28</think><ans>27/28</ans>",
-          "gold_answer": "27/28"
+          "prompt": "Q:MetaPaged:tokens=123;blocks=8;block_size=16->utilization?",
+          "verified_trace": "<think>cap=8*16=128;util=123/128=123/128</think><ans>123/128</ans>",
+          "gold_answer": "123/128"
         }
       ]
     },
@@ -179,14 +179,14 @@
       "reference_formula": "rloo_adv_1 = r_1 - (sum_other_rewards / (K - 1))",
       "worked_examples": [
         {
-          "prompt": "Q:MetaRLOO:r1=1;other_sum=1;k=5->rloo_advantage?",
-          "verified_trace": "<think>base=1/4;adv=1-1/4=3/4</think><ans>3/4</ans>",
-          "gold_answer": "3/4"
+          "prompt": "Q:MetaRLOO:r1=1;other_sum=1;k=6->rloo_advantage?",
+          "verified_trace": "<think>base=1/5;adv=1-1/5=4/5</think><ans>4/5</ans>",
+          "gold_answer": "4/5"
         },
         {
-          "prompt": "Q:MetaRLOO:r1=1;other_sum=2;k=5->rloo_advantage?",
-          "verified_trace": "<think>base=2/4;adv=1-1/2=1/2</think><ans>1/2</ans>",
-          "gold_answer": "1/2"
+          "prompt": "Q:MetaRLOO:r1=1;other_sum=2;k=6->rloo_advantage?",
+          "verified_trace": "<think>base=2/5;adv=1-2/5=3/5</think><ans>3/5</ans>",
+          "gold_answer": "3/5"
         }
       ]
     },
@@ -196,14 +196,82 @@
       "reference_formula": "effective_density = (1 - drop_rate) * top_k_density",
       "worked_examples": [
         {
-          "prompt": "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=6->effective_density?",
-          "verified_trace": "<think>eff=(3/4)*(2/6)=1/4</think><ans>1/4</ans>",
-          "gold_answer": "1/4"
+          "prompt": "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=7->effective_density?",
+          "verified_trace": "<think>eff=(3/4)*(2/7)=3/14</think><ans>3/14</ans>",
+          "gold_answer": "3/14"
         },
         {
-          "prompt": "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=9->effective_density?",
-          "verified_trace": "<think>eff=(3/4)*(2/9)=1/6</think><ans>1/6</ans>",
-          "gold_answer": "1/6"
+          "prompt": "Q:MetaMerge:keep_num=3;keep_den=4;topk_num=2;topk_den=10->effective_density?",
+          "verified_trace": "<think>eff=(3/4)*(2/10)=3/20</think><ans>3/20</ans>",
+          "gold_answer": "3/20"
+        }
+      ]
+    },
+    "META_MUON_ORTHOGONAL_OPTIMIZER": {
+      "title": "Muon Newton-Schulz Orthogonalized Momentum Optimizer State Analyzer",
+      "prefix": "Q:MetaMuon:",
+      "reference_formula": "state_memory_ratio = muon_states / adamw_states",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaMuon:muon_states=1;adam_states=2->state_ratio?",
+          "verified_trace": "<think>ratio=1/2=1/2</think><ans>1/2</ans>",
+          "gold_answer": "1/2"
+        },
+        {
+          "prompt": "Q:MetaMuon:muon_states=1;adam_states=4->state_ratio?",
+          "verified_trace": "<think>ratio=1/4=1/4</think><ans>1/4</ans>",
+          "gold_answer": "1/4"
+        }
+      ]
+    },
+    "META_OPENR1_LENGTH_PENALTY_REWARD": {
+      "title": "Open-R1 & Kimi Length-Regularized Verifiable Reward Shaping Engine",
+      "prefix": "Q:MetaLenR1:",
+      "reference_formula": "length_reg_reward = acc_reward - (used_tokens / max_tokens)",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaLenR1:acc=1;used_toks=100;max_toks=700->len_reward?",
+          "verified_trace": "<think>pen=100/700=1/7;rew=1-1/7=6/7</think><ans>6/7</ans>",
+          "gold_answer": "6/7"
+        },
+        {
+          "prompt": "Q:MetaLenR1:acc=1;used_toks=200;max_toks=700->len_reward?",
+          "verified_trace": "<think>pen=200/700=2/7;rew=1-2/7=5/7</think><ans>5/7</ans>",
+          "gold_answer": "5/7"
+        }
+      ]
+    },
+    "META_DSPY_MIPRO_PROMPT_OPT": {
+      "title": "Stanford DSPy MIPRO Bayesian Demonstration & Prompt Optimizer",
+      "prefix": "Q:MetaDSPy:",
+      "reference_formula": "mipro_pass_rate = passed_demos / total_demos",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaDSPy:passed_demos=6;total_demos=8->mipro_score?",
+          "verified_trace": "<think>score=6/8=3/4</think><ans>3/4</ans>",
+          "gold_answer": "3/4"
+        },
+        {
+          "prompt": "Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?",
+          "verified_trace": "<think>score=7/8=7/8</think><ans>7/8</ans>",
+          "gold_answer": "7/8"
+        }
+      ]
+    },
+    "META_SWE_PATCH_TEST_COVERAGE": {
+      "title": "Autonomous SWE Bug-Fix Patch Verification & Regression Coverage Engine",
+      "prefix": "Q:MetaSWE:",
+      "reference_formula": "patch_pass_rate = passed_tests / total_tests",
+      "worked_examples": [
+        {
+          "prompt": "Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?",
+          "verified_trace": "<think>rate=15/16=15/16</think><ans>15/16</ans>",
+          "gold_answer": "15/16"
+        },
+        {
+          "prompt": "Q:MetaSWE:passed_tests=16;total_tests=16->patch_pass_rate?",
+          "verified_trace": "<think>rate=16/16=1</think><ans>1</ans>",
+          "gold_answer": "1"
         }
       ]
     }

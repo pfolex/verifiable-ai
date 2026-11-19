@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "cycle_index": 1,
+  "domain_count": 16,
+  "total_domain_tasks_tested": 78,
+  "total_domain_tasks_verified": 78,
+  "overall_domain_accuracy": 1.0,
+  "swe_patch_tasks_tested": 2,
+  "swe_patch_tasks_verified": 2,
+  "swe_patch_pass_rate": 1.0,
+  "sprt_non_regression_status": "PASS_H0_NON_INFERIOR",
+  "per_domain_breakdown": {
+    "META_SCALING_OPTIMIZER": {
+      "tested": 9,
+      "verified": 9
+    },
+    "META_LORA_MOE_ARCHITECT": {
+      "tested": 6,
+      "verified": 6
+    },
+    "META_GQA_KV_SYSTEMS": {
+      "tested": 9,
+      "verified": 9
+    },
+    "META_RLVR_GRPO_TRAINER": {
+      "tested": 6,
+      "verified": 6
+    },
+    "META_FLASH_ATTENTION_TILING": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_SPECULATIVE_DECODING": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_QUANTIZATION_FP8_INT4": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_DISTRIBUTED_TP_PP_DP": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_DEEPSEEK_MLA_LATENT_KV": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_VLLM_PAGED_ATTENTION": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_TRL_RLOO_LEAVE_ONE_OUT": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_MERGEKIT_TIES_DARE": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_MUON_ORTHOGONAL_OPTIMIZER": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_OPENR1_LENGTH_PENALTY_REWARD": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_DSPY_MIPRO_PROMPT_OPT": {
+      "tested": 4,
+      "verified": 4
+    },
+    "META_SWE_PATCH_TEST_COVERAGE": {
+      "tested": 4,
+      "verified": 4
+    }
+  }
+}

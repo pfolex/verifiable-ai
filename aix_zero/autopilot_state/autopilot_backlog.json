@@ -24,9 +24,11 @@
       "backlog_id": "AIX-BACKLOG-03-META_GQA_KV_SYSTEMS",
       "domain": "META_GQA_KV_SYSTEMS",
       "title": "[AIX-BACKLOG-03-META_GQA_KV_SYSTEMS] Autonomous mastery & held-out validation gate for META_GQA_KV_SYSTEMS",
-      "status": "OPEN",
+      "status": "COMPLETED",
       "target_metric": "promoted_on_heldout_val && alu_assisted_heldout_exact_match == 1.0",
-      "github_issue_url": null
+      "github_issue_url": null,
+      "completed_in_cycle": 32,
+      "heldout_val_post_loss": 3.895822
     },
     {
       "backlog_id": "AIX-BACKLOG-04-META_RLVR_GRPO_TRAINER",

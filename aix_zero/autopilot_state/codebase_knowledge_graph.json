@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0.0",
-  "knowledge_graph_sha256": "38f00e6f2b6dc216b73d2cc7fefc40b1ffe6fbdc021989d76214d9fb4bffa132",
+  "knowledge_graph_sha256": "6b7ab6a38db4009c814e72896df6725ce13a81563c2218b9ed75a4bbb119f63c",
   "indexed_package_or_repo_count": 17,
   "indexed_module_count": 194,
-  "total_functions_indexed": 1100,
-  "total_classes_indexed": 159,
+  "total_functions_indexed": 1110,
+  "total_classes_indexed": 160,
   "external_frontier_catalog_count": 10,
   "modules": [
     {
@@ -50,8 +50,8 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/aix_ctl.py",
       "summary_docstring": "AIX-Zero Autopilot Control CLI (`aix_zero/aix_ctl.py`)",
-      "lines": 182,
-      "cyclomatic_branches": 17,
+      "lines": 215,
+      "cyclomatic_branches": 19,
       "classes": [],
       "public_functions": [
         {
@@ -646,14 +646,30 @@
       "package": "aix_zero",
       "rel_path": "aix_zero/meta_ai_autopilot.py",
       "summary_docstring": "AIX Meta-AI Autonomous Self-Improvement Engine (`aix_zero/meta_ai_autopilot.py`)",
-      "lines": 2087,
-      "cyclomatic_branches": 162,
+      "lines": 2708,
+      "cyclomatic_branches": 206,
       "classes": [
+        "ElasticLoRAAdapterBank",
         "AutonomousSelfImprovementController"
       ],
       "public_functions": [
         {
           "name": "build_meta_ai_self_improvement_curriculum",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "stream_huggingface_open_source_rows",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "normalize_and_verify_streamed_rows",
+          "arg_count": 1,
+          "has_docstring": true
+        },
+        {
+          "name": "synthesize_and_verify_swe_patch_tasks",
           "arg_count": 1,
           "has_docstring": true
         },
@@ -693,6 +709,11 @@
           "has_docstring": true
         },
         {
+          "name": "apply_ties_dare_parameter_delta",
+          "arg_count": 2,
+          "has_docstring": true
+        },
+        {
           "name": "verify_r1_reasoning_trace",
           "arg_count": 2,
           "has_docstring": true
@@ -704,26 +725,6 @@
         },
         {
           "name": "build_executable_code_synthesis_tasks",
-          "arg_count": 1,
-          "has_docstring": true
-        },
-        {
-          "name": "verify_executable_code_tasks",
-          "arg_count": 1,
-          "has_docstring": true
-        },
-        {
-          "name": "install_signal_handlers",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "should_stop",
-          "arg_count": 1,
-          "has_docstring": false
-        },
-        {
-          "name": "request_stop",
           "arg_count": 1,
           "has_docstring": true
         }

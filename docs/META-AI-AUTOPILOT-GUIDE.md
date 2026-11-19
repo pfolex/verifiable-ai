@@ -68,6 +68,14 @@ Supported 12-Domain Meta-AI & External Open-Source Breakthrough prompt templates
     `Q:MetaRLOO:r1=1;other_sum=1;k=4->rloo_advantage?`
 12. **MergeKit TIES/DARE Effective Parameter Density (`META_MERGEKIT_TIES_DARE` / `arcee-ai/mergekit`):**
     `Q:MetaMerge:keep_num=3;keep_den=4;topk_num=1;topk_den=5->effective_density?`
+13. **Muon Orthogonalized Momentum Optimizer State Memory Ratio (`META_MUON_ORTHOGONAL_OPTIMIZER` / `KellerJordan/Muon`):**
+    `Q:MetaMuon:muon_states=1;adam_states=2->state_ratio?`
+14. **Open-R1 Length-Regularized Verifiable Reward (`META_OPENR1_LENGTH_PENALTY_REWARD` / `open-r1/OpenR1-Math-220k`):**
+    `Q:MetaLenR1:acc=1;used_toks=200;max_toks=1000->len_reward?`
+15. **Stanford DSPy MIPRO Demonstration Pass Rate (`META_DSPY_MIPRO_PROMPT_OPT` / `stanfordnlp/dspy`):**
+    `Q:MetaDSPy:passed_demos=7;total_demos=8->mipro_score?`
+16. **Autonomous SWE Bug-Fix Patch Verification Coverage (`META_SWE_PATCH_TEST_COVERAGE`):**
+    `Q:MetaSWE:passed_tests=15;total_tests=16->patch_pass_rate?`
 
 ### F. Grade & Coach Another Conversing AI (`coach` & `peer-session`)
 Evaluates a peer AI's `<think>...</think><ans>...</ans>` response against the deterministic reference verifier (`verify_r1_reasoning_trace`) and generates a targeted corrective coaching prompt:
@@ -85,6 +93,21 @@ Or run a multi-turn **Peer-AI Symbiosis & Mutual Distillation Session** (`peer-s
 Catalogs and indexes external frontier open-source AI repositories (`deepseek-ai/DeepSeek-V3`, `deepseek-ai/DeepSeek-R1`, `vllm-project/vllm`, `Dao-AILab/flash-attention`, `huggingface/trl`, `arcee-ai/mergekit`, `karpathy/llm.c`, `KellerJordan/Muon`, `ml-explore/mlx`, `ggml-org/llama.cpp`) plus all 10 sibling open-source AI repositories in your workspace (`aix-evolver`, `r1-verifiers`, `r1_reward_lab`, `math-verify`, `mergekit`, `model_merging`, `trl`, `smolagents`, `lighteval`, `ollama-python`), and optionally shallow-clones new GitHub repositories into `open_source_corpus/`:
 ```bash
 /Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl harvest-external
+```
+
+### H. Stream Live Open-Source Reasoning Databases from Hugging Face (`stream-hf`)
+Streams micro-batches over HTTPS from Hugging Face (`open-r1/OpenR1-Math-220k`, `AI-MO/NuminaMath-1.5`, `open-thoughts/OpenThoughts-114k`, `HuggingFaceFW/fineweb-edu`) with zero local terabyte disk usage, normalizes them into `<think>...</think><ans>...</ans>` traces, and filters every trace through `verify_r1_reasoning_trace()`:
+```bash
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl stream-hf \
+  --dataset "open-r1/OpenR1-Math-220k" \
+  --offset 0 \
+  --limit 4
+```
+
+### I. Run the 16-Domain Frontier Benchmark Arena (`arena`)
+Benchmarks AIX across all 16 Meta-AI & External Open-Source domains plus autonomous SWE code-patching tasks and writes `aix_zero/autopilot_state/frontier_arena_scorecard.json`:
+```bash
+/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl arena
 ```
 
 ---
