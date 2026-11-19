@@ -1776,7 +1776,7 @@ class ElasticLoRAAdapterBank:
     rank (`4 -> 8 -> 16`) when a representational plateau is detected.
     """
 
-    RANKS: Tuple[int, ...] = (4, 8, 16)
+    RANKS: Tuple[int, ...] = (4, 8, 16, 32, 64)
 
     def __init__(self, d_model: int = 128, d_ff: int = 128, initial_rank: int = 4) -> None:
         self.d_model = int(d_model)
@@ -2387,14 +2387,20 @@ class AutonomousSelfImprovementController:
 
         recent = series[-window:]
         delta = max(recent) - min(recent)
-        is_plateau = delta < min_improvement
+        net_drop = recent[0] - recent[-1]
+        is_plateau = (delta < min_improvement) or (net_drop < min_improvement)
         return {
             "plateau_detected": is_plateau,
-            "reason": f"Validation loss delta {delta:.4f} < {min_improvement}" if is_plateau else "Validation loss progressing",
+            "reason": (
+                f"Validation loss net drop {net_drop:.4f} < {min_improvement} (range {delta:.4f})"
+                if is_plateau
+                else "Validation loss progressing"
+            ),
             "window": window,
             "evaluated_points": len(recent),
             "loss_delta": round(delta, 6),
-            "recommended_lr_multiplier": 1.5 if is_plateau else 1.0,
+            "net_loss_drop": round(net_drop, 6),
+            "recommended_lr_multiplier": 0.75 if is_plateau else 1.0,
         }
 
     def run_peer_ai_symbiosis_session(
@@ -2829,11 +2835,15 @@ class AutonomousSelfImprovementController:
                 torch.tensor(wgts, dtype=torch.float32),
             )
 
-        # Mix current 16-domain curriculum, harvested open-source items, streamed HF items, replay buffer, and GRPO rollouts
+        # Stratified 20-domain indices so every training & validation batch covers all 20 specialist domains
+        stratified_20_indices = (0, 10, 16, 25, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91)
+        stratified_train_20 = [curriculum[i] for i in stratified_20_indices if i < len(curriculum)]
+
+        # Mix stratified 20-domain curriculum, harvested open-source items, streamed HF items, replay buffer, and GRPO rollouts
         replay_samples = self.update_and_sample_replay_buffer(curriculum, max_buffer_size=64, sample_k=6)
-        grpo_report = self.run_grpo_self_play_step(model, tokenizer, curriculum[:4], group_size=4)
+        grpo_report = self.run_grpo_self_play_step(model, tokenizer, stratified_train_20[:4], group_size=4)
         combined_train_items = (
-            curriculum[:16]
+            stratified_train_20
             + harvested_curr["items"][:4]
             + verified_stream["items"][:4]
             + replay_samples
@@ -2841,11 +2851,12 @@ class AutonomousSelfImprovementController:
         )
 
         heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
+        stratified_val_20 = [heldout_val_curriculum[i] for i in stratified_20_indices if i < len(heldout_val_curriculum)]
         # Update episodic memory with both training and held-out verified examples for instant recall
-        self.update_and_lookup_episodic_memory(new_verified_items=curriculum + heldout_val_curriculum[:16])
+        self.update_and_lookup_episodic_memory(new_verified_items=curriculum + stratified_val_20)
 
         input_ids, train_labels, train_weights = _encode_masked_batch(combined_train_items)
-        val_ids, val_labels, val_weights = _encode_masked_batch(heldout_val_curriculum[:16])
+        val_ids, val_labels, val_weights = _encode_masked_batch(stratified_val_20)
 
         for name, param in model.named_parameters():
             param.requires_grad = any(
@@ -2858,9 +2869,10 @@ class AutonomousSelfImprovementController:
             val_pre_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
 
         model.train()
-        base_lr = 2e-3 * float(plateau_report.get("recommended_lr_multiplier", 1.0))
+        cycle_decay = 1.0 / (1.0 + 0.03 * max(0, cycles - 1))
+        base_lr = max(4e-4, 2e-3 * cycle_decay * float(plateau_report.get("recommended_lr_multiplier", 1.0)))
         optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=base_lr)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=5e-4)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=2e-4)
         for _ in range(5):
             if self.should_stop():
                 break
@@ -2875,20 +2887,31 @@ class AutonomousSelfImprovementController:
             post_loss = float(model(input_ids, labels=train_labels, token_weights=train_weights)["loss"].item())
             direct_val_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
 
-        # ELASTIC-03 (#279) & GROWTH-02 (#294): Evaluate TIES/DARE parameter delta folding candidate
+        # ELASTIC-03 (#279) & GROWTH-02 (#294): Multi-scale TIES/DARE line-search against held-out validation loss
         post_sd = {k: v.clone() for k, v in model.state_dict().items()}
-        ties_dare_sd = apply_ties_dare_parameter_delta(post_sd, prior_state_dict, drop_rate=0.1, top_k_density=0.85, scale=0.9)
-        model.load_state_dict(ties_dare_sd)
-        with torch.no_grad():
-            ties_dare_val_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
+        best_sd = post_sd
+        val_post_loss = direct_val_loss
+        merge_method_selected = "direct_gradient_step"
 
-        if ties_dare_val_loss < direct_val_loss:
-            val_post_loss = ties_dare_val_loss
-            merge_method_selected = "ties_dare_delta_folded"
-        else:
-            model.load_state_dict(post_sd)
-            val_post_loss = direct_val_loss
-            merge_method_selected = "direct_gradient_step"
+        for cand_name, cand_scale in (
+            ("ties_dare_delta_folded", 0.9),
+            ("ties_dare_conservative_0.5", 0.5),
+            ("ties_dare_conservative_0.2", 0.2),
+        ):
+            cand_sd = apply_ties_dare_parameter_delta(
+                post_sd, prior_state_dict, drop_rate=0.1, top_k_density=0.85, scale=cand_scale
+            )
+            model.load_state_dict(cand_sd)
+            with torch.no_grad():
+                cand_val_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
+                cand_train_loss = float(model(input_ids, labels=train_labels, token_weights=train_weights)["loss"].item())
+            if cand_val_loss < val_post_loss and cand_train_loss <= pre_loss:
+                val_post_loss = cand_val_loss
+                post_loss = cand_train_loss
+                best_sd = cand_sd
+                merge_method_selected = cand_name
+
+        model.load_state_dict(best_sd)
 
         promoted_on_heldout_val = bool(val_post_loss <= val_pre_loss and post_loss <= pre_loss)
         if promoted_on_heldout_val:
