@@ -55,7 +55,7 @@ class CommunityDocsTests(unittest.TestCase):
         rep_doc = ROOT / "docs/REPLICATION-AND-TRIAGE.md"
         reason_doc = ROOT / "docs/REASONING-CAPABILITY-SPEC.md"
         web_doc = ROOT / "docs/WEBSITE-INFORMATION-ARCHITECTURE.md"
-        pr_default = ROOT / ".github/pull_request_template.md"
+        pr_default = ROOT / ".github/PULL_REQUEST_TEMPLATE.md"
         pr_exp = ROOT / ".github/PULL_REQUEST_TEMPLATE/experiment_or_research.md"
         pr_code = ROOT / ".github/PULL_REQUEST_TEMPLATE/code_or_docs.md"
 

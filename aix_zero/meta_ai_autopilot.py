@@ -1898,34 +1898,71 @@ def verify_r1_reasoning_trace(text: str, gold: str) -> Dict[str, Any]:
     }
 
 
-def reflect_and_repair_rollout(prompt: str, initial_response: str, gold: str) -> Dict[str, Any]:
-    """Execute a second-pass `<verify>...</verify>` self-reflection repair when an initial rollout
-    fails `verify_r1_reasoning_trace()` (`R1VERIFY-02` / Issue #281).
-    """
-    initial_check = verify_r1_reasoning_trace(initial_response, gold)
-    if initial_check["fully_verified"]:
-        return {
-            "reflection_triggered": False,
-            "initial_verified": True,
-            "final_verified": True,
-            "repaired_response": initial_response,
-        }
+def encode_complete_training_batch(
+    items: List[Dict[str, Any]],
+    tokenizer: Any,
+    high_weight_token_ids: set,
+    max_len: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, Dict[str, int]]:
+    if max_len < 2:
+        raise ValueError("Context limit must be at least two tokens")
+    skipped = 0
+    seqs: List[List[int]] = []
+    lbls: List[List[int]] = []
+    wgts: List[List[float]] = []
+    for it in items:
+        p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
+        c_ids = tokenizer.encode(it["completion"], add_bos=False, add_eos=True)
+        full = p_ids + c_ids
+        if len(full) > max_len:
+            skipped += 1
+            continue
+        p_cut = min(len(p_ids), len(full))
+        masked = ([0] * p_cut) + full[p_cut:]
+        w_row = ([0.0] * p_cut) + [3.0 if tid in high_weight_token_ids else 1.0 for tid in full[p_cut:]]
+        if len(full) < max_len:
+            pad_n = max_len - len(full)
+            full = full + [0] * pad_n
+            masked = masked + [0] * pad_n
+            w_row = w_row + [0.0] * pad_n
+        seqs.append(full)
+        lbls.append(masked)
+        wgts.append(w_row)
+    if not seqs:
+        raise ValueError("No complete examples fit the model context")
+    return (
+        torch.tensor(seqs, dtype=torch.long),
+        torch.tensor(lbls, dtype=torch.long),
+        torch.tensor(wgts, dtype=torch.float32),
+        {"offered": len(items), "encoded": len(seqs), "skipped_overlength": skipped},
+    )
 
-    sym = solve_meta_ai_prompt_symbolic(prompt)
-    repaired = sym["completion"] if sym is not None else f"<think>verified={gold}</think><ans>{gold}</ans>"
-    final_check = verify_r1_reasoning_trace(repaired, gold)
+
+def repair_rollout_from_prompt(prompt: str, initial_response: str) -> Dict[str, Any]:
+    """Repair using an explicitly identified symbolic helper and prompt alone."""
+    symbolic = solve_meta_ai_prompt_symbolic(prompt)
+    repaired = symbolic["completion"] if symbolic is not None else initial_response
     return {
-        "reflection_triggered": True,
-        "initial_verified": False,
-        "failure_reasons": {
-            "format_ok": initial_check["format_ok"],
-            "equations_ok": initial_check["equations_ok"],
-            "failed_equations": initial_check["failed_equations"],
-            "answer_ok": initial_check["answer_ok"],
-        },
-        "reflection_tag": f"<verify>repaired_failed_trace->gold={gold}</verify>",
-        "final_verified": final_check["fully_verified"],
+        "reflection_triggered": repaired != initial_response,
         "repaired_response": repaired,
+        "assistance_mode": "symbolic_solver" if symbolic is not None else "none",
+        "reflection_tag": "<verify>symbolic_solver_assistance</verify>" if symbolic is not None else "",
+    }
+
+
+def reflect_and_repair_rollout(prompt: str, initial_response: str, gold: str) -> Dict[str, Any]:
+    """Compatibility wrapper. Gold is available only to scoring after repair."""
+    repaired = repair_rollout_from_prompt(prompt, initial_response)
+    initial_check = verify_r1_reasoning_trace(initial_response, gold)
+    final_check = verify_r1_reasoning_trace(repaired["repaired_response"], gold)
+    return {
+        **repaired,
+        "initial_verified": initial_check["fully_verified"],
+        "final_verified": final_check["fully_verified"],
+        "failure_reasons": {
+            key: initial_check[key]
+            for key in ("format_ok", "equations_ok", "failed_equations", "answer_ok")
+        },
     }
 
 
@@ -2604,42 +2641,88 @@ class AutonomousSelfImprovementController:
         *,
         cycle_index: int = 1,
         output_path: Optional[Path] = None,
+        model: Optional[AIXZeroModel] = None,
+        tokenizer: Any = None,
     ) -> Dict[str, Any]:
-        """Benchmark AIX across all 16 Meta-AI & External Open-Source domains + SWE code-patching tasks
-        and write `frontier_arena_scorecard.json` (`ARENA-01` / Issue #299).
-        """
-        out_p = Path(output_path) if output_path is not None else (self.state_dir / "frontier_arena_scorecard.json")
-        curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index)
-        by_domain: Dict[str, Dict[str, int]] = {
-            dom: {"tested": 0, "verified": 0} for dom in META_AI_EXPERT_DOMAINS
-        }
-        total_tested = 0
-        total_verified = 0
-        for item in curr:
-            dom = item["domain"]
-            sym = solve_meta_ai_prompt_symbolic(item["prompt"])
-            cand = sym["completion"] if sym is not None else ""
-            chk = verify_r1_reasoning_trace(cand, item["gold"])
-            by_domain[dom]["tested"] += 1
-            total_tested += 1
-            if chk["fully_verified"]:
-                by_domain[dom]["verified"] += 1
-                total_verified += 1
+        """Score real neural generations and record symbolic controls separately.
 
+        Synthetic probes are diagnostics. They are not an independent final test.
+        """
+        if (model is None) != (tokenizer is None):
+            raise ValueError("Supply model and tokenizer together")
+        torch.set_num_threads(self.max_cpu_threads)
+        checkpoint_name = "in_memory_candidate"
+        if model is None:
+            checkpoint = self.repo_root / "aix_zero/checkpoints/aix_zero_v11_kip.safetensors"
+            model, tokenizer = load_v11(checkpoint)
+            checkpoint_name = checkpoint.name
+            evolving = self.state_dir / "aix_zero_v12_evolving.pt"
+            if evolving.exists():
+                model.load_state_dict(torch.load(evolving, map_location="cpu", weights_only=True))
+                checkpoint_name = evolving.name
+        digest = hashlib.sha256()
+        for name, tensor in sorted(model.state_dict().items()):
+            value = tensor.detach().cpu().contiguous()
+            digest.update(name.encode())
+            digest.update(str((tuple(value.shape), value.dtype)).encode())
+            digest.update(value.numpy().tobytes())
+        curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index + 2000)
+        by_domain = {dom: {"tested": 0, "verified": 0} for dom in META_AI_EXPERT_DOMAINS}
+        records = []
+        symbolic_correct = 0
+        was_training = model.training
+        model.eval()
+        try:
+            with torch.no_grad():
+                for item in curr:
+                    if self.should_stop():
+                        break
+                    prompt_ids = tokenizer.encode(item["prompt"], add_bos=True, add_eos=False)
+                    generated, _, _ = model.generate_verified(
+                        prompt_ids, eos_id=tokenizer.eos_id, max_new_tokens=36,
+                        num_candidates=1, temperature=0.0, tokenizer=tokenizer, inflight_alu=False,
+                    )
+                    completion = tokenizer.decode(generated[len(prompt_ids):], skip_special=False)
+                    # Candidate generation above receives no reference answers.
+                    score = score_rational_or_probability(completion, item["gold"], is_probability=False)
+                    correct = score["score"] == 1.0
+                    symbolic = solve_meta_ai_prompt_symbolic(item["prompt"])
+                    symbolic_completion = symbolic["completion"] if symbolic is not None else ""
+                    control = score_rational_or_probability(symbolic_completion, item["gold"], is_probability=False)
+                    symbolic_correct += int(control["score"] == 1.0)
+                    by_domain[item["domain"]]["tested"] += 1
+                    by_domain[item["domain"]]["verified"] += int(correct)
+                    records.append({
+                        "domain": item["domain"], "prompt": item["prompt"], "gold": item["gold"],
+                        "completion": completion, "correct": correct,
+                        "symbolic_completion": symbolic_completion,
+                    })
+        finally:
+            model.train(was_training)
+        tested = len(records)
+        correct = sum(row["correct"] for row in records)
         swe_eval = synthesize_and_verify_swe_patch_tasks(cycle_index=cycle_index)
         scorecard = {
-            "schema_version": "1.0.0",
-            "cycle_index": cycle_index,
-            "domain_count": len(META_AI_EXPERT_DOMAINS),
-            "total_domain_tasks_tested": total_tested,
-            "total_domain_tasks_verified": total_verified,
-            "overall_domain_accuracy": round(total_verified / max(1, total_tested), 4),
+            "schema_version": "2.0.0", "cycle_index": cycle_index,
+            "evaluation_mode": "neural_only", "evaluation_split": "synthetic_diagnostic_probe",
+            "independent_final_test": False,
+            "model_identity": {"checkpoint": checkpoint_name, "state_sha256": digest.hexdigest(),
+                               "tokenizer_sha256": tokenizer.vocab_sha256},
+            "generation_settings": {"max_new_tokens": 36, "num_candidates": 1,
+                                    "temperature": 0.0, "inflight_alu": False},
+            "domain_count": len(by_domain), "total_domain_tasks_tested": tested,
+            "total_domain_tasks_verified": correct,
+            "overall_domain_accuracy": round(correct / tested, 4) if tested else None,
+            "evaluation_complete": tested == len(curr),
+            "symbolic_control_accuracy": round(symbolic_correct / tested, 4) if tested else None,
             "swe_patch_tasks_tested": swe_eval["total_patches"],
             "swe_patch_tasks_verified": swe_eval["verified_patches"],
             "swe_patch_pass_rate": swe_eval["pass_rate"],
-            "sprt_non_regression_status": "PASS_H0_NON_INFERIOR" if total_verified == total_tested else "NEEDS_REVIEW",
-            "per_domain_breakdown": by_domain,
+            "swe_patch_source": "predefined_reference_fixtures",
+            "sprt_non_regression_status": "NOT_EVALUATED",
+            "per_domain_breakdown": by_domain, "records": records,
         }
+        out_p = Path(output_path) if output_path is not None else self.state_dir / "frontier_arena_scorecard.json"
         write_json(scorecard, out_p)
         return scorecard
 
@@ -2682,8 +2765,9 @@ class AutonomousSelfImprovementController:
             "effective_system_parameters": status.get("effective_system_parameters", 1616130),
             "shard_hash_prefixes": status.get("shard_hash_prefixes", {}),
             "latest_heldout_val_loss": status.get("heldout_val_post_loss"),
-            "latest_reflected_heldout_accuracy": status.get("reflected_heldout_exact_match", 1.0),
-            "latest_alu_heldout_accuracy": status.get("alu_assisted_heldout_exact_match", 1.0),
+            "latest_reflected_heldout_accuracy": status.get("reflected_heldout_exact_match"),
+            "reflection_assistance_mode": "symbolic_solver",
+            "latest_alu_heldout_accuracy": status.get("alu_assisted_heldout_exact_match"),
             "recent_loss_trajectory": loss_curve,
         }
         write_json(payload, out_p)
@@ -2807,34 +2891,6 @@ class AutonomousSelfImprovementController:
             *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
         }
 
-        def _encode_masked_batch(
-            items: List[Dict[str, Any]],
-            max_len: int = 80,
-        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-            seqs: List[List[int]] = []
-            lbls: List[List[int]] = []
-            wgts: List[List[float]] = []
-            for it in items:
-                p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
-                c_ids = tokenizer.encode(it["completion"], add_bos=False, add_eos=True)
-                full = (p_ids + c_ids)[:max_len]
-                p_cut = min(len(p_ids), len(full))
-                masked = ([0] * p_cut) + full[p_cut:]
-                w_row = ([0.0] * p_cut) + [3.0 if tid in high_weight_token_ids else 1.0 for tid in full[p_cut:]]
-                if len(full) < max_len:
-                    pad_n = max_len - len(full)
-                    full = full + [0] * pad_n
-                    masked = masked + [0] * pad_n
-                    w_row = w_row + [0.0] * pad_n
-                seqs.append(full)
-                lbls.append(masked)
-                wgts.append(w_row)
-            return (
-                torch.tensor(seqs, dtype=torch.long),
-                torch.tensor(lbls, dtype=torch.long),
-                torch.tensor(wgts, dtype=torch.float32),
-            )
-
         # Stratified 20-domain indices so every training & validation batch covers all 20 specialist domains
         stratified_20_indices = (0, 10, 16, 25, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91)
         stratified_train_20 = [curriculum[i] for i in stratified_20_indices if i < len(curriculum)]
@@ -2852,11 +2908,15 @@ class AutonomousSelfImprovementController:
 
         heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
         stratified_val_20 = [heldout_val_curriculum[i] for i in stratified_20_indices if i < len(heldout_val_curriculum)]
-        # Update episodic memory with both training and held-out verified examples for instant recall
-        self.update_and_lookup_episodic_memory(new_verified_items=curriculum + stratified_val_20)
+        # Store training examples only. Validation answers must not enter retrieval memory.
+        self.update_and_lookup_episodic_memory(new_verified_items=curriculum)
 
-        input_ids, train_labels, train_weights = _encode_masked_batch(combined_train_items)
-        val_ids, val_labels, val_weights = _encode_masked_batch(stratified_val_20)
+        input_ids, train_labels, train_weights, train_encoding = encode_complete_training_batch(
+            combined_train_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
+        )
+        val_ids, val_labels, val_weights, validation_encoding = encode_complete_training_batch(
+            stratified_val_20, tokenizer, high_weight_token_ids, model.config.max_seq_len
+        )
 
         for name, param in model.named_parameters():
             param.requires_grad = any(
@@ -2923,7 +2983,9 @@ class AutonomousSelfImprovementController:
         swe_eval = synthesize_and_verify_swe_patch_tasks(cycle_index=cycles)
         py_refactor_eval = refactor_and_verify_python_code()
         repo_task_eval = solve_python_repo_task_and_emit_diff(self.repo_root)
-        arena_scorecard = self.run_frontier_arena_evaluation(cycle_index=cycles)
+        arena_scorecard = self.run_frontier_arena_evaluation(cycle_index=cycles, model=model, tokenizer=tokenizer)
+        if not arena_scorecard["evaluation_complete"]:
+            return {"executed": False, "halted_by_kill_switch": True, "daemon_state": "STOPPED"}
 
         # Evaluate live autoregressive generation (raw neural vs. episodic/R1 reflection vs. ALU-assisted)
         heldout_eval_subset = [
@@ -2987,7 +3049,7 @@ class AutonomousSelfImprovementController:
                 f"- **Executable AST, Python Stdlib & Open-Source Kernel Verification:** `{code_eval['verified_tasks']}/{code_eval['total_tasks']}` (`{code_eval['pass_rate'] * 100:.1f}%` pass rate)\n"
                 f"- **Token-Weighted Completion Training Loss (`v11 -> v12_evolving`):** `{pre_loss:.4f} -> {post_loss:.4f}` (delta `{post_loss - pre_loss:+.4f}`)\n"
                 f"- **Unseen Held-Out Validation Loss (Cycle #{cycles + 1000}):** `{val_pre_loss:.4f} -> {val_post_loss:.4f}` (delta `{val_post_loss - val_pre_loss:+.4f}`, promoted: `{promoted_on_heldout_val}`, merge: `{merge_method_selected}`)\n"
-                f"- **20-Domain Frontier Arena & SPRT Gate:** `{arena_scorecard['overall_domain_accuracy'] * 100:.1f}%` (`{arena_scorecard['sprt_non_regression_status']}`)\n"
+                f"- **Neural Diagnostic Arena (SPRT status):** `{arena_scorecard['overall_domain_accuracy'] * 100:.1f}%` (`{arena_scorecard['sprt_non_regression_status']}`)\n"
                 f"- **Updated 20-Shard Meta-AI Cartridge Digest Prefixes:** `{json.dumps(shard_hashes, sort_keys=True)}`\n"
                 "- **Scientific Honesty Disclosure:** Evolving 817K-parameter MoE weights are initialized from `v11`, trained with 3x token-weighted completion-masked cross-entropy + streamed HF open-source traces + GRPO self-play + TIES/DARE delta folding, gated on unseen held-out validation loss (`aix_zero_v12_evolving.pt`), and exported as 20 content-addressed `.safetensors` shards; the immutable `v11` baseline checkpoint remains untouched."
             )
@@ -3049,6 +3111,12 @@ class AutonomousSelfImprovementController:
             "promoted_on_heldout_val": promoted_on_heldout_val,
             "raw_neural_heldout_exact_match": raw_neural_acc,
             "reflected_heldout_exact_match": reflected_acc,
+            "reflection_assistance_mode": "symbolic_solver",
+            "heldout_exact_match_tested": len(heldout_eval_subset),
+            "training_encoding": train_encoding,
+            "validation_encoding": validation_encoding,
+            "arena_evaluation_mode": "neural_only",
+            "swe_patch_source": "predefined_reference_fixtures",
             "alu_assisted_heldout_exact_match": alu_assisted_acc,
             "exported_meta_shards": list(META_AI_EXPERT_DOMAINS.keys()),
             "shard_hash_prefixes": shard_hashes,
