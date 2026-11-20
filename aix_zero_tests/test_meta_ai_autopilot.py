@@ -30,8 +30,14 @@ class MetaAIAutopilotTests(unittest.TestCase):
         self.assertEqual(domains, set(META_AI_EXPERT_DOMAINS.keys()))
         self.assertGreaterEqual(len(curr), 25)
 
-        idx = scan_open_source_ai_codebase_patterns()
-        self.assertGreaterEqual(idx["indexed_package_count"], 5)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'repo'
+            for package in ('aix_zero', 'rlvr-forge', 'branchbox', 'mlx-tree', 'steerlens'):
+                directory = root / package
+                directory.mkdir(parents=True)
+                (directory / 'example.py').write_text('def example():\n    return 1\n', encoding='utf-8')
+            idx = scan_open_source_ai_codebase_patterns(root)
+        self.assertEqual(idx["indexed_package_count"], 5)
         peer = synthesize_peer_ai_improvement_prompt(idx, target_domain="META_RLVR_GRPO_TRAINER")
         self.assertIn("META_RLVR_GRPO_TRAINER", peer["peer_coaching_prompt"])
 
