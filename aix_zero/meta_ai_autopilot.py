@@ -2896,8 +2896,8 @@ class AutonomousSelfImprovementController:
 
         heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
         stratified_val_20 = [heldout_val_curriculum[i] for i in stratified_20_indices if i < len(heldout_val_curriculum)]
-        # Update episodic memory with both training and held-out verified examples for instant recall
-        self.update_and_lookup_episodic_memory(new_verified_items=curriculum + stratified_val_20)
+        # Store training examples only. Validation answers must not enter retrieval memory.
+        self.update_and_lookup_episodic_memory(new_verified_items=curriculum)
 
         input_ids, train_labels, train_weights = _encode_masked_batch(combined_train_items)
         val_ids, val_labels, val_weights = _encode_masked_batch(stratified_val_20)
