@@ -2,7 +2,7 @@
   "executed": true,
   "halted_by_kill_switch": false,
   "daemon_state": "RUNNING_IDLE_BETWEEN_CYCLES",
-  "cycles_completed": 93,
+  "cycles_completed": 94,
   "max_cpu_threads": 1,
   "codebase_index_sha256": "4bbac54808234719a3e69800b197d0c0a16c0454a6a0e0d8a095b4799e535b3c",
   "knowledge_graph_sha256": "b34d2ec22bb9a8c1acb4598d9b494c6e711b0e7f1bdf8606fbd5aba0053bf5e1",
@@ -10,7 +10,7 @@
   "sibling_open_source_repos_detected": 10,
   "external_frontier_projects_cataloged": 10,
   "harvested_open_source_items_verified": 5,
-  "streamed_hf_dataset": "open-r1/OpenR1-Math-220k",
+  "streamed_hf_dataset": "AI-MO/NuminaMath-1.5",
   "streamed_hf_verified_count": 4,
   "swe_patch_verified_count": 2,
   "swe_patch_total_count": 2,
@@ -22,39 +22,39 @@
   "arena_sprt_status": "PASS_H0_NON_INFERIOR",
   "cycle_focused_files": [
     {
-      "rel_path": "external_workspace/math-verify/src/math_verify/utils.py",
-      "functions": 8,
+      "rel_path": "external_workspace/mergekit/mergekit/card.py",
+      "functions": 7,
       "classes": 0,
-      "lines": 108
+      "lines": 222
     },
     {
-      "rel_path": "external_workspace/math-verify/tests/__init__.py",
-      "functions": 0,
-      "classes": 0,
-      "lines": 0
+      "rel_path": "external_workspace/mergekit/mergekit/common.py",
+      "functions": 30,
+      "classes": 4,
+      "lines": 425
     },
     {
-      "rel_path": "external_workspace/mergekit/mergekit/__init__.py",
-      "functions": 0,
-      "classes": 0,
-      "lines": 0
+      "rel_path": "external_workspace/mergekit/mergekit/config.py",
+      "functions": 11,
+      "classes": 8,
+      "lines": 219
     }
   ],
   "code_synthesis_verified_count": 9,
   "code_synthesis_total_count": 9,
   "replay_buffer_sampled_count": 6,
   "grpo_positive_trajectories": 4,
-  "plateau_detected": true,
+  "plateau_detected": false,
   "merge_method_selected": "direct_gradient_step",
-  "curriculum_sha256": "f0b515d33d8a9dc797026cfb770b8fd2643743099ed6ced53d31266cb93c14ff",
+  "curriculum_sha256": "84121a13b27da99c95fe1cc159997c7971a6177e894de2e2efa296581397d0af",
   "curriculum_verified_count": 94,
   "curriculum_total_count": 94,
-  "expert_pre_update_loss": 1.272684,
-  "expert_post_update_loss": 1.077672,
-  "heldout_val_pre_loss": 1.865486,
-  "heldout_val_post_loss": 1.83183,
+  "expert_pre_update_loss": 1.278718,
+  "expert_post_update_loss": 1.278718,
+  "heldout_val_pre_loss": 1.971663,
+  "heldout_val_post_loss": 1.971663,
   "promoted_on_heldout_val": true,
-  "raw_neural_heldout_exact_match": 0.0,
+  "raw_neural_heldout_exact_match": 0.05,
   "reflected_heldout_exact_match": 1.0,
   "alu_assisted_heldout_exact_match": 1.0,
   "exported_meta_shards": [
@@ -101,8 +101,8 @@
     "META_PYTORCH_TENSOR_MEMORY_STRIDES": "3d7878a24da5436a",
     "META_PYTHON_TYPE_CONCURRENCY_ASYNC": "5f110bdc4b7880b7"
   },
-  "active_coaching_domain": "META_MUON_ORTHOGONAL_OPTIMIZER",
-  "peer_coaching_prompt": "[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: META_MUON_ORTHOGONAL_OPTIMIZER]\nObjective: Improve peer AI reasoning using exact reference formula `state_memory_ratio = muon_states / adamw_states`.\nProtocol: Emit step-by-step rational equations inside `<think>...</think>` so every intermediate claim can be checked by a deterministic verifier before emitting `<ans>...</ans>`.",
-  "github_issue_url": "https://github.com/pfolex/verifiable-ai/issues/393",
-  "updated_at_utc": "2026-11-20T00:26:56.325148+00:00"
+  "active_coaching_domain": "META_OPENR1_LENGTH_PENALTY_REWARD",
+  "peer_coaching_prompt": "[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: META_OPENR1_LENGTH_PENALTY_REWARD]\nObjective: Improve peer AI reasoning using exact reference formula `length_reg_reward = acc_reward - (used_tokens / max_tokens)`.\nProtocol: Emit step-by-step rational equations inside `<think>...</think>` so every intermediate claim can be checked by a deterministic verifier before emitting `<ans>...</ans>`.",
+  "github_issue_url": null,
+  "updated_at_utc": "2026-11-20T00:29:13.441388+00:00"
 }
