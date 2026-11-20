@@ -21,3 +21,5 @@ Interrupted reports set `evaluation_complete` false. A report with no completed 
 Validation examples are excluded from new episodic-memory writes. Existing memory files may already contain validation examples from older versions; use a fresh evaluation state and do not treat legacy memory as uncontaminated.
 
 A token-length audit found that the 80-token training cap truncates 33/94 curriculum rows at index 1, 35/94 at index 98, and 43/94 at validation index 1098. Maximum full lengths were 105, 109 and 115 tokens respectively. Increasing the cap alone is insufficient when examples exceed model context; a follow-up encoder must preserve complete targets or explicitly exclude and count overlength examples.
+
+The training encoder now uses the model context limit, keeps complete prompt/completion pairs including EOS, and excludes whole examples that exceed it. Status records offered, encoded and skipped-overlength counts separately for training and validation. An entirely excluded batch raises an error. Exclusion can change domain coverage, so interpret loss alongside these counts.

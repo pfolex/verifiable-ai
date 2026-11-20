@@ -1898,6 +1898,46 @@ def verify_r1_reasoning_trace(text: str, gold: str) -> Dict[str, Any]:
     }
 
 
+def encode_complete_training_batch(
+    items: List[Dict[str, Any]],
+    tokenizer: Any,
+    high_weight_token_ids: set,
+    max_len: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, Dict[str, int]]:
+    if max_len < 2:
+        raise ValueError("Context limit must be at least two tokens")
+    skipped = 0
+    seqs: List[List[int]] = []
+    lbls: List[List[int]] = []
+    wgts: List[List[float]] = []
+    for it in items:
+        p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
+        c_ids = tokenizer.encode(it["completion"], add_bos=False, add_eos=True)
+        full = p_ids + c_ids
+        if len(full) > max_len:
+            skipped += 1
+            continue
+        p_cut = min(len(p_ids), len(full))
+        masked = ([0] * p_cut) + full[p_cut:]
+        w_row = ([0.0] * p_cut) + [3.0 if tid in high_weight_token_ids else 1.0 for tid in full[p_cut:]]
+        if len(full) < max_len:
+            pad_n = max_len - len(full)
+            full = full + [0] * pad_n
+            masked = masked + [0] * pad_n
+            w_row = w_row + [0.0] * pad_n
+        seqs.append(full)
+        lbls.append(masked)
+        wgts.append(w_row)
+    if not seqs:
+        raise ValueError("No complete examples fit the model context")
+    return (
+        torch.tensor(seqs, dtype=torch.long),
+        torch.tensor(lbls, dtype=torch.long),
+        torch.tensor(wgts, dtype=torch.float32),
+        {"offered": len(items), "encoded": len(seqs), "skipped_overlength": skipped},
+    )
+
+
 def repair_rollout_from_prompt(prompt: str, initial_response: str) -> Dict[str, Any]:
     """Repair using an explicitly identified symbolic helper and prompt alone."""
     symbolic = solve_meta_ai_prompt_symbolic(prompt)
@@ -2851,34 +2891,6 @@ class AutonomousSelfImprovementController:
             *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
         }
 
-        def _encode_masked_batch(
-            items: List[Dict[str, Any]],
-            max_len: int = 80,
-        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-            seqs: List[List[int]] = []
-            lbls: List[List[int]] = []
-            wgts: List[List[float]] = []
-            for it in items:
-                p_ids = tokenizer.encode(it["prompt"], add_bos=True, add_eos=False)
-                c_ids = tokenizer.encode(it["completion"], add_bos=False, add_eos=True)
-                full = (p_ids + c_ids)[:max_len]
-                p_cut = min(len(p_ids), len(full))
-                masked = ([0] * p_cut) + full[p_cut:]
-                w_row = ([0.0] * p_cut) + [3.0 if tid in high_weight_token_ids else 1.0 for tid in full[p_cut:]]
-                if len(full) < max_len:
-                    pad_n = max_len - len(full)
-                    full = full + [0] * pad_n
-                    masked = masked + [0] * pad_n
-                    w_row = w_row + [0.0] * pad_n
-                seqs.append(full)
-                lbls.append(masked)
-                wgts.append(w_row)
-            return (
-                torch.tensor(seqs, dtype=torch.long),
-                torch.tensor(lbls, dtype=torch.long),
-                torch.tensor(wgts, dtype=torch.float32),
-            )
-
         # Stratified 20-domain indices so every training & validation batch covers all 20 specialist domains
         stratified_20_indices = (0, 10, 16, 25, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91)
         stratified_train_20 = [curriculum[i] for i in stratified_20_indices if i < len(curriculum)]
@@ -2899,8 +2911,12 @@ class AutonomousSelfImprovementController:
         # Store training examples only. Validation answers must not enter retrieval memory.
         self.update_and_lookup_episodic_memory(new_verified_items=curriculum)
 
-        input_ids, train_labels, train_weights = _encode_masked_batch(combined_train_items)
-        val_ids, val_labels, val_weights = _encode_masked_batch(stratified_val_20)
+        input_ids, train_labels, train_weights, train_encoding = encode_complete_training_batch(
+            combined_train_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
+        )
+        val_ids, val_labels, val_weights, validation_encoding = encode_complete_training_batch(
+            stratified_val_20, tokenizer, high_weight_token_ids, model.config.max_seq_len
+        )
 
         for name, param in model.named_parameters():
             param.requires_grad = any(
@@ -3097,6 +3113,8 @@ class AutonomousSelfImprovementController:
             "reflected_heldout_exact_match": reflected_acc,
             "reflection_assistance_mode": "symbolic_solver",
             "heldout_exact_match_tested": len(heldout_eval_subset),
+            "training_encoding": train_encoding,
+            "validation_encoding": validation_encoding,
             "arena_evaluation_mode": "neural_only",
             "swe_patch_source": "predefined_reference_fixtures",
             "alu_assisted_heldout_exact_match": alu_assisted_acc,

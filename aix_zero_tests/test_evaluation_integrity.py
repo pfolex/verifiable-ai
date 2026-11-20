@@ -7,12 +7,32 @@ from unittest.mock import patch
 from aix_zero.benchmark_baseline import load_v11
 from aix_zero.meta_ai_autopilot import (
     AutonomousSelfImprovementController,
+    encode_complete_training_batch,
     build_meta_ai_self_improvement_curriculum,
     reflect_and_repair_rollout,
 )
 
 
 class EvaluationIntegrityTests(unittest.TestCase):
+    def test_encoder_keeps_complete_targets_and_counts_overlength(self):
+        class Tokenizer:
+            def encode(self, text, add_bos=False, add_eos=False):
+                return ([1] if add_bos else []) + [3] * len(text) + ([2] if add_eos else [])
+        rows = [dict(prompt='ab', completion='c' * 80), dict(prompt='ab', completion='c' * 110)]
+        ids, labels, weights, report = encode_complete_training_batch(rows, Tokenizer(), {2}, 112)
+        self.assertEqual(report, dict(offered=2, encoded=1, skipped_overlength=1))
+        self.assertEqual(ids.shape, (1, 112))
+        self.assertEqual(labels[0, :3].tolist(), [0, 0, 0])
+        self.assertEqual(labels[0, 83].item(), 2)
+        self.assertEqual(weights[0, 83].item(), 3.)
+        self.assertEqual(labels[0, 84:].sum().item(), 0)
+        # Exactly-at-limit examples keep EOS, too.
+        exact = [dict(prompt='ab', completion='c' * 108)]
+        _, labels, _, _ = encode_complete_training_batch(exact, Tokenizer(), set(), 112)
+        self.assertEqual(labels[0, -1].item(), 2)
+        with self.assertRaisesRegex(ValueError, 'No complete examples'):
+            encode_complete_training_batch(rows[1:], Tokenizer(), set(), 112)
+
     def test_unknown_prompt_cannot_copy_reference_into_repair(self):
         initial = '<think>unknown</think><ans>0</ans>'
         for gold in ('123456789', '987654321'):
