@@ -41,3 +41,38 @@ class RegistryTests(unittest.TestCase):
                 registry.verify(digest)
             with self.assertRaises(ValueError):
                 registry.verify('../escape')
+
+    def test_interrupted_initialization_and_event_gap(self):
+        with tempfile.TemporaryDirectory() as d:
+            source = Path(d) / 'model'; source.write_bytes(b'best')
+            registry = ExperimentRegistry(Path(d) / 'registry')
+            metadata = dict(source_revision='rev', tokenizer_sha256='vocab', dataset_sha256='data', seed=42, hardware='cpu', settings={})
+            attempt = registry.create(source, metadata)
+            directory = registry.root / 'attempts' / attempt
+            (directory / '000000.json').unlink()
+            with self.assertRaisesRegex(ValueError, 'Incomplete'):
+                registry.inspect(attempt)
+            self.assertEqual(registry.recover(attempt)['state'], 'proposed')
+            registry.transition(attempt, 'proposed', 'running', 'resume')
+            (directory / '000001.json').rename(directory / '000002.json')
+            with self.assertRaisesRegex(ValueError, 'Non-contiguous'):
+                registry.recover(attempt)
+
+    def test_competing_publications_keep_exactly_one_event(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Barrier
+        with tempfile.TemporaryDirectory() as d:
+            destination = Path(d) / 'event.json'
+            barrier = Barrier(2)
+            def publish(data):
+                barrier.wait()
+                try:
+                    ExperimentRegistry._exclusive(destination, data)
+                    return True
+                except FileExistsError:
+                    return False
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(publish, (b'first', b'second')))
+            self.assertEqual(sum(results), 1)
+            self.assertIn(destination.read_bytes(), (b'first', b'second'))
+            self.assertEqual(list(Path(d).iterdir()), [destination])

@@ -8,6 +8,7 @@ import json
 import os
 import tempfile
 import uuid
+from datetime import datetime, timezone
 
 
 class ExperimentRegistry:
@@ -60,6 +61,10 @@ class ExperimentRegistry:
             raise ValueError('Corrupt artifact')
         return path
 
+    @staticmethod
+    def _now():
+        return datetime.now(timezone.utc).isoformat()
+
     def create(self, champion_source, metadata):
         required = {'source_revision', 'tokenizer_sha256', 'dataset_sha256', 'seed', 'hardware', 'settings'}
         if not required.issubset(metadata):
@@ -72,6 +77,7 @@ class ExperimentRegistry:
         directory.mkdir(parents=True)
         self._exclusive(directory / 'manifest.json', json.dumps(dict(
             attempt=attempt, champion_sha256=champion, metadata=encoded_metadata,
+            created_at_utc=self._now(), schema_version=1,
         ), sort_keys=True, allow_nan=False).encode())
         self._exclusive(directory / '000000.json', b'{"state":"proposed","reason":"created"}')
         return attempt
@@ -82,13 +88,44 @@ class ExperimentRegistry:
         directory = self.root / 'attempts' / attempt
         manifest = json.loads((directory / 'manifest.json').read_text())
         self.verify(manifest['champion_sha256'])
-        events = [json.loads(p.read_text()) for p in sorted(directory.glob('[0-9]' * 6 + '.json'))]
+        paths = sorted(directory.glob('[0-9]' * 6 + '.json'))
+        if [p.name for p in paths] != [f'{i:06d}.json' for i in range(len(paths))]:
+            raise ValueError('Non-contiguous event history')
+        events = [json.loads(p.read_text()) for p in paths]
         if not events:
             raise ValueError('Incomplete attempt')
+        if manifest['attempt'] != attempt or events[0]['state'] != 'proposed':
+            raise ValueError('Invalid attempt history')
+        for previous, event in zip(events, events[1:]):
+            if event['state'] not in self.transitions.get(previous['state'], set()):
+                raise ValueError('Invalid event transition')
         for event in events:
+            if not event.get('reason', '').strip():
+                raise ValueError('Missing event reason')
+            if event['state'] == 'evaluated' and not event.get('artifact_sha256'):
+                raise ValueError('Missing evaluation evidence')
             if event.get('artifact_sha256'):
                 self.verify(event['artifact_sha256'])
         return dict(manifest=manifest, events=events, state=events[-1]['state'])
+
+    def recover(self, attempt):
+        """Complete only an interrupted initial publication; never resume training implicitly."""
+        if len(attempt) != 32 or any(c not in '0123456789abcdef' for c in attempt):
+            raise ValueError('Invalid attempt identity')
+        directory = self.root / 'attempts' / attempt
+        manifest = json.loads((directory / 'manifest.json').read_text())
+        if manifest['attempt'] != attempt:
+            raise ValueError('Invalid manifest identity')
+        self.verify(manifest['champion_sha256'])
+        if not list(directory.glob('[0-9]' * 6 + '.json')):
+            try:
+                self._exclusive(directory / '000000.json', json.dumps(dict(
+                    state='proposed', reason='recovered interrupted initialization',
+                    created_at_utc=self._now(),
+                )).encode())
+            except FileExistsError:
+                pass
+        return self.inspect(attempt)
 
     def transition(self, attempt, expected_state, state, reason, artifact=None):
         current = self.inspect(attempt)
@@ -98,7 +135,7 @@ class ExperimentRegistry:
             raise ValueError('Decision reason is required')
         if state == 'evaluated' and artifact is None:
             raise ValueError('Evaluation evidence is required')
-        event = dict(state=state, reason=reason)
+        event = dict(state=state, reason=reason, created_at_utc=self._now())
         if artifact is not None:
             event['artifact_sha256'] = self.snapshot(artifact)
         path = self.root / 'attempts' / attempt / f"{len(current['events']):06d}.json"
