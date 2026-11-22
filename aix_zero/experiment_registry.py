@@ -65,10 +65,29 @@ class ExperimentRegistry:
     def _now():
         return datetime.now(timezone.utc).isoformat()
 
-    def create(self, champion_source, metadata):
+    @staticmethod
+    def validate_metadata(metadata):
+        if not isinstance(metadata, dict):
+            raise ValueError('Metadata must be an object')
         required = {'source_revision', 'tokenizer_sha256', 'dataset_sha256', 'seed', 'hardware', 'settings'}
         if not required.issubset(metadata):
             raise ValueError('Missing reproducibility metadata')
+        for key in ('tokenizer_sha256', 'dataset_sha256'):
+            value = metadata[key]
+            if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
+                raise ValueError('Invalid ' + key)
+        if not isinstance(metadata['source_revision'], str) or not metadata['source_revision'].strip():
+            raise ValueError('Missing source revision')
+        if type(metadata['seed']) is not int or metadata['seed'] < 0:
+            raise ValueError('Seed must be a nonnegative integer')
+        if not isinstance(metadata['hardware'], str) or not metadata['hardware'].strip():
+            raise ValueError('Missing hardware identity')
+        if not isinstance(metadata['settings'], dict):
+            raise ValueError('Settings must be an object')
+        json.dumps(metadata, allow_nan=False)
+
+    def create(self, champion_source, metadata):
+        self.validate_metadata(metadata)
         # Validate JSON before creating an attempt directory.
         encoded_metadata = json.loads(json.dumps(metadata, allow_nan=False))
         champion = self.snapshot(champion_source)
@@ -79,7 +98,7 @@ class ExperimentRegistry:
             attempt=attempt, champion_sha256=champion, metadata=encoded_metadata,
             created_at_utc=self._now(), schema_version=1,
         ), sort_keys=True, allow_nan=False).encode())
-        self._exclusive(directory / '000000.json', b'{"state":"proposed","reason":"created"}')
+        self._exclusive(directory / '000000.json', json.dumps(dict(state='proposed', reason='created', created_at_utc=self._now())).encode())
         return attempt
 
     def inspect(self, attempt):
@@ -87,6 +106,7 @@ class ExperimentRegistry:
             raise ValueError('Invalid attempt identity')
         directory = self.root / 'attempts' / attempt
         manifest = json.loads((directory / 'manifest.json').read_text())
+        self.validate_metadata(manifest['metadata'])
         self.verify(manifest['champion_sha256'])
         paths = sorted(directory.glob('[0-9]' * 6 + '.json'))
         if [p.name for p in paths] != [f'{i:06d}.json' for i in range(len(paths))]:
@@ -116,6 +136,7 @@ class ExperimentRegistry:
         manifest = json.loads((directory / 'manifest.json').read_text())
         if manifest['attempt'] != attempt:
             raise ValueError('Invalid manifest identity')
+        self.validate_metadata(manifest['metadata'])
         self.verify(manifest['champion_sha256'])
         if not list(directory.glob('[0-9]' * 6 + '.json')):
             try:

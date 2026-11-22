@@ -9,7 +9,7 @@ class RegistryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             source = Path(d) / 'model'; source.write_bytes(b'best')
             registry = ExperimentRegistry(Path(d) / 'registry')
-            metadata = dict(source_revision='revision', tokenizer_sha256='vocab', dataset_sha256='data', seed=42, hardware='cpu', settings={})
+            metadata = dict(source_revision='revision', tokenizer_sha256='a'*64, dataset_sha256='b'*64, seed=42, hardware='cpu', settings={})
             attempt = registry.create(source, metadata)
             registry.transition(attempt, 'proposed', 'running', 'start')
             source.write_bytes(b'candidate')
@@ -46,7 +46,7 @@ class RegistryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             source = Path(d) / 'model'; source.write_bytes(b'best')
             registry = ExperimentRegistry(Path(d) / 'registry')
-            metadata = dict(source_revision='rev', tokenizer_sha256='vocab', dataset_sha256='data', seed=42, hardware='cpu', settings={})
+            metadata = dict(source_revision='rev', tokenizer_sha256='a'*64, dataset_sha256='b'*64, seed=42, hardware='cpu', settings={})
             attempt = registry.create(source, metadata)
             directory = registry.root / 'attempts' / attempt
             (directory / '000000.json').unlink()
@@ -76,3 +76,14 @@ class RegistryTests(unittest.TestCase):
             self.assertEqual(sum(results), 1)
             self.assertIn(destination.read_bytes(), (b'first', b'second'))
             self.assertEqual(list(Path(d).iterdir()), [destination])
+
+    def test_invalid_metadata_rejected_before_attempt_creation(self):
+        with tempfile.TemporaryDirectory() as d:
+            registry = ExperimentRegistry(Path(d) / 'registry')
+            source = Path(d) / 'model'; source.write_bytes(b'best')
+            valid = dict(source_revision='revision', tokenizer_sha256='a'*64, dataset_sha256='b'*64, seed=42, hardware='cpu', settings={})
+            for key, value in [('tokenizer_sha256', 'short'), ('seed', True), ('seed', -1), ('hardware', ''), ('settings', []), ('source_revision', '')]:
+                with self.subTest(key=key, value=value):
+                    with self.assertRaises(ValueError):
+                        registry.create(source, {**valid, key: value})
+            self.assertFalse((registry.root / 'attempts').exists())
