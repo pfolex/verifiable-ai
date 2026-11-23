@@ -8,6 +8,7 @@ import json
 
 from aix_zero.experiment_registry import ExperimentRegistry
 from aix_zero.experiment_splits import verify_manifest, eligible_training_rows
+from aix_zero.candidate_training import TrainingOutput
 from aix_zero.candidate_policy import screen_candidate, validate_policy
 
 
@@ -36,8 +37,15 @@ def run_experiment(registry, champion, manifest, metadata, policy, *, identity, 
         champion_digest=registry.inspect(attempt)['manifest']['champion_sha256']
         # Pass immutable baseline bytes and only training rows, never held-out answers.
         candidate_bytes=train(registry.verify(champion_digest).read_bytes(),deepcopy(training),deepcopy(frozen))
+        training_metrics = None
+        if isinstance(candidate_bytes, TrainingOutput):
+            training_metrics = candidate_bytes.metrics
+            candidate_bytes = candidate_bytes.checkpoint
         if not isinstance(candidate_bytes,bytes) or not candidate_bytes:
             raise ValueError('Trainer must return nonempty checkpoint bytes')
+        training_digest = None
+        if training_metrics is not None:
+            training_digest = registry.snapshot(publish('training.json', training_metrics))
         candidate_path=directory/'candidate.checkpoint'
         registry._exclusive(candidate_path,candidate_bytes)
         candidate_digest=registry.snapshot(candidate_path)
@@ -47,6 +55,9 @@ def run_experiment(registry, champion, manifest, metadata, policy, *, identity, 
         for split, report in (('development', dev), ('regression', reg)):
             if report.get('model_identities') != expected or report.get('split_manifest_sha256') != manifest['sha256'] or report.get('tokenizer_sha256') != metadata['tokenizer_sha256']:
                 raise ValueError('Evaluation provenance differs from experiment')
+            declared_evaluation = frozen['settings'].get('evaluation')
+            if declared_evaluation is not None and report.get('settings') != declared_evaluation:
+                raise ValueError('Evaluation settings differ from frozen experiment')
             expected_rows = {r['row']['prompt']: r['row']['gold'] for r in payload['splits'][split]}
             for role in ('champion', 'candidate'):
                 records = report['arms'][role]['records']
@@ -54,13 +65,13 @@ def run_experiment(registry, champion, manifest, metadata, policy, *, identity, 
                 if len(records) != len(expected_rows) or observed != expected_rows:
                     raise ValueError('Evaluation cases differ from registered split')
         decision=screen_candidate(dev,reg,policy)
-        evidence=publish('evaluation.json',dict(development=dev,regression=reg,decision=decision,candidate_sha256=candidate_digest))
+        evidence=publish('evaluation.json',dict(development=dev,regression=reg,decision=decision,candidate_sha256=candidate_digest,training_metrics_sha256=training_digest))
         registry.transition(attempt,'running','evaluated','evaluation evidence recorded',evidence)
         if decision['decision']=='reject':
             registry.transition(attempt,'evaluated','rejected','; '.join(decision['reasons']))
         elif decision['decision']=='blocked':
             registry.transition(attempt,'evaluated','failed',decision['reason'])
-        return dict(attempt=attempt,state=registry.inspect(attempt)['state'],decision=decision,candidate_sha256=candidate_digest)
+        return dict(attempt=attempt,state=registry.inspect(attempt)['state'],decision=decision,candidate_sha256=candidate_digest,training_metrics_sha256=training_digest)
     except Exception as error:
         state=registry.inspect(attempt)['state']
         if state in ('running','evaluated'):
