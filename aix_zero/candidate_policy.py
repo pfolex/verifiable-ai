@@ -33,13 +33,17 @@ def _paired_rows(report, split):
     return a,b
 
 
-def screen_candidate(development, regression, policy):
+def validate_policy(policy):
     required = {'min_cases', 'min_net_gain', 'max_regression_losses', 'max_trace_losses'}
     if set(policy) != required or any(type(v) is not int or v < 0 for v in policy.values()):
         raise ValueError('Invalid policy')
     if policy['min_cases'] < 1 or policy['min_net_gain'] < 1:
         raise ValueError('Positive case and gain thresholds required')
-    digest = hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest()
+
+
+def screen_candidate(development, regression, policy):
+    digest = validate_policy(policy)
     try:
         dev = _paired_rows(development,'development'); reg = _paired_rows(regression,'regression')
         identities = development['model_identities']
