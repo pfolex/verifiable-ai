@@ -42,3 +42,52 @@ class TrainingSettingsTests(unittest.TestCase):
         metadata=dict(settings=dict(training=dict(steps=1,learning_rate=.0004,max_seconds=60)))
         with self.assertRaisesRegex(ValueError,'trace verification'):
             train_checkpoint(b'not loaded',[dict(prompt='1+1?',gold='2',completion='wrong')],metadata)
+
+    def test_experiment_cli_records_real_training_and_paired_evidence(self):
+        import contextlib
+        import io
+        import json
+        from pathlib import Path
+        import tempfile
+        import torch
+        from aix_zero.benchmark_baseline import load_v11
+        from aix_zero.experiment_registry import ExperimentRegistry
+        from aix_zero.experiment_splits import build_split_manifest
+        from aix_zero.meta_ai_autopilot import build_meta_ai_self_improvement_curriculum
+        from aix_zero.run_candidate_experiment import main
+        base=Path(__file__).resolve().parents[1]/'aix_zero/checkpoints/aix_zero_v11_kip.safetensors'
+        model, tokenizer=load_v11(base)
+        splits={name:[] for name in ('train','development','regression','final')}
+        seen=set()
+        for split, cycle in (('train',101),('development',2100),('regression',3100)):
+            for row in build_meta_ai_self_improvement_curriculum(cycle_index=cycle):
+                length=len(tokenizer.encode(row['prompt'],add_bos=True,add_eos=False)+
+                           tokenizer.encode(row['completion'],add_bos=False,add_eos=True))
+                if row['prompt'] not in seen and length <= model.config.max_seq_len:
+                    splits[split].append(row);seen.add(row['prompt']);break
+            self.assertEqual(len(splits[split]),1)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            champion=root/'champion.pt'
+            torch.save(model.state_dict(),champion)
+            before=champion.read_bytes()
+            manifest=root/'manifest.json'
+            manifest.write_text(json.dumps(build_split_manifest(splits,lambda row:row['prompt'])))
+            policy=root/'policy.json'
+            policy.write_text(json.dumps(dict(min_cases=1,min_net_gain=1,max_regression_losses=0,max_trace_losses=0)))
+            with contextlib.redirect_stdout(io.StringIO()):
+                result=main(['--champion',str(champion),'--manifest',str(manifest),
+                    '--policy',str(policy),'--registry',str(root/'registry'),
+                    '--steps','1','--learning-rate','0.0004','--max-training-seconds','60'])
+            self.assertIn(result['state'],('evaluated','rejected'))
+            self.assertEqual(champion.read_bytes(),before)
+            registry=ExperimentRegistry(root/'registry')
+            self.assertEqual(registry.inspect(result['attempt'])['state'],result['state'])
+            metrics=json.loads(registry.verify(result['training_metrics_sha256']).read_text())
+            self.assertEqual(metrics['steps_completed'],1)
+            evidence=json.loads((root/'registry'/'attempts'/result['attempt']/'evaluation.json').read_text())
+            for split in ('development','regression'):
+                report=evidence[split]
+                self.assertTrue(report['comparison_complete'])
+                self.assertEqual(report['assistance_mode'],'neural_only')
+                self.assertEqual(report['arms']['candidate']['offered'],1)
