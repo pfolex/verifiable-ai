@@ -33,10 +33,18 @@ def evaluate_pair(rows, champion, candidate, *, identities, settings, score_answ
             start=time.monotonic()
             record=dict(prompt=row['prompt'], gold=row['gold'], domain=row.get('domain', 'unspecified'))
             try:
-                completion=generate(row['prompt'], deepcopy(settings))
+                raw=generate(row['prompt'], deepcopy(settings))
+                telemetry=None
+                if isinstance(raw, dict):
+                    completion=raw.get('completion')
+                    telemetry={k: deepcopy(raw[k]) for k in ('generated_tokens', 'termination_reason', 'prompt_tokens', 'total_tokens', 'max_new_tokens', 'context_limit') if k in raw}
+                else:
+                    completion=raw
                 if not isinstance(completion, str):
                     raise TypeError('Generator must return text')
                 record['completion']=completion
+                if telemetry:
+                    record.update(telemetry)
                 # Reference answers are introduced only after generation returns.
                 record['answer_correct']=bool(score_answer(completion, row['gold']))
                 record['trace_valid']=bool(score_trace(completion, row['gold']))

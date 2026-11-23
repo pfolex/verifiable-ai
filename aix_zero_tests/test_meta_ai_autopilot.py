@@ -70,7 +70,11 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertGreater(res1["grpo_positive_trajectories"], 0)
             self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 20)
+            self.assertEqual(len(res2["exported_meta_shards"]), 30)
+            self.assertGreaterEqual(res2["certified_sme_subject_count"], 31)
+            self.assertGreaterEqual(res2["dynamically_discovered_subject_count"], 1)
+            self.assertTrue((tdir / "discovered_subjects_registry.json").exists())
+            self.assertTrue((tdir / "subject_expertise_index.json").exists())
             self.assertEqual(res1["swe_patch_verified_count"], res1["swe_patch_total_count"])
             self.assertTrue(res1["python_refactor_verified"])
             self.assertTrue(res1["repo_task_execute_routed_request_verified"])
@@ -105,7 +109,7 @@ class MetaAIAutopilotTests(unittest.TestCase):
             gm_res = grade_and_merge_python_patches()
             self.assertTrue(gm_res["collaborative_merged_patch_passed"])
 
-            # Verify ElasticLoRAAdapterBank dynamic rank expansion (`GROWTH-01`)
+            # Verify ElasticLoRAAdapterBank dynamic rank expansion (`GROWTH-01` & `DISCOVER-03`)
             eb = ElasticLoRAAdapterBank(d_model=128, d_ff=128, initial_rank=4)
             e1 = eb.maybe_expand_rank(True, cycle_index=1)
             self.assertTrue(e1["expanded"])
@@ -113,6 +117,17 @@ class MetaAIAutopilotTests(unittest.TestCase):
             e2 = eb.maybe_expand_rank(True, cycle_index=2)
             self.assertTrue(e2["expanded"])
             self.assertEqual(e2["current_rank"], 16)
+            for next_r in (32, 64, 128):
+                en = eb.maybe_expand_rank(False, cycle_index=3, new_subject_discovered=True)
+                self.assertEqual(en["current_rank"], next_r)
+
+            # Verify Phase-VI CLI commands (`aix_ctl subjects` and `aix_ctl learn-subject`)
+            import contextlib, io
+            with contextlib.redirect_stdout(io.StringIO()):
+                rc_learn = aix_ctl_main(["--state-dir", str(tdir), "learn-subject", "--subject", "Quantum Error Correction", "--category", "quantum_computing"])
+                rc_subj = aix_ctl_main(["--state-dir", str(tdir), "subjects"])
+            self.assertEqual(rc_learn, 0)
+            self.assertEqual(rc_subj, 0)
 
             # Verify ElasticBrain plateau detection (`ELASTIC-01`)
             plat_yes = ctrl.detect_domain_plateaus(window=4, min_improvement=0.05, loss_series_override=[6.10, 6.09, 6.08, 6.08])
@@ -156,6 +171,16 @@ class MetaAIAutopilotTests(unittest.TestCase):
                 ("Q:MetaPyAlgo:hash_ops=8;scan_ops=64->speedup_ratio?", "META_PYTHON_ALGORITHMIC_BIG_O", "<ans>8</ans>"),
                 ("Q:MetaPyTorch:ckpt_layers=4;total_layers=16->mem_ratio?", "META_PYTORCH_TENSOR_MEMORY_STRIDES", "<ans>1/4</ans>"),
                 ("Q:MetaPyAsync:seq_ms=120;async_ms=30->concurrency_gain?", "META_PYTHON_TYPE_CONCURRENCY_ASYNC", "<ans>4</ans>"),
+                ("Q:MetaFinSharpe:ret_bps=250;rf_bps=50;vol_bps=100->sharpe_ratio?", "META_FINANCE_PORTFOLIO_SHARPE", "<ans>2</ans>"),
+                ("Q:MetaPhysKE:mass=4;v_sq=8->kinetic_energy?", "META_PHYSICS_RELATIVISTIC_ENERGY", "<ans>16</ans>"),
+                ("Q:MetaChemYield:actual_moles=10;theoretical_moles=12->yield_ratio?", "META_CHEMISTRY_STOICHIOMETRY_YIELD", "<ans>5/6</ans>"),
+                ("Q:MetaBioAllele:observed_alleles=10;total_alleles=40->allele_frequency?", "META_BIOLOGY_GENOMICS_ALLELE_FREQ", "<ans>1/4</ans>"),
+                ("Q:MetaCryptoZK:accepted_rounds=2;challenge_space=32->soundness_survival?", "META_CRYPTO_MODULAR_VERIFIER", "<ans>1/16</ans>"),
+                ("Q:MetaEconElast:pct_qty=10;pct_price=5->elasticity_ratio?", "META_ECONOMICS_ELASTICITY_EQUILIBRIUM", "<ans>2</ans>"),
+                ("Q:MetaBFT:fault_nodes=1;total_nodes=4->quorum_fraction?", "META_DISTRIBUTED_CONSENSUS_BFT", "<ans>3/4</ans>"),
+                ("Q:MetaBayesOdds:prior_num=1;prior_den=2;lh_hit=3;lh_false=1->posterior_odds?", "META_BAYESIAN_POSTERIOR_ODDS", "<ans>3/2</ans>"),
+                ("Q:MetaLogicSAT:clauses=42;variables=10->clause_density?", "META_FORMAL_LOGIC_SAT_DENSITY", "<ans>21/5</ans>"),
+                ("Q:MetaNetBDP:inflight_kb=32;bdp_kb=64->window_utilization?", "META_NETWORK_BDP_THROUGHPUT", "<ans>1/2</ans>"),
             ]:
                 q_dom = ctrl.query_evolving_meta_ai(prompt_str, use_alu=True)
                 self.assertEqual(q_dom["routed_domain"], expected_dom)

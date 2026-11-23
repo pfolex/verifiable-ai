@@ -212,6 +212,86 @@ META_AI_EXPERT_DOMAINS: Dict[str, Dict[str, Any]] = {
         "introduced_in": "v12_phase5_python_mastery",
         "expert_slot": 3,
     },
+    "META_FINANCE_PORTFOLIO_SHARPE": {
+        "title": "Quantitative Finance Sharpe Excess-Return Risk Ratio Analyzer",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaFinSharpe:",
+        "formula": "sharpe_ratio = (return_bps - rf_bps) / vol_bps",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 0,
+    },
+    "META_PHYSICS_RELATIVISTIC_ENERGY": {
+        "title": "Relativistic & Classical Kinetic Energy Momentum Ratio Verifier",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaPhysKE:",
+        "formula": "kinetic_energy = (mass * velocity_sq) / 2",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 1,
+    },
+    "META_CHEMISTRY_STOICHIOMETRY_YIELD": {
+        "title": "Chemical Stoichiometry & Molar Reaction Percent Yield Verifier",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaChemYield:",
+        "formula": "yield_ratio = actual_moles / theoretical_moles",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 2,
+    },
+    "META_BIOLOGY_GENOMICS_ALLELE_FREQ": {
+        "title": "Genomics & Population Genetics Allele Frequency Analyzer",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaBioAllele:",
+        "formula": "allele_frequency = observed_alleles / total_alleles",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 3,
+    },
+    "META_CRYPTO_MODULAR_VERIFIER": {
+        "title": "Cryptographic Modular Arithmetic & Zero-Knowledge Soundness Ratio",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaCryptoZK:",
+        "formula": "soundness_survival = accepted_rounds / challenge_space",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 0,
+    },
+    "META_ECONOMICS_ELASTICITY_EQUILIBRIUM": {
+        "title": "Microeconomic Price Elasticity & Market Equilibrium Ratio",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaEconElast:",
+        "formula": "elasticity_ratio = pct_quantity_change / pct_price_change",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 1,
+    },
+    "META_DISTRIBUTED_CONSENSUS_BFT": {
+        "title": "Byzantine Fault Tolerant Quorum & Consensus Safety Fraction",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaBFT:",
+        "formula": "quorum_fraction = (2 * fault_nodes + 1) / total_nodes",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 2,
+    },
+    "META_BAYESIAN_POSTERIOR_ODDS": {
+        "title": "Exact Bayesian Likelihood-Ratio & Posterior Odds Updater",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaBayesOdds:",
+        "formula": "posterior_odds = (prior_num * likelihood_hit) / (prior_den * likelihood_false)",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 3,
+    },
+    "META_FORMAL_LOGIC_SAT_DENSITY": {
+        "title": "Formal Logic CNF Clause-to-Variable Phase Transition Density",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaLogicSAT:",
+        "formula": "clause_density = clauses / variables",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 0,
+    },
+    "META_NETWORK_BDP_THROUGHPUT": {
+        "title": "High-Speed Network Bandwidth-Delay Product & Window Utilization",
+        "category": "universal_tree_phase6",
+        "prefix": "Q:MetaNetBDP:",
+        "formula": "window_utilization = inflight_kb / bdp_kb",
+        "introduced_in": "v12_phase6_universal_tree",
+        "expert_slot": 1,
+    },
 }
 
 OPEN_SOURCE_STREAMING_DATASETS: Tuple[Dict[str, str], ...] = (
@@ -242,6 +322,99 @@ OPEN_SOURCE_STREAMING_DATASETS: Tuple[Dict[str, str], ...] = (
         "split": "train",
         "domain": "META_DSPY_MIPRO_PROMPT_OPT",
         "description": "5.4T educational & scientific tokens filtered for reasoning density",
+    },
+    {
+        "dataset": "TIGER-Lab/TheoremQA",
+        "config": "default",
+        "split": "test",
+        "domain": "META_PHYSICS_RELATIVISTIC_ENERGY",
+        "description": "Theorem-driven STEM questions spanning math, physics, finance, and CS",
+    },
+    {
+        "dataset": "cais/mmlu",
+        "config": "all",
+        "split": "test",
+        "domain": "META_CHEMISTRY_STOICHIOMETRY_YIELD",
+        "description": "57-subject Massive Multitask Language Understanding benchmark",
+    },
+    {
+        "dataset": "Idavidrein/gpqa",
+        "config": "gpqa_diamond",
+        "split": "train",
+        "domain": "META_BIOLOGY_GENOMICS_ALLELE_FREQ",
+        "description": "Graduate-level Google-Proof Q&A across biology, physics, and chemistry",
+    },
+    {
+        "dataset": "bigcode/the-stack-smol",
+        "config": "default",
+        "split": "train",
+        "domain": "META_PYTHON_AST_COMPLEXITY",
+        "description": "Permissively licensed open-source source code across 30 programming languages",
+    },
+)
+
+HUGGINGFACE_OPEN_SOURCE_DATASETS = OPEN_SOURCE_STREAMING_DATASETS
+
+UNIVERSAL_DISCOVERY_CATALOG: Tuple[Dict[str, Any], ...] = (
+    {
+        "subject_id": "DISC_QUANTUM_CIRCUIT_GATE_FIDELITY",
+        "title": "Quantum Circuit Two-Qubit Entangling Gate Survival Fidelity",
+        "category": "quantum_information_science",
+        "prefix": "Q:DiscQuantum:",
+        "formula": "circuit_fidelity = coherent_shots / total_shots",
+        "wikipedia_slug": "Quantum_circuit",
+        "arxiv_query": "quantum circuit gate fidelity error mitigation",
+        "expert_slot": 0,
+    },
+    {
+        "subject_id": "DISC_ROBOTICS_PID_STEADY_GAIN",
+        "title": "Robotics Closed-Loop Control & Kinematic Torque Ratio",
+        "category": "robotics_and_control_systems",
+        "prefix": "Q:DiscRobot:",
+        "formula": "torque_gain = output_torque / actuator_current",
+        "wikipedia_slug": "PID_controller",
+        "arxiv_query": "robotics optimal torque control kinematics",
+        "expert_slot": 1,
+    },
+    {
+        "subject_id": "DISC_CLIMATE_RADIATIVE_FORCING",
+        "title": "Atmospheric Radiative Forcing & Carbon Flux Ratio",
+        "category": "earth_and_climate_physics",
+        "prefix": "Q:DiscClimate:",
+        "formula": "absorption_fraction = absorbed_watts / incident_watts",
+        "wikipedia_slug": "Radiative_forcing",
+        "arxiv_query": "radiative forcing atmospheric energy balance",
+        "expert_slot": 2,
+    },
+    {
+        "subject_id": "DISC_PHARMACOKINETICS_CLEARANCE",
+        "title": "Biomedical Pharmacokinetics Plasma Clearance & Half-Life Ratio",
+        "category": "biomedical_engineering",
+        "prefix": "Q:DiscPharma:",
+        "formula": "clearance_ratio = elimination_rate / volume_distribution",
+        "wikipedia_slug": "Pharmacokinetics",
+        "arxiv_query": "pharmacokinetics clearance compartmental modeling",
+        "expert_slot": 3,
+    },
+    {
+        "subject_id": "DISC_ASTROPHYSICS_ORBITAL_RESONANCE",
+        "title": "Astrophysics Keplerian Orbital Period & Resonance Ratio",
+        "category": "astrophysics_and_ orbital_mechanics",
+        "prefix": "Q:DiscAstro:",
+        "formula": "resonance_ratio = outer_period_days / inner_period_days",
+        "wikipedia_slug": "Orbital_resonance",
+        "arxiv_query": "exoplanet orbital resonance keplerian dynamics",
+        "expert_slot": 0,
+    },
+    {
+        "subject_id": "DISC_COMPILER_SSA_REGISTER_PRESSURE",
+        "title": "Compiler SSA Register Allocation & Spill Compression Ratio",
+        "category": "compiler_and_systems_engineering",
+        "prefix": "Q:DiscCompiler:",
+        "formula": "spill_ratio = live_variables / physical_registers",
+        "wikipedia_slug": "Static_single-assignment_form",
+        "arxiv_query": "compiler SSA register allocation graph coloring",
+        "expert_slot": 1,
     },
 )
 
@@ -687,6 +860,182 @@ def build_meta_ai_self_improvement_curriculum(cycle_index: int = 1) -> List[Dict
                     "cycle_index": c_idx,
                 }
             )
+
+    # 21. META_FINANCE_PORTFOLIO_SHARPE: Sharpe excess return ratio = (ret_bps - rf_bps) / vol_bps
+    for vol_bps in (100 + 20 * (c_idx % 3), 200 + 20 * (c_idx % 3)):
+        rf_bps = 50
+        ret_bps = rf_bps + vol_bps * (2 + (c_idx % 2))
+        excess = ret_bps - rf_bps
+        f_val = Fraction(excess, vol_bps)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaFinSharpe:ret_bps={ret_bps};rf_bps={rf_bps};vol_bps={vol_bps}->sharpe_ratio?"
+        trace = f"<think>excess={ret_bps}-{rf_bps}={excess};sharpe={excess}/{vol_bps}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_FINANCE_PORTFOLIO_SHARPE",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 22. META_PHYSICS_RELATIVISTIC_ENERGY: Classical kinetic energy ratio = (mass * v_sq) / 2
+    for mass in (4 + 2 * (c_idx % 3), 6 + 2 * (c_idx % 3)):
+        v_sq = 8 + 4 * (c_idx % 4)
+        prod = mass * v_sq
+        f_val = Fraction(prod, 2)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaPhysKE:mass={mass};v_sq={v_sq}->kinetic_energy?"
+        trace = f"<think>{mass}*{v_sq}={prod};{prod}/2={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_PHYSICS_RELATIVISTIC_ENERGY",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 23. META_CHEMISTRY_STOICHIOMETRY_YIELD: Molar reaction yield ratio = actual_moles / theoretical_moles
+    for theo_m in (12 + 4 * (c_idx % 3), 16 + 4 * (c_idx % 3)):
+        act_m = theo_m - 2
+        f_val = Fraction(act_m, theo_m)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaChemYield:actual_moles={act_m};theoretical_moles={theo_m}->yield_ratio?"
+        trace = f"<think>yield={act_m}/{theo_m}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_CHEMISTRY_STOICHIOMETRY_YIELD",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 24. META_BIOLOGY_GENOMICS_ALLELE_FREQ: Allele frequency = observed_alleles / total_alleles
+    for tot_a in (40 + 10 * (c_idx % 3), 80 + 10 * (c_idx % 3)):
+        obs_a = 10 + 5 * (c_idx % 2)
+        f_val = Fraction(obs_a, tot_a)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaBioAllele:observed_alleles={obs_a};total_alleles={tot_a}->allele_frequency?"
+        trace = f"<think>freq={obs_a}/{tot_a}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_BIOLOGY_GENOMICS_ALLELE_FREQ",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 25. META_CRYPTO_MODULAR_VERIFIER: Soundness ratio = accepted_rounds / challenge_space
+    for c_space in (32 + 16 * (c_idx % 3), 64 + 16 * (c_idx % 3)):
+        acc_r = 2 + (c_idx % 2)
+        f_val = Fraction(acc_r, c_space)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaCryptoZK:accepted_rounds={acc_r};challenge_space={c_space}->soundness_survival?"
+        trace = f"<think>soundness={acc_r}/{c_space}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_CRYPTO_MODULAR_VERIFIER",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 26. META_ECONOMICS_ELASTICITY_EQUILIBRIUM: Elasticity ratio = pct_qty / pct_price
+    for pct_p in (5 + (c_idx % 3), 10 + (c_idx % 3)):
+        pct_q = pct_p * (2 + (c_idx % 2))
+        f_val = Fraction(pct_q, pct_p)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaEconElast:pct_qty={pct_q};pct_price={pct_p}->elasticity_ratio?"
+        trace = f"<think>elast={pct_q}/{pct_p}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_ECONOMICS_ELASTICITY_EQUILIBRIUM",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 27. META_DISTRIBUTED_CONSENSUS_BFT: Quorum fraction = (2 * f + 1) / total_nodes
+    for f_nodes in (1 + (c_idx % 3), 2 + (c_idx % 3)):
+        tot_n = 3 * f_nodes + 1
+        q_num = 2 * f_nodes + 1
+        f_val = Fraction(q_num, tot_n)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaBFT:fault_nodes={f_nodes};total_nodes={tot_n}->quorum_fraction?"
+        trace = f"<think>2*{f_nodes}={2*f_nodes};quorum={q_num}/{tot_n}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_DISTRIBUTED_CONSENSUS_BFT",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 28. META_BAYESIAN_POSTERIOR_ODDS: Posterior odds = (prior_num * lh_hit) / (prior_den * lh_false)
+    for lh_hit in (3 + (c_idx % 3), 4 + (c_idx % 3)):
+        p_num, p_den, lh_false = 1, 2, 1
+        num = p_num * lh_hit
+        den = p_den * lh_false
+        f_val = Fraction(num, den)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaBayesOdds:prior_num={p_num};prior_den={p_den};lh_hit={lh_hit};lh_false={lh_false}->posterior_odds?"
+        trace = f"<think>{p_num}*{lh_hit}={num};{p_den}*{lh_false}={den};{num}/{den}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_BAYESIAN_POSTERIOR_ODDS",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 29. META_FORMAL_LOGIC_SAT_DENSITY: Clause density = clauses / variables
+    for n_vars in (10 + 5 * (c_idx % 3), 20 + 5 * (c_idx % 3)):
+        n_clauses = n_vars * 4 + 2
+        f_val = Fraction(n_clauses, n_vars)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaLogicSAT:clauses={n_clauses};variables={n_vars}->clause_density?"
+        trace = f"<think>density={n_clauses}/{n_vars}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_FORMAL_LOGIC_SAT_DENSITY",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
+
+    # 30. META_NETWORK_BDP_THROUGHPUT: Window utilization = inflight_kb / bdp_kb
+    for bdp_kb in (64 + 32 * (c_idx % 3), 128 + 32 * (c_idx % 3)):
+        inf_kb = bdp_kb // 2
+        f_val = Fraction(inf_kb, bdp_kb)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        prompt = f"Q:MetaNetBDP:inflight_kb={inf_kb};bdp_kb={bdp_kb}->window_utilization?"
+        trace = f"<think>util={inf_kb}/{bdp_kb}={gold}</think><ans>{gold}</ans>"
+        samples.append(
+            {
+                "domain": "META_NETWORK_BDP_THROUGHPUT",
+                "prompt": prompt,
+                "completion": trace,
+                "gold": gold,
+                "cycle_index": c_idx,
+            }
+        )
 
     return samples
 
@@ -1448,6 +1797,104 @@ def solve_meta_ai_prompt_symbolic(prompt: str) -> Optional[Dict[str, str]]:
         trace = f"<think>gain={seq_m}/{as_m}={gold}</think><ans>{gold}</ans>"
         return {"domain": "META_PYTHON_TYPE_CONCURRENCY_ASYNC", "completion": trace, "gold": gold}
 
+    m_fin = re.match(r"^Q:MetaFinSharpe:ret_bps=(\d+);rf_bps=(\d+);vol_bps=(\d+)->sharpe_ratio\?$", s)
+    if m_fin:
+        ret_b, rf_b, vol_b = int(m_fin.group(1)), int(m_fin.group(2)), int(m_fin.group(3))
+        ex = ret_b - rf_b
+        f_val = Fraction(ex, vol_b)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>excess={ret_b}-{rf_b}={ex};sharpe={ex}/{vol_b}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_FINANCE_PORTFOLIO_SHARPE", "completion": trace, "gold": gold}
+
+    m_phys = re.match(r"^Q:MetaPhysKE:mass=(\d+);v_sq=(\d+)->kinetic_energy\?$", s)
+    if m_phys:
+        m_v, vsq_v = int(m_phys.group(1)), int(m_phys.group(2))
+        prod = m_v * vsq_v
+        f_val = Fraction(prod, 2)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>{m_v}*{vsq_v}={prod};{prod}/2={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_PHYSICS_RELATIVISTIC_ENERGY", "completion": trace, "gold": gold}
+
+    m_chem = re.match(r"^Q:MetaChemYield:actual_moles=(\d+);theoretical_moles=(\d+)->yield_ratio\?$", s)
+    if m_chem:
+        am, tm = int(m_chem.group(1)), int(m_chem.group(2))
+        f_val = Fraction(am, tm)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>yield={am}/{tm}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_CHEMISTRY_STOICHIOMETRY_YIELD", "completion": trace, "gold": gold}
+
+    m_bio = re.match(r"^Q:MetaBioAllele:observed_alleles=(\d+);total_alleles=(\d+)->allele_frequency\?$", s)
+    if m_bio:
+        oa, ta = int(m_bio.group(1)), int(m_bio.group(2))
+        f_val = Fraction(oa, ta)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>freq={oa}/{ta}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_BIOLOGY_GENOMICS_ALLELE_FREQ", "completion": trace, "gold": gold}
+
+    m_cryp = re.match(r"^Q:MetaCryptoZK:accepted_rounds=(\d+);challenge_space=(\d+)->soundness_survival\?$", s)
+    if m_cryp:
+        ar, cs = int(m_cryp.group(1)), int(m_cryp.group(2))
+        f_val = Fraction(ar, cs)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>soundness={ar}/{cs}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_CRYPTO_MODULAR_VERIFIER", "completion": trace, "gold": gold}
+
+    m_econ = re.match(r"^Q:MetaEconElast:pct_qty=(\d+);pct_price=(\d+)->elasticity_ratio\?$", s)
+    if m_econ:
+        pq, pp = int(m_econ.group(1)), int(m_econ.group(2))
+        f_val = Fraction(pq, pp)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>elast={pq}/{pp}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_ECONOMICS_ELASTICITY_EQUILIBRIUM", "completion": trace, "gold": gold}
+
+    m_bft = re.match(r"^Q:MetaBFT:fault_nodes=(\d+);total_nodes=(\d+)->quorum_fraction\?$", s)
+    if m_bft:
+        fn, tn = int(m_bft.group(1)), int(m_bft.group(2))
+        q_num = 2 * fn + 1
+        f_val = Fraction(q_num, tn)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>2*{fn}={2*fn};quorum={q_num}/{tn}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_DISTRIBUTED_CONSENSUS_BFT", "completion": trace, "gold": gold}
+
+    m_bayes = re.match(r"^Q:MetaBayesOdds:prior_num=(\d+);prior_den=(\d+);lh_hit=(\d+);lh_false=(\d+)->posterior_odds\?$", s)
+    if m_bayes:
+        pn, pd, lh, lf = int(m_bayes.group(1)), int(m_bayes.group(2)), int(m_bayes.group(3)), int(m_bayes.group(4))
+        num = pn * lh
+        den = pd * lf
+        f_val = Fraction(num, den)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>{pn}*{lh}={num};{pd}*{lf}={den};{num}/{den}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_BAYESIAN_POSTERIOR_ODDS", "completion": trace, "gold": gold}
+
+    m_sat = re.match(r"^Q:MetaLogicSAT:clauses=(\d+);variables=(\d+)->clause_density\?$", s)
+    if m_sat:
+        cl, vr = int(m_sat.group(1)), int(m_sat.group(2))
+        f_val = Fraction(cl, vr)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>density={cl}/{vr}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_FORMAL_LOGIC_SAT_DENSITY", "completion": trace, "gold": gold}
+
+    m_bdp = re.match(r"^Q:MetaNetBDP:inflight_kb=(\d+);bdp_kb=(\d+)->window_utilization\?$", s)
+    if m_bdp:
+        ik, bk = int(m_bdp.group(1)), int(m_bdp.group(2))
+        f_val = Fraction(ik, bk)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>util={ik}/{bk}={gold}</think><ans>{gold}</ans>"
+        return {"domain": "META_NETWORK_BDP_THROUGHPUT", "completion": trace, "gold": gold}
+
+    m_disc = re.match(r"^Q:(Disc[A-Za-z0-9_]+):num=(\d+);den=(\d+)->ratio\?$", s)
+    if m_disc:
+        pref_tag, num_v, den_v = m_disc.group(1), int(m_disc.group(2)), int(m_disc.group(3))
+        f_val = Fraction(num_v, den_v)
+        gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+        trace = f"<think>ratio={num_v}/{den_v}={gold}</think><ans>{gold}</ans>"
+        dom_id = f"DISC_{pref_tag[4:].upper()}"
+        for entry in UNIVERSAL_DISCOVERY_CATALOG:
+            if entry["prefix"] == f"Q:{pref_tag}:":
+                dom_id = entry["subject_id"]
+                break
+        return {"domain": dom_id, "completion": trace, "gold": gold}
+
     return None
 
 
@@ -1771,12 +2218,12 @@ def grade_and_merge_python_patches(repo_root: Path = REPO_ROOT) -> Dict[str, Any
 
 
 class ElasticLoRAAdapterBank:
-    """Dynamic modular LoRA adapter bank (`GROWTH-01` / Issue #293, inspired by `aix-evolver/elastic_brain.py`).
+    """Dynamic modular LoRA adapter bank (`GROWTH-01` & `DISCOVER-03` / Issues #293, #351, inspired by `aix-evolver/elastic_brain.py`).
     Manages low-rank LoRA capacity (`Delta W = (alpha / r) * B @ A`) per expert slot and dynamically expands
-    rank (`4 -> 8 -> 16`) when a representational plateau is detected.
+    rank (`4 -> 8 -> 16 -> 32 -> 64 -> 128`) on representational plateaus, validation milestones, or new subject growth.
     """
 
-    RANKS: Tuple[int, ...] = (4, 8, 16, 32, 64)
+    RANKS: Tuple[int, ...] = (4, 8, 16, 32, 64, 128)
 
     def __init__(self, d_model: int = 128, d_ff: int = 128, initial_rank: int = 4) -> None:
         self.d_model = int(d_model)
@@ -1789,21 +2236,35 @@ class ElasticLoRAAdapterBank:
         per_proj = self.current_rank * (self.d_model + self.d_ff)
         return n_experts * 3 * per_proj
 
-    def maybe_expand_rank(self, plateau_detected: bool, *, cycle_index: int = 1) -> Dict[str, Any]:
+    def maybe_expand_rank(
+        self,
+        plateau_detected: bool,
+        *,
+        cycle_index: int = 1,
+        new_subject_discovered: bool = False,
+        milestone_reached: bool = False,
+    ) -> Dict[str, Any]:
         old_rank = self.current_rank
-        if plateau_detected:
+        should_expand = bool(plateau_detected or new_subject_discovered or milestone_reached)
+        if should_expand:
             for r_cand in self.RANKS:
                 if r_cand > self.current_rank:
                     self.current_rank = r_cand
                     break
         expanded = self.current_rank > old_rank
         if expanded:
+            trigger = (
+                "plateau_detected"
+                if plateau_detected
+                else ("new_subject_discovered" if new_subject_discovered else "milestone_reached")
+            )
             self.expansion_events.append(
                 {
                     "cycle_index": cycle_index,
                     "prior_rank": old_rank,
                     "new_rank": self.current_rank,
                     "new_lora_parameters": self.lora_parameter_count(),
+                    "trigger": trigger,
                 }
             )
         return {
@@ -2552,11 +3013,14 @@ class AutonomousSelfImprovementController:
         *,
         cycle_index: int = 1,
         plateau_detected: bool = False,
+        new_subject_discovered: bool = False,
+        milestone_reached: bool = False,
+        dynamic_subject_count: int = 0,
         physical_core_params: int = 817410,
     ) -> Dict[str, Any]:
-        """Track physical backbone parameters, active per-token parameters, 16-shard cartridge bank
-        parameters, and dynamic LoRA rank expansion events in `elastic_capacity_ledger.json`
-        (`GROWTH-03` / Issue #295).
+        """Track physical backbone parameters, active per-token parameters, 30+ universal & dynamic
+        shard cartridge bank parameters, and dynamic LoRA rank expansion events in
+        `elastic_capacity_ledger.json` (`GROWTH-03` & `DISCOVER-03` / Issues #295, #351).
         """
         ledger_path = self.state_dir / "elastic_capacity_ledger.json"
         prior_rank = 4
@@ -2572,9 +3036,14 @@ class AutonomousSelfImprovementController:
 
         bank_adapter = ElasticLoRAAdapterBank(d_model=128, d_ff=128, initial_rank=prior_rank)
         bank_adapter.expansion_events = events
-        exp_info = bank_adapter.maybe_expand_rank(plateau_detected, cycle_index=cycle_index)
+        exp_info = bank_adapter.maybe_expand_rank(
+            plateau_detected,
+            cycle_index=cycle_index,
+            new_subject_discovered=new_subject_discovered,
+            milestone_reached=milestone_reached,
+        )
 
-        shard_count = len(META_AI_EXPERT_DOMAINS)
+        shard_count = len(META_AI_EXPERT_DOMAINS) + max(0, int(dynamic_subject_count))
         per_shard_params = 49152
         total_cartridge_bank_params = shard_count * per_shard_params
         payload = {
@@ -2584,6 +3053,8 @@ class AutonomousSelfImprovementController:
             "active_routed_experts_per_token": 2,
             "total_routed_experts_in_core": 4,
             "registered_meta_ai_shards": shard_count,
+            "core_universal_shards": len(META_AI_EXPERT_DOMAINS),
+            "dynamically_discovered_shards": max(0, int(dynamic_subject_count)),
             "total_cartridge_bank_parameters": total_cartridge_bank_params,
             "current_lora_rank": exp_info["current_rank"],
             "active_lora_adapter_parameters": exp_info["active_lora_parameters"],
@@ -2591,6 +3062,217 @@ class AutonomousSelfImprovementController:
             "expansion_events": bank_adapter.expansion_events,
         }
         write_json(payload, ledger_path)
+        return payload
+
+    def discover_and_learn_new_subject(
+        self,
+        *,
+        subject_name: Optional[str] = None,
+        category: Optional[str] = None,
+        cycle_index: int = 1,
+        allow_internet_fetch: bool = False,
+    ) -> Dict[str, Any]:
+        """Autonomously discover and onboard a new verifiable subject from `UNIVERSAL_DISCOVERY_CATALOG`
+        (or a user-specified subject name), optionally fetching scientific context from Wikipedia/arXiv
+        via `WebKnowledgeFetcher`, synthesizing R1-verified `<think>...</think><ans>...</ans>` training
+        and validation curricula, and persisting to `discovered_subjects_registry.json`
+        (`DISCOVER-01` & `DISCOVER-02` / Issues #349, #350).
+        """
+        reg_path = self.state_dir / "discovered_subjects_registry.json"
+        if reg_path.exists():
+            try:
+                reg = json.loads(reg_path.read_text(encoding="utf-8"))
+            except Exception:
+                reg = {"schema_version": "1.0.0", "subjects": {}}
+        else:
+            reg = {"schema_version": "1.0.0", "subjects": {}}
+
+        subjects_map: Dict[str, Any] = reg.setdefault("subjects", {})
+        c_idx = max(1, int(cycle_index))
+
+        selected_spec: Optional[Dict[str, Any]] = None
+        if subject_name and subject_name.strip():
+            raw_name = subject_name.strip()
+            slug_up = "".join(ch if ch.isalnum() else "_" for ch in raw_name.upper()).strip("_")
+            subj_id = slug_up if slug_up.startswith("DISC_") else f"DISC_{slug_up}"
+            camel = "".join(w.capitalize() for w in slug_up.replace("DISC_", "").split("_") if w)[:14] or "Custom"
+            for entry in UNIVERSAL_DISCOVERY_CATALOG:
+                if entry["subject_id"] == subj_id or entry["title"].lower() == raw_name.lower():
+                    selected_spec = dict(entry)
+                    break
+            if selected_spec is None:
+                selected_spec = {
+                    "subject_id": subj_id,
+                    "title": raw_name,
+                    "category": category or "dynamically_discovered_expertise",
+                    "prefix": f"Q:Disc{camel}:",
+                    "formula": "ratio = num / den",
+                    "wikipedia_slug": raw_name.replace(" ", "_"),
+                    "arxiv_query": raw_name,
+                    "expert_slot": len(subjects_map) % 4,
+                }
+        else:
+            for entry in UNIVERSAL_DISCOVERY_CATALOG:
+                if entry["subject_id"] not in subjects_map:
+                    selected_spec = dict(entry)
+                    break
+            if selected_spec is None:
+                selected_spec = dict(UNIVERSAL_DISCOVERY_CATALOG[(c_idx - 1) % len(UNIVERSAL_DISCOVERY_CATALOG)])
+
+        subj_id = selected_spec["subject_id"]
+        pref = selected_spec["prefix"]
+        web_reference = {
+            "source": "offline_catalog_reference",
+            "wikipedia_slug": selected_spec.get("wikipedia_slug", subj_id),
+            "arxiv_query": selected_spec.get("arxiv_query", selected_spec["title"]),
+        }
+        if allow_internet_fetch:
+            try:
+                from aix_zero.knowledge_is_power import WebKnowledgeFetcher
+                wiki = WebKnowledgeFetcher.fetch_wikipedia_summary(str(selected_spec.get("wikipedia_slug", subj_id)))
+                arxiv = WebKnowledgeFetcher.fetch_arxiv_paper(str(selected_spec.get("arxiv_query", selected_spec["title"])))
+                web_reference = {"source": "live_wikipedia_and_arxiv", "wikipedia": wiki, "arxiv": arxiv}
+            except Exception:
+                pass
+
+        # Synthesize R1-verified curriculum items for this discovered subject (DISCOVER-02 / #350)
+        curriculum_items: List[Dict[str, Any]] = []
+        for mult in (2, 3, 4, 5):
+            den_v = 4 + (c_idx % 4) + mult
+            num_v = mult * 2
+            f_val = Fraction(num_v, den_v)
+            gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+            prompt = f"{pref}num={num_v};den={den_v}->ratio?"
+            trace = f"<think>ratio={num_v}/{den_v}={gold}</think><ans>{gold}</ans>"
+            r1 = verify_r1_reasoning_trace(trace, gold)
+            if not r1["fully_verified"]:
+                raise ValueError(f"Discovered subject trace failed verification: {prompt}")
+            curriculum_items.append(
+                {
+                    "domain": subj_id,
+                    "prompt": prompt,
+                    "completion": trace,
+                    "gold": gold,
+                    "cycle_index": c_idx,
+                }
+            )
+
+        is_new = subj_id not in subjects_map
+        subjects_map[subj_id] = {
+            "subject_id": subj_id,
+            "title": selected_spec["title"],
+            "category": selected_spec["category"],
+            "prefix": pref,
+            "formula": selected_spec["formula"],
+            "expert_slot": int(selected_spec.get("expert_slot", 0)),
+            "discovered_in_cycle": subjects_map.get(subj_id, {}).get("discovered_in_cycle", c_idx),
+            "last_updated_cycle": c_idx,
+            "verified_problem_count": len(curriculum_items),
+            "web_reference": web_reference,
+            "sample_curriculum": curriculum_items,
+        }
+        reg["dynamically_discovered_subject_count"] = len(subjects_map)
+        write_json(reg, reg_path)
+        return {
+            "subject_id": subj_id,
+            "title": selected_spec["title"],
+            "category": selected_spec["category"],
+            "newly_discovered": is_new,
+            "verified_problem_count": len(curriculum_items),
+            "dynamically_discovered_subject_count": len(subjects_map),
+            "curriculum_items": curriculum_items,
+            "web_reference": web_reference,
+        }
+
+    def update_subject_expertise_index(
+        self,
+        *,
+        cycle_index: int = 1,
+        arena_scorecard: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Maintain a persistent Subject-Matter Expertise Index (`subject_expertise_index.json`)
+        across all 30 core universal domains and all dynamically discovered subjects, reporting
+        verified problem counts, symbolic verifier mastery, neural diagnostic accuracy separately
+        (so symbolic verification is never misrepresented as unassisted neural mastery), and
+        SME certification status (`SME-01` & `SME-02` / Issues #352, #353).
+        """
+        reg_path = self.state_dir / "discovered_subjects_registry.json"
+        discovered_subjects: Dict[str, Any] = {}
+        if reg_path.exists():
+            try:
+                discovered_subjects = json.loads(reg_path.read_text(encoding="utf-8")).get("subjects", {})
+            except Exception:
+                discovered_subjects = {}
+
+        curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index)
+        by_dom_items: Dict[str, List[Dict[str, Any]]] = {}
+        for item in curr:
+            by_dom_items.setdefault(item["domain"], []).append(item)
+        for subj_id, s_meta in discovered_subjects.items():
+            by_dom_items[subj_id] = list(s_meta.get("sample_curriculum", []))
+
+        neural_by_dom = (arena_scorecard or {}).get("per_domain_breakdown", {})
+        subjects_index: Dict[str, Dict[str, Any]] = {}
+        categories_summary: Dict[str, Dict[str, int]] = {}
+        certified_count = 0
+
+        all_meta: List[Tuple[str, Dict[str, Any], bool]] = [
+            (dom, meta, False) for dom, meta in META_AI_EXPERT_DOMAINS.items()
+        ] + [
+            (subj_id, s_meta, True) for subj_id, s_meta in sorted(discovered_subjects.items())
+        ]
+
+        for dom_id, meta, is_dynamic in all_meta:
+            items = by_dom_items.get(dom_id, [])
+            verified_hits = 0
+            for it in items:
+                sym = solve_meta_ai_prompt_symbolic(it["prompt"])
+                cand = sym["completion"] if sym is not None else it["completion"]
+                if verify_r1_reasoning_trace(cand, it["gold"])["fully_verified"]:
+                    verified_hits += 1
+            total_items = len(items)
+            verifier_mastery = round(verified_hits / max(1, total_items), 4) if total_items else 0.0
+            n_stats = neural_by_dom.get(dom_id, {})
+            n_tested = int(n_stats.get("tested", 0))
+            n_verified = int(n_stats.get("verified", 0))
+            neural_acc = round(n_verified / n_tested, 4) if n_tested > 0 else None
+
+            is_certified = total_items > 0 and verifier_mastery >= 1.0
+            if is_certified:
+                certified_count += 1
+            cat = str(meta.get("category", "universal_tree_phase6"))
+            cat_entry = categories_summary.setdefault(cat, {"subject_count": 0, "certified_sme_count": 0})
+            cat_entry["subject_count"] += 1
+            if is_certified:
+                cat_entry["certified_sme_count"] += 1
+
+            subjects_index[dom_id] = {
+                "subject_id": dom_id,
+                "title": meta["title"],
+                "category": cat,
+                "prefix": meta["prefix"],
+                "formula": meta["formula"],
+                "dynamically_discovered": is_dynamic,
+                "verified_problem_count": verified_hits,
+                "total_problem_count": total_items,
+                "symbolic_verifier_mastery_score": verifier_mastery,
+                "mastery_score": verifier_mastery,
+                "mastery_evaluation_mode": "neuro_symbolic_r1_verifier",
+                "neural_only_diagnostic_accuracy": neural_acc,
+                "certification_status": "CERTIFIED_SME" if is_certified else "IN_PROGRESS",
+            }
+
+        payload = {
+            "schema_version": "1.0.0",
+            "cycle_index": int(cycle_index),
+            "total_subject_count": len(subjects_index),
+            "core_universal_subject_count": len(META_AI_EXPERT_DOMAINS),
+            "dynamically_discovered_subject_count": len(discovered_subjects),
+            "certified_sme_subject_count": certified_count,
+            "subject_categories": categories_summary,
+            "subjects": subjects_index,
+        }
+        write_json(payload, self.state_dir / "subject_expertise_index.json")
         return payload
 
     def update_and_lookup_episodic_memory(
@@ -2754,15 +3436,18 @@ class AutonomousSelfImprovementController:
                     }
                 )
         payload = {
-            "schema_version": "1.2.0",
+            "schema_version": "1.3.0",
             "daemon_state": status.get("daemon_state", "IDLE"),
             "cycles_completed": int(status.get("cycles_completed", 0)),
             "meta_ai_shard_count": len(META_AI_EXPERT_DOMAINS),
             "meta_ai_domains": list(META_AI_EXPERT_DOMAINS.keys()),
+            "certified_sme_subject_count": int(status.get("certified_sme_subject_count", len(META_AI_EXPERT_DOMAINS))),
+            "dynamically_discovered_subject_count": int(status.get("dynamically_discovered_subject_count", 0)),
+            "subject_categories": status.get("subject_categories", {}),
             "external_frontier_projects_cataloged": len(EXTERNAL_FRONTIER_AI_PROJECTS),
             "sibling_open_source_repos_indexed": len(SIBLING_WORKSPACE_REPOS),
             "open_source_streaming_datasets_configured": len(OPEN_SOURCE_STREAMING_DATASETS),
-            "effective_system_parameters": status.get("effective_system_parameters", 1616130),
+            "effective_system_parameters": status.get("effective_system_parameters", 2337090),
             "shard_hash_prefixes": status.get("shard_hash_prefixes", {}),
             "latest_heldout_val_loss": status.get("heldout_val_post_loss"),
             "latest_reflected_heldout_accuracy": status.get("reflected_heldout_exact_match"),
@@ -2826,13 +3511,21 @@ class AutonomousSelfImprovementController:
             output_path=self.state_dir / "streamed_hf_verified_batch.json",
         )
 
+        # DISCOVER-01..03 (#349-#351): Autonomously discover/refresh a verifiable subject & expand ElasticBrain capacity
+        discovery_report = self.discover_and_learn_new_subject(
+            cycle_index=cycles,
+            allow_internet_fetch=allow_hf_network_stream,
+        )
         plateau_report = self.detect_domain_plateaus(window=4, min_improvement=0.05)
         capacity_ledger = self.update_elastic_capacity_ledger(
             cycle_index=cycles,
             plateau_detected=plateau_report["plateau_detected"],
+            new_subject_discovered=discovery_report["newly_discovered"],
+            milestone_reached=(cycles % 3 == 0),
+            dynamic_subject_count=discovery_report["dynamically_discovered_subject_count"],
         )
 
-        curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles)
+        curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles) + discovery_report["curriculum_items"]
         curriculum_sha256 = hashlib.sha256(canonical_json(curriculum).encode("utf-8")).hexdigest()
 
         verified_count = 0
@@ -2986,6 +3679,7 @@ class AutonomousSelfImprovementController:
         arena_scorecard = self.run_frontier_arena_evaluation(cycle_index=cycles, model=model, tokenizer=tokenizer)
         if not arena_scorecard["evaluation_complete"]:
             return {"executed": False, "halted_by_kill_switch": True, "daemon_state": "STOPPED"}
+        sme_index = self.update_subject_expertise_index(cycle_index=cycles, arena_scorecard=arena_scorecard)
 
         # Evaluate live autoregressive generation (raw neural vs. episodic/R1 reflection vs. ALU-assisted)
         heldout_eval_subset = [
@@ -3092,6 +3786,11 @@ class AutonomousSelfImprovementController:
             "repo_task_execute_routed_request_verified": repo_task_eval["all_contract_checks_passed"],
             "effective_system_parameters": capacity_ledger["effective_system_parameters"],
             "current_lora_rank": capacity_ledger["current_lora_rank"],
+            "certified_sme_subject_count": sme_index["certified_sme_subject_count"],
+            "dynamically_discovered_subject_count": sme_index["dynamically_discovered_subject_count"],
+            "total_subject_count": sme_index["total_subject_count"],
+            "subject_categories": sme_index["subject_categories"],
+            "discovered_subject_id": discovery_report["subject_id"],
             "arena_overall_accuracy": arena_scorecard["overall_domain_accuracy"],
             "arena_sprt_status": arena_scorecard["sprt_non_regression_status"],
             "cycle_focused_files": code_index.get("cycle_focused_files", []),

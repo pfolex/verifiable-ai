@@ -43,7 +43,22 @@ def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='deve
                 raise ValueError('Prompt exceeds context budget')
             with torch.no_grad():
                 generated,_,_=model.generate_verified(ids,eos_id=tokenizer.eos_id,tokenizer=tokenizer,**settings)
-            return tokenizer.decode(generated[len(ids):],skip_special=False)
+            new_ids=generated[len(ids):]
+            if new_ids and new_ids[-1]==tokenizer.eos_id:
+                termination_reason='eos'
+            elif len(generated)>=model.config.max_seq_len:
+                termination_reason='context_limit'
+            elif len(new_ids)>=settings['max_new_tokens']:
+                termination_reason='max_new_tokens'
+            else:
+                termination_reason='incomplete'
+            return dict(
+                completion=tokenizer.decode(new_ids,skip_special=False),
+                prompt_tokens=len(ids),
+                generated_tokens=len(new_ids),
+                total_tokens=len(generated),
+                termination_reason=termination_reason,
+            )
         return generate
     report=evaluate_pair(rows,adapter('champion'),adapter('candidate'),identities=identities,settings=settings,
                          score_answer=lambda text,gold:score_rational_or_probability(text,gold,is_probability=False)['score']==1.,

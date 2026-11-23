@@ -119,6 +119,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_grade.add_argument("--collaborative", default=None, help="Optional path to collaborative patch file")
     p_grade.add_argument("--reference", default=None, help="Optional path to reference patch file")
 
+    p_subjects = sub.add_parser("subjects", help="Inspect the Universal Subject-Matter Expertise (SME) Index across all core and discovered subjects")
+    p_subjects.add_argument("--cycle", type=int, default=1, help="Cycle index for SME evaluation")
+
+    p_learn = sub.add_parser("learn-subject", help="Autonomously discover, research, and synthesize an R1-verified curriculum for a new subject")
+    p_learn.add_argument("--subject", default=None, help="Optional subject title or ID to learn (defaults to next Universal Catalog subject)")
+    p_learn.add_argument("--category", default=None, help="Optional subject category")
+    p_learn.add_argument("--cycle", type=int, default=1, help="Cycle index")
+    p_learn.add_argument("--online", action="store_true", help="Fetch live Wikipedia and arXiv context for the subject")
+
     args = parser.parse_args(argv)
     ctrl = AutonomousSelfImprovementController(
         args.state_dir,
@@ -294,6 +303,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "grade-patch":
         res = grade_and_merge_python_patches(ctrl.repo_root)
         print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "subjects":
+        res = ctrl.update_subject_expertise_index(cycle_index=args.cycle)
+        print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "learn-subject":
+        disc = ctrl.discover_and_learn_new_subject(
+            subject_name=args.subject,
+            category=args.category,
+            cycle_index=args.cycle,
+            allow_internet_fetch=args.online,
+        )
+        sme = ctrl.update_subject_expertise_index(cycle_index=args.cycle)
+        out = dict(
+            discovered_subject=disc,
+            total_subject_count=sme["total_subject_count"],
+            certified_sme_subject_count=sme["certified_sme_subject_count"],
+            dynamically_discovered_subject_count=sme["dynamically_discovered_subject_count"],
+        )
+        print(json.dumps(out, indent=2))
         return 0
 
     return 1

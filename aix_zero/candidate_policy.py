@@ -35,11 +35,53 @@ def _paired_rows(report, split):
 
 def validate_policy(policy):
     required = {'min_cases', 'min_net_gain', 'max_regression_losses', 'max_trace_losses'}
-    if set(policy) != required or any(type(v) is not int or v < 0 for v in policy.values()):
+    optional = {'min_champion_regression_correct'}
+    if not required.issubset(policy) or set(policy) - (required | optional) or any(type(v) is not int or v < 0 for v in policy.values()):
         raise ValueError('Invalid policy')
     if policy['min_cases'] < 1 or policy['min_net_gain'] < 1:
         raise ValueError('Positive case and gain thresholds required')
     return hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest()
+
+
+def compute_retention_metrics(regression, *, min_champion_correct=0):
+    if type(min_champion_correct) is not int or min_champion_correct < 0:
+        raise ValueError('min_champion_correct must be a nonnegative integer')
+    champ_rows, cand_rows = _paired_rows(regression, 'regression')
+    total_cases = len(champ_rows)
+    champion_correct = sum(r['answer_correct'] for r in champ_rows.values())
+    candidate_correct = sum(r['answer_correct'] for r in cand_rows.values())
+    retained_correct = sum(champ_rows[k]['answer_correct'] and cand_rows[k]['answer_correct'] for k in champ_rows)
+    losses = sum(champ_rows[k]['answer_correct'] and not cand_rows[k]['answer_correct'] for k in champ_rows)
+    gains = sum(not champ_rows[k]['answer_correct'] and cand_rows[k]['answer_correct'] for k in champ_rows)
+    both_wrong = sum(not champ_rows[k]['answer_correct'] and not cand_rows[k]['answer_correct'] for k in champ_rows)
+    denominator = champion_correct
+    measurable = denominator > 0
+    retention_rate = (retained_correct / denominator) if measurable else None
+    coverage_met = denominator >= min_champion_correct and (measurable or min_champion_correct == 0)
+    if not measurable:
+        status = 'not_measurable_zero_champion_successes'
+    elif denominator < min_champion_correct:
+        status = 'insufficient_champion_coverage'
+    elif losses == 0:
+        status = 'retained'
+    else:
+        status = 'regressed'
+    return dict(
+        total_cases=total_cases,
+        champion_correct=champion_correct,
+        candidate_correct=candidate_correct,
+        retained_champion_correct=retained_correct,
+        losses=losses,
+        gains=gains,
+        both_wrong=both_wrong,
+        retention_denominator=denominator,
+        retention_measurable=measurable,
+        retention_rate=retention_rate,
+        zero_losses_non_informative=not measurable,
+        min_champion_correct_required=min_champion_correct,
+        champion_coverage_sufficient=denominator >= min_champion_correct and (measurable if min_champion_correct > 0 else True),
+        retention_status=status,
+    )
 
 
 def screen_candidate(development, regression, policy):
@@ -61,11 +103,23 @@ def screen_candidate(development, regression, policy):
     net = sum(b['answer_correct']-dev[0][k]['answer_correct'] for k,b in dev[1].items())
     losses = sum(a['answer_correct'] and not reg[1][k]['answer_correct'] for k,a in reg[0].items())
     trace_losses = sum(a['trace_valid'] and not b[k]['trace_valid'] for arows,b in (dev,reg) for k,a in arows.items())
+    min_champ = policy.get('min_champion_regression_correct', 0)
+    retention = compute_retention_metrics(regression, min_champion_correct=min_champ)
     reasons=[]
     if min(len(dev[0]),len(reg[0])) < policy['min_cases']:reasons.append('insufficient cases')
     if net < policy['min_net_gain']:reasons.append('insufficient development gain')
     if losses > policy['max_regression_losses']:reasons.append('regression losses exceed limit')
     if trace_losses > policy['max_trace_losses']:reasons.append('trace losses exceed limit')
-    return dict(decision='reject' if reasons else 'eligible_for_review', reasons=reasons,
+    if min_champ > 0 and not retention['champion_coverage_sufficient']:
+        reasons.append('insufficient champion regression coverage')
+    if reasons:
+        if reasons == ['insufficient champion regression coverage']:
+            decision = 'inconclusive_insufficient_retention_evidence'
+        else:
+            decision = 'reject'
+    else:
+        decision = 'eligible_for_review'
+    return dict(decision=decision, reasons=reasons,
                 development_net_gain=net,regression_losses=losses,trace_losses=trace_losses,
+                retention=retention,
                 policy_sha256=digest,statistical_status='NOT_EVALUATED',automatic_promotion=False)

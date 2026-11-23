@@ -126,6 +126,14 @@ Inspect Python files or snippets with Python's `ast` and `dis` (bytecode disasse
 /Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python -m aix_zero.aix_ctl grade-patch
 ```
 
+### K. Universal Multi-Subject Tree of Knowledge & Subject-Matter Expertise (SME) Index (`subjects`, `learn-subject`)
+Inspect the full Subject-Matter Expertise Index across all 30 core universal domains and all dynamically discovered subjects (`subject_expertise_index.json`), or trigger on-demand autonomous subject discovery and curriculum synthesis (`discovered_subjects_registry.json`):
+```bash
+./.venv-training/bin/python -m aix_zero.aix_ctl subjects
+./.venv-training/bin/python -m aix_zero.aix_ctl learn-subject --subject "Quantum Error Correction" --category "quantum_computing"
+./.venv-training/bin/python -m aix_zero.aix_ctl learn-subject --online
+```
+
 ---
 
 ## 2. How Each Progressive Cycle Learns and Improves
