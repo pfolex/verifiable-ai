@@ -2220,10 +2220,11 @@ def grade_and_merge_python_patches(repo_root: Path = REPO_ROOT) -> Dict[str, Any
 class ElasticLoRAAdapterBank:
     """Dynamic modular LoRA adapter bank (`GROWTH-01` & `DISCOVER-03` / Issues #293, #351, inspired by `aix-evolver/elastic_brain.py`).
     Manages low-rank LoRA capacity (`Delta W = (alpha / r) * B @ A`) per expert slot and dynamically expands
-    rank (`4 -> 8 -> 16 -> 32 -> 64 -> 128`) on representational plateaus, validation milestones, or new subject growth.
+    rank (`4 -> 8 -> 16 -> 32 -> 64 -> 128`, then open-endedly `+32` rank steps on new subject discovery,
+    validation milestones, or representational plateaus).
     """
 
-    RANKS: Tuple[int, ...] = (4, 8, 16, 32, 64, 128)
+    RANKS: Tuple[int, ...] = (4, 8, 16, 32, 64, 128, 160, 192, 224, 256, 320, 384, 512, 640, 768, 1024)
 
     def __init__(self, d_model: int = 128, d_ff: int = 128, initial_rank: int = 4) -> None:
         self.d_model = int(d_model)
@@ -2247,10 +2248,15 @@ class ElasticLoRAAdapterBank:
         old_rank = self.current_rank
         should_expand = bool(plateau_detected or new_subject_discovered or milestone_reached)
         if should_expand:
+            advanced = False
             for r_cand in self.RANKS:
                 if r_cand > self.current_rank:
                     self.current_rank = r_cand
+                    advanced = True
                     break
+            if not advanced:
+                # Open-ended elastic growth beyond 1024 in +64 rank increments
+                self.current_rank = self.current_rank + 64
         expanded = self.current_rank > old_rank
         if expanded:
             trigger = (
@@ -3117,7 +3123,41 @@ class AutonomousSelfImprovementController:
                     selected_spec = dict(entry)
                     break
             if selected_spec is None:
-                selected_spec = dict(UNIVERSAL_DISCOVERY_CATALOG[(c_idx - 1) % len(UNIVERSAL_DISCOVERY_CATALOG)])
+                # Open-ended autonomous subject synthesis once the seed catalog is completed:
+                # combine frontier STEM/AI disciplines, Hugging Face datasets, and open-source modules
+                open_ended_topics = (
+                    ("QUANTUM_TOPOLOGICAL_BRAIDING", "Topological Quantum Anyon Braiding & Fault-Tolerant logical Qubit Ratio", "quantum_information_science", "Topological_quantum_computer", "topological quantum computation anyon braiding"),
+                    ("NEUROMORPHIC_SPIKING_SYNAPSE", "Neuromorphic Spiking Neural Network Synaptic Energy Efficiency Ratio", "neuromorphic_computing", "Spiking_neural_network", "spiking neural network neuromorphic energy efficiency"),
+                    ("PROTEIN_FOLDING_CONTACT_ENERGY", "Computational Structural Biology Protein Contact Map Free-Energy Ratio", "computational_biology", "Protein_structure_prediction", "protein structure prediction contact map energy"),
+                    ("FUSION_PLASMA_LAWSON_CRITERION", "Magnetic Confinement Fusion Triple-Product Lawson Ignition Ratio", "plasma_and_fusion_physics", "Lawson_criterion", "tokamak fusion plasma lawson triple product"),
+                    ("AUTONOMOUS_FORMAL_THEOREM_PROVING", "Automated Lean/Coq Formal Proof Search Branching & Lemma Compression Ratio", "formal_verification", "Automated_theorem_proving", "neural theorem proving formal verification lean"),
+                    ("CRYPTOGRAPHIC_ZK_STARK_FRI", "Zero-Knowledge STARK Fast Reed-Solomon IOP Low-Degree Proof Soundness", "cryptography_and_security", "Zero-knowledge_proof", "zk-STARK fast reed solomon interactive oracle proof"),
+                    ("FLUID_NAVIER_STOKES_REYNOLDS", "Computational Fluid Dynamics Reynolds Turbulence & Drag Dissipation Ratio", "continuum_mechanics", "Reynolds_number", "computational fluid dynamics turbulence reynolds scaling"),
+                    ("GAME_THEORY_MECHANISM_VICKREY", "Algorithmic Game Theory Vickrey Auction Social Welfare Efficiency Ratio", "algorithmic_economics", "Vickrey_auction", "algorithmic mechanism design incentive compatibility"),
+                    ("PHOTONIC_OPTICAL_TENSOR_CORE", "Silicon Photonics Mach-Zehnder Interferometer Optical Matrix Throughput", "photonic_computing", "Optical_computing", "silicon photonics optical neural network matrix multiplication"),
+                    ("SATELLITE_CONSTELLATION_LINK_BUDGET", "Low-Earth-Orbit Free-Space Optical Inter-Satellite Link SNR Margin", "aerospace_communications", "Link_budget", "LEO satellite free space optical inter-satellite link"),
+                    ("EPIGENETIC_CHROMATIN_ACCESSIBILITY", "Single-Cell Epigenomics ATAC-Seq Chromatin Accessibility Enrichment Ratio", "genomics_and_epigenetics", "ATAC-seq", "single cell chromatin accessibility gene regulation"),
+                    ("SUPERCONDUCTING_JOSEPHSON_QUBIT", "Superconducting Transmon Josephson Junction Anharmonicity Coherence Ratio", "condensed_matter_physics", "Transmon", "superconducting transmon qubit coherence anharmonicity"),
+                )
+                tier_idx = len(subjects_map) - len(UNIVERSAL_DISCOVERY_CATALOG)
+                base_slug, base_title, base_cat, wiki_s, arxiv_q = open_ended_topics[tier_idx % len(open_ended_topics)]
+                gen_round = (tier_idx // len(open_ended_topics)) + 1
+                suffix = f"_V{gen_round}" if gen_round > 1 else ""
+                subj_id = f"DISC_{base_slug}{suffix}"
+                while subj_id in subjects_map:
+                    gen_round += 1
+                    subj_id = f"DISC_{base_slug}_V{gen_round}"
+                camel = "".join(w.capitalize() for w in base_slug.split("_")[:3]) + (str(gen_round) if gen_round > 1 else "")
+                selected_spec = {
+                    "subject_id": subj_id,
+                    "title": f"{base_title} (Tier {gen_round})" if gen_round > 1 else base_title,
+                    "category": base_cat,
+                    "prefix": f"Q:Disc{camel}:",
+                    "formula": "ratio = num / den",
+                    "wikipedia_slug": wiki_s,
+                    "arxiv_query": arxiv_q,
+                    "expert_slot": len(subjects_map) % 4,
+                }
 
         subj_id = selected_spec["subject_id"]
         pref = selected_spec["prefix"]
