@@ -55,7 +55,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_stop = sub.add_parser("stop", help="Immediately stop all AIX autonomous training processes so you can shut down your machine")
     p_stop.add_argument("--reason", default="USER_SHUTDOWN_REQUEST", help="Reason recorded in status log")
 
-    sub.add_parser("status", help="Show unified live status across autopilot, SME subjects, and candidate experiment scheduler")
+    p_status = sub.add_parser("status", help="Show concise live improvement summary (pass --full for full JSON)")
+    p_status.add_argument("--full", "--json", dest="full_json", action="store_true", help="Print full detailed JSON telemetry")
 
     p_run_auto = sub.add_parser("run", help="One-command launch: starts background continuous self-training + subject discovery + candidate experiment loop")
     p_run_auto.add_argument("--max-cycles", type=int, default=1000, help="Maximum cycles before pausing")
@@ -185,7 +186,44 @@ def main(argv: Optional[List[str]] = None) -> int:
                 }
             except Exception:
                 pass
-        print(json.dumps(st, indent=2))
+        if getattr(args, "full_json", False):
+            print(json.dumps(st, indent=2))
+            return 0
+
+        state_str = "STOPPED" if st.get("stop_sentinel_present") else st.get("daemon_state", "IDLE")
+        if state_str == "RUNNING_IDLE_BETWEEN_CYCLES":
+            state_str = "RUNNING"
+        pid_str = ""
+        if ctrl.pid_path.exists():
+            try:
+                pid_str = f" (PID {ctrl.pid_path.read_text(encoding='utf-8').strip()})"
+            except Exception:
+                pid_str = ""
+
+        cycles = st.get("cycles_completed", 0)
+        params = st.get("effective_system_parameters", 817410)
+        rank = st.get("current_lora_rank", 4)
+        total_subj = st.get("total_subject_count", 30)
+        cert_subj = st.get("certified_sme_subject_count", total_subj)
+        dyn_subj = st.get("dynamically_discovered_subject_count", 0)
+        newest_subj = st.get("discovered_subject_id", "none")
+
+        tr_pre = st.get("expert_pre_update_loss")
+        tr_post = st.get("expert_post_update_loss")
+        val_pre = st.get("heldout_val_pre_loss")
+        val_post = st.get("heldout_val_post_loss")
+        promoted = "YES (Checkpoint Improved)" if st.get("promoted_on_heldout_val") else "NO (Retained Prior)"
+        alu_acc = (st.get("alu_assisted_heldout_exact_match") or 0.0) * 100.0
+        neural_acc = (st.get("arena_overall_accuracy") or 0.0) * 100.0
+
+        print(f"AIX Status    : {state_str}{pid_str} | Cycle #{cycles}")
+        print(f"Parameters    : {params:,} effective params (LoRA rank r={rank})")
+        print(f"Expertise     : {cert_subj}/{total_subj} Certified SME Subjects (+{dyn_subj} discovered | latest: {newest_subj})")
+        if tr_pre is not None and tr_post is not None:
+            print(f"Training Loss : {tr_pre:.4f} -> {tr_post:.4f} ({tr_post - tr_pre:+.4f})")
+        if val_pre is not None and val_post is not None:
+            print(f"Held-Out Val  : {val_pre:.4f} -> {val_post:.4f} ({val_post - val_pre:+.4f}) | Promoted: {promoted}")
+        print(f"Accuracy      : {alu_acc:.1f}% Neuro-Symbolic Verified | {neural_acc:.2f}% Raw Neural Arena")
         return 0
 
     if args.command == "run":
