@@ -52,10 +52,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_stop = sub.add_parser("stop", help="Immediately stop the autopilot so you can shut down your machine")
+    p_stop = sub.add_parser("stop", help="Immediately stop all AIX autonomous training processes so you can shut down your machine")
     p_stop.add_argument("--reason", default="USER_SHUTDOWN_REQUEST", help="Reason recorded in status log")
 
-    sub.add_parser("status", help="Show current autopilot state and completed Meta-AI cycles")
+    sub.add_parser("status", help="Show unified live status across autopilot, SME subjects, and candidate experiment scheduler")
+
+    p_run_auto = sub.add_parser("run", help="One-command launch: starts background continuous self-training + subject discovery + candidate experiment loop")
+    p_run_auto.add_argument("--max-cycles", type=int, default=1000, help="Maximum cycles before pausing")
+    p_run_auto.add_argument("--interval-seconds", "--interval", dest="interval_seconds", type=float, default=60.0, help="Sleep interval between cycles")
+    p_run_auto.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
+    p_run_auto.add_argument("--sync-github", action="store_true", help="Open and close auditable GitHub issues")
+    p_run_auto.add_argument("--auto-push", action="store_true", help="Automatically commit and push verified shards/telemetry")
 
     p_once = sub.add_parser("run-once", help="Run a single Meta-AI self-improvement cycle")
     p_once.add_argument("--threads", type=int, default=1, help="Max CPU threads (default: 1)")
@@ -144,12 +151,84 @@ def main(argv: Optional[List[str]] = None) -> int:
             except (ValueError, ProcessLookupError, PermissionError):
                 pass
         st = ctrl.request_stop(reason=args.reason)
+        sched_reg = ctrl.state_dir / "candidate_bundle" / "registry"
+        if sched_reg.exists():
+            try:
+                from aix_zero.autonomous_scheduler import AutonomousExperimentScheduler
+                AutonomousExperimentScheduler(sched_reg).request_stop(reason=args.reason)
+            except Exception:
+                pass
         print(json.dumps(st, indent=2))
         return 0
 
     if args.command == "status":
-        print(json.dumps(ctrl.get_status(), indent=2))
+        st = ctrl.get_status()
+        sme_path = ctrl.state_dir / "subject_expertise_index.json"
+        if sme_path.exists():
+            try:
+                sme_data = json.loads(sme_path.read_text(encoding="utf-8"))
+                st["total_subject_count"] = sme_data.get("total_subject_count")
+                st["certified_sme_subject_count"] = sme_data.get("certified_sme_subject_count")
+                st["dynamically_discovered_subject_count"] = sme_data.get("dynamically_discovered_subject_count")
+            except Exception:
+                pass
+        sched_reg = ctrl.state_dir / "candidate_bundle" / "registry"
+        if sched_reg.exists():
+            try:
+                from aix_zero.autonomous_scheduler import AutonomousExperimentScheduler
+                sched_st = AutonomousExperimentScheduler(sched_reg).build_operator_status()
+                st["candidate_experiment_scheduler"] = {
+                    "phase": sched_st["phase"],
+                    "mode": sched_st["mode"],
+                    "attempt_count": sched_st["attempt_count"],
+                    "cumulative_budget": sched_st["cumulative_budget"],
+                }
+            except Exception:
+                pass
+        print(json.dumps(st, indent=2))
         return 0
+
+    if args.command == "run":
+        # Unified one-command launcher:
+        # 1. Prepares the candidate experiment bundle if not already initialized
+        # 2. Triggers one online subject discovery check
+        # 3. Starts (or reports already-running) background self-improvement daemon
+        bundle_dir = ctrl.state_dir / "candidate_bundle"
+        if not (bundle_dir / "bundle.json").exists():
+            try:
+                from aix_zero.prepare_candidate_experiment import prepare_experiment_inputs
+                prepare_experiment_inputs(bundle_dir)
+            except Exception:
+                pass
+        ctrl.discover_and_learn_new_subject(allow_internet_fetch=True)
+        ctrl.update_subject_expertise_index()
+
+        existing_pid = None
+        if ctrl.pid_path.exists():
+            try:
+                cand_pid = int(ctrl.pid_path.read_text(encoding="utf-8").strip())
+                os.kill(cand_pid, 0)
+                existing_pid = cand_pid
+            except Exception:
+                existing_pid = None
+
+        if existing_pid is not None and not ctrl.should_stop():
+            print(
+                json.dumps(
+                    {
+                        "status": "ALREADY_RUNNING",
+                        "daemon_started": True,
+                        "pid": existing_pid,
+                        "state_dir": str(ctrl.state_dir),
+                        "status_command": "aix status",
+                        "stop_command": "aix stop",
+                    },
+                    indent=2,
+                )
+            )
+            return 0
+
+        args.command = "start-daemon"
 
     if args.command == "run-once":
         ctrl.clear_stop_sentinel()

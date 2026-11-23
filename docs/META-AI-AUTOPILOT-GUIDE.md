@@ -6,7 +6,22 @@ This guide documents how to run, monitor, query, use for peer-AI coaching, and i
 
 ## 1. Quickstart Commands (Run from Any Directory)
 
-If you are using the configured local environment (`/Users/alexpfeil/.gemini/antigravity/scratch/trl/.venv/bin/python` or `/Users/alexpfeil/.local/bin/aix-ctl`), you can run all commands below from **any folder on your machine**:
+With the global `aix` (or `aix-ctl`) launcher installed in `~/.local/bin`, you only need **three commands** from any directory on your Mac:
+
+- **1. Start automatic training & subject discovery:**
+  ```bash
+  aix run
+  ```
+- **2. Check live status, subject mastery, and parameter growth:**
+  ```bash
+  aix status
+  ```
+- **3. Stop immediately (before shutting down your computer):**
+  ```bash
+  aix stop
+  ```
+
+If you are calling Python directly (`/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/.venv-training/bin/python` or `/Users/alexpfeil/.local/bin/aix-ctl`), you can also run the detailed subcommands below from **any folder on your machine**:
 
 ### A. Run One Self-Improvement Cycle
 Runs one progressive cycle (generates 30 new Meta-AI tasks, inspects 3 rotating open-source Python files via AST, verifies 4 executable code-synthesis tasks, trains the 817,410-parameter `v12_evolving` MoE weights with completion-masked cross-entropy, gates promotion on unseen held-out validation loss, exports updated `.safetensors` expert shards, and optionally opens/closes an auditable GitHub issue):
