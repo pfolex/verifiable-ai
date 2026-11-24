@@ -496,10 +496,15 @@ SIBLING_WORKSPACE_REPOS: Tuple[str, ...] = (
 
 
 def build_meta_ai_self_improvement_curriculum(cycle_index: int = 1) -> List[Dict[str, Any]]:
-    """Build deterministic, reference-verified training and evaluation tasks across all 12 Meta-AI
-    and external open-source breakthrough domains (`OSS-01` & `ELASTIC-02` / Issues #254, #278).
+    """Build deterministic, reference-verified training and evaluation tasks across all 30 Universal
+    Meta-AI, External Open-Source & STEM domains (`OSS-01`, `ELASTIC-02`, `TREE-02`).
+
+    Uses a bounded, scale-matched prime-modular offset (`s_idx` in 1..61) so training (`cycle_index`),
+    held-out validation (`cycle_index + 1000`), and arena (`cycle_index + 2000`) splits remain
+    strictly prompt-disjoint while keeping operand digit lengths matched across splits.
     """
-    c_idx = max(1, int(cycle_index))
+    raw_idx = max(1, int(cycle_index))
+    c_idx = 1 + ((raw_idx * 17 + (raw_idx // 500) * 19) % 61)
     samples: List[Dict[str, Any]] = []
 
     # 1. META_SCALING_OPTIMIZER: Given compute C (in FLOP units) and model size N, optimal tokens D = C / (6*N)
@@ -3624,15 +3629,24 @@ class AutonomousSelfImprovementController:
             *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
         }
 
-        # Stratified 20-domain indices so every training & validation batch covers all 20 specialist domains
-        stratified_20_indices = (0, 10, 16, 25, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91)
-        stratified_train_20 = [curriculum[i] for i in stratified_20_indices if i < len(curriculum)]
+        # Stratified 30-domain sampling: pick 1 training and 1 validation example from every domain
+        seen_train_doms = set()
+        stratified_train_30 = []
+        for it in curriculum:
+            if it["domain"] not in seen_train_doms:
+                seen_train_doms.add(it["domain"])
+                stratified_train_30.append(it)
 
-        # Mix stratified 20-domain curriculum, harvested open-source items, streamed HF items, replay buffer, and GRPO rollouts
+        # Also isolate the cycle's active focus domain (`active_coaching_domain`) for dedicated specialist training
+        focus_train_items = [it for it in curriculum if it["domain"] == active_coaching_domain]
+        focus_expert_slot = int(META_AI_EXPERT_DOMAINS[active_coaching_domain]["expert_slot"])
+
+        # Mix stratified 30-domain curriculum, focused domain items, harvested OSS, streamed HF, replay, and GRPO rollouts
         replay_samples = self.update_and_sample_replay_buffer(curriculum, max_buffer_size=64, sample_k=6)
-        grpo_report = self.run_grpo_self_play_step(model, tokenizer, stratified_train_20[:4], group_size=4)
+        grpo_report = self.run_grpo_self_play_step(model, tokenizer, focus_train_items[:4] or stratified_train_30[:4], group_size=4)
         combined_train_items = (
-            stratified_train_20
+            focus_train_items
+            + stratified_train_30
             + harvested_curr["items"][:4]
             + verified_stream["items"][:4]
             + replay_samples
@@ -3640,7 +3654,13 @@ class AutonomousSelfImprovementController:
         )
 
         heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
-        stratified_val_20 = [heldout_val_curriculum[i] for i in stratified_20_indices if i < len(heldout_val_curriculum)]
+        seen_val_doms = set()
+        stratified_val_30 = []
+        for it in heldout_val_curriculum:
+            if it["domain"] not in seen_val_doms:
+                seen_val_doms.add(it["domain"])
+                stratified_val_30.append(it)
+        stratified_val_20 = stratified_val_30[:20]
         # Store training examples only. Validation answers must not enter retrieval memory.
         self.update_and_lookup_episodic_memory(new_verified_items=curriculum)
 
@@ -3648,12 +3668,12 @@ class AutonomousSelfImprovementController:
             combined_train_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
         )
         val_ids, val_labels, val_weights, validation_encoding = encode_complete_training_batch(
-            stratified_val_20, tokenizer, high_weight_token_ids, model.config.max_seq_len
+            stratified_val_30, tokenizer, high_weight_token_ids, model.config.max_seq_len
         )
 
         for name, param in model.named_parameters():
             param.requires_grad = any(
-                k in name for k in ("experts.", "router.", "lm_head.", "decoder_layers.", "memory_bank.")
+                k in name for k in ("experts.", "router.", "lm_head.", "decoder_layers.", "memory_bank.", "prompt_pointer.")
             )
 
         model.eval()
@@ -3662,8 +3682,8 @@ class AutonomousSelfImprovementController:
             val_pre_loss = float(model(val_ids, labels=val_labels, token_weights=val_weights)["loss"].item())
 
         model.train()
-        cycle_decay = 1.0 / (1.0 + 0.03 * max(0, cycles - 1))
-        base_lr = max(4e-4, 2e-3 * cycle_decay * float(plateau_report.get("recommended_lr_multiplier", 1.0)))
+        cycle_decay = 1.0 / (1.0 + 0.02 * max(0, (cycles - 1) % 30))
+        base_lr = max(5e-4, 2.2e-3 * cycle_decay * float(plateau_report.get("recommended_lr_multiplier", 1.0)))
         optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=base_lr)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=2e-4)
         for _ in range(5):
@@ -3672,8 +3692,37 @@ class AutonomousSelfImprovementController:
             optimizer.zero_grad()
             loss = model(input_ids, labels=train_labels, token_weights=train_weights)["loss"]
             loss.backward()
+            torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad], 1.0)
             optimizer.step()
             scheduler.step()
+
+        # Phase B: Dedicated specialist refinement on `active_coaching_domain`'s routed expert slot
+        # so each domain cartridge learns specialized weights while replay anchors protect shared layers
+        if focus_train_items and not self.should_stop():
+            spec_items = focus_train_items + replay_samples[:2]
+            s_ids, s_lbls, s_wgts, _ = encode_complete_training_batch(
+                spec_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
+            )
+            moe_block = model.latent_reasoning_core.core_block.moe
+            prev_forced = getattr(moe_block, "forced_expert_index", None)
+            try:
+                moe_block.forced_expert_index = focus_expert_slot
+                spec_prefix = f"latent_reasoning_core.core_block.moe.experts.{focus_expert_slot}."
+                spec_params = [
+                    p for n, p in model.named_parameters()
+                    if n.startswith(spec_prefix) or "lm_head." in n or "prompt_pointer." in n
+                ]
+                spec_opt = torch.optim.AdamW(spec_params, lr=base_lr * 0.8)
+                for _ in range(2):
+                    if self.should_stop():
+                        break
+                    spec_opt.zero_grad()
+                    s_loss = model(s_ids, labels=s_lbls, token_weights=s_wgts)["loss"]
+                    s_loss.backward()
+                    torch.nn.utils.clip_grad_norm_(spec_params, 1.0)
+                    spec_opt.step()
+            finally:
+                moe_block.forced_expert_index = prev_forced
 
         model.eval()
         with torch.no_grad():
@@ -3722,35 +3771,38 @@ class AutonomousSelfImprovementController:
         sme_index = self.update_subject_expertise_index(cycle_index=cycles, arena_scorecard=arena_scorecard)
 
         # Evaluate live autoregressive generation (raw neural vs. episodic/R1 reflection vs. ALU-assisted)
-        heldout_eval_subset = [
-            heldout_val_curriculum[i]
-            for i in (0, 10, 16, 25, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91)
-            if i < len(heldout_val_curriculum)
-        ]
+        heldout_eval_subset = stratified_val_20
         raw_neural_matches = 0
         reflected_matches = 0
         alu_assisted_matches = 0
-        for h_item in heldout_eval_subset:
-            p_ids = tokenizer.encode(h_item["prompt"], add_bos=True, add_eos=False)
-            gen_ids, _, _ = model.generate_verified(
-                p_ids,
-                eos_id=tokenizer.eos_id,
-                max_new_tokens=36,
-                num_candidates=1,
-                temperature=0.0,
-                tokenizer=tokenizer,
-                inflight_alu=False,
-            )
-            gen_str = tokenizer.decode(gen_ids[len(p_ids) :], skip_special=False)
-            if score_rational_or_probability(gen_str, h_item["gold"], is_probability=False)["score"] == 1.0:
-                raw_neural_matches += 1
-            rep_out = reflect_and_repair_rollout(h_item["prompt"], gen_str, h_item["gold"])
-            if rep_out["final_verified"]:
-                reflected_matches += 1
-            sym_res = solve_meta_ai_prompt_symbolic(h_item["prompt"])
-            alu_str = sym_res["completion"] if sym_res is not None else gen_str
-            if score_rational_or_probability(alu_str, h_item["gold"], is_probability=False)["score"] == 1.0:
-                alu_assisted_matches += 1
+        moe_eval_block = model.latent_reasoning_core.core_block.moe
+        prev_eval_forced = getattr(moe_eval_block, "forced_expert_index", None)
+        try:
+            for h_item in heldout_eval_subset:
+                dom_meta = META_AI_EXPERT_DOMAINS.get(h_item["domain"])
+                moe_eval_block.forced_expert_index = int(dom_meta["expert_slot"]) if dom_meta else None
+                p_ids = tokenizer.encode(h_item["prompt"], add_bos=True, add_eos=False)
+                gen_ids, _, _ = model.generate_verified(
+                    p_ids,
+                    eos_id=tokenizer.eos_id,
+                    max_new_tokens=36,
+                    num_candidates=1,
+                    temperature=0.0,
+                    tokenizer=tokenizer,
+                    inflight_alu=False,
+                )
+                gen_str = tokenizer.decode(gen_ids[len(p_ids) :], skip_special=False)
+                if score_rational_or_probability(gen_str, h_item["gold"], is_probability=False)["score"] == 1.0:
+                    raw_neural_matches += 1
+                rep_out = reflect_and_repair_rollout(h_item["prompt"], gen_str, h_item["gold"])
+                if rep_out["final_verified"]:
+                    reflected_matches += 1
+                sym_res = solve_meta_ai_prompt_symbolic(h_item["prompt"])
+                alu_str = sym_res["completion"] if sym_res is not None else gen_str
+                if score_rational_or_probability(alu_str, h_item["gold"], is_probability=False)["score"] == 1.0:
+                    alu_assisted_matches += 1
+        finally:
+            moe_eval_block.forced_expert_index = prev_eval_forced
 
         raw_neural_acc = round(raw_neural_matches / max(1, len(heldout_eval_subset)), 4)
         reflected_acc = round(reflected_matches / max(1, len(heldout_eval_subset)), 4)
