@@ -122,6 +122,9 @@ def verify_bundle(bundle):
         raise ValueError('Runtime baseline differs from the validating loader baseline')
     if info['model_config']!=manifest['model']['model_config'] or info['tokenizer']!=manifest['model']['tokenizer']:
         raise ValueError('Bundle model/tokenizer metadata differs')
+    for key in ('unique_physical_parameters','physical_lora_parameters','n_experts','lora_ranks_present'):
+        if info['physical_accounting'].get(key)!=manifest['model']['physical_accounting'].get(key):
+            raise ValueError('Bundle physical parameter accounting differs')
     return manifest
 
 
@@ -225,6 +228,7 @@ def publish_release(snapshot, repository, *, gh='gh', runner=subprocess.run):
     checksums=read_json(parent/'checksums.json')
     if any(checksums.get(k)!=snapshot[k] for k in ('tag','cycle','source_revision','archive_sha256','manifest_sha256')):
         raise ValueError('Publication checksums differ from verified snapshot')
+    checksum_digest=digest(parent/'checksums.json')
     notes=parent/'release-notes.md'
     notes.write_text(f"AIX cycle {snapshot['cycle']} runtime snapshot.\n\nSource: {snapshot['source_revision']}\n\nArchive SHA256: {snapshot['archive_sha256']}\n\nLatest snapshot, not an independently evaluated best model.\n")
     def run(*args):
@@ -236,7 +240,7 @@ def publish_release(snapshot, repository, *, gh='gh', runner=subprocess.run):
         run('release','download',tag,'--repo',repository,'--pattern',archive.name,
             '--pattern','checksums.json','--dir',temporary)
         downloaded=Path(temporary)
-        if digest(downloaded/archive.name)!=snapshot['archive_sha256'] or digest(downloaded/'checksums.json')!=digest(parent/'checksums.json'):
+        if digest(downloaded/archive.name)!=snapshot['archive_sha256'] or digest(downloaded/'checksums.json')!=checksum_digest:
             raise ValueError('Downloaded GitHub assets differ; release remains draft and AIX remains paused')
     run('release','edit',tag,'--repo',repository,'--draft=false','--latest=false')
     receipt=dict(repository=repository,tag=tag,url=f'https://github.com/{repository}/releases/tag/{tag}',

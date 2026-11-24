@@ -155,15 +155,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         repo_root = Path(__file__).resolve().parents[1]
         if args.command == "checkpoint-verify":
             result = verify_bundle(args.bundle)
-        elif args.command == "checkpoint-resume":
-            result = resume_paused(args.state_dir, repo_root, clear_only=args.clear_only)
         else:
-            result = create_snapshot(args.state_dir, repo_root, args.output_dir,
-                timeout=args.timeout, max_bytes=args.max_bytes, extra_state=args.extra_state)
-            if args.publish:
-                result["publication"] = publish_release(result, args.repo, gh=args.gh)
-            if args.resume:
-                result["resume"] = resume_paused(args.state_dir, repo_root)
+            from aix_zero.checkpoint_control import file_lock
+            with file_lock(args.state_dir / '.checkpoint-operation.lock'):
+                if args.command == "checkpoint-resume":
+                    result = resume_paused(args.state_dir, repo_root, clear_only=args.clear_only)
+                else:
+                    result = create_snapshot(args.state_dir, repo_root, args.output_dir,
+                        timeout=args.timeout, max_bytes=args.max_bytes, extra_state=args.extra_state)
+                    if args.publish:
+                        result["publication"] = publish_release(result, args.repo, gh=args.gh)
+                    if args.resume:
+                        result["resume"] = resume_paused(args.state_dir, repo_root)
         print(json.dumps(result, indent=2))
         return 0
     ctrl = AutonomousSelfImprovementController(
