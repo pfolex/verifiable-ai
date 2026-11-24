@@ -24,6 +24,7 @@ An unattended, resource-bounded, self-improving AI engineering loop that:
 from __future__ import annotations
 
 import copy
+from aix_zero.checkpoint_control import cycle_boundary
 from datetime import datetime, timezone
 from fractions import Fraction
 import hashlib
@@ -3075,6 +3076,7 @@ class AutonomousSelfImprovementController:
         write_json(payload, ledger_path)
         return payload
 
+    @cycle_boundary
     def discover_and_learn_new_subject(
         self,
         *,
@@ -3229,6 +3231,7 @@ class AutonomousSelfImprovementController:
             "web_reference": web_reference,
         }
 
+    @cycle_boundary
     def update_subject_expertise_index(
         self,
         *,
@@ -3518,6 +3521,7 @@ class AutonomousSelfImprovementController:
         write_json(payload, out_p)
         return payload
 
+    @cycle_boundary
     def run_single_self_improvement_cycle(
         self,
         *,

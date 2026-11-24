@@ -136,7 +136,36 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_learn.add_argument("--cycle", type=int, default=1, help="Cycle index")
     p_learn.add_argument("--online", action="store_true", help="Fetch live Wikipedia and arXiv context for the subject")
 
+    p_checkpoint = sub.add_parser("checkpoint", help="Pause at cycle boundary and create a verified model bundle")
+    p_checkpoint.add_argument("--output-dir", type=Path, default=Path("checkpoint-releases"))
+    p_checkpoint.add_argument("--publish", action="store_true", help="Publish verified assets as a GitHub release")
+    p_checkpoint.add_argument("--repo", default="pfolex/verifiable-ai")
+    p_checkpoint.add_argument("--resume", action="store_true", help="Resume the previously running daemon only after success")
+    p_checkpoint.add_argument("--timeout", type=float, default=300)
+    p_checkpoint.add_argument("--max-bytes", type=int, default=512*1024*1024)
+    p_checkpoint.add_argument("--extra-state", action="append", default=[], help="Additional state-relative adapter/config artifact")
+    p_checkpoint.add_argument("--gh", default="gh")
+    p_verify = sub.add_parser("checkpoint-verify", help="Verify an unpacked checkpoint bundle and reload its model")
+    p_verify.add_argument("--bundle", type=Path, required=True)
+    p_resume = sub.add_parser("checkpoint-resume", help="Explicitly recover from a checkpoint pause")
+    p_resume.add_argument("--clear-only", action="store_true", help="Clear pause without launching a daemon")
     args = parser.parse_args(argv)
+    if args.command in ("checkpoint", "checkpoint-resume", "checkpoint-verify"):
+        from aix_zero.checkpoint_publish import create_snapshot, publish_release, resume_paused, verify_bundle
+        repo_root = Path(__file__).resolve().parents[1]
+        if args.command == "checkpoint-verify":
+            result = verify_bundle(args.bundle)
+        elif args.command == "checkpoint-resume":
+            result = resume_paused(args.state_dir, repo_root, clear_only=args.clear_only)
+        else:
+            result = create_snapshot(args.state_dir, repo_root, args.output_dir,
+                timeout=args.timeout, max_bytes=args.max_bytes, extra_state=args.extra_state)
+            if args.publish:
+                result["publication"] = publish_release(result, args.repo, gh=args.gh)
+            if args.resume:
+                result["resume"] = resume_paused(args.state_dir, repo_root)
+        print(json.dumps(result, indent=2))
+        return 0
     ctrl = AutonomousSelfImprovementController(
         args.state_dir,
         max_cpu_threads=getattr(args, "threads", 1),
@@ -226,6 +255,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Accuracy      : {alu_acc:.1f}% Neuro-Symbolic Verified | {neural_acc:.2f}% Raw Neural Arena")
         return 0
 
+    if args.command in ("run", "run-once", "start", "start-daemon"):
+        from aix_zero.checkpoint_control import PAUSE
+        if (ctrl.state_dir / PAUSE).exists():
+            raise RuntimeError("Checkpoint pause is active; use checkpoint-resume explicitly")
+
     if args.command == "run":
         # Unified one-command launcher:
         # 1. Prepares the candidate experiment bundle if not already initialized
@@ -283,7 +317,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         ctrl.install_signal_handlers()
         completed = 0
         last_res = {}
-        while completed < args.max_cycles and not ctrl.should_stop():
+        from aix_zero.checkpoint_control import PAUSE, atomic_json
+        atomic_json(ctrl.state_dir / '.checkpoint.launch.json', dict(
+            max_cycles=args.max_cycles, initial_cycles_completed=ctrl.get_status().get('cycles_completed', 0),
+            interval_seconds=args.interval_seconds, threads=args.threads,
+            sync_github=bool(args.sync_github), auto_push=bool(args.auto_push)))
+        while completed < args.max_cycles and not ctrl.should_stop() and not (ctrl.state_dir / PAUSE).exists():
             last_res = ctrl.run_single_self_improvement_cycle(
                 sync_github_issue=args.sync_github,
                 auto_push=args.auto_push,
@@ -292,57 +331,67 @@ def main(argv: Optional[List[str]] = None) -> int:
                 break
             completed += 1
             if completed < args.max_cycles and not ctrl.should_stop():
-                time.sleep(max(0.0, float(args.interval_seconds)))
+                deadline = time.monotonic() + max(0.0, float(args.interval_seconds))
+                while time.monotonic() < deadline and not ctrl.should_stop() and not (ctrl.state_dir / PAUSE).exists():
+                    time.sleep(min(.2, max(0., deadline-time.monotonic())))
         print(json.dumps(ctrl.get_status(), indent=2))
         return 0
 
     if args.command == "start-daemon":
-        ctrl.clear_stop_sentinel()
-        ctrl.state_dir.mkdir(parents=True, exist_ok=True)
-        log_path = ctrl.state_dir / "autopilot_daemon.log"
-        cmd = [
-            sys.executable,
-            "-m",
-            "aix_zero.aix_ctl",
-            "--state-dir",
-            str(ctrl.state_dir),
-            "start",
-            "--max-cycles",
-            str(args.max_cycles),
-            "--interval-seconds",
-            str(args.interval_seconds),
-            "--threads",
-            str(args.threads),
-        ]
-        if args.sync_github:
-            cmd.append("--sync-github")
-        if args.auto_push:
-            cmd.append("--auto-push")
-        with open(log_path, "a", encoding="utf-8") as log_f:
-            proc = subprocess.Popen(
-                cmd,
-                cwd=str(ctrl.repo_root),
-                stdout=log_f,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
+        from aix_zero.checkpoint_control import PAUSE, CYCLE_LOCK, file_lock
+        from aix_zero.checkpoint_publish import alive, state_pid
+        with file_lock(ctrl.state_dir / CYCLE_LOCK):
+            if (ctrl.state_dir / PAUSE).exists():
+                raise RuntimeError("Checkpoint pause is active")
+            if alive(state_pid(ctrl.state_dir)):
+                raise RuntimeError("An AIX daemon is already active; refusing duplicate start")
+            ctrl.clear_stop_sentinel()
+            ctrl.state_dir.mkdir(parents=True, exist_ok=True)
+            log_path = ctrl.state_dir / "autopilot_daemon.log"
+            cmd = [
+                sys.executable,
+                "-m",
+                "aix_zero.aix_ctl",
+                "--state-dir",
+                str(ctrl.state_dir),
+                "start",
+                "--max-cycles",
+                str(args.max_cycles),
+                "--interval-seconds",
+                str(args.interval_seconds),
+                "--threads",
+                str(args.threads),
+            ]
+            if args.sync_github:
+                cmd.append("--sync-github")
+            if args.auto_push:
+                cmd.append("--auto-push")
+            with open(log_path, "a", encoding="utf-8") as log_f:
+                proc = subprocess.Popen(
+                    cmd,
+                    cwd=str(ctrl.repo_root),
+                    stdout=log_f,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
+            ctrl.pid_path.write_text(str(proc.pid), encoding="utf-8")
+            print(
+                json.dumps(
+                    {
+                        "daemon_started": True,
+                        "pid": proc.pid,
+                        "max_cpu_threads": args.threads,
+                        "interval_seconds": args.interval_seconds,
+                        "sync_github": bool(args.sync_github),
+                        "auto_push": bool(args.auto_push),
+                        "log_path": str(log_path),
+                        "stop_command": f"{sys.executable} -m aix_zero.aix_ctl stop",
+                    },
+                    indent=2,
+                )
             )
-        ctrl.pid_path.write_text(str(proc.pid), encoding="utf-8")
-        print(
-            json.dumps(
-                {
-                    "daemon_started": True,
-                    "pid": proc.pid,
-                    "max_cpu_threads": args.threads,
-                    "interval_seconds": args.interval_seconds,
-                    "sync_github": bool(args.sync_github),
-                    "auto_push": bool(args.auto_push),
-                    "log_path": str(log_path),
-                    "stop_command": f"{sys.executable} -m aix_zero.aix_ctl stop",
-                },
-                indent=2,
-            )
-        )
-        return 0
+            return 0
+    
 
     if args.command == "query":
         res = ctrl.query_evolving_meta_ai(args.prompt, use_alu=not args.no_alu)
