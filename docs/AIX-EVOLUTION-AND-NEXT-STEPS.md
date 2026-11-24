@@ -49,25 +49,62 @@ Installed global executables ([`/Users/alexpfeil/.local/bin/aix`](file:///Users/
 
 ---
 
-## 2. Next Steps to Evolve AIX to the Next Level
+## 2. Implemented Neural & Software Engineering Roadmap (`#428`–`#433`)
 
-To take AIX from a fast self-improving hybrid neuro-symbolic system (`100%` neuro-symbolic accuracy, `2.63%` unassisted raw neural accuracy across 30+ domains) to a high-accuracy autonomous neural reasoner and software engineer:
+All five work items coordinated under [`#433` (`[AIX NEURAL & SOFTWARE ROADMAP]`)](https://github.com/pfolex/verifiable-ai/issues/433) have now been implemented, audited against current `main`, and verified with boundary and unit test suites:
 
-### Step 1: Per-Domain Cartridge Bank Routing During Neural Arena Evaluation
-- **Why:** Even though AIX exports 30+ specialist `.safetensors` shards, `AIXZeroModel` still has `n_experts = 4` in its physical core, meaning 7–8 domains share each physical expert slot in RAM.
-- **Next Action:** Wire `SparseExpertCartridgeBank.execute_routed_request` directly into `run_frontier_arena_evaluation` and `run_single_self_improvement_cycle` so each of the 30+ domains loads and trains its own dedicated disk-backed `.safetensors` expert shard (`49,152` dedicated parameters per domain, zero cross-domain interference).
+### Step 1 (`#428` — `[AIX NEURAL-01]`): Routed Domain Cartridges & Isolated Specialist Training
+- **Module:** [`aix_zero/routed_specialist_training.py`](../aix_zero/routed_specialist_training.py) | **Tests:** [`aix_zero_tests/test_routed_specialist_training.py`](../aix_zero_tests/test_routed_specialist_training.py)
+- **Baseline Tensor Ownership Audit (`audit_model_and_cartridge_tensor_ownership`):**
+  - Audited `AIXZeroModel` (`v11` config): `817,410` total physical parameters (`620,802` shared backbone/router/shared-expert parameters + `4` routed expert slots of `49,152` float32 parameters / `196,608` bytes each).
+  - Explicitly distinguishes **snapshot aliases** (`existing_routed_expert_snapshot`, where 30 domains mapped across 4 slots produce at most 4 unique SHA-256 tensor digests) from **independently trained specialists** (`frozen_v11_single_expert_training_candidate`).
+  - Records `zero_cross_domain_interference_guaranteed_by_disk_file_alone: False` because shared backbone/router weights can still cause cross-domain interference unless frozen.
+- **Isolated Specialist Training (`train_isolated_domain_cartridge`):**
+  - Freezes 100% of shared backbone, router, shared expert, and non-target expert slots, verifying `frozen_tensors_unchanged == True` via pre/post SHA-256 checksums.
+  - Creates a fresh isolated `AdamW` optimizer bound strictly to `moe.experts[target_slot].parameters()` (`49,152` trainable params) so no optimizer state or parameter references cross slot swaps.
+  - Atomically publishes only the single candidate `.safetensors` cartridge and restores the base model's in-RAM slot on completion, error, or cancellation.
+- **Four-Arm Paired Routed Evaluation (`evaluate_routed_cartridge_paired_comparison`):**
+  - Connects `SparseExpertCartridgeBank` to [`paired_checkpoint_eval.py`](../aix_zero/paired_checkpoint_eval.py) and `run_frontier_arena_evaluation` in [`meta_ai_autopilot.py`](../aix_zero/meta_ai_autopilot.py).
+  - Evaluates in strict `neural_only` mode (`inflight_alu=False`, no retrieval, no repair), reporting `unchanged_baseline`, `predicted_prefix_routed` (using prompt text only, never gold answers), `oracle_domain_label_routed` (reported separately), and `wrong_cartridge_control` (plus corrupt/incompatible cartridge fallback telemetry).
 
-### Step 2: Physical LoRA & Expert-Count Expansion in `AIXZeroModel`
-- **Why:** Right now `ElasticLoRAAdapterBank` tracks rank expansion (`r = 4 -> 256+`) in the capacity ledger, while the base checkpoint tensor shapes stay compatible with `v11` (`d_model = 128, n_experts = 4`).
-- **Next Action:** Add a physical `LoRALinear` wrapper or dynamic expert-slot growth (`n_experts: 4 -> 8 -> 16 -> 32`) inside `MixtureOfReasoningExperts` in [`aix_zero/architecture.py`](../aix_zero/architecture.py) with function-preserving zero-initialized $B$ matrices ($\Delta W = \frac{\alpha}{r} B A = 0$ at expansion time), so increasing parameters immediately adds physical representational capacity to forward/backward passes without disrupting existing skills.
+### Step 2 (`#429` — `[AIX NEURAL-02]`): Physical LoRA Capacity & Function-Preserving Migration
+- **Module:** [`aix_zero/physical_lora.py`](../aix_zero/physical_lora.py) | **Tests:** [`aix_zero_tests/test_physical_lora.py`](../aix_zero_tests/test_physical_lora.py)
+- **Physical `LoRALinear` & Trained-Adapter Rank Growth (`expand_rank`):**
+  - Registers physical `lora_A` (`(r, d_in)`) and `lora_B` (`(d_out, r)`) parameters computing $\Delta W = \frac{\alpha}{r} B A$ in `forward()`, with $B = 0$ initialization verified to preserve forward logits within `1e-6`.
+  - When expanding rank (`r_old -> r_new`) on an **already trained** adapter ($B \neq 0$) where $\frac{\alpha_{\text{new}}}{r_{\text{new}}} \neq \frac{\alpha_{\text{old}}}{r_{\text{old}}}$, rescales preserved columns `B[:, :r_old]` by `old_scaling / new_scaling` and appends zero columns `B[:, r_old:r_new] = 0`, preserving exact forward outputs within float32 tolerance (`1e-5`).
+  - Migrates `AdamW` optimizer state (`exp_avg`, `exp_avg_sq`) for existing dimensions while zero-initializing new rank slices, and verifies two-step gradient dynamics on added capacity (`grad(A_new) == 0` at step 1 while `grad(B_new) != 0`, followed by `grad(A_new) != 0` at step 2).
+- **Function-Preserving MoE Expert-Count Growth (`expand_moe_experts_function_preserving`):**
+  - Grows `moe.experts` (`4 -> 8 -> 16 -> 32`) while preserving exact softmax routing probabilities and top-k selection at the expansion boundary by masking new router bias slots (`-1e9`), with `unmask_expanded_moe_experts` for controlled activation.
+- **Versioned Checkpoint Migration & Caps:**
+  - Supports `2.0.0-physical-lora` checkpoint save/reload round-trips, fails closed on unexplained shape mismatches, reports actual unique physical/trainable/active/disk parameters and optimizer memory bytes, and enforces `max_lora_rank`, `max_total_parameters`, and `max_rss_bytes` caps.
 
-### Step 3: Teach the Neural Network to Emit Symbolic ALU Triggers (`<think>op1*op2=`)
-- **Why:** Small transformers excel at **structural routing and operand extraction** (`PromptPointerAttention` copying numbers from the prompt into `<think>a*b=`), while exact multi-digit rational arithmetic is best handled by AIX's built-in `evaluate_inflight_subexpr` ALU.
-- **Next Action:** Add an explicit **Pointer-Prefix Supervision Loss** that heavily weights the tokens up to the first `=` sign inside `<think>` (`<think>6*202=`), training the neural network to achieve >80% accuracy at setting up equations from arbitrary prompts.
+### Step 3 (`#430` — `[AIX NEURAL-03]`): Equation-Prefix Supervision & Separately Measured ALU-Trigger Accuracy
+- **Module:** [`aix_zero/equation_prefix_supervision.py`](../aix_zero/equation_prefix_supervision.py) | **Tests:** [`aix_zero_tests/test_equation_prefix_supervision.py`](../aix_zero_tests/test_equation_prefix_supervision.py)
+- **Token-Aligned Prefix Masking (`encode_equation_prefix_supervision_batch`):**
+  - Masks all BOS and prompt tokens (including any `=` signs inside the prompt!) with `labels = 0`, `prefix_mask = 0.0`, and `continuation_mask = 0.0`.
+  - Weights tokens from `<think>` through the first arithmetic `=` inside the reasoning region (`prefix_weight = 5.0`), distinguishing optional variable labels (`ratio=`) from the arithmetic operator expression (`16/4=`), while preserving full continuation and `<eos>` supervision (`continuation_weight = 1.0`).
+  - Logs normalized `prefix_loss` and `continuation_loss` separately.
+- **Three-Way Outcome Separation (`evaluate_three_way_prefix_and_alu_outcomes`):**
+  - Reports three distinct outcomes with numerators, denominators, Wilson 95% confidence intervals, and per-domain breakdowns:
+    1. `neural_only_full_performance` (`assistance_mode: "neural_only"`, ALU off)
+    2. `neural_equation_setup_accuracy` (`exact_prefix_accuracy` and `semantic_setup_accuracy` before ALU insertion, classifying `correct_setup_wrong_continuation`, `correct_arithmetic_wrong_operand_selection`, and `malformed_alu_trigger`)
+    3. `alu_assisted_final_performance` (`assistance_mode: "bounded_alu_assisted"`, `unassisted_neural_claim_prohibited: True`, using bounded rational parser `evaluate_bounded_equation_prefix` that rejects division by zero, unsupported operators, and magnitude overflows without executing Python).
 
-### Step 4: Live Multi-Turn Peer-AI Distillation with Local Ollama Models (`#415`)
-- **Why:** You have local Ollama installed (`/Users/alexpfeil/.local/bin/ollama`).
-- **Next Action:** Connect the autonomous scheduler to query local teacher/peer models via Ollama when AIX hits a new domain or code-refactoring task, filter every peer response through `verify_r1_reasoning_trace()` and sandboxed `pytest` execution, and distill only 100%-verified peer solutions into AIX's specialist cartridges.
+### Step 4 (`#431` — `[AIX PEER-01]`): Bounded Multi-Turn Ollama Coaching & Verified Cartridge Distillation
+- **Module:** [`aix_zero/ollama_peer_coaching.py`](../aix_zero/ollama_peer_coaching.py) | **Tests:** [`aix_zero_tests/test_ollama_peer_coaching.py`](../aix_zero_tests/test_ollama_peer_coaching.py)
+- **Dynamic Discovery (`discover_ollama_service`):**
+  - Discovers Ollama via `OLLAMA_HOST`, `OLLAMA_BIN`, `shutil.which("ollama")`, or configured HTTP endpoint (`http://127.0.0.1:11434`) without hardcoded paths, returning an actionable `UNAVAILABLE` report when the service or requested teacher model is absent and never attempting implicit model downloads.
+- **Bounded Multi-Turn Coaching (`run_bounded_ollama_coaching_session`):**
+  - Pins teacher model digest, version, generation settings, and dataset license; enforces `max_turns_per_task`, `max_tokens_per_turn`, `max_total_tokens`, `max_wall_clock_sec`, `max_concurrency = 1`, caller cancellation, and `#407` split hygiene (blocking `development`, `regression`, and `reserved_final` prompts from entering coaching).
+  - Validates responses with both `verify_r1_reasoning_trace` and independent semantic operand/operator setup checks, labeling accepted traces `verification_status: "verifier_accepted"` (`guaranteed_universal_correctness: False`) and feeding concise non-leaking findings on retry turns.
+- **Four-Arm Neural-Only Distillation (`distill_verified_coaching_into_cartridge`):**
+  - Compares `original_baseline`, `no_teacher_self_trained_control`, `teacher_distilled_candidate` (on both known templates and unseen held-out prompts), and `teacher_only_reference` with zero teacher or ALU assistance at student evaluation time.
 
-### Step 5: Autonomous Code-Patching & Self-Refactoring Loop (`#270`, `#415`)
-- **Next Action:** Expand `synthesize_and_verify_swe_patch_tasks` so AIX proposes real unified diffs against open issues, runs the unit test suite in an isolated temporary worktree, and records three-arm comparisons (AIX solo vs. Peer AI solo vs. Symbiotic AIX + Peer).
+### Step 5 (`#432` — `[AIX SWE-01]`): Real Issue Patch Generation & Sandboxed Three-Arm SWE Benchmark
+- **Module:** [`aix_zero/swe_three_arm_benchmark.py`](../aix_zero/swe_three_arm_benchmark.py) | **Tests:** [`aix_zero_tests/test_swe_three_arm_benchmark.py`](../aix_zero_tests/test_swe_three_arm_benchmark.py)
+- **Pinned Tasks, Diff Security & Constrained Sandbox:**
+  - Pins repository revision, task snapshot SHA-256, `heldout_eval` split, open-source license (`Apache-2.0` / `MIT`), `allowed_target_files`, and immutable external test suite SHA-256.
+  - Rejects malformed diffs, path traversal (`..`), absolute paths, symlinks (`120000`), binary patches, and any file outside `allowed_target_files` (protecting graders, test suites, and promotion policies).
+  - Applies diffs in fresh detached disposable git worktrees (`git worktree add --detach`) and runs external pinned tests inside a constrained subprocess (`start_new_session=True`, process-group `SIGKILL` on timeout, stripped environment secrets, loopback-blocked proxy variables, isolated `HOME`/`TMPDIR`, `RLIMIT_CPU`/`RLIMIT_FSIZE` limits, and exact test-count + zero-skip verification).
+- **Three-Arm Comparison (`run_three_arm_swe_patch_comparison`):**
+  - Evaluates `aix_solo`, `peer_solo`, and `collaborative_aix_plus_peer` (with combined token/turn usage visible and all offered tasks kept in denominators) alongside a separate `reference_fixture_control` (`is_model_written_patch: False`), exporting validated patches only as reviewable candidate artifacts without direct production self-edit.

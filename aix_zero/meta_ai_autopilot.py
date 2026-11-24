@@ -3370,6 +3370,7 @@ class AutonomousSelfImprovementController:
         output_path: Optional[Path] = None,
         model: Optional[AIXZeroModel] = None,
         tokenizer: Any = None,
+        cartridge_bank: Optional[SparseExpertCartridgeBank] = None,
     ) -> Dict[str, Any]:
         """Score real neural generations and record symbolic controls separately.
 
@@ -3393,6 +3394,7 @@ class AutonomousSelfImprovementController:
             digest.update(name.encode())
             digest.update(str((tuple(value.shape), value.dtype)).encode())
             digest.update(value.numpy().tobytes())
+        state_sha = digest.hexdigest()
         curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index + 2000)
         by_domain = {dom: {"tested": 0, "verified": 0} for dom in META_AI_EXPERT_DOMAINS}
         records = []
@@ -3405,10 +3407,21 @@ class AutonomousSelfImprovementController:
                     if self.should_stop():
                         break
                     prompt_ids = tokenizer.encode(item["prompt"], add_bos=True, add_eos=False)
-                    generated, _, _ = model.generate_verified(
-                        prompt_ids, eos_id=tokenizer.eos_id, max_new_tokens=36,
-                        num_candidates=1, temperature=0.0, tokenizer=tokenizer, inflight_alu=False,
-                    )
+                    if cartridge_bank is not None:
+                        generated, _, _ = cartridge_bank.execute_routed_request(
+                            model,
+                            item["prompt"],
+                            lambda m, _p: m.generate_verified(
+                                prompt_ids, eos_id=tokenizer.eos_id, max_new_tokens=36,
+                                num_candidates=1, temperature=0.0, tokenizer=tokenizer, inflight_alu=False,
+                            ),
+                            active_base_checkpoint_sha256=state_sha,
+                        )
+                    else:
+                        generated, _, _ = model.generate_verified(
+                            prompt_ids, eos_id=tokenizer.eos_id, max_new_tokens=36,
+                            num_candidates=1, temperature=0.0, tokenizer=tokenizer, inflight_alu=False,
+                        )
                     completion = tokenizer.decode(generated[len(prompt_ids):], skip_special=False)
                     # Candidate generation above receives no reference answers.
                     score = score_rational_or_probability(completion, item["gold"], is_probability=False)
@@ -3431,9 +3444,11 @@ class AutonomousSelfImprovementController:
         swe_eval = synthesize_and_verify_swe_patch_tasks(cycle_index=cycle_index)
         scorecard = {
             "schema_version": "2.0.0", "cycle_index": cycle_index,
-            "evaluation_mode": "neural_only", "evaluation_split": "synthetic_diagnostic_probe",
+            "evaluation_mode": "neural_only",
+            "routing_assistance_mode": "predicted_prefix_cartridge" if cartridge_bank is not None else "none",
+            "evaluation_split": "synthetic_diagnostic_probe",
             "independent_final_test": False,
-            "model_identity": {"checkpoint": checkpoint_name, "state_sha256": digest.hexdigest(),
+            "model_identity": {"checkpoint": checkpoint_name, "state_sha256": state_sha,
                                "tokenizer_sha256": tokenizer.vocab_sha256},
             "generation_settings": {"max_new_tokens": 36, "num_candidates": 1,
                                     "temperature": 0.0, "inflight_alu": False},

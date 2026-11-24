@@ -8,11 +8,21 @@ from aix_zero.experiment_splits import verify_manifest
 from aix_zero.paired_evaluation import evaluate_pair
 
 
-def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='development', max_new_tokens=36):
+def evaluate_checkpoints(
+    manifest,
+    champion_path,
+    candidate_path,
+    *,
+    split='development',
+    max_new_tokens=36,
+    candidate_cartridge_bank_dir=None,
+):
     import torch
     from aix_zero.benchmark_baseline import load_v11
     from aix_zero.meta_ai_autopilot import verify_r1_reasoning_trace
     from aix_zero.eval_harness_bridge import score_rational_or_probability
+    from aix_zero.routed_specialist_training import compute_model_state_sha256
+    from aix_zero.sparse_cartridge_bank import SparseExpertCartridgeBank
     if split not in ('development', 'regression'):
         raise ValueError('Only development and regression splits are available to this evaluator')
     if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= 112:
@@ -22,7 +32,7 @@ def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='deve
     if not rows:
         raise ValueError('Selected evaluation split is empty')
     base = Path(__file__).resolve().parent / 'checkpoints/aix_zero_v11_kip.safetensors'
-    models = {}; tokenizers = {}; identities = {}
+    models = {}; tokenizers = {}; identities = {}; state_digests = {}
     # Read once so the recorded digest identifies the exact bytes deserialized.
     import io
     for role, source in (('champion',champion_path),('candidate',candidate_path)):
@@ -31,8 +41,14 @@ def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='deve
         model.load_state_dict(torch.load(io.BytesIO(data),map_location='cpu',weights_only=True),strict=True)
         model.eval(); models[role]=model; tokenizers[role]=tokenizer
         identities[role]=hashlib.sha256(data).hexdigest()
+        state_digests[role]=compute_model_state_sha256(model)
     if tokenizers['champion'].vocab_sha256 != tokenizers['candidate'].vocab_sha256:
         raise ValueError('Tokenizer identities differ')
+    cand_bank = (
+        SparseExpertCartridgeBank(Path(candidate_cartridge_bank_dir))
+        if candidate_cartridge_bank_dir is not None
+        else None
+    )
     torch.set_num_threads(1)
     settings=dict(max_new_tokens=max_new_tokens,num_candidates=1,temperature=0.,inflight_alu=False)
     def adapter(role):
@@ -42,7 +58,15 @@ def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='deve
             if len(ids)>=model.config.max_seq_len:
                 raise ValueError('Prompt exceeds context budget')
             with torch.no_grad():
-                generated,_,_=model.generate_verified(ids,eos_id=tokenizer.eos_id,tokenizer=tokenizer,**settings)
+                if role == 'candidate' and cand_bank is not None:
+                    generated,_,_ = cand_bank.execute_routed_request(
+                        model,
+                        prompt,
+                        lambda m, _p: m.generate_verified(ids,eos_id=tokenizer.eos_id,tokenizer=tokenizer,**settings),
+                        active_base_checkpoint_sha256=state_digests['candidate'],
+                    )
+                else:
+                    generated,_,_=model.generate_verified(ids,eos_id=tokenizer.eos_id,tokenizer=tokenizer,**settings)
             new_ids=generated[len(ids):]
             if new_ids and new_ids[-1]==tokenizer.eos_id:
                 termination_reason='eos'
@@ -64,7 +88,9 @@ def evaluate_checkpoints(manifest, champion_path, candidate_path, *, split='deve
                          score_answer=lambda text,gold:score_rational_or_probability(text,gold,is_probability=False)['score']==1.,
                          score_trace=lambda text,gold:verify_r1_reasoning_trace(text,gold)['fully_verified'])
     report.update(split=split,split_manifest_sha256=manifest['sha256'],tokenizer_sha256=tokenizers['champion'].vocab_sha256,
-                  assistance_mode='neural_only',checkpoint_format='v11-compatible torch state_dict',
+                  assistance_mode='neural_only',
+                  routing_assistance_mode='predicted_prefix_cartridge' if cand_bank is not None else 'none',
+                  checkpoint_format='v11-compatible torch state_dict',
                   context_limit=models['champion'].config.max_seq_len)
     return report
 
