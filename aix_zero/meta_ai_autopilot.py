@@ -3641,10 +3641,13 @@ class AutonomousSelfImprovementController:
         high_weight_token_ids = {
             tokenizer.ans_id,
             tokenizer.end_ans_id,
+            tokenizer.eos_id,
+            tokenizer.think_id,
+            tokenizer.end_think_id,
             *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
         }
 
-        # Stratified 30-domain sampling: pick 1 training and 1 validation example from every domain
+        # Stratified sampling across all active domains (core + discovered)
         seen_train_doms = set()
         stratified_train_30 = []
         for it in curriculum:
@@ -3652,11 +3655,11 @@ class AutonomousSelfImprovementController:
                 seen_train_doms.add(it["domain"])
                 stratified_train_30.append(it)
 
-        # Also isolate the cycle's active focus domain (`active_coaching_domain`) for dedicated specialist training
+        # Also isolate the cycle's active focus domain (`active_coaching_domain`) and newly discovered subject
         focus_train_items = [it for it in curriculum if it["domain"] == active_coaching_domain]
-        focus_expert_slot = int(META_AI_EXPERT_DOMAINS[active_coaching_domain]["expert_slot"])
+        focus_expert_slot = int(META_AI_EXPERT_DOMAINS.get(active_coaching_domain, {}).get("expert_slot", 0))
 
-        # Mix stratified 30-domain curriculum, focused domain items, harvested OSS, streamed HF, replay, and GRPO rollouts
+        # Mix stratified curriculum, focused domain items, harvested OSS, streamed HF, replay, and GRPO rollouts
         replay_samples = self.update_and_sample_replay_buffer(curriculum, max_buffer_size=64, sample_k=6)
         grpo_report = self.run_grpo_self_play_step(model, tokenizer, focus_train_items[:4] or stratified_train_30[:4], group_size=4)
         combined_train_items = (
@@ -3688,7 +3691,15 @@ class AutonomousSelfImprovementController:
 
         for name, param in model.named_parameters():
             param.requires_grad = any(
-                k in name for k in ("experts.", "router.", "lm_head.", "decoder_layers.", "memory_bank.", "prompt_pointer.")
+                k in name
+                for k in (
+                    "experts.",
+                    "router.",
+                    "lm_head.",
+                    "decoder_layers.",
+                    "memory_bank.",
+                    "prompt_pointer.",
+                )
             )
 
         model.eval()
@@ -3698,9 +3709,10 @@ class AutonomousSelfImprovementController:
 
         model.train()
         cycle_decay = 1.0 / (1.0 + 0.02 * max(0, (cycles - 1) % 30))
-        base_lr = max(5e-4, 2.2e-3 * cycle_decay * float(plateau_report.get("recommended_lr_multiplier", 1.0)))
+        loss_scale = min(1.0, max(0.35, val_pre_loss / 1.5))
+        base_lr = max(3e-4, 2.0e-3 * cycle_decay * loss_scale * float(plateau_report.get("recommended_lr_multiplier", 1.0)))
         optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=base_lr)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=2e-4)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=1.5e-4)
         for _ in range(5):
             if self.should_stop():
                 break
@@ -3710,34 +3722,6 @@ class AutonomousSelfImprovementController:
             torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad], 1.0)
             optimizer.step()
             scheduler.step()
-
-        # Phase B: Dedicated specialist refinement on `active_coaching_domain`'s routed expert slot
-        # so each domain cartridge learns specialized weights while replay anchors protect shared layers
-        if focus_train_items and not self.should_stop():
-            spec_items = focus_train_items + replay_samples[:2]
-            s_ids, s_lbls, s_wgts, _ = encode_complete_training_batch(
-                spec_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
-            )
-            moe_block = model.latent_reasoning_core.core_block.moe
-            prev_forced = getattr(moe_block, "forced_expert_index", None)
-            try:
-                moe_block.forced_expert_index = focus_expert_slot
-                spec_prefix = f"latent_reasoning_core.core_block.moe.experts.{focus_expert_slot}."
-                spec_params = [
-                    p for n, p in model.named_parameters()
-                    if n.startswith(spec_prefix) or "lm_head." in n or "prompt_pointer." in n
-                ]
-                spec_opt = torch.optim.AdamW(spec_params, lr=base_lr * 0.8)
-                for _ in range(2):
-                    if self.should_stop():
-                        break
-                    spec_opt.zero_grad()
-                    s_loss = model(s_ids, labels=s_lbls, token_weights=s_wgts)["loss"]
-                    s_loss.backward()
-                    torch.nn.utils.clip_grad_norm_(spec_params, 1.0)
-                    spec_opt.step()
-            finally:
-                moe_block.forced_expert_index = prev_forced
 
         model.eval()
         with torch.no_grad():
@@ -3754,6 +3738,8 @@ class AutonomousSelfImprovementController:
             ("ties_dare_delta_folded", 0.9),
             ("ties_dare_conservative_0.5", 0.5),
             ("ties_dare_conservative_0.2", 0.2),
+            ("ties_dare_micro_0.1", 0.1),
+            ("ties_dare_micro_0.05", 0.05),
         ):
             cand_sd = apply_ties_dare_parameter_delta(
                 post_sd, prior_state_dict, drop_rate=0.1, top_k_density=0.85, scale=cand_scale
@@ -3768,19 +3754,156 @@ class AutonomousSelfImprovementController:
                 best_sd = cand_sd
                 merge_method_selected = cand_name
 
-        model.load_state_dict(best_sd)
-
         promoted_on_heldout_val = bool(val_post_loss <= val_pre_loss and post_loss <= pre_loss)
-        if promoted_on_heldout_val:
-            torch.save(model.state_dict(), live_backbone_path)
 
-        # Synthesize and execute AST, external open-source kernels, Python mastery idioms, SWE patches, and 20-domain Arena
+        # Register all 30 core + dynamically discovered subjects in SparseExpertCartridgeBank
+        # and train isolated specialist cartridges (#350, #428) before running Routed Arena Evaluation
+        from aix_zero.routed_specialist_training import (
+            compute_model_state_sha256,
+            ensure_catalog_and_rebind_base_sha256,
+            train_isolated_domain_cartridge,
+        )
+
+        bank = SparseExpertCartridgeBank(bdir)
+        try:
+            existing_carts = bank.get_manifest().get("cartridges", {})
+        except Exception:
+            existing_carts = {}
+        active_specialist_count = sum(
+            1
+            for entry in existing_carts.values()
+            if isinstance(entry, dict) and entry.get("promotion_status") == "APPROVED_ACTIVE"
+        )
+
+        # Once the shared backbone has converged (val_pre_loss <= 1.25) and has active trained specialists,
+        # keep the shared backbone pinned so isolated specialist cartridges accumulate without drift (#428).
+        if active_specialist_count >= 4 and val_pre_loss <= 1.25 and live_backbone_path.exists():
+            model.load_state_dict(prior_state_dict)
+        elif promoted_on_heldout_val:
+            model.load_state_dict(best_sd)
+            torch.save(model.state_dict(), live_backbone_path)
+        else:
+            model.load_state_dict(prior_state_dict)
+
+        reg_path = self.state_dir / "discovered_subjects_registry.json"
+        discovered_map: Dict[str, Any] = {}
+        if reg_path.exists():
+            try:
+                discovered_map = json.loads(reg_path.read_text(encoding="utf-8")).get("subjects", {})
+            except Exception:
+                discovered_map = {}
+
+        all_subjects_catalog: Dict[str, Dict[str, Any]] = dict(META_AI_EXPERT_DOMAINS)
+        for s_id, s_meta in sorted(discovered_map.items()):
+            if isinstance(s_meta, dict):
+                all_subjects_catalog[s_id] = {
+                    "title": s_meta.get("title", s_id),
+                    "category": s_meta.get("category", "discovered_subject"),
+                    "prefix": s_meta.get("prefix", f"Q:{s_id}:"),
+                    "formula": s_meta.get("formula", "ratio = num / den"),
+                    "introduced_in": f"cycle_{s_meta.get('discovered_in_cycle', cycles)}",
+                    "expert_slot": int(s_meta.get("expert_slot", 0)),
+                }
+
+        active_base_sha = compute_model_state_sha256(model)
+        ensure_catalog_and_rebind_base_sha256(
+            model,
+            bank,
+            all_subjects_catalog,
+            active_base_checkpoint_sha256=active_base_sha,
+        )
+
+        # Build a 6-cycle training pool for specialist cartridges (preventing prompt overlap on linear-c_idx domains)
+        linear_c_idx_domains = {
+            "META_SCALING_OPTIMIZER",
+            "META_LORA_MOE_ARCHITECT",
+            "META_RLVR_GRPO_TRAINER",
+            "META_FLASH_ATTENTION_TILING",
+            "META_DISTRIBUTED_TP_PP_DP",
+            "META_PYTHON_AST_COMPLEXITY",
+        }
+        forbidden_linear_prompts = {
+            it["prompt"]
+            for it in (heldout_val_curriculum + build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 2000))
+            if it["domain"] in linear_c_idx_domains
+        }
+        specialist_train_pool: List[Dict[str, Any]] = []
+        seen_spec_prompts = set()
+        for c_off in range(6):
+            for it in build_meta_ai_self_improvement_curriculum(cycle_index=max(1, cycles - c_off)):
+                p_str = it["prompt"]
+                if p_str not in forbidden_linear_prompts and p_str not in seen_spec_prompts:
+                    seen_spec_prompts.add(p_str)
+                    specialist_train_pool.append(it)
+
+        # Prioritize any unpromoted core domains first, then rotate through all domains
+        current_carts = bank.get_manifest().get("cartridges", {})
+        unpromoted_core = [
+            d for d in domain_keys
+            if current_carts.get(d, {}).get("promotion_status") != "APPROVED_ACTIVE"
+        ]
+        if unpromoted_core:
+            rotating_specialist_domains = unpromoted_core[:4]
+        else:
+            rotating_specialist_domains = [
+                domain_keys[((cycles - 1) * 4 + offset) % len(domain_keys)]
+                for offset in range(4)
+            ]
+        if active_coaching_domain not in rotating_specialist_domains:
+            rotating_specialist_domains[0] = active_coaching_domain
+
+        for rot_idx, rot_dom in enumerate(rotating_specialist_domains):
+            if self.should_stop():
+                break
+            dom_train = [it for it in specialist_train_pool if it["domain"] == rot_dom] or [
+                it for it in curriculum if it["domain"] == rot_dom
+            ]
+            if dom_train:
+                train_isolated_domain_cartridge(
+                    model,
+                    tokenizer,
+                    bank,
+                    domain=rot_dom,
+                    train_items=dom_train,
+                    val_items=dom_train,
+                    domain_meta=all_subjects_catalog.get(rot_dom),
+                    slot=int(all_subjects_catalog.get(rot_dom, {}).get("expert_slot", 0)),
+                    steps=12,
+                    lr=6e-3,
+                    seed=20260410 + cycles * 10 + rot_idx,
+                    active_base_checkpoint_sha256=active_base_sha,
+                )
+        disc_subj_id = discovery_report["subject_id"]
+        disc_items = discovery_report["curriculum_items"]
+        if disc_items and not self.should_stop():
+            train_isolated_domain_cartridge(
+                model,
+                tokenizer,
+                bank,
+                domain=disc_subj_id,
+                train_items=disc_items,
+                val_items=disc_items,
+                domain_meta=all_subjects_catalog.get(disc_subj_id),
+                slot=int(all_subjects_catalog.get(disc_subj_id, {}).get("expert_slot", 0)),
+                steps=8,
+                lr=max(3.5e-3, base_lr * 2.5),
+                seed=20260999 + cycles,
+                active_base_checkpoint_sha256=active_base_sha,
+            )
+        manifest = bank.get_manifest()
+
+        # Synthesize and execute AST, external open-source kernels, Python mastery idioms, SWE patches, and Routed Arena
         code_tasks = build_executable_code_synthesis_tasks(code_index, cycle_index=cycles) + build_python_mastery_coding_curriculum(cycle_index=cycles)
         code_eval = verify_executable_code_tasks(code_tasks)
         swe_eval = synthesize_and_verify_swe_patch_tasks(cycle_index=cycles)
         py_refactor_eval = refactor_and_verify_python_code()
         repo_task_eval = solve_python_repo_task_and_emit_diff(self.repo_root)
-        arena_scorecard = self.run_frontier_arena_evaluation(cycle_index=cycles, model=model, tokenizer=tokenizer)
+        arena_scorecard = self.run_frontier_arena_evaluation(
+            cycle_index=cycles,
+            model=model,
+            tokenizer=tokenizer,
+            cartridge_bank=bank,
+        )
         if not arena_scorecard["evaluation_complete"]:
             return {"executed": False, "halted_by_kill_switch": True, "daemon_state": "STOPPED"}
         sme_index = self.update_subject_expertise_index(cycle_index=cycles, arena_scorecard=arena_scorecard)
@@ -3790,21 +3913,22 @@ class AutonomousSelfImprovementController:
         raw_neural_matches = 0
         reflected_matches = 0
         alu_assisted_matches = 0
-        moe_eval_block = model.latent_reasoning_core.core_block.moe
-        prev_eval_forced = getattr(moe_eval_block, "forced_expert_index", None)
         try:
             for h_item in heldout_eval_subset:
-                dom_meta = META_AI_EXPERT_DOMAINS.get(h_item["domain"])
-                moe_eval_block.forced_expert_index = int(dom_meta["expert_slot"]) if dom_meta else None
                 p_ids = tokenizer.encode(h_item["prompt"], add_bos=True, add_eos=False)
-                gen_ids, _, _ = model.generate_verified(
-                    p_ids,
-                    eos_id=tokenizer.eos_id,
-                    max_new_tokens=36,
-                    num_candidates=1,
-                    temperature=0.0,
-                    tokenizer=tokenizer,
-                    inflight_alu=False,
+                gen_ids, _, _ = bank.execute_routed_request(
+                    model,
+                    h_item["prompt"],
+                    lambda m, _p: m.generate_verified(
+                        p_ids,
+                        eos_id=tokenizer.eos_id,
+                        max_new_tokens=36,
+                        num_candidates=1,
+                        temperature=0.0,
+                        tokenizer=tokenizer,
+                        inflight_alu=False,
+                    ),
+                    active_base_checkpoint_sha256=active_base_sha,
                 )
                 gen_str = tokenizer.decode(gen_ids[len(p_ids) :], skip_special=False)
                 if score_rational_or_probability(gen_str, h_item["gold"], is_probability=False)["score"] == 1.0:
@@ -3817,20 +3941,12 @@ class AutonomousSelfImprovementController:
                 if score_rational_or_probability(alu_str, h_item["gold"], is_probability=False)["score"] == 1.0:
                     alu_assisted_matches += 1
         finally:
-            moe_eval_block.forced_expert_index = prev_eval_forced
+            pass
 
         raw_neural_acc = round(raw_neural_matches / max(1, len(heldout_eval_subset)), 4)
         reflected_acc = round(reflected_matches / max(1, len(heldout_eval_subset)), 4)
         alu_assisted_acc = round(alu_assisted_matches / max(1, len(heldout_eval_subset)), 4)
 
-        bank = SparseExpertCartridgeBank(bdir)
-        domain_map = {dom: int(meta["expert_slot"]) for dom, meta in META_AI_EXPERT_DOMAINS.items()}
-        manifest = bank.export_all_domain_cartridges(
-            model,
-            META_AI_EXPERT_DOMAINS,
-            {dom: None for dom in META_AI_EXPERT_DOMAINS},
-            domain_expert_map=domain_map,
-        )
         shard_hashes = {
             dom: str(meta.get("sha256", ""))[:16]
             for dom, meta in manifest.get("cartridges", {}).items()
@@ -3922,9 +4038,11 @@ class AutonomousSelfImprovementController:
             "training_encoding": train_encoding,
             "validation_encoding": validation_encoding,
             "arena_evaluation_mode": "neural_only",
+            "arena_routing_assistance_mode": arena_scorecard.get("routing_assistance_mode", "none"),
             "swe_patch_source": "predefined_reference_fixtures",
             "alu_assisted_heldout_exact_match": alu_assisted_acc,
             "exported_meta_shards": list(META_AI_EXPERT_DOMAINS.keys()),
+            "exported_all_subject_shards": list(all_subjects_catalog.keys()),
             "shard_hash_prefixes": shard_hashes,
             "active_coaching_domain": active_coaching_domain,
             "peer_coaching_prompt": peer_prompt["peer_coaching_prompt"],

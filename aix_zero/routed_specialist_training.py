@@ -72,7 +72,7 @@ def compute_model_state_sha256(
             continue
         val = tensor.detach().cpu().contiguous()
         digest.update(name.encode("utf-8"))
-        digest.update(str((tuple(val.shape), str(val.dtype))).encode("utf-8"))
+        digest.update(str((tuple(val.shape), val.dtype)).encode("utf-8"))
         digest.update(val.numpy().tobytes())
     return digest.hexdigest()
 
@@ -184,10 +184,13 @@ def _encode_supervised_items(
     tokenizer: Any,
     max_seq_len: int,
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Encode prompt+completion items with prompt tokens masked (`0` / `pad_id`) and digit/answer tokens weighted."""
+    """Encode prompt+completion items with prompt tokens masked (`0` / `pad_id`) and digit/answer/EOS tokens weighted."""
     high_weight_ids = {
         tokenizer.ans_id,
         tokenizer.end_ans_id,
+        tokenizer.eos_id,
+        tokenizer.think_id,
+        tokenizer.end_think_id,
         *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
     }
     seqs: List[List[int]] = []
@@ -202,7 +205,7 @@ def _encode_supervised_items(
             continue
         p_len = len(p_ids)
         lb = [0] * p_len + list(c_ids)
-        wt = [0.0] * p_len + [3.0 if tid in high_weight_ids else 1.0 for tid in c_ids]
+        wt = [0.0] * p_len + [4.0 if tid in high_weight_ids else 1.0 for tid in c_ids]
         seqs.append(full)
         lbls.append(lb)
         wgts.append(wt)
@@ -221,6 +224,99 @@ def _encode_supervised_items(
         batch_wgts[i, : len(w)] = torch.tensor(w, dtype=torch.float32)
 
     return batch_ids, batch_lbls, batch_wgts
+
+
+def ensure_catalog_and_rebind_base_sha256(
+    model: AIXZeroModel,
+    bank: SparseExpertCartridgeBank,
+    domain_catalog: Dict[str, Dict[str, Any]],
+    *,
+    active_base_checkpoint_sha256: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Ensure every domain in `domain_catalog` (including newly discovered subjects) exists in `bank`
+    WITHOUT overwriting already-trained specialist cartridges (`frozen_v11_single_expert_training_candidate`),
+    and synchronize `base_checkpoint_sha256` with the active base model.
+    """
+    moe = _moe(model)
+    base_sha = active_base_checkpoint_sha256 or compute_model_state_sha256(model)
+    try:
+        manifest = bank.get_manifest()
+    except Exception:
+        manifest = {}
+
+    cartridges = copy.deepcopy(manifest.get("cartridges", {})) if isinstance(manifest, dict) else {}
+    if not cartridges:
+        domain_map = {dom: int(meta.get("expert_slot", 0)) % len(moe.experts) for dom, meta in domain_catalog.items()}
+        bank.export_all_domain_cartridges(
+            model,
+            domain_catalog,
+            {dom: None for dom in domain_catalog},
+            domain_expert_map=domain_map,
+        )
+        manifest = bank.get_manifest()
+        cartridges = copy.deepcopy(manifest.get("cartridges", {}))
+
+    bank.cartridge_dir.mkdir(parents=True, exist_ok=True)
+    for dom, meta in domain_catalog.items():
+        slot_idx = int(meta.get("expert_slot", 0)) % len(moe.experts)
+        existing = cartridges.get(dom)
+        if (
+            isinstance(existing, dict)
+            and existing.get("provenance") == "frozen_v11_single_expert_training_candidate"
+            and (bank.cartridge_dir / str(existing.get("cartridge_file", ""))).is_file()
+        ):
+            # Preserve trained specialist cartridge and rebind to current base model state digest
+            existing["base_checkpoint_sha256"] = base_sha
+            if not existing.get("prefix") and meta.get("prefix"):
+                existing["prefix"] = meta["prefix"]
+            continue
+
+        # Snapshot initial slot for any new or untrained domain
+        tensors = {
+            k: v.detach().cpu().clone().contiguous()
+            for k, v in moe.experts[slot_idx].state_dict().items()
+        }
+        payload = save(tensors)
+        digest = hashlib.sha256(payload).hexdigest()
+        filename = f"expert_{dom.lower()}_{digest}.safetensors"
+        _atomic_write(bank.cartridge_dir / filename, payload)
+        cartridges[dom] = {
+            "domain": dom,
+            "title": meta.get("title", dom),
+            "category": meta.get("category", "universal_subject"),
+            "prefix": meta.get("prefix", f"Q:{dom}:"),
+            "formula": meta.get("formula", ""),
+            "introduced_in": meta.get("introduced_in", "v12_dynamic_subject"),
+            "cartridge_file": filename,
+            "sha256": digest,
+            "serialized_bytes": len(payload),
+            "source_expert_index": slot_idx,
+            "parameters": sum(int(v.numel()) for v in tensors.values()),
+            "tensors": {
+                k: {"shape": list(v.shape), "dtype": str(v.dtype)}
+                for k, v in tensors.items()
+            },
+            "base_checkpoint_sha256": base_sha,
+            "base_model_accuracy_pct": None,
+            "verified_accuracy_pct": None,
+            "sprt_gate": "NOT_EVALUATED",
+            "provenance": "existing_routed_expert_snapshot",
+            "promotion_status": "NOT_EVALUATED_SNAPSHOT",
+        }
+
+    new_manifest = {
+        "schema_version": 1,
+        "architecture": "AIX-Zero routed expert snapshots and isolated specialists",
+        "model_config": asdict(model.config),
+        "base_checkpoint_sha256": base_sha,
+        "active_core_physical_parameters": model.count_parameters()["total_parameters"],
+        "registered_cartridges": len(cartridges),
+        "total_cartridge_bank_parameters": sum(int(v.get("parameters", 0)) for v in cartridges.values()),
+        "cartridges": cartridges,
+        "limitations": "Isolated specialists train a single 49,152-parameter routed slot with frozen backbone.",
+    }
+    bank.publish_verified_catalog_atomic(new_manifest)
+    return bank.get_manifest()
 
 
 def train_isolated_domain_cartridge(
