@@ -537,10 +537,8 @@ def measure_physical_lora_Accounting(
     }
 
 
-def save_physical_lora_checkpoint(model: AIXZeroModel, path: Path) -> Dict[str, Any]:
-    """Save a versioned physical-LoRA checkpoint with explicit architecture and adapter metadata."""
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+def physical_lora_checkpoint_payload(model: AIXZeroModel) -> Dict[str, Any]:
+    """Build the versioned payload for file or in-memory experiment serialization."""
     lora_meta = getattr(model, "_physical_lora_metadata", None)
     payload = {
         "schema_version": "2.0.0-physical-lora",
@@ -552,6 +550,14 @@ def save_physical_lora_checkpoint(model: AIXZeroModel, path: Path) -> Dict[str, 
         ),
         "state_dict": {k: v.detach().cpu() for k, v in model.state_dict().items()},
     }
+    return payload
+
+
+def save_physical_lora_checkpoint(model: AIXZeroModel, path: Path) -> Dict[str, Any]:
+    """Save a versioned physical-LoRA checkpoint with explicit architecture metadata."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = physical_lora_checkpoint_payload(model)
     torch.save(payload, path)
     raw = path.read_bytes()
     return {
@@ -570,8 +576,13 @@ def load_physical_lora_checkpoint(
     """Load a versioned physical-LoRA checkpoint or migrate a `v11` checkpoint, failing closed on shape mismatches."""
     path = Path(path)
     loaded = torch.load(path, map_location="cpu", weights_only=True)
+    return load_physical_lora_payload(loaded, base_v11_safetensors_path=base_v11_safetensors_path)
+
+
+def load_physical_lora_payload(loaded, *, base_v11_safetensors_path=None) -> AIXZeroModel:
+    """Reconstruct deserialized weights; experiment callers validate provenance first."""
     if not isinstance(loaded, dict) or "schema_version" not in loaded or "model_config" not in loaded:
-        raise ValueError(f"Unsupported or unversioned physical LoRA checkpoint at {path}")
+        raise ValueError("Unsupported or unversioned physical LoRA checkpoint")
     if loaded["schema_version"] != "2.0.0-physical-lora":
         raise ValueError(f"Unsupported schema_version: {loaded['schema_version']!r}")
 

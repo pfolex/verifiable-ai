@@ -18,7 +18,8 @@ def evaluate_checkpoints(
     candidate_cartridge_bank_dir=None,
 ):
     import torch
-    from aix_zero.benchmark_baseline import load_v11
+    from aix_zero.candidate_checkpoint import load_candidate_checkpoint
+    from aix_zero.physical_lora import measure_physical_lora_Accounting
     from aix_zero.meta_ai_autopilot import verify_r1_reasoning_trace
     from aix_zero.eval_harness_bridge import score_rational_or_probability
     from aix_zero.routed_specialist_training import compute_model_state_sha256
@@ -31,14 +32,12 @@ def evaluate_checkpoints(
     rows = [record['row'] for record in payload['splits'][split]]
     if not rows:
         raise ValueError('Selected evaluation split is empty')
-    base = Path(__file__).resolve().parent / 'checkpoints/aix_zero_v11_kip.safetensors'
-    models = {}; tokenizers = {}; identities = {}; state_digests = {}
+    models = {}; tokenizers = {}; identities = {}; state_digests = {}; formats = {}; physical_counts = {}
     # Read once so the recorded digest identifies the exact bytes deserialized.
-    import io
     for role, source in (('champion',champion_path),('candidate',candidate_path)):
         data = Path(source).read_bytes()
-        model, tokenizer = load_v11(base)
-        model.load_state_dict(torch.load(io.BytesIO(data),map_location='cpu',weights_only=True),strict=True)
+        model, tokenizer, formats[role] = load_candidate_checkpoint(data)
+        physical_counts[role] = measure_physical_lora_Accounting(model)
         model.eval(); models[role]=model; tokenizers[role]=tokenizer
         identities[role]=hashlib.sha256(data).hexdigest()
         state_digests[role]=compute_model_state_sha256(model)
@@ -90,7 +89,8 @@ def evaluate_checkpoints(
     report.update(split=split,split_manifest_sha256=manifest['sha256'],tokenizer_sha256=tokenizers['champion'].vocab_sha256,
                   assistance_mode='neural_only',
                   routing_assistance_mode='predicted_prefix_cartridge' if cand_bank is not None else 'none',
-                  checkpoint_format='v11-compatible torch state_dict',
+                  checkpoint_format='v11-compatible torch state_dict' if all(f == 'v11_state_dict' for f in formats.values()) else 'versioned physical LoRA / v11 comparison',
+                  checkpoint_formats=formats, physical_accounting=physical_counts,
                   context_limit=models['champion'].config.max_seq_len)
     return report
 

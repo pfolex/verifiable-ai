@@ -195,3 +195,45 @@ with post-switch smoke rollback (`aix_zero.champion_promotion`):
 ```
 
 
+
+
+## Opt-in physical LoRA candidate training
+
+The standalone physical-LoRA module is now connected to the recorded experiment
+trainer and paired evaluator. Add `--lora-rank 16` to the experiment command:
+
+```sh
+"$PYTHON" -m aix_zero.run_candidate_experiment \
+  --champion ./candidate-inputs/champion.pt \
+  --manifest ./candidate-inputs/manifest.json \
+  --policy ./candidate-inputs/policy.json \
+  --registry ./candidate-experiments \
+  --steps 5 --learning-rate 0.001 --max-training-seconds 120 \
+  --max-new-tokens 36 --seed 42 \
+  --lora-rank 16 --lora-alpha 16 --max-parameters 2000000
+```
+
+Prepare the input bundle first with the preparation command above. This option
+adds real A/B tensors to the module's configured attention/shared-expert targets,
+freezes the original weights, and trains only the adapters. It does not alter the
+live daemon, its ledger rank or the champion. There is no automatic promotion.
+
+Training evidence records actual starting/added/total physical parameters,
+adapter/trainable counts, optimizer memory and the logit difference at adapter
+insertion. New B matrices are zero; insertion must preserve the initial sampled
+logits within tolerance. Training then changes the adapters, so held-out and
+retention evaluation remains mandatory. Parameter growth is not a learning claim.
+
+Candidate bytes use a versioned physical-LoRA payload with exact target names,
+architecture and tokenizer identity; the same evaluator accepts legacy backbones
+and these expanded candidates. A physical candidate may be used as the next
+experiment's champion. A larger requested rank preserves the existing adapter's
+effective delta before fresh-optimizer training, including when alpha/r changes.
+Shrinking ranks and same-rank alpha changes are rejected.
+
+Experiment ranks are limited to 1–128 and a physical parameter cap is enforced.
+The adapter path currently supports the v11 backbone configuration; expert-count
+growth has a separate migration contract and is intentionally rejected here.
+Standalone physical checkpoints lacking tokenizer identity are not silently
+accepted as experiment inputs. Do not use the legacy daemon to load or promote
+a versioned physical-LoRA payload until it has an explicit compatible loader.

@@ -17,7 +17,7 @@ from aix_zero.paired_checkpoint_eval import evaluate_checkpoints
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--champion', type=Path, required=True, help='v11-compatible torch state_dict file')
+    parser.add_argument('--champion', type=Path, required=True, help='v11-compatible state_dict or versioned physical-LoRA checkpoint')
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--policy', type=Path, required=True)
     parser.add_argument('--registry', type=Path, required=True)
@@ -25,9 +25,18 @@ def main(argv=None):
     parser.add_argument('--learning-rate', type=float, default=.001)
     parser.add_argument('--max-training-seconds', type=float, default=120)
     parser.add_argument('--max-new-tokens', type=int, default=36)
+    parser.add_argument('--lora-rank', type=int, help='Opt in to physical adapters, rank 1..128')
+    parser.add_argument('--lora-alpha', type=float, help='Adapter alpha (defaults to requested rank)')
+    parser.add_argument('--max-parameters', type=int, default=2_000_000, help='Physical parameter cap for adapter insertion/growth')
     parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args(argv)
     training = dict(steps=args.steps, learning_rate=args.learning_rate, max_seconds=args.max_training_seconds)
+    if args.lora_rank is None and args.lora_alpha is not None:
+        parser.error('--lora-alpha requires --lora-rank')
+    if args.lora_rank is not None:
+        training['physical_lora'] = dict(rank=args.lora_rank,
+            alpha=args.lora_alpha if args.lora_alpha is not None else float(args.lora_rank),
+            max_total_parameters=args.max_parameters)
     validate_training_settings(training)
     if args.seed < 0 or args.seed >= 2**32 or not 1 <= args.max_new_tokens <= 112:
         parser.error('Invalid seed or generation budget')
