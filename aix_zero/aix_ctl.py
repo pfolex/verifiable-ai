@@ -117,6 +117,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_arena = sub.add_parser("arena", help="Score neural diagnostic probes with symbolic controls and reference SWE fixture results")
     p_arena.add_argument("--cycle", type=int, default=1, help="Cycle index for benchmark generation")
 
+    p_bench = sub.add_parser("benchmark", help="Run unified Standard AI Benchmark suites (Math, STEM/MMLU, ML Systems, Python/AI-Coding, and 3-Arm SWE)")
+    p_bench.add_argument("--cycle", type=int, default=None, help="Optional cycle index override")
+    p_bench.add_argument("--coding-steps", type=int, default=25, help="Training steps for isolated AI-Coding pilot")
+    p_bench.add_argument("--full", "--json", dest="full_json", action="store_true", help="Print full JSON benchmark scorecard")
+
     p_py = sub.add_parser("py-analyze", help="Analyze Python source file or inline snippet with AST & bytecode disassembler")
     p_py.add_argument("--file", default=None, help="Path to Python file to analyze")
     p_py.add_argument("--code", default=None, help="Inline Python code string to analyze")
@@ -470,6 +475,33 @@ def main(argv: Optional[List[str]] = None) -> int:
             output_path=ctrl.state_dir / "frontier_arena_scorecard.json",
         )
         print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "benchmark":
+        from aix_zero.standard_benchmarks import run_standard_ai_benchmark_suites
+        res = run_standard_ai_benchmark_suites(
+            ctrl.state_dir,
+            cycle_index=args.cycle,
+            ai_coding_steps=args.coding_steps,
+        )
+        if getattr(args, "full_json", False):
+            print(json.dumps(res, indent=2))
+            return 0
+        ov = res["overall_summary"]
+        bs = res["benchmark_suites"]
+        ac = res["ai_coding_expression_suite"]
+        sw = res["swe_three_arm_patch_suite"] or {}
+        rn = ov["routed_neural_only"]
+        ba = ov["bounded_alu_assisted"]
+        ns = ov["neuro_symbolic_verified"]
+        print(f"AIX Benchmark : Cycle #{res['cycle_index']} | Checkpoint {res['model_identity']['checkpoint']} ({res['model_identity']['certified_sme_subjects']} SME Subjects)")
+        print(f"Overall Score : {rn['accuracy']*100:.2f}% Routed Neural-Only ({rn['correct']}/{rn['tested']}) | {ba['accuracy']*100:.2f}% Prefix+ALU | {ns['accuracy']*100:.1f}% Neuro-Symbolic")
+        print(f"Math & Quant  : {bs['math_gsm8k_numinamath']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['math_gsm8k_numinamath']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"STEM & Logic  : {bs['stem_mmlu_gpqa_theoremqa']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['stem_mmlu_gpqa_theoremqa']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"ML Systems    : {bs['ml_systems_frontier']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['ml_systems_frontier']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"Python & SWE  : {bs['python_and_swe_systems']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['python_and_swe_systems']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"AI-Coding AST : Train Fit {ac['train_fit_after']['correct']}/{ac['train_fit_after']['total']} ({ac['train_fit_after']['accuracy']*100:.1f}%) | Dev {ac['dev_before']['correct']}/{ac['dev_before']['total']} -> {ac['dev_after']['correct']}/{ac['dev_after']['total']}")
+        print(f"3-Arm SWE Git : AIX Solo {sw.get('aix_solo_pass_rate',0)*100:.1f}% | Peer Solo {sw.get('peer_solo_pass_rate',0)*100:.1f}% | Collaborative {sw.get('collaborative_pass_rate',0)*100:.1f}%")
         return 0
 
     if args.command == "py-analyze":

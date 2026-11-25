@@ -422,8 +422,13 @@ def train_isolated_domain_cartridge(
             pre_train_loss = float(model(train_ids, labels=train_lbls, token_weights=train_wgts)["loss"].item())
             pre_val_loss = float(model(val_ids, labels=val_lbls, token_weights=val_wgts)["loss"].item())
 
-        # Fresh isolated optimizer bound strictly to this slot's parameters
-        optimizer = torch.optim.AdamW(trainable_params, lr=float(lr))
+        # Fresh isolated optimizer bound strictly to this slot's parameters, scaled down when already near zero loss
+        lr_scale = min(1.0, max(0.15, pre_train_loss / 0.5))
+        effective_lr = float(lr) * lr_scale
+        optimizer = torch.optim.AdamW(trainable_params, lr=effective_lr)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=max(1, int(steps)), eta_min=effective_lr * 0.2
+        )
         model.train()
         steps_completed = 0
         for _ in range(int(steps)):
@@ -435,6 +440,7 @@ def train_isolated_domain_cartridge(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(trainable_params, 1.0)
             optimizer.step()
+            scheduler.step()
             steps_completed += 1
 
         model.eval()
@@ -457,60 +463,71 @@ def train_isolated_domain_cartridge(
         val_improved_or_held = (post_val_loss <= pre_val_loss and post_train_loss < pre_train_loss)
 
         gate_decision = "PASS" if (val_improved_or_held and weights_updated and frozen_tensors_unchanged) else "HOLD"
-        promotion_status = (
-            "APPROVED_ACTIVE"
-            if (approve_if_val_non_regressed and gate_decision == "PASS")
-            else ("ELIGIBLE_NOT_ACTIVATED" if gate_decision == "PASS" else "PENDING_AUDIT")
+        had_approved_champion = (
+            isinstance(existing_entry, dict)
+            and existing_entry.get("promotion_status") == "APPROVED_ACTIVE"
+            and (bank.cartridge_dir / str(existing_entry.get("cartridge_file", ""))).is_file()
         )
+        if gate_decision != "PASS" and had_approved_champion:
+            # Never downgrade an already APPROVED_ACTIVE specialist cartridge on a non-improving step (#413/#428)
+            existing_entry["base_checkpoint_sha256"] = base_sha
+            cartridges[domain] = existing_entry
+            promotion_status = "APPROVED_ACTIVE"
+            filename = str(existing_entry["cartridge_file"])
+            post_slot_sha = str(existing_entry["sha256"])
+        else:
+            promotion_status = (
+                "APPROVED_ACTIVE"
+                if (approve_if_val_non_regressed and gate_decision == "PASS")
+                else ("ELIGIBLE_NOT_ACTIVATED" if gate_decision == "PASS" else "PENDING_AUDIT")
+            )
+            filename = f"expert_{domain.lower()}_{post_slot_sha}.safetensors"
+            _atomic_write(bank.cartridge_dir / filename, payload)
 
-        filename = f"expert_{domain.lower()}_{post_slot_sha}.safetensors"
-        _atomic_write(bank.cartridge_dir / filename, payload)
-
-        meta_info = domain_meta or existing_entry or {}
-        new_entry = {
-            "domain": domain,
-            "title": meta_info.get("title", domain),
-            "category": meta_info.get("category", "specialist_domain"),
-            "prefix": meta_info.get("prefix", f"Q:{domain}:"),
-            "formula": meta_info.get("formula", ""),
-            "introduced_in": meta_info.get("introduced_in", "v12_isolated_specialist"),
-            "cartridge_file": filename,
-            "sha256": post_slot_sha,
-            "serialized_bytes": len(payload),
-            "source_expert_index": target_slot,
-            "parameters": sum(int(v.numel()) for v in trained_tensors.values()),
-            "tensors": {
-                k: {"shape": list(v.shape), "dtype": str(v.dtype)}
-                for k, v in trained_tensors.items()
-            },
-            "base_checkpoint_sha256": base_sha,
-            "base_model_accuracy_pct": existing_entry.get("base_model_accuracy_pct"),
-            "verified_accuracy_pct": None,
-            "sprt_gate": "PASS" if gate_decision == "PASS" else "NOT_EVALUATED",
-            "provenance": "frozen_v11_single_expert_training_candidate",
-            "promotion_status": promotion_status,
-            "training": {
-                "frozen_tensors_unchanged": frozen_tensors_unchanged,
-                "frozen_backbone_sha256": frozen_post_sha,
-                "target_slot": target_slot,
-                "trainable_parameters": trainable_param_count,
-                "steps_completed": steps_completed,
-                "learning_rate": float(lr),
-                "seed": int(seed),
-                "pre_train_loss": round(pre_train_loss, 6),
-                "post_train_loss": round(post_train_loss, 6),
-                "pre_val_loss": round(pre_val_loss, 6),
-                "post_val_loss": round(post_val_loss, 6),
-            },
-            "empirical_gate": {
-                "decision": gate_decision,
-                "val_loss_delta": round(post_val_loss - pre_val_loss, 6),
-                "train_loss_delta": round(post_train_loss - pre_train_loss, 6),
-            },
-        }
-        SparseExpertCartridgeBank.validate_specialist_provenance(new_entry)
-
-        cartridges[domain] = new_entry
+            meta_info = domain_meta or existing_entry or {}
+            new_entry = {
+                "domain": domain,
+                "title": meta_info.get("title", domain),
+                "category": meta_info.get("category", "specialist_domain"),
+                "prefix": meta_info.get("prefix", f"Q:{domain}:"),
+                "formula": meta_info.get("formula", ""),
+                "introduced_in": meta_info.get("introduced_in", "v12_isolated_specialist"),
+                "cartridge_file": filename,
+                "sha256": post_slot_sha,
+                "serialized_bytes": len(payload),
+                "source_expert_index": target_slot,
+                "parameters": sum(int(v.numel()) for v in trained_tensors.values()),
+                "tensors": {
+                    k: {"shape": list(v.shape), "dtype": str(v.dtype)}
+                    for k, v in trained_tensors.items()
+                },
+                "base_checkpoint_sha256": base_sha,
+                "base_model_accuracy_pct": existing_entry.get("base_model_accuracy_pct"),
+                "verified_accuracy_pct": None,
+                "sprt_gate": "PASS" if gate_decision == "PASS" else "NOT_EVALUATED",
+                "provenance": "frozen_v11_single_expert_training_candidate",
+                "promotion_status": promotion_status,
+                "training": {
+                    "frozen_tensors_unchanged": frozen_tensors_unchanged,
+                    "frozen_backbone_sha256": frozen_post_sha,
+                    "target_slot": target_slot,
+                    "trainable_parameters": trainable_param_count,
+                    "steps_completed": steps_completed,
+                    "learning_rate": round(effective_lr, 6),
+                    "seed": int(seed),
+                    "pre_train_loss": round(pre_train_loss, 6),
+                    "post_train_loss": round(post_train_loss, 6),
+                    "pre_val_loss": round(pre_val_loss, 6),
+                    "post_val_loss": round(post_val_loss, 6),
+                },
+                "empirical_gate": {
+                    "decision": gate_decision,
+                    "val_loss_delta": round(post_val_loss - pre_val_loss, 6),
+                    "train_loss_delta": round(post_train_loss - pre_train_loss, 6),
+                },
+            }
+            SparseExpertCartridgeBank.validate_specialist_provenance(new_entry)
+            cartridges[domain] = new_entry
         new_manifest = {
             "schema_version": 1,
             "architecture": "AIX-Zero routed expert snapshots and isolated specialists",

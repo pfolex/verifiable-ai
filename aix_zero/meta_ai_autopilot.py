@@ -3468,7 +3468,8 @@ class AutonomousSelfImprovementController:
             "per_domain_breakdown": by_domain, "records": records,
         }
         out_p = Path(output_path) if output_path is not None else self.state_dir / "frontier_arena_scorecard.json"
-        write_json(scorecard, out_p)
+        if scorecard["evaluation_complete"] or output_path is not None or not out_p.exists():
+            write_json(scorecard, out_p)
         return scorecard
 
     def export_website_autopilot_telemetry(
@@ -3833,28 +3834,34 @@ class AutonomousSelfImprovementController:
         }
         specialist_train_pool: List[Dict[str, Any]] = []
         seen_spec_prompts = set()
-        for c_off in range(6):
+        for c_off in range(18):
             for it in build_meta_ai_self_improvement_curriculum(cycle_index=max(1, cycles - c_off)):
                 p_str = it["prompt"]
                 if p_str not in forbidden_linear_prompts and p_str not in seen_spec_prompts:
                     seen_spec_prompts.add(p_str)
                     specialist_train_pool.append(it)
 
-        # Prioritize any unpromoted core domains first, then rotate through all domains
+        # Prioritize any unpromoted core domains first; then fill up to 5 slots with highest-loss cartridges (#409)
         current_carts = bank.get_manifest().get("cartridges", {})
         unpromoted_core = [
             d for d in domain_keys
             if current_carts.get(d, {}).get("promotion_status") != "APPROVED_ACTIVE"
         ]
-        if unpromoted_core:
-            rotating_specialist_domains = unpromoted_core[:4]
-        else:
-            rotating_specialist_domains = [
-                domain_keys[((cycles - 1) * 4 + offset) % len(domain_keys)]
-                for offset in range(4)
-            ]
-        if active_coaching_domain not in rotating_specialist_domains:
-            rotating_specialist_domains[0] = active_coaching_domain
+        ranked_by_loss = sorted(
+            domain_keys,
+            key=lambda d: float(current_carts.get(d, {}).get("training", {}).get("post_train_loss", 10.0)),
+            reverse=True,
+        )
+        rotating_specialist_domains: List[str] = []
+        for candidate_dom in (
+            unpromoted_core
+            + [active_coaching_domain]
+            + ranked_by_loss
+        ):
+            if candidate_dom not in rotating_specialist_domains:
+                rotating_specialist_domains.append(candidate_dom)
+            if len(rotating_specialist_domains) >= 5:
+                break
 
         for rot_idx, rot_dom in enumerate(rotating_specialist_domains):
             if self.should_stop():
