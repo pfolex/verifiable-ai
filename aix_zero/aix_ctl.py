@@ -54,6 +54,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     p_stop = sub.add_parser("stop", help="Immediately stop all AIX autonomous training processes so you can shut down your machine")
     p_stop.add_argument("--reason", default="USER_SHUTDOWN_REQUEST", help="Reason recorded in status log")
+    p_stop.add_argument("--no-push", action="store_true", help="Skip automatic GitHub sync of the latest model and state on stop")
 
     p_status = sub.add_parser("status", help="Show concise live improvement summary (pass --full for full JSON)")
     p_status.add_argument("--full", "--json", dest="full_json", action="store_true", help="Print full detailed JSON telemetry")
@@ -175,12 +176,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
 
     if args.command == "stop":
+        import time as _time
         # Send SIGTERM to active PID if present and alive
         if ctrl.pid_path.exists():
             try:
                 pid = int(ctrl.pid_path.read_text(encoding="utf-8").strip())
                 if pid != os.getpid():
                     os.kill(pid, signal.SIGTERM)
+                    for _ in range(20):
+                        try:
+                            os.kill(pid, 0)
+                            _time.sleep(0.1)
+                        except ProcessLookupError:
+                            break
             except (ValueError, ProcessLookupError, PermissionError):
                 pass
         st = ctrl.request_stop(reason=args.reason)
@@ -191,6 +199,14 @@ def main(argv: Optional[List[str]] = None) -> int:
                 AutonomousExperimentScheduler(sched_reg).request_stop(reason=args.reason)
             except Exception:
                 pass
+        if not getattr(args, "no_push", False) and Path(args.state_dir).resolve() == DEFAULT_STATE_DIR.resolve():
+            try:
+                cyc = st.get("cycles_completed", 0)
+                st["github_sync"] = ctrl.auto_push_verified_state(
+                    f"chore(aix-stop): sync latest model, active cartridges, and SME state at cycle #{cyc}"
+                )
+            except Exception as exc:
+                st["github_sync"] = {"executed": False, "error": f"{type(exc).__name__}: {exc}"}
         print(json.dumps(st, indent=2))
         return 0
 
