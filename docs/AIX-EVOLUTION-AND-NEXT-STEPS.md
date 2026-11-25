@@ -108,3 +108,66 @@ All five work items coordinated under [`#433` (`[AIX NEURAL & SOFTWARE ROADMAP]`
   - Applies diffs in fresh detached disposable git worktrees (`git worktree add --detach`) and runs external pinned tests inside a constrained subprocess (`start_new_session=True`, process-group `SIGKILL` on timeout, stripped environment secrets, loopback-blocked proxy variables, isolated `HOME`/`TMPDIR`, `RLIMIT_CPU`/`RLIMIT_FSIZE` limits, and exact test-count + zero-skip verification).
 - **Three-Arm Comparison (`run_three_arm_swe_patch_comparison`):**
   - Evaluates `aix_solo`, `peer_solo`, and `collaborative_aix_plus_peer` (with combined token/turn usage visible and all offered tasks kept in denominators) alongside a separate `reference_fixture_control` (`is_model_written_patch: False`), exporting validated patches only as reviewable candidate artifacts without direct production self-edit.
+
+---
+
+## 3. Master Project Goals & Live Status Matrix
+
+Below are the 8 overarching project goals for **AIX**, how the current architecture maps to each goal, and the remaining milestones to complete them:
+
+### Goal 1: Complete the AIX Continuous Improvement Loop (Self-Updating Codebase)
+- **What is Built (`#406`–`#418`, `#422`–`#432`):**
+  - Autonomous codebase AST & symbol knowledge graph scanner (`scan_open_source_ai_codebase_patterns`, `build_open_source_knowledge_graph` in [`meta_ai_autopilot.py`](../aix_zero/meta_ai_autopilot.py)).
+  - Evidence-gated candidate experiment planner ([`experiment_planner.py`](../aix_zero/experiment_planner.py)), isolated training runner ([`autonomous_scheduler.py`](../aix_zero/autonomous_scheduler.py)), atomic CAS champion promotion with rollback ([`champion_promotion.py`](../aix_zero/champion_promotion.py)), and sandboxed git worktree diff validator & test grader ([`swe_three_arm_benchmark.py`](../aix_zero/swe_three_arm_benchmark.py)).
+- **Next Milestone to Complete:**
+  - Connect the autonomous scheduler to propose reviewable pull-request branches (`git worktree` -> unified diff -> sandboxed `unittest` suite -> `gh pr create`) whenever AIX synthesizes a verified code optimization or bug fix (`#415`, `#432`).
+
+### Goal 2: Make AIX an Expert Programmer
+- **What is Built (`#304`–`#312`, `#432`, PR `#436`):**
+  - 4 dedicated Python & PyTorch systems specialist shards (`META_PYTHON_AST_COMPLEXITY`, `META_PYTHON_ALGORITHMIC_BIG_O`, `META_PYTORCH_TENSOR_MEMORY_STRIDES`, `META_PYTHON_TYPE_CONCURRENCY_ASYNC`) + `META_SWE_PATCH_TEST_COVERAGE`.
+  - Isolated AI-coding expression trainer ([`train_ai_coding.py`](../aix_zero/train_ai_coding.py) from PR `#436`) with AST functional equivalence scoring for SGD, linear layers, and LoRA scaling expressions.
+  - AST anti-pattern detector (`detect_python_antipatterns_ast`), automated code refactorer (`refactor_and_verify_python_code`), and sandboxed unified-diff patch synthesizer ([`swe_three_arm_benchmark.py`](../aix_zero/swe_three_arm_benchmark.py)).
+- **Next Milestone to Complete:**
+  - Expand [`train_ai_coding.py`](../aix_zero/train_ai_coding.py) into multi-line Python function & unified-diff synthesis cartridges so the neural model directly emits verified code and patches across multi-file repository tasks.
+
+### Goal 3: Make AIX an Expert GitHub User
+- **What is Built (`#251`–`#253`, `#432`, `0eb2341`):**
+  - Automated GitHub issue discovery, creation, and evidence-backed closure (`discover_and_file_improvement_issues`, `work_on_active_backlog_issue` in [`meta_ai_autopilot.py`](../aix_zero/meta_ai_autopilot.py) via `gh issue create` / `gh issue close`).
+  - Automatic pruning of unreferenced `.safetensors` shards and automatic commit + push of the latest model (`aix_zero_v12_evolving.pt`), active specialist cartridges, and SME registries to `origin/main` whenever `aix stop` is run ([`aix_ctl.py`](../aix_zero/aix_ctl.py)).
+- **Next Milestone to Complete:**
+  - Add autonomous GitHub PR workflow commands (`gh pr list`, `gh pr checks`, `gh pr create`, and CI status inspection) so AIX can open feature branches, monitor GitHub Actions CI checks, and report review-ready PRs.
+
+### Goal 4: Make AIX an Expert at Training Itself Using Other LLMs Where Necessary
+- **What is Built (`#415`, `#431`):**
+  - Bounded multi-turn local Ollama teacher coaching & cartridge distillation ([`ollama_peer_coaching.py`](../aix_zero/ollama_peer_coaching.py)) with dynamic Ollama endpoint/model discovery, strict `#407` split hygiene (blocking held-out/test prompts from entering coaching), `verify_r1_reasoning_trace` + semantic setup validation, and four-arm neural-only distillation (`original_baseline`, `no_teacher_self_trained_control`, `teacher_distilled_candidate`, `teacher_only_reference`).
+  - Zero-disk Hugging Face streamer (`stream_huggingface_open_source_rows`) streaming and R1-verifying reasoning traces from 8 open-source LLM/STEM datasets (`OpenR1-Math-220k`, `NuminaMath-1.5`, `OpenThoughts-114k`, `TheoremQA`, `MMLU`, `GPQA`, `fineweb-edu`, `the-stack-smol`).
+- **Next Milestone to Complete:**
+  - Trigger `run_bounded_ollama_coaching_session` automatically inside the background training loop whenever a local Ollama teacher model (`qwen2.5-coder`, `deepseek-r1`, `llama3`) is online and a domain hits a validation plateau.
+
+### Goal 5: Train a New LLM Model from Zero to Competitive in `< 200` Training Rounds
+- **What is Built & Measured:**
+  - Using scale-matched disjoint splits, `<eos>`/`<ans>` token-weighted cross-entropy, and isolated per-domain `.safetensors` specialist cartridge routing ([`routed_specialist_training.py`](../aix_zero/routed_specialist_training.py) — `#428`), AIX's unassisted **Raw Neural Arena accuracy (`inflight_alu=False`, `neural_only`) jumped from `4.39%` at Cycle #164 to `24.56%` at Cycle #179 (in just 15 rounds) and reached `43.86%` by Cycle #241 (in just 77 rounds of routed cartridge training!)**.
+- **Next Milestone to Complete:**
+  - Package a single standalone command (`aix train-from-zero --rounds 200`) that initializes a fresh `AIXZeroModel` from scratch, runs `< 200` rounds of stratified backbone + isolated specialist cartridge + equation-prefix training ([`equation_prefix_supervision.py`](../aix_zero/equation_prefix_supervision.py) — `#430`), and reaches >80% benchmark accuracy within 200 rounds.
+
+### Goal 6: Finish Benchmark Testing Against Standard AI Benchmark Tests
+- **What is Built (`#263`, `#348`, `#407`–`#408`, `#421`):**
+  - 4-split cryptographically hashed evaluation manifest (`train`, `development`, `regression`, `reserved_final` in [`experiment_splits.py`](../aix_zero/experiment_splits.py) and [`prepare_candidate_experiment.py`](../aix_zero/prepare_candidate_experiment.py)).
+  - Paired checkpoint evaluator ([`paired_checkpoint_eval.py`](../aix_zero/paired_checkpoint_eval.py)) with Wilson 95% confidence intervals, McNemar paired gain/loss counts, trace verification, and non-vacuous retention gates ([`candidate_policy.py`](../aix_zero/candidate_policy.py) — `#426`).
+  - Streaming connectors and verifiers for standard benchmark families (`GSM8K` / `NuminaMath`, `MATH` / `OpenR1`, `TheoremQA`, `MMLU`, `GPQA`, and SWE patch tasks).
+- **Next Milestone to Complete:**
+  - Build a unified standard-benchmark runner (`aix benchmark --suite gsm8k,math,mmlu,gpqa,humaneval,swe`) that evaluates both `neural_only` and `neuro_symbolic_verified` modes on frozen held-out benchmark splits and publishes a versioned scorecard (`#263`).
+
+### Goal 7: Become a Competitive Model in LLM Benchmark Testing
+- **What is Built & Measured:**
+  - **Neuro-Symbolic Verified Mode (`use_alu=True`):** **100.0%** exact verified accuracy across all 30 core universal domains and 141+ discovered STEM/AI subjects (`171/171` Certified SME Subjects).
+  - **Unassisted Raw Neural Mode (`neural_only`, `inflight_alu=False`):** Climbed from `0.88%` $\rightarrow$ `4.39%` $\rightarrow$ `24.56%` $\rightarrow$ **`43.86%`** via routed `.safetensors` specialist cartridges (`#428`).
+- **Next Milestone to Complete:**
+  - Combine routed specialist cartridges (`#428`), physical LoRA capacity growth (`#429`), and equation-prefix supervision (`#430`) so unassisted raw neural accuracy and ALU-trigger setup accuracy both exceed **80%–95%+** across all benchmark suites.
+
+### Goal 8: Continue Training AIX to Become an Expert in Every Subject
+- **What is Built (`#346`–`#358`):**
+  - Open-ended autonomous subject discovery (`discover_and_learn_new_subject`) + live Wikipedia/arXiv research (`WebKnowledgeFetcher`) + persistent Subject-Matter Expertise Index (`subject_expertise_index.json`).
+  - AIX has already expanded autonomously from **30** initial domains to **171/171 Certified SME Subjects** (`+141` discovered subjects across Quantum Computing, Robotics, Astrophysics, Climate Physics, Compiler SSA, Cryptography, Continuum Mechanics, Fusion Plasma, Algorithmic Economics, Neuromorphic Computing, Biomedical Engineering, Photonic Computing, and Computational Biology) with **36,747,522 effective parameters (`r = 8960`)**.
+- **Next Milestone to Complete:**
+  - Train dedicated `.safetensors` specialist cartridges for every newly discovered subject (`DISC_...`) across multi-step problem templates so every subject in `subject_expertise_index.json` achieves both 100% neuro-symbolic mastery and high unassisted raw neural accuracy.
