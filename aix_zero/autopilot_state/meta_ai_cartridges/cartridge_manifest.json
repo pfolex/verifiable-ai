@@ -3816,8 +3816,8 @@
       "prefix": "Q:DiscEpigeneticChromatinAccessibility6:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_180",
-      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_v6_d37a5d1f9c917e16234e4bb06f4d8f95190ad23418afbcea635aa75aaf9622c5.safetensors",
-      "sha256": "d37a5d1f9c917e16234e4bb06f4d8f95190ad23418afbcea635aa75aaf9622c5",
+      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_bc53f360b16d575a7b3e548d555bf775fc4f6be7e4ed66bd9ee05760a5a1bdf8.safetensors",
+      "sha256": "bc53f360b16d575a7b3e548d555bf775fc4f6be7e4ed66bd9ee05760a5a1bdf8",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -3855,18 +3855,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 12,
-        "learning_rate": 0.006,
-        "seed": 20263020,
-        "pre_train_loss": 1.646695,
-        "post_train_loss": 0.224397,
-        "pre_val_loss": 1.646695,
-        "post_val_loss": 0.224397
+        "steps_completed": 65,
+        "learning_rate": 0.01,
+        "seed": 20260955,
+        "pre_train_loss": 1.814842,
+        "post_train_loss": 0.100639,
+        "pre_val_loss": 1.755437,
+        "post_val_loss": 0.10121
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -1.422298,
-        "train_loss_delta": -1.422298
+        "val_loss_delta": -1.654227,
+        "train_loss_delta": -1.714203
       }
     },
     "DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V7": {

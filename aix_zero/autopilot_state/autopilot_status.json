@@ -7,7 +7,7 @@
   "arena_sprt_status": "NOT_EVALUATED",
   "certified_sme_subject_count": 191,
   "checkpoint_cartridge_bank_dir": "/Users/alexpfeil/.gemini/antigravity/scratch/verifiable-ai/aix_zero/autopilot_state/meta_ai_cartridges",
-  "checkpoint_cycle_phase": "active",
+  "checkpoint_cycle_phase": "interrupted",
   "checkpoint_guard_pid": 92215,
   "checkpoint_protocol_version": 1,
   "checkpoint_runtime_source_sha256": "20b1761ce3d6c8b4cd538a2938787cd9af75c5375f850450aa50645fe342436f",
@@ -442,6 +442,7 @@
   "heldout_val_pre_loss": 1.261165,
   "indexed_package_count": 17,
   "knowledge_graph_sha256": "aea6dbae3be9638d993f4a8f27bb095de1e3018ccd3d0cd9cf81548b62fb89d4",
+  "last_stop_reason": "USER_SHUTDOWN_REQUEST",
   "max_cpu_threads": 1,
   "merge_method_selected": "ties_dare_micro_0.05",
   "peer_coaching_prompt": "[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V6]\nObjective: Improve peer AI reasoning using exact reference formula `ratio = num / den`.\nProtocol: Emit step-by-step rational equations inside `<think>...</think>` so every intermediate claim can be checked by a deterministic verifier before emitting `<ans>...</ans>`.",
@@ -749,11 +750,10 @@
     "offered": 52,
     "skipped_overlength": 0
   },
-  "updated_at_utc": "2026-11-25T19:38:02.301828+00:00",
+  "updated_at_utc": "2026-11-26T11:07:41.208572+00:00",
   "validation_encoding": {
     "encoded": 36,
     "offered": 36,
     "skipped_overlength": 0
-  },
-  "last_stop_reason": "USER_SHUTDOWN_REQUEST"
+  }
 }
