@@ -26,8 +26,8 @@
   },
   "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
   "active_core_physical_parameters": 817410,
-  "registered_cartridges": 198,
-  "total_cartridge_bank_parameters": 9732096,
+  "registered_cartridges": 200,
+  "total_cartridge_bank_parameters": 9830400,
   "cartridges": {
     "META_SCALING_OPTIMIZER": {
       "domain": "META_SCALING_OPTIMIZER",
@@ -36,8 +36,8 @@
       "prefix": "Q:MetaScale:",
       "formula": "D_opt = C / (6 * N)",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_scaling_optimizer_9d843cea2d1a8e217ef9e21234cd0d6f308b00ad4d51c669101243218a6da273.safetensors",
-      "sha256": "9d843cea2d1a8e217ef9e21234cd0d6f308b00ad4d51c669101243218a6da273",
+      "cartridge_file": "expert_meta_scaling_optimizer_f33a74c4d1092f8494de6a11ada971f76e79393b9a5295d7476e0a736c314fc0.safetensors",
+      "sha256": "f33a74c4d1092f8494de6a11ada971f76e79393b9a5295d7476e0a736c314fc0",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -77,16 +77,16 @@
         "trainable_parameters": 49152,
         "steps_completed": 24,
         "learning_rate": 0.0035,
-        "seed": 20263061,
-        "pre_train_loss": 0.612444,
-        "post_train_loss": 0.425329,
-        "pre_val_loss": 1.293279,
-        "post_val_loss": 0.521582
+        "seed": 20263082,
+        "pre_train_loss": 0.572341,
+        "post_train_loss": 0.4047,
+        "pre_val_loss": 1.2745,
+        "post_val_loss": 0.5627
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.771697,
-        "train_loss_delta": -0.187114
+        "val_loss_delta": -0.7118,
+        "train_loss_delta": -0.167641
       }
     },
     "META_LORA_MOE_ARCHITECT": {
@@ -216,8 +216,8 @@
       "prefix": "Q:MetaRLVR:",
       "formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_rlvr_grpo_trainer_b929ff83882dea554b479b2e3b53cf1647248ee19cdbf5d11c76ca3ddf3d1b47.safetensors",
-      "sha256": "b929ff83882dea554b479b2e3b53cf1647248ee19cdbf5d11c76ca3ddf3d1b47",
+      "cartridge_file": "expert_meta_rlvr_grpo_trainer_77b412714769a35b853707ee9ac00a8b629fb3e7071faaf9d30d1bd284f0c268.safetensors",
+      "sha256": "77b412714769a35b853707ee9ac00a8b629fb3e7071faaf9d30d1bd284f0c268",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -255,18 +255,18 @@
         "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
         "target_slot": 3,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.001005,
-        "seed": 20267003,
-        "pre_train_loss": 0.251192,
-        "post_train_loss": 0.209233,
-        "pre_val_loss": 0.378168,
-        "post_val_loss": 0.299157
+        "steps_completed": 24,
+        "learning_rate": 0.002,
+        "seed": 20263083,
+        "pre_train_loss": 0.972753,
+        "post_train_loss": 0.491197,
+        "pre_val_loss": 0.993083,
+        "post_val_loss": 0.52178
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.079011,
-        "train_loss_delta": -0.041959
+        "val_loss_delta": -0.471302,
+        "train_loss_delta": -0.481556
       }
     },
     "META_FLASH_ATTENTION_TILING": {
@@ -456,8 +456,8 @@
       "prefix": "Q:MetaDist:",
       "formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_distributed_tp_pp_dp_4e83266cde0a167e9e827554b0874d0b21af124a787285865b1c4a67e5eccee3.safetensors",
-      "sha256": "4e83266cde0a167e9e827554b0874d0b21af124a787285865b1c4a67e5eccee3",
+      "cartridge_file": "expert_meta_distributed_tp_pp_dp_5e36b4109753bf3aca0bb8e480d3c8a166973bcead16bf51f51cbeec101a9d61.safetensors",
+      "sha256": "5e36b4109753bf3aca0bb8e480d3c8a166973bcead16bf51f51cbeec101a9d61",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -495,18 +495,18 @@
         "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
         "target_slot": 3,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.001125,
-        "seed": 20267007,
-        "pre_train_loss": 0.281215,
-        "post_train_loss": 0.247517,
-        "pre_val_loss": 0.245491,
-        "post_val_loss": 0.223031
+        "steps_completed": 24,
+        "learning_rate": 0.0035,
+        "seed": 20263081,
+        "pre_train_loss": 0.544519,
+        "post_train_loss": 0.376891,
+        "pre_val_loss": 0.620602,
+        "post_val_loss": 0.334965
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.02246,
-        "train_loss_delta": -0.033698
+        "val_loss_delta": -0.285637,
+        "train_loss_delta": -0.167629
       }
     },
     "META_DEEPSEEK_MLA_LATENT_KV": {
@@ -1896,8 +1896,8 @@
       "prefix": "Q:DiscPharma:",
       "formula": "clearance_ratio = elimination_rate / volume_distribution",
       "introduced_in": "cycle_1",
-      "cartridge_file": "expert_disc_pharmacokinetics_clearance_c542431a8bda47b093b4ae2e7cb26567f553abf67dcaa238518428b3b671b382.safetensors",
-      "sha256": "c542431a8bda47b093b4ae2e7cb26567f553abf67dcaa238518428b3b671b382",
+      "cartridge_file": "expert_disc_pharmacokinetics_clearance_4232d482a2f125c4247b952fa54f2240f8a16f7836cd68289ad123fbd5984913.safetensors",
+      "sha256": "4232d482a2f125c4247b952fa54f2240f8a16f7836cd68289ad123fbd5984913",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -1935,18 +1935,18 @@
         "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
         "target_slot": 3,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.001122,
-        "seed": 20268001,
-        "pre_train_loss": 0.280498,
-        "post_train_loss": 0.225688,
-        "pre_val_loss": 0.387688,
-        "post_val_loss": 0.338808
+        "steps_completed": 24,
+        "learning_rate": 0.00089,
+        "seed": 20263073,
+        "pre_train_loss": 0.222513,
+        "post_train_loss": 0.126978,
+        "pre_val_loss": 0.222271,
+        "post_val_loss": 0.144272
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.04888,
-        "train_loss_delta": -0.05481
+        "val_loss_delta": -0.077999,
+        "train_loss_delta": -0.095535
       }
     },
     "DISC_CLIMATE_RADIATIVE_FORCING": {
@@ -2796,8 +2796,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_124",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_db27a7c43b8823a622799dd5572ea73296b23d4eb7ba71350e547b92ef068c0a.safetensors",
-      "sha256": "db27a7c43b8823a622799dd5572ea73296b23d4eb7ba71350e547b92ef068c0a",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_3d9deadc5ff26047e9f642f760eae41ff3ee30e514792e297ee5e2bdda0e8766.safetensors",
+      "sha256": "3d9deadc5ff26047e9f642f760eae41ff3ee30e514792e297ee5e2bdda0e8766",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -2835,18 +2835,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.001025,
-        "seed": 20268016,
-        "pre_train_loss": 0.256259,
-        "post_train_loss": 0.211409,
-        "pre_val_loss": 0.351979,
-        "post_val_loss": 0.28295
+        "steps_completed": 24,
+        "learning_rate": 0.000958,
+        "seed": 20263074,
+        "pre_train_loss": 0.239576,
+        "post_train_loss": 0.117094,
+        "pre_val_loss": 0.337705,
+        "post_val_loss": 0.150574
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.069028,
-        "train_loss_delta": -0.04485
+        "val_loss_delta": -0.187131,
+        "train_loss_delta": -0.122482
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V2": {
@@ -11907,6 +11907,126 @@
         "decision": "PASS",
         "val_loss_delta": -0.026515,
         "train_loss_delta": -0.031705
+      }
+    },
+    "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V14": {
+      "domain": "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V14",
+      "title": "Computational Fluid Dynamics Reynolds Turbulence & Drag Dissipation Ratio (Tier 14)",
+      "category": "continuum_mechanics",
+      "prefix": "Q:DiscFluidNavierStokes14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_266",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v10_add5d691e61bb096ddd12897ebd36da1765b3d90ebe0c889aab5216ebb545f2e.safetensors",
+      "sha256": "add5d691e61bb096ddd12897ebd36da1765b3d90ebe0c889aab5216ebb545f2e",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
+        "target_slot": 0,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000743,
+        "seed": 20268006,
+        "pre_train_loss": 0.185685,
+        "post_train_loss": 0.149539,
+        "pre_val_loss": 0.190171,
+        "post_val_loss": 0.159389
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.030783,
+        "train_loss_delta": -0.036146
+      }
+    },
+    "DISC_GAME_THEORY_MECHANISM_VICKREY_V14": {
+      "domain": "DISC_GAME_THEORY_MECHANISM_VICKREY_V14",
+      "title": "Algorithmic Game Theory Vickrey Auction Social Welfare Efficiency Ratio (Tier 14)",
+      "category": "algorithmic_economics",
+      "prefix": "Q:DiscGameTheoryMechanism14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_267",
+      "cartridge_file": "expert_disc_cryptographic_zk_stark_fri_v2_9b0717b41ca1b5b7c2a24ea6bfd1b3f95ec2f9d454dc1c8f6644e934adf2e4b8.safetensors",
+      "sha256": "9b0717b41ca1b5b7c2a24ea6bfd1b3f95ec2f9d454dc1c8f6644e934adf2e4b8",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
+        "target_slot": 3,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000659,
+        "seed": 20268008,
+        "pre_train_loss": 0.164848,
+        "post_train_loss": 0.136929,
+        "pre_val_loss": 0.156368,
+        "post_val_loss": 0.129003
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.027365,
+        "train_loss_delta": -0.027919
       }
     }
   },
