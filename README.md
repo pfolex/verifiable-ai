@@ -233,3 +233,13 @@ The base stays unchanged. The current machine exposes CPU only, so full-size run
 can be slow. Small pilots measure observed changes and may remain statistically
 inconclusive. See [the training guide](docs/TRAINING-AIX.md) for settings, staged
 commands, memory considerations and interpretation.
+
+## AIX training framework direction
+
+The [framework roadmap](docs/AIX-TRAINING-FRAMEWORK-ROADMAP.md) documents the plan
+for training and evaluating user-supplied models, including compatible Mergekit
+exports. It distinguishes existing functionality from proposed integrations and
+tracks the first clean-machine release through [#437](https://github.com/pfolex/verifiable-ai/issues/437).
+Start with the [current HF training guide](docs/TRAINING-AIX.md) for supported
+local-model experiments; arbitrary-model compatibility and competitive gains are
+not established.
