@@ -70,7 +70,7 @@ class MetaAIAutopilotTests(unittest.TestCase):
             self.assertGreater(res1["grpo_positive_trajectories"], 0)
             self.assertGreater(res2["replay_buffer_sampled_count"], 0)
             self.assertNotEqual(res1["shard_hash_prefixes"], res2["shard_hash_prefixes"])
-            self.assertEqual(len(res2["exported_meta_shards"]), 30)
+            self.assertGreaterEqual(len(res2["exported_meta_shards"]), 31)
             self.assertGreaterEqual(res2["certified_sme_subject_count"], 31)
             self.assertGreaterEqual(res2["dynamically_discovered_subject_count"], 1)
             self.assertTrue((tdir / "discovered_subjects_registry.json").exists())

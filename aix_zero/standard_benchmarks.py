@@ -25,6 +25,7 @@ from aix_zero.benchmark_baseline import load_v11
 from aix_zero.equation_prefix_supervision import evaluate_bounded_equation_prefix
 from aix_zero.eval_harness_bridge import score_rational_or_probability
 from aix_zero.meta_ai_autopilot import (
+    AutonomousSelfImprovementController,
     DEFAULT_STATE_DIR,
     META_AI_EXPERT_DOMAINS,
     REPO_ROOT,
@@ -234,8 +235,16 @@ def run_standard_ai_benchmark_suites(
     bank_dir = state_dir / "meta_ai_cartridges"
     bank = SparseExpertCartridgeBank(bank_dir) if bank_dir.exists() else None
 
-    eval_items = build_meta_ai_self_improvement_curriculum(cycle_index=int(cycle_index) + 2000)
+    ctrl = AutonomousSelfImprovementController(state_dir)
+    discovered_items = ctrl.build_discovered_subjects_curriculum(
+        cycle_index=int(cycle_index) + 2000,
+        items_per_subject=1,
+    )
+    eval_items = build_meta_ai_self_improvement_curriculum(cycle_index=int(cycle_index) + 2000) + discovered_items
 
+    suite_names = list(BENCHMARK_SUITE_DOMAIN_GROUPS.keys())
+    if discovered_items:
+        suite_names.append("discovered_universal_subjects")
     suite_stats: Dict[str, Dict[str, int]] = {
         suite_name: {
             "tested": 0,
@@ -244,7 +253,7 @@ def run_standard_ai_benchmark_suites(
             "bounded_alu_assisted_correct": 0,
             "neuro_symbolic_verified_correct": 0,
         }
-        for suite_name in BENCHMARK_SUITE_DOMAIN_GROUPS
+        for suite_name in suite_names
     }
     domain_to_suite = {
         dom: s_name
@@ -261,7 +270,10 @@ def run_standard_ai_benchmark_suites(
     with torch.no_grad():
         for item in eval_items:
             dom = item["domain"]
-            s_name = domain_to_suite.get(dom, "ml_systems_frontier")
+            s_name = domain_to_suite.get(
+                dom,
+                "discovered_universal_subjects" if dom.startswith("DISC_") else "ml_systems_frontier",
+            )
             prompt = item["prompt"]
             gold = item["gold"]
             prompt_ids = tokenizer.encode(prompt, add_bos=True, add_eos=False)

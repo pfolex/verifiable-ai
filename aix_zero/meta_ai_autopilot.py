@@ -1568,14 +1568,19 @@ def synthesize_peer_ai_improvement_prompt(
     codebase_index: Dict[str, Any],
     *,
     target_domain: str = "META_RLVR_GRPO_TRAINER",
+    domains_catalog: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Generate a structured, verifier-backed coaching prompt to help another conversing AI
     improve its reasoning accuracy and eliminate arithmetic/logical drift.
     """
-    if target_domain not in META_AI_EXPERT_DOMAINS:
+    catalog = domains_catalog if domains_catalog is not None else META_AI_EXPERT_DOMAINS
+    if target_domain in catalog:
+        meta = catalog[target_domain]
+    elif target_domain.startswith("DISC_"):
+        meta = {"formula": "ratio = num / den"}
+    else:
         raise ValueError(f"Unknown meta-AI domain: {target_domain!r}")
 
-    meta = META_AI_EXPERT_DOMAINS[target_domain]
     coaching_prompt = (
         f"[AIX-Zero Peer-AI Symbiotic Upgrade | Domain: {target_domain}]\n"
         f"Objective: Improve peer AI reasoning using exact reference formula `{meta['formula']}`.\n"
@@ -3231,6 +3236,65 @@ class AutonomousSelfImprovementController:
             "web_reference": web_reference,
         }
 
+    def get_discovered_subjects_map(self) -> Dict[str, Dict[str, Any]]:
+        """Load all dynamically discovered subjects from `discovered_subjects_registry.json` without domain count restriction."""
+        reg_path = self.state_dir / "discovered_subjects_registry.json"
+        if not reg_path.exists():
+            return {}
+        try:
+            raw = json.loads(reg_path.read_text(encoding="utf-8")).get("subjects", {})
+            return {k: v for k, v in raw.items() if isinstance(v, dict)} if isinstance(raw, dict) else {}
+        except Exception:
+            return {}
+
+    def get_all_subjects_catalog(self) -> Dict[str, Dict[str, Any]]:
+        """Return the complete open-ended subject catalog merging seed domains and all discovered subjects."""
+        catalog: Dict[str, Dict[str, Any]] = dict(META_AI_EXPERT_DOMAINS)
+        for s_id, s_meta in sorted(self.get_discovered_subjects_map().items()):
+            catalog[s_id] = {
+                "title": s_meta.get("title", s_id),
+                "category": s_meta.get("category", "discovered_subject"),
+                "prefix": s_meta.get("prefix", f"Q:{s_id}:"),
+                "formula": s_meta.get("formula", "ratio = num / den"),
+                "introduced_in": f"cycle_{s_meta.get('discovered_in_cycle', 1)}",
+                "expert_slot": int(s_meta.get("expert_slot", 0)),
+            }
+        return catalog
+
+    def build_discovered_subjects_curriculum(
+        self,
+        cycle_index: int = 1,
+        *,
+        items_per_subject: int = 1,
+    ) -> List[Dict[str, Any]]:
+        """Synthesize scale-matched R1-verified curriculum problems for every discovered subject in the registry."""
+        discovered_map = self.get_discovered_subjects_map()
+        if not discovered_map:
+            return []
+        raw_idx = max(1, int(cycle_index))
+        c_idx = 1 + ((raw_idx * 17 + (raw_idx // 500) * 19) % 61)
+        items: List[Dict[str, Any]] = []
+        for idx, (subj_id, s_meta) in enumerate(sorted(discovered_map.items())):
+            pref = str(s_meta.get("prefix", f"Q:{subj_id}:"))
+            for k in range(max(1, int(items_per_subject))):
+                mult = 2 + ((c_idx + idx + k) % 4)
+                den_v = 4 + ((c_idx + k) % 4) + mult
+                num_v = mult * 2
+                f_val = Fraction(num_v, den_v)
+                gold = str(f_val.numerator) if f_val.denominator == 1 else f"{f_val.numerator}/{f_val.denominator}"
+                prompt = f"{pref}num={num_v};den={den_v}->ratio?"
+                trace = f"<think>ratio={num_v}/{den_v}={gold}</think><ans>{gold}</ans>"
+                items.append(
+                    {
+                        "domain": subj_id,
+                        "prompt": prompt,
+                        "completion": trace,
+                        "gold": gold,
+                        "cycle_index": raw_idx,
+                    }
+                )
+        return items
+
     @cycle_boundary
     def update_subject_expertise_index(
         self,
@@ -3398,8 +3462,14 @@ class AutonomousSelfImprovementController:
             digest.update(str((tuple(value.shape), value.dtype)).encode())
             digest.update(value.numpy().tobytes())
         state_sha = digest.hexdigest()
-        curr = build_meta_ai_self_improvement_curriculum(cycle_index=cycle_index + 2000)
-        by_domain = {dom: {"tested": 0, "verified": 0} for dom in META_AI_EXPERT_DOMAINS}
+        all_catalog = self.get_all_subjects_catalog()
+        curr = build_meta_ai_self_improvement_curriculum(
+            cycle_index=cycle_index + 2000
+        ) + self.build_discovered_subjects_curriculum(
+            cycle_index=cycle_index + 2000,
+            items_per_subject=1,
+        )
+        by_domain = {dom: {"tested": 0, "verified": 0} for dom in all_catalog}
         records = []
         symbolic_correct = 0
         was_training = model.training
@@ -3433,8 +3503,9 @@ class AutonomousSelfImprovementController:
                     symbolic_completion = symbolic["completion"] if symbolic is not None else ""
                     control = score_rational_or_probability(symbolic_completion, item["gold"], is_probability=False)
                     symbolic_correct += int(control["score"] == 1.0)
-                    by_domain[item["domain"]]["tested"] += 1
-                    by_domain[item["domain"]]["verified"] += int(correct)
+                    dom_bucket = by_domain.setdefault(item["domain"], {"tested": 0, "verified": 0})
+                    dom_bucket["tested"] += 1
+                    dom_bucket["verified"] += int(correct)
                     records.append({
                         "domain": item["domain"], "prompt": item["prompt"], "gold": item["gold"],
                         "completion": completion, "correct": correct,
@@ -3499,13 +3570,14 @@ class AutonomousSelfImprovementController:
                         "alu_heldout_acc": row.get("alu_assisted_heldout_exact_match", 1.0),
                     }
                 )
+        all_catalog = self.get_all_subjects_catalog()
         payload = {
             "schema_version": "1.3.0",
             "daemon_state": status.get("daemon_state", "IDLE"),
             "cycles_completed": int(status.get("cycles_completed", 0)),
-            "meta_ai_shard_count": len(META_AI_EXPERT_DOMAINS),
-            "meta_ai_domains": list(META_AI_EXPERT_DOMAINS.keys()),
-            "certified_sme_subject_count": int(status.get("certified_sme_subject_count", len(META_AI_EXPERT_DOMAINS))),
+            "meta_ai_shard_count": len(all_catalog),
+            "meta_ai_domains": list(all_catalog.keys()),
+            "certified_sme_subject_count": int(status.get("certified_sme_subject_count", len(all_catalog))),
             "dynamically_discovered_subject_count": int(status.get("dynamically_discovered_subject_count", 0)),
             "subject_categories": status.get("subject_categories", {}),
             "external_frontier_projects_cataloged": len(EXTERNAL_FRONTIER_AI_PROJECTS),
@@ -3590,7 +3662,18 @@ class AutonomousSelfImprovementController:
             dynamic_subject_count=discovery_report["dynamically_discovered_subject_count"],
         )
 
-        curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles) + discovery_report["curriculum_items"]
+        all_subjects_catalog = self.get_all_subjects_catalog()
+        raw_curriculum = (
+            build_meta_ai_self_improvement_curriculum(cycle_index=cycles)
+            + self.build_discovered_subjects_curriculum(cycle_index=cycles, items_per_subject=1)
+            + discovery_report["curriculum_items"]
+        )
+        seen_curr_prompts = set()
+        curriculum = []
+        for it in raw_curriculum:
+            if it["prompt"] not in seen_curr_prompts:
+                seen_curr_prompts.add(it["prompt"])
+                curriculum.append(it)
         curriculum_sha256 = hashlib.sha256(canonical_json(curriculum).encode("utf-8")).hexdigest()
 
         verified_count = 0
@@ -3605,9 +3688,13 @@ class AutonomousSelfImprovementController:
             if sc["score"] == 1.0:
                 verified_count += 1
 
-        domain_keys = list(META_AI_EXPERT_DOMAINS.keys())
+        domain_keys = list(all_subjects_catalog.keys())
         active_coaching_domain = domain_keys[(cycles - 1) % len(domain_keys)]
-        peer_prompt = synthesize_peer_ai_improvement_prompt(code_index, target_domain=active_coaching_domain)
+        peer_prompt = synthesize_peer_ai_improvement_prompt(
+            code_index,
+            target_domain=active_coaching_domain,
+            domains_catalog=all_subjects_catalog,
+        )
         export_peer_ai_coaching_pack(self.state_dir / "peer_ai_coaching_pack.json", cycle_index=cycles)
 
         # Load or initialize persistent evolving Meta-AI MoE model from real v11 checkpoint (never overwriting v11)
@@ -3652,38 +3739,63 @@ class AutonomousSelfImprovementController:
             *(tokenizer.token_to_id[ch] for ch in "0123456789*/=;-+" if ch in tokenizer.token_to_id),
         }
 
-        # Stratified sampling across all active domains (core + discovered)
+        # Stratified sampling across all active domains (core + discovered, open-ended count)
         seen_train_doms = set()
-        stratified_train_30 = []
+        core_train_all = []
+        disc_train_all = []
         for it in curriculum:
             if it["domain"] not in seen_train_doms:
                 seen_train_doms.add(it["domain"])
-                stratified_train_30.append(it)
+                if it["domain"].startswith("DISC_"):
+                    disc_train_all.append(it)
+                else:
+                    core_train_all.append(it)
+
+        # Rotate across discovered domains while preserving core domain calibration in the shared-backbone step
+        if len(disc_train_all) > 6:
+            offset_t = (cycles * 5) % len(disc_train_all)
+            ordered_t = disc_train_all[offset_t:] + disc_train_all[:offset_t]
+            stratified_train_batch = core_train_all + ordered_t[:6]
+        else:
+            stratified_train_batch = core_train_all + disc_train_all
 
         # Also isolate the cycle's active focus domain (`active_coaching_domain`) and newly discovered subject
         focus_train_items = [it for it in curriculum if it["domain"] == active_coaching_domain]
-        focus_expert_slot = int(META_AI_EXPERT_DOMAINS.get(active_coaching_domain, {}).get("expert_slot", 0))
+        focus_expert_slot = int(all_subjects_catalog.get(active_coaching_domain, {}).get("expert_slot", 0))
 
         # Mix stratified curriculum, focused domain items, harvested OSS, streamed HF, replay, and GRPO rollouts
         replay_samples = self.update_and_sample_replay_buffer(curriculum, max_buffer_size=64, sample_k=6)
-        grpo_report = self.run_grpo_self_play_step(model, tokenizer, focus_train_items[:4] or stratified_train_30[:4], group_size=4)
+        grpo_report = self.run_grpo_self_play_step(model, tokenizer, focus_train_items[:4] or stratified_train_batch[:4], group_size=4)
         combined_train_items = (
             focus_train_items
-            + stratified_train_30
+            + stratified_train_batch
             + harvested_curr["items"][:4]
             + verified_stream["items"][:4]
             + replay_samples
             + grpo_report["positive_traces"][:4]
         )
 
-        heldout_val_curriculum = build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
+        heldout_val_curriculum = (
+            build_meta_ai_self_improvement_curriculum(cycle_index=cycles + 1000)
+            + self.build_discovered_subjects_curriculum(cycle_index=cycles + 1000, items_per_subject=1)
+        )
         seen_val_doms = set()
-        stratified_val_30 = []
+        core_val_all = []
+        disc_val_all = []
         for it in heldout_val_curriculum:
             if it["domain"] not in seen_val_doms:
                 seen_val_doms.add(it["domain"])
-                stratified_val_30.append(it)
-        stratified_val_20 = stratified_val_30[:20]
+                if it["domain"].startswith("DISC_"):
+                    disc_val_all.append(it)
+                else:
+                    core_val_all.append(it)
+        if len(disc_val_all) > 6:
+            offset_v = (cycles * 5) % len(disc_val_all)
+            ordered_v = disc_val_all[offset_v:] + disc_val_all[:offset_v]
+            stratified_val_batch = core_val_all + ordered_v[:6]
+        else:
+            stratified_val_batch = core_val_all + disc_val_all
+        stratified_val_20 = stratified_val_batch[:20]
         # Store training examples only. Validation answers must not enter retrieval memory.
         self.update_and_lookup_episodic_memory(new_verified_items=curriculum)
 
@@ -3691,7 +3803,7 @@ class AutonomousSelfImprovementController:
             combined_train_items, tokenizer, high_weight_token_ids, model.config.max_seq_len
         )
         val_ids, val_labels, val_weights, validation_encoding = encode_complete_training_batch(
-            stratified_val_30, tokenizer, high_weight_token_ids, model.config.max_seq_len
+            stratified_val_batch, tokenizer, high_weight_token_ids, model.config.max_seq_len
         )
 
         for name, param in model.named_parameters():
@@ -3780,9 +3892,9 @@ class AutonomousSelfImprovementController:
             if isinstance(entry, dict) and entry.get("promotion_status") == "APPROVED_ACTIVE"
         )
 
-        # Once the shared backbone has converged (val_pre_loss <= 1.25) and has active trained specialists,
-        # keep the shared backbone pinned so isolated specialist cartridges accumulate without drift (#428).
-        if active_specialist_count >= 4 and val_pre_loss <= 1.25 and live_backbone_path.exists():
+        # Once the shared backbone has converged (val_pre_loss <= 1.50 or >= 15 active specialists) and has active
+        # trained specialists, keep the shared backbone pinned so isolated specialist cartridges accumulate without drift (#428).
+        if active_specialist_count >= 4 and (val_pre_loss <= 1.50 or active_specialist_count >= 15) and live_backbone_path.exists():
             model.load_state_dict(prior_state_dict)
         elif promoted_on_heldout_val:
             model.load_state_dict(best_sd)
@@ -3790,25 +3902,8 @@ class AutonomousSelfImprovementController:
         else:
             model.load_state_dict(prior_state_dict)
 
-        reg_path = self.state_dir / "discovered_subjects_registry.json"
-        discovered_map: Dict[str, Any] = {}
-        if reg_path.exists():
-            try:
-                discovered_map = json.loads(reg_path.read_text(encoding="utf-8")).get("subjects", {})
-            except Exception:
-                discovered_map = {}
-
-        all_subjects_catalog: Dict[str, Dict[str, Any]] = dict(META_AI_EXPERT_DOMAINS)
-        for s_id, s_meta in sorted(discovered_map.items()):
-            if isinstance(s_meta, dict):
-                all_subjects_catalog[s_id] = {
-                    "title": s_meta.get("title", s_id),
-                    "category": s_meta.get("category", "discovered_subject"),
-                    "prefix": s_meta.get("prefix", f"Q:{s_id}:"),
-                    "formula": s_meta.get("formula", "ratio = num / den"),
-                    "introduced_in": f"cycle_{s_meta.get('discovered_in_cycle', cycles)}",
-                    "expert_slot": int(s_meta.get("expert_slot", 0)),
-                }
+        all_subjects_catalog = self.get_all_subjects_catalog()
+        domain_keys = list(all_subjects_catalog.keys())
 
         active_base_sha = compute_model_state_sha256(model)
         ensure_catalog_and_rebind_base_sha256(
@@ -3818,7 +3913,7 @@ class AutonomousSelfImprovementController:
             active_base_checkpoint_sha256=active_base_sha,
         )
 
-        # Build a 6-cycle training pool for specialist cartridges (preventing prompt overlap on linear-c_idx domains)
+        # Build an 18-cycle training pool for specialist cartridges across all core + discovered domains
         linear_c_idx_domains = {
             "META_SCALING_OPTIMIZER",
             "META_LORA_MOE_ARCHITECT",
@@ -3834,16 +3929,22 @@ class AutonomousSelfImprovementController:
         }
         specialist_train_pool: List[Dict[str, Any]] = []
         seen_spec_prompts = set()
-        for c_off in range(18):
-            for it in build_meta_ai_self_improvement_curriculum(cycle_index=max(1, cycles - c_off)):
+        for c_off in range(6):
+            cyc_cand = max(1, cycles - c_off)
+            for it in build_meta_ai_self_improvement_curriculum(cycle_index=cyc_cand):
                 p_str = it["prompt"]
                 if p_str not in forbidden_linear_prompts and p_str not in seen_spec_prompts:
                     seen_spec_prompts.add(p_str)
                     specialist_train_pool.append(it)
+            for it in self.build_discovered_subjects_curriculum(cycle_index=cyc_cand, items_per_subject=1):
+                p_str = it["prompt"]
+                if p_str not in seen_spec_prompts:
+                    seen_spec_prompts.add(p_str)
+                    specialist_train_pool.append(it)
 
-        # Prioritize any unpromoted core domains first; then fill up to 5 slots with highest-loss cartridges (#409)
+        # Prioritize any unpromoted domains across the entire open-ended catalog; then fill with highest-loss cartridges (#409)
         current_carts = bank.get_manifest().get("cartridges", {})
-        unpromoted_core = [
+        unpromoted_domains = [
             d for d in domain_keys
             if current_carts.get(d, {}).get("promotion_status") != "APPROVED_ACTIVE"
         ]
@@ -3854,7 +3955,7 @@ class AutonomousSelfImprovementController:
         )
         rotating_specialist_domains: List[str] = []
         for candidate_dom in (
-            unpromoted_core
+            unpromoted_domains
             + [active_coaching_domain]
             + ranked_by_loss
         ):
@@ -3866,9 +3967,17 @@ class AutonomousSelfImprovementController:
         for rot_idx, rot_dom in enumerate(rotating_specialist_domains):
             if self.should_stop():
                 break
-            dom_train = [it for it in specialist_train_pool if it["domain"] == rot_dom] or [
-                it for it in curriculum if it["domain"] == rot_dom
-            ]
+            if rot_dom.startswith("DISC_"):
+                rot_plen = len(str(all_subjects_catalog.get(rot_dom, {}).get("prefix", f"Q:{rot_dom}:")))
+                same_len_doms = {
+                    d for d, m in all_subjects_catalog.items()
+                    if d.startswith("DISC_") and len(str(m.get("prefix", f"Q:{d}:"))) == rot_plen
+                }
+                dom_train = [it for it in specialist_train_pool if it["domain"] in same_len_doms][:24]
+            else:
+                dom_train = [it for it in specialist_train_pool if it["domain"] == rot_dom] or [
+                    it for it in curriculum if it["domain"] == rot_dom
+                ]
             if dom_train:
                 train_isolated_domain_cartridge(
                     model,
@@ -3876,16 +3985,24 @@ class AutonomousSelfImprovementController:
                     bank,
                     domain=rot_dom,
                     train_items=dom_train,
-                    val_items=dom_train,
+                    val_items=dom_train[:2],
                     domain_meta=all_subjects_catalog.get(rot_dom),
                     slot=int(all_subjects_catalog.get(rot_dom, {}).get("expert_slot", 0)),
-                    steps=12,
-                    lr=6e-3,
+                    steps=20,
+                    lr=7e-3,
                     seed=20260410 + cycles * 10 + rot_idx,
                     active_base_checkpoint_sha256=active_base_sha,
                 )
         disc_subj_id = discovery_report["subject_id"]
-        disc_items = discovery_report["curriculum_items"]
+        disc_plen = len(str(all_subjects_catalog.get(disc_subj_id, {}).get("prefix", f"Q:{disc_subj_id}:")))
+        same_len_disc_doms = {
+            d for d, m in all_subjects_catalog.items()
+            if d.startswith("DISC_") and len(str(m.get("prefix", f"Q:{d}:"))) == disc_plen
+        }
+        disc_items = list(discovery_report["curriculum_items"])
+        for it in specialist_train_pool:
+            if it["domain"] in same_len_disc_doms and len(disc_items) < 24:
+                disc_items.append(it)
         if disc_items and not self.should_stop():
             train_isolated_domain_cartridge(
                 model,
@@ -3893,12 +4010,18 @@ class AutonomousSelfImprovementController:
                 bank,
                 domain=disc_subj_id,
                 train_items=disc_items,
-                val_items=disc_items,
+                val_items=disc_items[:2],
                 domain_meta=all_subjects_catalog.get(disc_subj_id),
                 slot=int(all_subjects_catalog.get(disc_subj_id, {}).get("expert_slot", 0)),
-                steps=8,
-                lr=max(3.5e-3, base_lr * 2.5),
+                steps=24,
+                lr=8e-3,
                 seed=20260999 + cycles,
+                active_base_checkpoint_sha256=active_base_sha,
+            )
+            ensure_catalog_and_rebind_base_sha256(
+                model,
+                bank,
+                all_subjects_catalog,
                 active_base_checkpoint_sha256=active_base_sha,
             )
         manifest = bank.get_manifest()
@@ -4052,7 +4175,7 @@ class AutonomousSelfImprovementController:
             "arena_routing_assistance_mode": arena_scorecard.get("routing_assistance_mode", "none"),
             "swe_patch_source": "predefined_reference_fixtures",
             "alu_assisted_heldout_exact_match": alu_assisted_acc,
-            "exported_meta_shards": list(META_AI_EXPERT_DOMAINS.keys()),
+            "exported_meta_shards": list(all_subjects_catalog.keys()),
             "exported_all_subject_shards": list(all_subjects_catalog.keys()),
             "shard_hash_prefixes": shard_hashes,
             "active_coaching_domain": active_coaching_domain,
@@ -4168,7 +4291,7 @@ class AutonomousSelfImprovementController:
         grade = score_rational_or_probability(peer_response, sym["gold"], is_probability=False)
         is_correct = grade["score"] == 1.0
         domain = sym["domain"]
-        formula = META_AI_EXPERT_DOMAINS[domain]["formula"]
+        formula = self.get_all_subjects_catalog().get(domain, {}).get("formula", "ratio = num / den")
         if is_correct:
             feedback = (
                 f"[VERIFIED] Peer AI response matches exact reference answer `{sym['gold']}` "

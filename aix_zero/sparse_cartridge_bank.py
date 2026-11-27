@@ -96,8 +96,8 @@ class SparseExpertCartridgeBank:
     def __init__(self, cartridge_dir: Optional[Path] = None, *,
                  max_cached_bytes: int = 1024 * 1024, max_cached_experts: int = 2,
                  max_shard_bytes: int = 16 * 1024 * 1024,
-                 max_manifest_bytes: int = 1024 * 1024,
-                 max_manifest_entries: int = 256) -> None:
+                 max_manifest_bytes: int = 64 * 1024 * 1024,
+                 max_manifest_entries: int = 65536) -> None:
         if (max_cached_bytes < 0 or max_cached_experts < 0 or max_shard_bytes <= 0
                 or max_manifest_bytes <= 0 or max_manifest_entries <= 0):
             raise ValueError('Cache limits must be nonnegative; shard and manifest limits must be positive')

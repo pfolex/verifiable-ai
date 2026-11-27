@@ -1,13 +1,1139 @@
 {
   "schema_version": "1.0.0",
-  "cycle_index": 33,
+  "cycle_index": 261,
   "physical_core_parameters": 817410,
   "active_routed_experts_per_token": 2,
   "total_routed_experts_in_core": 4,
-  "registered_meta_ai_shards": 20,
-  "total_cartridge_bank_parameters": 983040,
-  "current_lora_rank": 4,
-  "active_lora_adapter_parameters": 12288,
-  "effective_system_parameters": 1812738,
-  "expansion_events": []
+  "registered_meta_ai_shards": 193,
+  "core_universal_shards": 30,
+  "dynamically_discovered_shards": 163,
+  "total_cartridge_bank_parameters": 9486336,
+  "current_lora_rank": 10368,
+  "active_lora_adapter_parameters": 31850496,
+  "effective_system_parameters": 42154242,
+  "expansion_events": [
+    {
+      "cycle_index": 39,
+      "prior_rank": 4,
+      "new_rank": 8,
+      "new_lora_parameters": 24576
+    },
+    {
+      "cycle_index": 64,
+      "prior_rank": 8,
+      "new_rank": 16,
+      "new_lora_parameters": 49152
+    },
+    {
+      "cycle_index": 68,
+      "prior_rank": 16,
+      "new_rank": 32,
+      "new_lora_parameters": 98304
+    },
+    {
+      "cycle_index": 69,
+      "prior_rank": 32,
+      "new_rank": 64,
+      "new_lora_parameters": 196608
+    },
+    {
+      "cycle_index": 109,
+      "prior_rank": 64,
+      "new_rank": 128,
+      "new_lora_parameters": 393216,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 118,
+      "prior_rank": 128,
+      "new_rank": 160,
+      "new_lora_parameters": 491520,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 119,
+      "prior_rank": 160,
+      "new_rank": 192,
+      "new_lora_parameters": 589824,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 120,
+      "prior_rank": 192,
+      "new_rank": 224,
+      "new_lora_parameters": 688128,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 120,
+      "prior_rank": 224,
+      "new_rank": 256,
+      "new_lora_parameters": 786432,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 120,
+      "prior_rank": 256,
+      "new_rank": 320,
+      "new_lora_parameters": 983040,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 121,
+      "prior_rank": 320,
+      "new_rank": 384,
+      "new_lora_parameters": 1179648,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 121,
+      "prior_rank": 384,
+      "new_rank": 512,
+      "new_lora_parameters": 1572864,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 122,
+      "prior_rank": 512,
+      "new_rank": 640,
+      "new_lora_parameters": 1966080,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 123,
+      "prior_rank": 640,
+      "new_rank": 768,
+      "new_lora_parameters": 2359296,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 123,
+      "prior_rank": 768,
+      "new_rank": 1024,
+      "new_lora_parameters": 3145728,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 124,
+      "prior_rank": 1024,
+      "new_rank": 1088,
+      "new_lora_parameters": 3342336,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 125,
+      "prior_rank": 1088,
+      "new_rank": 1152,
+      "new_lora_parameters": 3538944,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 126,
+      "prior_rank": 1152,
+      "new_rank": 1216,
+      "new_lora_parameters": 3735552,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 127,
+      "prior_rank": 1216,
+      "new_rank": 1280,
+      "new_lora_parameters": 3932160,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 128,
+      "prior_rank": 1280,
+      "new_rank": 1344,
+      "new_lora_parameters": 4128768,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 129,
+      "prior_rank": 1344,
+      "new_rank": 1408,
+      "new_lora_parameters": 4325376,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 130,
+      "prior_rank": 1408,
+      "new_rank": 1472,
+      "new_lora_parameters": 4521984,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 131,
+      "prior_rank": 1472,
+      "new_rank": 1536,
+      "new_lora_parameters": 4718592,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 132,
+      "prior_rank": 1536,
+      "new_rank": 1600,
+      "new_lora_parameters": 4915200,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 133,
+      "prior_rank": 1600,
+      "new_rank": 1664,
+      "new_lora_parameters": 5111808,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 134,
+      "prior_rank": 1664,
+      "new_rank": 1728,
+      "new_lora_parameters": 5308416,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 135,
+      "prior_rank": 1728,
+      "new_rank": 1792,
+      "new_lora_parameters": 5505024,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 136,
+      "prior_rank": 1792,
+      "new_rank": 1856,
+      "new_lora_parameters": 5701632,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 137,
+      "prior_rank": 1856,
+      "new_rank": 1920,
+      "new_lora_parameters": 5898240,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 138,
+      "prior_rank": 1920,
+      "new_rank": 1984,
+      "new_lora_parameters": 6094848,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 139,
+      "prior_rank": 1984,
+      "new_rank": 2048,
+      "new_lora_parameters": 6291456,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 140,
+      "prior_rank": 2048,
+      "new_rank": 2112,
+      "new_lora_parameters": 6488064,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 141,
+      "prior_rank": 2112,
+      "new_rank": 2176,
+      "new_lora_parameters": 6684672,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 142,
+      "prior_rank": 2176,
+      "new_rank": 2240,
+      "new_lora_parameters": 6881280,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 143,
+      "prior_rank": 2240,
+      "new_rank": 2304,
+      "new_lora_parameters": 7077888,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 144,
+      "prior_rank": 2304,
+      "new_rank": 2368,
+      "new_lora_parameters": 7274496,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 145,
+      "prior_rank": 2368,
+      "new_rank": 2432,
+      "new_lora_parameters": 7471104,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 146,
+      "prior_rank": 2432,
+      "new_rank": 2496,
+      "new_lora_parameters": 7667712,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 146,
+      "prior_rank": 2496,
+      "new_rank": 2560,
+      "new_lora_parameters": 7864320,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 147,
+      "prior_rank": 2560,
+      "new_rank": 2624,
+      "new_lora_parameters": 8060928,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 148,
+      "prior_rank": 2624,
+      "new_rank": 2688,
+      "new_lora_parameters": 8257536,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 149,
+      "prior_rank": 2688,
+      "new_rank": 2752,
+      "new_lora_parameters": 8454144,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 150,
+      "prior_rank": 2752,
+      "new_rank": 2816,
+      "new_lora_parameters": 8650752,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 151,
+      "prior_rank": 2816,
+      "new_rank": 2880,
+      "new_lora_parameters": 8847360,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 152,
+      "prior_rank": 2880,
+      "new_rank": 2944,
+      "new_lora_parameters": 9043968,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 153,
+      "prior_rank": 2944,
+      "new_rank": 3008,
+      "new_lora_parameters": 9240576,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 154,
+      "prior_rank": 3008,
+      "new_rank": 3072,
+      "new_lora_parameters": 9437184,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 155,
+      "prior_rank": 3072,
+      "new_rank": 3136,
+      "new_lora_parameters": 9633792,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 156,
+      "prior_rank": 3136,
+      "new_rank": 3200,
+      "new_lora_parameters": 9830400,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 157,
+      "prior_rank": 3200,
+      "new_rank": 3264,
+      "new_lora_parameters": 10027008,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 157,
+      "prior_rank": 3264,
+      "new_rank": 3328,
+      "new_lora_parameters": 10223616,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 158,
+      "prior_rank": 3328,
+      "new_rank": 3392,
+      "new_lora_parameters": 10420224,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 159,
+      "prior_rank": 3392,
+      "new_rank": 3456,
+      "new_lora_parameters": 10616832,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 160,
+      "prior_rank": 3456,
+      "new_rank": 3520,
+      "new_lora_parameters": 10813440,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 161,
+      "prior_rank": 3520,
+      "new_rank": 3584,
+      "new_lora_parameters": 11010048,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 162,
+      "prior_rank": 3584,
+      "new_rank": 3648,
+      "new_lora_parameters": 11206656,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 163,
+      "prior_rank": 3648,
+      "new_rank": 3712,
+      "new_lora_parameters": 11403264,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 163,
+      "prior_rank": 3712,
+      "new_rank": 3776,
+      "new_lora_parameters": 11599872,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 164,
+      "prior_rank": 3776,
+      "new_rank": 3840,
+      "new_lora_parameters": 11796480,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 165,
+      "prior_rank": 3840,
+      "new_rank": 3904,
+      "new_lora_parameters": 11993088,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 166,
+      "prior_rank": 3904,
+      "new_rank": 3968,
+      "new_lora_parameters": 12189696,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 167,
+      "prior_rank": 3968,
+      "new_rank": 4032,
+      "new_lora_parameters": 12386304,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 168,
+      "prior_rank": 4032,
+      "new_rank": 4096,
+      "new_lora_parameters": 12582912,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 169,
+      "prior_rank": 4096,
+      "new_rank": 4160,
+      "new_lora_parameters": 12779520,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 170,
+      "prior_rank": 4160,
+      "new_rank": 4224,
+      "new_lora_parameters": 12976128,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 171,
+      "prior_rank": 4224,
+      "new_rank": 4288,
+      "new_lora_parameters": 13172736,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 172,
+      "prior_rank": 4288,
+      "new_rank": 4352,
+      "new_lora_parameters": 13369344,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 173,
+      "prior_rank": 4352,
+      "new_rank": 4416,
+      "new_lora_parameters": 13565952,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 174,
+      "prior_rank": 4416,
+      "new_rank": 4480,
+      "new_lora_parameters": 13762560,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 175,
+      "prior_rank": 4480,
+      "new_rank": 4544,
+      "new_lora_parameters": 13959168,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 176,
+      "prior_rank": 4544,
+      "new_rank": 4608,
+      "new_lora_parameters": 14155776,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 177,
+      "prior_rank": 4608,
+      "new_rank": 4672,
+      "new_lora_parameters": 14352384,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 178,
+      "prior_rank": 4672,
+      "new_rank": 4736,
+      "new_lora_parameters": 14548992,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 179,
+      "prior_rank": 4736,
+      "new_rank": 4800,
+      "new_lora_parameters": 14745600,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 180,
+      "prior_rank": 4800,
+      "new_rank": 4864,
+      "new_lora_parameters": 14942208,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 181,
+      "prior_rank": 4864,
+      "new_rank": 4928,
+      "new_lora_parameters": 15138816,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 182,
+      "prior_rank": 4928,
+      "new_rank": 4992,
+      "new_lora_parameters": 15335424,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 183,
+      "prior_rank": 4992,
+      "new_rank": 5056,
+      "new_lora_parameters": 15532032,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 184,
+      "prior_rank": 5056,
+      "new_rank": 5120,
+      "new_lora_parameters": 15728640,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 185,
+      "prior_rank": 5120,
+      "new_rank": 5184,
+      "new_lora_parameters": 15925248,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 186,
+      "prior_rank": 5184,
+      "new_rank": 5248,
+      "new_lora_parameters": 16121856,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 187,
+      "prior_rank": 5248,
+      "new_rank": 5312,
+      "new_lora_parameters": 16318464,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 188,
+      "prior_rank": 5312,
+      "new_rank": 5376,
+      "new_lora_parameters": 16515072,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 189,
+      "prior_rank": 5376,
+      "new_rank": 5440,
+      "new_lora_parameters": 16711680,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 190,
+      "prior_rank": 5440,
+      "new_rank": 5504,
+      "new_lora_parameters": 16908288,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 190,
+      "prior_rank": 5504,
+      "new_rank": 5568,
+      "new_lora_parameters": 17104896,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 190,
+      "prior_rank": 5568,
+      "new_rank": 5632,
+      "new_lora_parameters": 17301504,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 191,
+      "prior_rank": 5632,
+      "new_rank": 5696,
+      "new_lora_parameters": 17498112,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 192,
+      "prior_rank": 5696,
+      "new_rank": 5760,
+      "new_lora_parameters": 17694720,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 193,
+      "prior_rank": 5760,
+      "new_rank": 5824,
+      "new_lora_parameters": 17891328,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 194,
+      "prior_rank": 5824,
+      "new_rank": 5888,
+      "new_lora_parameters": 18087936,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 195,
+      "prior_rank": 5888,
+      "new_rank": 5952,
+      "new_lora_parameters": 18284544,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 196,
+      "prior_rank": 5952,
+      "new_rank": 6016,
+      "new_lora_parameters": 18481152,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 197,
+      "prior_rank": 6016,
+      "new_rank": 6080,
+      "new_lora_parameters": 18677760,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 198,
+      "prior_rank": 6080,
+      "new_rank": 6144,
+      "new_lora_parameters": 18874368,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 199,
+      "prior_rank": 6144,
+      "new_rank": 6208,
+      "new_lora_parameters": 19070976,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 200,
+      "prior_rank": 6208,
+      "new_rank": 6272,
+      "new_lora_parameters": 19267584,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 201,
+      "prior_rank": 6272,
+      "new_rank": 6336,
+      "new_lora_parameters": 19464192,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 202,
+      "prior_rank": 6336,
+      "new_rank": 6400,
+      "new_lora_parameters": 19660800,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 203,
+      "prior_rank": 6400,
+      "new_rank": 6464,
+      "new_lora_parameters": 19857408,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 204,
+      "prior_rank": 6464,
+      "new_rank": 6528,
+      "new_lora_parameters": 20054016,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 205,
+      "prior_rank": 6528,
+      "new_rank": 6592,
+      "new_lora_parameters": 20250624,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 206,
+      "prior_rank": 6592,
+      "new_rank": 6656,
+      "new_lora_parameters": 20447232,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 207,
+      "prior_rank": 6656,
+      "new_rank": 6720,
+      "new_lora_parameters": 20643840,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 208,
+      "prior_rank": 6720,
+      "new_rank": 6784,
+      "new_lora_parameters": 20840448,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 209,
+      "prior_rank": 6784,
+      "new_rank": 6848,
+      "new_lora_parameters": 21037056,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 210,
+      "prior_rank": 6848,
+      "new_rank": 6912,
+      "new_lora_parameters": 21233664,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 211,
+      "prior_rank": 6912,
+      "new_rank": 6976,
+      "new_lora_parameters": 21430272,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 212,
+      "prior_rank": 6976,
+      "new_rank": 7040,
+      "new_lora_parameters": 21626880,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 213,
+      "prior_rank": 7040,
+      "new_rank": 7104,
+      "new_lora_parameters": 21823488,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 214,
+      "prior_rank": 7104,
+      "new_rank": 7168,
+      "new_lora_parameters": 22020096,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 215,
+      "prior_rank": 7168,
+      "new_rank": 7232,
+      "new_lora_parameters": 22216704,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 216,
+      "prior_rank": 7232,
+      "new_rank": 7296,
+      "new_lora_parameters": 22413312,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 217,
+      "prior_rank": 7296,
+      "new_rank": 7360,
+      "new_lora_parameters": 22609920,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 218,
+      "prior_rank": 7360,
+      "new_rank": 7424,
+      "new_lora_parameters": 22806528,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 219,
+      "prior_rank": 7424,
+      "new_rank": 7488,
+      "new_lora_parameters": 23003136,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 220,
+      "prior_rank": 7488,
+      "new_rank": 7552,
+      "new_lora_parameters": 23199744,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 221,
+      "prior_rank": 7552,
+      "new_rank": 7616,
+      "new_lora_parameters": 23396352,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 222,
+      "prior_rank": 7616,
+      "new_rank": 7680,
+      "new_lora_parameters": 23592960,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 223,
+      "prior_rank": 7680,
+      "new_rank": 7744,
+      "new_lora_parameters": 23789568,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 223,
+      "prior_rank": 7744,
+      "new_rank": 7808,
+      "new_lora_parameters": 23986176,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 224,
+      "prior_rank": 7808,
+      "new_rank": 7872,
+      "new_lora_parameters": 24182784,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 225,
+      "prior_rank": 7872,
+      "new_rank": 7936,
+      "new_lora_parameters": 24379392,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 226,
+      "prior_rank": 7936,
+      "new_rank": 8000,
+      "new_lora_parameters": 24576000,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 227,
+      "prior_rank": 8000,
+      "new_rank": 8064,
+      "new_lora_parameters": 24772608,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 228,
+      "prior_rank": 8064,
+      "new_rank": 8128,
+      "new_lora_parameters": 24969216,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 229,
+      "prior_rank": 8128,
+      "new_rank": 8192,
+      "new_lora_parameters": 25165824,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 230,
+      "prior_rank": 8192,
+      "new_rank": 8256,
+      "new_lora_parameters": 25362432,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 231,
+      "prior_rank": 8256,
+      "new_rank": 8320,
+      "new_lora_parameters": 25559040,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 232,
+      "prior_rank": 8320,
+      "new_rank": 8384,
+      "new_lora_parameters": 25755648,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 233,
+      "prior_rank": 8384,
+      "new_rank": 8448,
+      "new_lora_parameters": 25952256,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 234,
+      "prior_rank": 8448,
+      "new_rank": 8512,
+      "new_lora_parameters": 26148864,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 235,
+      "prior_rank": 8512,
+      "new_rank": 8576,
+      "new_lora_parameters": 26345472,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 236,
+      "prior_rank": 8576,
+      "new_rank": 8640,
+      "new_lora_parameters": 26542080,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 237,
+      "prior_rank": 8640,
+      "new_rank": 8704,
+      "new_lora_parameters": 26738688,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 238,
+      "prior_rank": 8704,
+      "new_rank": 8768,
+      "new_lora_parameters": 26935296,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 239,
+      "prior_rank": 8768,
+      "new_rank": 8832,
+      "new_lora_parameters": 27131904,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 240,
+      "prior_rank": 8832,
+      "new_rank": 8896,
+      "new_lora_parameters": 27328512,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 241,
+      "prior_rank": 8896,
+      "new_rank": 8960,
+      "new_lora_parameters": 27525120,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 242,
+      "prior_rank": 8960,
+      "new_rank": 9024,
+      "new_lora_parameters": 27721728,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 242,
+      "prior_rank": 9024,
+      "new_rank": 9088,
+      "new_lora_parameters": 27918336,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 243,
+      "prior_rank": 9088,
+      "new_rank": 9152,
+      "new_lora_parameters": 28114944,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 244,
+      "prior_rank": 9152,
+      "new_rank": 9216,
+      "new_lora_parameters": 28311552,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 245,
+      "prior_rank": 9216,
+      "new_rank": 9280,
+      "new_lora_parameters": 28508160,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 246,
+      "prior_rank": 9280,
+      "new_rank": 9344,
+      "new_lora_parameters": 28704768,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 247,
+      "prior_rank": 9344,
+      "new_rank": 9408,
+      "new_lora_parameters": 28901376,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 248,
+      "prior_rank": 9408,
+      "new_rank": 9472,
+      "new_lora_parameters": 29097984,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 249,
+      "prior_rank": 9472,
+      "new_rank": 9536,
+      "new_lora_parameters": 29294592,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 250,
+      "prior_rank": 9536,
+      "new_rank": 9600,
+      "new_lora_parameters": 29491200,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 251,
+      "prior_rank": 9600,
+      "new_rank": 9664,
+      "new_lora_parameters": 29687808,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 252,
+      "prior_rank": 9664,
+      "new_rank": 9728,
+      "new_lora_parameters": 29884416,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 253,
+      "prior_rank": 9728,
+      "new_rank": 9792,
+      "new_lora_parameters": 30081024,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 254,
+      "prior_rank": 9792,
+      "new_rank": 9856,
+      "new_lora_parameters": 30277632,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 255,
+      "prior_rank": 9856,
+      "new_rank": 9920,
+      "new_lora_parameters": 30474240,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 256,
+      "prior_rank": 9920,
+      "new_rank": 9984,
+      "new_lora_parameters": 30670848,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 257,
+      "prior_rank": 9984,
+      "new_rank": 10048,
+      "new_lora_parameters": 30867456,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 258,
+      "prior_rank": 10048,
+      "new_rank": 10112,
+      "new_lora_parameters": 31064064,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 259,
+      "prior_rank": 10112,
+      "new_rank": 10176,
+      "new_lora_parameters": 31260672,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 260,
+      "prior_rank": 10176,
+      "new_rank": 10240,
+      "new_lora_parameters": 31457280,
+      "trigger": "new_subject_discovered"
+    },
+    {
+      "cycle_index": 261,
+      "prior_rank": 10240,
+      "new_rank": 10304,
+      "new_lora_parameters": 31653888,
+      "trigger": "plateau_detected"
+    },
+    {
+      "cycle_index": 261,
+      "prior_rank": 10304,
+      "new_rank": 10368,
+      "new_lora_parameters": 31850496,
+      "trigger": "plateau_detected"
+    }
+  ]
 }

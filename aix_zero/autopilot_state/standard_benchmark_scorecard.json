@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at_utc": "2026-11-27T02:34:48.086630+00:00",
+  "cycle_index": 261,
+  "elapsed_seconds": 115.347,
+  "model_identity": {
+    "checkpoint": "aix_zero_v12_evolving.pt",
+    "state_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+    "tokenizer_sha256": "119921a77f6fbcd13d00770c240144dd3714200f7443e520ab41f211f0c00b10",
+    "certified_sme_subjects": 193
+  },
+  "overall_summary": {
+    "total_domain_problems_tested": 277,
+    "routed_neural_only": {
+      "assistance_mode": "neural_only_with_predicted_prefix_cartridge_routing",
+      "inflight_alu": false,
+      "correct": 83,
+      "tested": 277,
+      "accuracy": 0.2996,
+      "wilson_95_ci": [
+        0.2487,
+        0.356
+      ]
+    },
+    "bounded_alu_assisted": {
+      "assistance_mode": "bounded_alu_assisted",
+      "correct": 112,
+      "tested": 277,
+      "accuracy": 0.4043
+    },
+    "neuro_symbolic_verified": {
+      "assistance_mode": "symbolic_verifier_and_solver",
+      "correct": 277,
+      "tested": 277,
+      "accuracy": 1.0
+    }
+  },
+  "benchmark_suites": {
+    "math_gsm8k_numinamath": {
+      "tested": 10,
+      "routed_neural_only_accuracy": 0.6,
+      "routed_neural_only_correct": 6,
+      "equation_prefix_valid_rate": 1.0,
+      "bounded_alu_assisted_accuracy": 0.6,
+      "neuro_symbolic_verified_accuracy": 1.0,
+      "wilson_95_ci_neural_only": [
+        0.3127,
+        0.8318
+      ]
+    },
+    "stem_mmlu_gpqa_theoremqa": {
+      "tested": 10,
+      "routed_neural_only_accuracy": 0.9,
+      "routed_neural_only_correct": 9,
+      "equation_prefix_valid_rate": 1.0,
+      "bounded_alu_assisted_accuracy": 1.0,
+      "neuro_symbolic_verified_accuracy": 1.0,
+      "wilson_95_ci_neural_only": [
+        0.5958,
+        0.9821
+      ]
+    },
+    "ml_systems_frontier": {
+      "tested": 74,
+      "routed_neural_only_accuracy": 0.3649,
+      "routed_neural_only_correct": 27,
+      "equation_prefix_valid_rate": 0.7973,
+      "bounded_alu_assisted_accuracy": 0.3919,
+      "neuro_symbolic_verified_accuracy": 1.0,
+      "wilson_95_ci_neural_only": [
+        0.2644,
+        0.4787
+      ]
+    },
+    "python_and_swe_systems": {
+      "tested": 20,
+      "routed_neural_only_accuracy": 0.7,
+      "routed_neural_only_correct": 14,
+      "equation_prefix_valid_rate": 0.95,
+      "bounded_alu_assisted_accuracy": 0.75,
+      "neuro_symbolic_verified_accuracy": 1.0,
+      "wilson_95_ci_neural_only": [
+        0.481,
+        0.8545
+      ]
+    },
+    "discovered_universal_subjects": {
+      "tested": 163,
+      "routed_neural_only_accuracy": 0.1656,
+      "routed_neural_only_correct": 27,
+      "equation_prefix_valid_rate": 0.7791,
+      "bounded_alu_assisted_accuracy": 0.319,
+      "neuro_symbolic_verified_accuracy": 1.0,
+      "wilson_95_ci_neural_only": [
+        0.1164,
+        0.2303
+      ]
+    }
+  },
+  "ai_coding_expression_suite": {
+    "assistance_mode": "neural_only",
+    "split_note": "Coefficient-disjoint, template-shared development (k=9..12 vs train k=1..8)",
+    "steps_completed": 25,
+    "initial_loss": 7.312994,
+    "final_loss": 0.080249,
+    "train_fit_after": {
+      "correct": 20,
+      "total": 24,
+      "accuracy": 0.8333
+    },
+    "dev_before": {
+      "correct": 0,
+      "total": 12,
+      "accuracy": 0.0
+    },
+    "dev_after": {
+      "correct": 0,
+      "total": 12,
+      "accuracy": 0.0
+    }
+  },
+  "swe_three_arm_patch_suite": {
+    "aix_solo_pass_rate": 0.5,
+    "peer_solo_pass_rate": 0.5,
+    "collaborative_pass_rate": 1.0,
+    "offered_tasks": 2
+  },
+  "scientific_honesty_disclosure": "Routed neural-only accuracy is measured with inflight_alu=False, no retrieval memory, and no reference leakage. ALU-assisted and neuro-symbolic scores are reported in separate fields and never conflated with unassisted neural accuracy."
+}

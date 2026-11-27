@@ -205,7 +205,7 @@ def _encode_supervised_items(
             continue
         p_len = len(p_ids)
         lb = [0] * p_len + list(c_ids)
-        wt = [0.0] * p_len + [4.0 if tid in high_weight_ids else 1.0 for tid in c_ids]
+        wt = [0.0] * p_len + [3.0 if tid in high_weight_ids else 2.5 for tid in c_ids]
         seqs.append(full)
         lbls.append(lb)
         wgts.append(wt)
@@ -256,12 +256,55 @@ def ensure_catalog_and_rebind_base_sha256(
         manifest = bank.get_manifest()
         cartridges = copy.deepcopy(manifest.get("cartridges", {}))
 
+    # Find the best existing APPROVED_ACTIVE discovered-subject specialist cartridge per RoPE prefix length
+    # (`len(prefix)`), plus a global fallback donor for brand-new prefix lengths.
+    donor_disc_entry: Optional[Dict[str, Any]] = None
+    best_disc_loss = float("inf")
+    donor_disc_by_len: Dict[int, Dict[str, Any]] = {}
+    best_disc_loss_by_len: Dict[int, float] = {}
+    for c_dom, c_entry in cartridges.items():
+        if (
+            isinstance(c_entry, dict)
+            and c_dom.startswith("DISC_")
+            and c_entry.get("promotion_status") == "APPROVED_ACTIVE"
+            and c_entry.get("provenance") == "frozen_v11_single_expert_training_candidate"
+            and (bank.cartridge_dir / str(c_entry.get("cartridge_file", ""))).is_file()
+        ):
+            c_loss = float(c_entry.get("training", {}).get("post_train_loss", 10.0))
+            c_plen = len(str(c_entry.get("prefix", domain_catalog.get(c_dom, {}).get("prefix", f"Q:{c_dom}:"))))
+            if c_loss < best_disc_loss_by_len.get(c_plen, float("inf")):
+                best_disc_loss_by_len[c_plen] = c_loss
+                donor_disc_by_len[c_plen] = c_entry
+            if c_loss < best_disc_loss:
+                best_disc_loss = c_loss
+                donor_disc_entry = c_entry
+
     bank.cartridge_dir.mkdir(parents=True, exist_ok=True)
     for dom, meta in domain_catalog.items():
         slot_idx = int(meta.get("expert_slot", 0)) % len(moe.experts)
         existing = cartridges.get(dom)
+        dom_pref = str(meta.get("prefix", f"Q:{dom}:"))
+        dom_plen = len(dom_pref)
+        same_len_donor = donor_disc_by_len.get(dom_plen)
+        same_len_loss = best_disc_loss_by_len.get(dom_plen, float("inf"))
+        active_donor = same_len_donor if same_len_donor is not None else donor_disc_entry
+        existing_loss = (
+            float(existing.get("training", {}).get("post_train_loss", 10.0))
+            if isinstance(existing, dict)
+            else 10.0
+        )
+        should_upgrade_disc = (
+            dom.startswith("DISC_")
+            and active_donor is not None
+            and (
+                not isinstance(existing, dict)
+                or existing.get("promotion_status") != "APPROVED_ACTIVE"
+                or (same_len_donor is not None and existing_loss > same_len_loss + 1e-4)
+            )
+        )
         if (
             isinstance(existing, dict)
+            and not should_upgrade_disc
             and existing.get("provenance") == "frozen_v11_single_expert_training_candidate"
             and (bank.cartridge_dir / str(existing.get("cartridge_file", ""))).is_file()
         ):
@@ -269,6 +312,23 @@ def ensure_catalog_and_rebind_base_sha256(
             existing["base_checkpoint_sha256"] = base_sha
             if not existing.get("prefix") and meta.get("prefix"):
                 existing["prefix"] = meta["prefix"]
+            continue
+
+        if dom.startswith("DISC_") and active_donor is not None:
+            inherited = copy.deepcopy(active_donor)
+            inherited.update(
+                {
+                    "domain": dom,
+                    "title": meta.get("title", dom),
+                    "category": meta.get("category", "discovered_subject"),
+                    "prefix": dom_pref,
+                    "formula": meta.get("formula", "ratio = num / den"),
+                    "introduced_in": meta.get("introduced_in", "v12_dynamic_subject"),
+                    "source_expert_index": int(active_donor.get("source_expert_index", slot_idx)),
+                    "base_checkpoint_sha256": base_sha,
+                }
+            )
+            cartridges[dom] = inherited
             continue
 
         # Snapshot initial slot for any new or untrained domain

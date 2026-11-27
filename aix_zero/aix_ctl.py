@@ -500,6 +500,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"STEM & Logic  : {bs['stem_mmlu_gpqa_theoremqa']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['stem_mmlu_gpqa_theoremqa']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
         print(f"ML Systems    : {bs['ml_systems_frontier']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['ml_systems_frontier']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
         print(f"Python & SWE  : {bs['python_and_swe_systems']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['python_and_swe_systems']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        if "discovered_universal_subjects" in bs:
+            ds_b = bs["discovered_universal_subjects"]
+            print(f"Discovered SME: {ds_b['routed_neural_only_accuracy']*100:.1f}% Neural-Only ({ds_b['routed_neural_only_correct']}/{ds_b['tested']}) | {ds_b['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
         print(f"AI-Coding AST : Train Fit {ac['train_fit_after']['correct']}/{ac['train_fit_after']['total']} ({ac['train_fit_after']['accuracy']*100:.1f}%) | Dev {ac['dev_before']['correct']}/{ac['dev_before']['total']} -> {ac['dev_after']['correct']}/{ac['dev_after']['total']}")
         print(f"3-Arm SWE Git : AIX Solo {sw.get('aix_solo_pass_rate',0)*100:.1f}% | Peer Solo {sw.get('peer_solo_pass_rate',0)*100:.1f}% | Collaborative {sw.get('collaborative_pass_rate',0)*100:.1f}%")
         return 0
