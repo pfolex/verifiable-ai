@@ -154,6 +154,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_inspect.add_argument("--path", type=Path, required=True, help="Path to AIX-Zero .safetensors or local HF/Mergekit directory")
     p_inspect.add_argument("--device", default="auto", help="Requested device (auto, cpu, mps, cuda)")
 
+    p_byom = sub.add_parser("byom", help="Run bounded Bring-Your-Own-Model training, evaluation, and verified bundle export (#442/#444)")
+    p_byom.add_argument("--model", type=Path, required=True, help="Path to AIX-Zero .safetensors or local HF directory")
+    p_byom.add_argument("--dataset", type=Path, required=True, help="Path to versioned user JSONL dataset")
+    p_byom.add_argument("--run-dir", type=Path, required=True, help="Fresh output directory for this BYOM run")
+    p_byom.add_argument("--task-format", default="instruction_chat", choices=["instruction_chat", "code_task"])
+    p_byom.add_argument("--steps", type=int, default=4)
+    p_byom.add_argument("--lr", type=float, default=1e-3)
+    p_byom.add_argument("--allow-promotion", action="store_true")
+
     p_checkpoint = sub.add_parser("checkpoint", help="Pause at cycle boundary and create a verified model bundle")
     p_checkpoint.add_argument("--output-dir", type=Path, default=Path("checkpoint-releases"))
     p_checkpoint.add_argument("--publish", action="store_true", help="Publish verified assets as a GitHub release")
@@ -583,6 +592,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         else:
             adapter = AIXZeroBackendAdapter(target)
         print(json.dumps(adapter.inspect_model(), indent=2))
+        return 0
+
+    if args.command == "byom":
+        from aix_zero.byom_pipeline import run_byom_experiment
+        res = run_byom_experiment(
+            model_path=args.model,
+            dataset_path=args.dataset,
+            run_dir=args.run_dir,
+            task_format=args.task_format,
+            steps=args.steps,
+            lr=args.lr,
+            allow_promotion=bool(args.allow_promotion),
+        )
+        print(json.dumps(res, indent=2))
         return 0
 
     return 1
