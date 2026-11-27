@@ -3979,6 +3979,8 @@ class AutonomousSelfImprovementController:
                     it for it in curriculum if it["domain"] == rot_dom
                 ]
             if dom_train:
+                cur_loss = float(current_carts.get(rot_dom, {}).get("training", {}).get("post_train_loss", 10.0))
+                rot_lr = 2.0e-3 if cur_loss < 0.25 else (3.5e-3 if cur_loss < 0.50 else 6.0e-3)
                 train_isolated_domain_cartridge(
                     model,
                     tokenizer,
@@ -3988,8 +3990,8 @@ class AutonomousSelfImprovementController:
                     val_items=dom_train[:2],
                     domain_meta=all_subjects_catalog.get(rot_dom),
                     slot=int(all_subjects_catalog.get(rot_dom, {}).get("expert_slot", 0)),
-                    steps=20,
-                    lr=7e-3,
+                    steps=24 if cur_loss > 0.12 else 16,
+                    lr=rot_lr,
                     seed=20260410 + cycles * 10 + rot_idx,
                     active_base_checkpoint_sha256=active_base_sha,
                 )
@@ -4004,6 +4006,8 @@ class AutonomousSelfImprovementController:
             if it["domain"] in same_len_disc_doms and len(disc_items) < 24:
                 disc_items.append(it)
         if disc_items and not self.should_stop():
+            disc_cur_loss = float(current_carts.get(disc_subj_id, {}).get("training", {}).get("post_train_loss", 10.0))
+            disc_lr = 2.0e-3 if disc_cur_loss < 0.25 else (3.5e-3 if disc_cur_loss < 0.50 else 6.0e-3)
             train_isolated_domain_cartridge(
                 model,
                 tokenizer,
@@ -4014,16 +4018,16 @@ class AutonomousSelfImprovementController:
                 domain_meta=all_subjects_catalog.get(disc_subj_id),
                 slot=int(all_subjects_catalog.get(disc_subj_id, {}).get("expert_slot", 0)),
                 steps=24,
-                lr=8e-3,
+                lr=disc_lr,
                 seed=20260999 + cycles,
                 active_base_checkpoint_sha256=active_base_sha,
             )
-            ensure_catalog_and_rebind_base_sha256(
-                model,
-                bank,
-                all_subjects_catalog,
-                active_base_checkpoint_sha256=active_base_sha,
-            )
+        ensure_catalog_and_rebind_base_sha256(
+            model,
+            bank,
+            all_subjects_catalog,
+            active_base_checkpoint_sha256=active_base_sha,
+        )
         manifest = bank.get_manifest()
 
         # Synthesize and execute AST, external open-source kernels, Python mastery idioms, SWE patches, and Routed Arena

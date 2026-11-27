@@ -39,22 +39,30 @@ from aix_zero.swe_three_arm_benchmark import run_three_arm_swe_patch_comparison
 from aix_zero.train_ai_coding import correct as score_ai_coding_expr, curriculum as build_ai_coding_curriculum
 
 
+LEGACY_SUITE_KEY_MAPPING: Dict[str, str] = {
+    "math_gsm8k_numinamath": "internal_diag_quant_math",
+    "stem_mmlu_gpqa_theoremqa": "internal_diag_stem_logic",
+    "ml_systems_frontier": "internal_diag_ml_systems",
+    "python_and_swe_systems": "internal_diag_python_swe",
+    "discovered_universal_subjects": "internal_diag_discovered_subjects",
+}
+
 BENCHMARK_SUITE_DOMAIN_GROUPS: Dict[str, List[str]] = {
-    "math_gsm8k_numinamath": [
+    "internal_diag_quant_math": [
         "META_FINANCE_PORTFOLIO_SHARPE",
         "META_PHYSICS_RELATIVISTIC_ENERGY",
         "META_CHEMISTRY_STOICHIOMETRY_YIELD",
         "META_ECONOMICS_ELASTICITY_EQUILIBRIUM",
         "META_BAYESIAN_POSTERIOR_ODDS",
     ],
-    "stem_mmlu_gpqa_theoremqa": [
+    "internal_diag_stem_logic": [
         "META_BIOLOGY_GENOMICS_ALLELE_FREQ",
         "META_CRYPTO_MODULAR_VERIFIER",
         "META_DISTRIBUTED_CONSENSUS_BFT",
         "META_FORMAL_LOGIC_SAT_DENSITY",
         "META_NETWORK_BDP_THROUGHPUT",
     ],
-    "ml_systems_frontier": [
+    "internal_diag_ml_systems": [
         "META_SCALING_OPTIMIZER",
         "META_LORA_MOE_ARCHITECT",
         "META_GQA_KV_SYSTEMS",
@@ -71,7 +79,7 @@ BENCHMARK_SUITE_DOMAIN_GROUPS: Dict[str, List[str]] = {
         "META_OPENR1_LENGTH_PENALTY_REWARD",
         "META_DSPY_MIPRO_PROMPT_OPT",
     ],
-    "python_and_swe_systems": [
+    "internal_diag_python_swe": [
         "META_SWE_PATCH_TEST_COVERAGE",
         "META_PYTHON_AST_COMPLEXITY",
         "META_PYTHON_ALGORITHMIC_BIG_O",
@@ -244,7 +252,7 @@ def run_standard_ai_benchmark_suites(
 
     suite_names = list(BENCHMARK_SUITE_DOMAIN_GROUPS.keys())
     if discovered_items:
-        suite_names.append("discovered_universal_subjects")
+        suite_names.append("internal_diag_discovered_subjects")
     suite_stats: Dict[str, Dict[str, int]] = {
         suite_name: {
             "tested": 0,
@@ -272,7 +280,7 @@ def run_standard_ai_benchmark_suites(
             dom = item["domain"]
             s_name = domain_to_suite.get(
                 dom,
-                "discovered_universal_subjects" if dom.startswith("DISC_") else "ml_systems_frontier",
+                "internal_diag_discovered_subjects" if dom.startswith("DISC_") else "internal_diag_ml_systems",
             )
             prompt = item["prompt"]
             gold = item["gold"]
@@ -366,7 +374,9 @@ def run_standard_ai_benchmark_suites(
             certified_subjects = 30
 
     scorecard = {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
+        "evaluation_origin": "internal_synthetic_diagnostic",
+        "legacy_suite_key_mapping": LEGACY_SUITE_KEY_MAPPING,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "cycle_index": int(cycle_index),
         "elapsed_seconds": round(time.perf_counter() - t0, 3),
@@ -403,6 +413,7 @@ def run_standard_ai_benchmark_suites(
         "ai_coding_expression_suite": ai_coding_report,
         "swe_three_arm_patch_suite": (
             {
+                "attribution_mode": "heuristic_ast_control_not_model_generated",
                 "aix_solo_pass_rate": swe_report["arms"]["aix_solo"]["pass_rate"],
                 "peer_solo_pass_rate": swe_report["arms"]["peer_solo"]["pass_rate"],
                 "collaborative_pass_rate": swe_report["arms"]["collaborative_aix_plus_peer"]["pass_rate"],

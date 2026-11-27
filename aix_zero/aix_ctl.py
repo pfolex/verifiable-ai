@@ -142,6 +142,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_learn.add_argument("--cycle", type=int, default=1, help="Cycle index")
     p_learn.add_argument("--online", action="store_true", help="Fetch live Wikipedia and arXiv context for the subject")
 
+    p_self_edit = sub.add_parser("self-edit", help="Validate, sandbox-test in a detached git worktree, and export a reviewable self-edit PR proposal")
+    p_self_edit.add_argument("--patch", type=Path, required=True, help="Path to unified diff .patch file")
+    p_self_edit.add_argument("--title", required=True, help="Short title for the self-edit proposal")
+    p_self_edit.add_argument("--rationale", default="Verified autonomous codebase improvement", help="Rationale for the change")
+    p_self_edit.add_argument("--allow-file", dest="allow_files", action="append", required=True, help="Allowed target file relative path (repeatable)")
+    p_self_edit.add_argument("--test-module", dest="test_modules", action="append", default=[], help="Unittest module to run in isolated worktree (repeatable)")
+    p_self_edit.add_argument("--open-pr", action="store_true", help="Push branch and open GitHub PR if all sandbox tests pass")
+
     p_checkpoint = sub.add_parser("checkpoint", help="Pause at cycle boundary and create a verified model bundle")
     p_checkpoint.add_argument("--output-dir", type=Path, default=Path("checkpoint-releases"))
     p_checkpoint.add_argument("--publish", action="store_true", help="Publish verified assets as a GitHub release")
@@ -496,15 +504,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         ns = ov["neuro_symbolic_verified"]
         print(f"AIX Benchmark : Cycle #{res['cycle_index']} | Checkpoint {res['model_identity']['checkpoint']} ({res['model_identity']['certified_sme_subjects']} SME Subjects)")
         print(f"Overall Score : {rn['accuracy']*100:.2f}% Routed Neural-Only ({rn['correct']}/{rn['tested']}) | {ba['accuracy']*100:.2f}% Prefix+ALU | {ns['accuracy']*100:.1f}% Neuro-Symbolic")
-        print(f"Math & Quant  : {bs['math_gsm8k_numinamath']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['math_gsm8k_numinamath']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
-        print(f"STEM & Logic  : {bs['stem_mmlu_gpqa_theoremqa']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['stem_mmlu_gpqa_theoremqa']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
-        print(f"ML Systems    : {bs['ml_systems_frontier']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['ml_systems_frontier']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
-        print(f"Python & SWE  : {bs['python_and_swe_systems']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['python_and_swe_systems']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
-        if "discovered_universal_subjects" in bs:
-            ds_b = bs["discovered_universal_subjects"]
+        print(f"Math & Quant  : {bs['internal_diag_quant_math']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['internal_diag_quant_math']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"STEM & Logic  : {bs['internal_diag_stem_logic']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['internal_diag_stem_logic']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"ML Systems    : {bs['internal_diag_ml_systems']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['internal_diag_ml_systems']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        print(f"Python & SWE  : {bs['internal_diag_python_swe']['routed_neural_only_accuracy']*100:.1f}% Neural-Only | {bs['internal_diag_python_swe']['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
+        if "internal_diag_discovered_subjects" in bs:
+            ds_b = bs["internal_diag_discovered_subjects"]
             print(f"Discovered SME: {ds_b['routed_neural_only_accuracy']*100:.1f}% Neural-Only ({ds_b['routed_neural_only_correct']}/{ds_b['tested']}) | {ds_b['neuro_symbolic_verified_accuracy']*100:.1f}% Verified")
         print(f"AI-Coding AST : Train Fit {ac['train_fit_after']['correct']}/{ac['train_fit_after']['total']} ({ac['train_fit_after']['accuracy']*100:.1f}%) | Dev {ac['dev_before']['correct']}/{ac['dev_before']['total']} -> {ac['dev_after']['correct']}/{ac['dev_after']['total']}")
-        print(f"3-Arm SWE Git : AIX Solo {sw.get('aix_solo_pass_rate',0)*100:.1f}% | Peer Solo {sw.get('peer_solo_pass_rate',0)*100:.1f}% | Collaborative {sw.get('collaborative_pass_rate',0)*100:.1f}%")
+        print(f"3-Arm SWE Ctrl: AIX Solo {sw.get('aix_solo_pass_rate',0)*100:.1f}% | Peer Solo {sw.get('peer_solo_pass_rate',0)*100:.1f}% | Collaborative {sw.get('collaborative_pass_rate',0)*100:.1f}% (Heuristic AST Control)")
         return 0
 
     if args.command == "py-analyze":
@@ -546,6 +554,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
         print(json.dumps(out, indent=2))
         return 0
+
+    if args.command == "self-edit":
+        from aix_zero.autonomous_self_edit import propose_and_verify_self_edit
+        diff_text = Path(args.patch).read_text(encoding="utf-8")
+        res = propose_and_verify_self_edit(
+            ctrl.repo_root,
+            diff_text=diff_text,
+            title=args.title,
+            rationale=args.rationale,
+            allowed_target_files=args.allow_files,
+            test_modules=args.test_modules,
+            state_dir=ctrl.state_dir,
+            open_pr=bool(args.open_pr),
+        )
+        print(json.dumps(res, indent=2))
+        return 0 if res.get("accepted") else 1
 
     return 1
 
