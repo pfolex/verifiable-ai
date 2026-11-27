@@ -150,6 +150,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_self_edit.add_argument("--test-module", dest="test_modules", action="append", default=[], help="Unittest module to run in isolated worktree (repeatable)")
     p_self_edit.add_argument("--open-pr", action="store_true", help="Push branch and open GitHub PR if all sandbox tests pass")
 
+    p_inspect = sub.add_parser("inspect-model", help="Validate and inspect an AIX-Zero checkpoint or local Hugging Face / Mergekit directory (#438/#439)")
+    p_inspect.add_argument("--path", type=Path, required=True, help="Path to AIX-Zero .safetensors or local HF/Mergekit directory")
+    p_inspect.add_argument("--device", default="auto", help="Requested device (auto, cpu, mps, cuda)")
+
     p_checkpoint = sub.add_parser("checkpoint", help="Pause at cycle boundary and create a verified model bundle")
     p_checkpoint.add_argument("--output-dir", type=Path, default=Path("checkpoint-releases"))
     p_checkpoint.add_argument("--publish", action="store_true", help="Publish verified assets as a GitHub release")
@@ -570,6 +574,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
         print(json.dumps(res, indent=2))
         return 0 if res.get("accepted") else 1
+
+    if args.command == "inspect-model":
+        from aix_zero.backend_interface import AIXZeroBackendAdapter, HuggingFaceBackendAdapter
+        target = Path(args.path)
+        if target.is_dir():
+            adapter = HuggingFaceBackendAdapter(target, requested_device=args.device)
+        else:
+            adapter = AIXZeroBackendAdapter(target)
+        print(json.dumps(adapter.inspect_model(), indent=2))
+        return 0
 
     return 1
 
