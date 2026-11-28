@@ -110,6 +110,12 @@ class BackendInterfaceTests(unittest.TestCase):
             self.assertFalse(info["trust_remote_code"])
             self.assertTrue(info["memory_values_are_estimates"])
 
+            # Verify actionable dependency error when transformers/peft are unavailable
+            try:
+                adapter.train_step([{"prompt": "hi", "completion": "hello"}], steps=1)
+            except RuntimeError as exc:
+                self.assertIn("requirements-training.txt", str(exc))
+
 
 if __name__ == "__main__":
     unittest.main()

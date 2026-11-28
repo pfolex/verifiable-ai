@@ -96,11 +96,17 @@ def evaluate_backend_on_pinned_external_benchmark(
 
     for row in rows:
         # Only public prompt passes to backend.generate(); gold is never passed.
-        gen = backend.generate(row["prompt"], max_new_tokens=int(max_new_tokens))
-        completion = str(gen.get("completion", ""))
-        sc = score_rational_or_probability(completion, row["gold"], is_probability=False)
-        is_ok = bool(sc["score"] == 1.0)
-        if sc.get("status") in ("MISSING_ANSWER_TAG", "INVALID_FORMAT"):
+        try:
+            gen = backend.generate(row["prompt"], max_new_tokens=int(max_new_tokens))
+            completion = str(gen.get("completion", ""))
+            sc = score_rational_or_probability(completion, row["gold"], is_probability=False)
+            is_ok = bool(sc["score"] == 1.0)
+            status = sc.get("status")
+        except ValueError as exc:
+            completion = ""
+            is_ok = False
+            status = f"UNSUPPORTED_CONTEXT:{exc}"
+        if status in ("MISSING_ANSWER_TAG", "INVALID_FORMAT") or str(status).startswith("UNSUPPORTED_CONTEXT"):
             invalid_outputs += 1
         correct_count += int(is_ok)
         records.append(
@@ -108,7 +114,7 @@ def evaluate_backend_on_pinned_external_benchmark(
                 "task_id": row["task_id"],
                 "completion": completion,
                 "correct": is_ok,
-                "status": sc.get("status"),
+                "status": status,
             }
         )
 

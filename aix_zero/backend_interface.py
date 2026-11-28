@@ -397,13 +397,31 @@ class HuggingFaceBackendAdapter(ModelBackendAdapter):
     def inspect_model(self) -> Dict[str, Any]:
         return dict(self.validation)
 
+    @staticmethod
+    def _require_hf_dependencies():
+        missing = []
+        for mod in ("transformers", "peft"):
+            try:
+                __import__(mod)
+            except ImportError:
+                missing.append(mod)
+        if missing:
+            raise RuntimeError(
+                f"Hugging Face backend execution requires {missing}. "
+                "Install training dependencies via: pip install -r requirements-training.txt"
+            )
+        from aix_training_runtime import libraries
+        return libraries()
+
     def render_prompt(self, prompt: str) -> str:
+        self._require_hf_dependencies()
         from aix_training_runtime import tokenizer_for
-        from aix_training_data import render_prompt as hf_render_prompt
         tok = tokenizer_for({"base_model": str(self.model_dir)})
-        return hf_render_prompt(tok, {"prompt": prompt})
+        messages = [{"role": "user", "content": str(prompt)}]
+        return tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
     def generate(self, prompt: str, *, max_new_tokens: int = 36) -> Dict[str, Any]:
+        self._require_hf_dependencies()
         from aix_training_runtime import model_for, tokenizer_for
         cfg = {"base_model": str(self.model_dir), "training": {"device": "auto"}}
         tok = tokenizer_for(cfg)
@@ -415,8 +433,74 @@ class HuggingFaceBackendAdapter(ModelBackendAdapter):
         comp = tok.decode(out[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
         return {"backend": self.backend_name, "assistance_mode": "neural_only", "completion": comp}
 
-    def train_step(self, examples: Sequence[Dict[str, str]], *, lr: float = 1e-3, steps: int = 1) -> Dict[str, Any]:
-        raise NotImplementedError("Use train_aix.py / aix_training_runtime.train_adapter(run_dir) for full bounded HF LoRA runs")
+    def train_step(
+        self,
+        examples: Sequence[Dict[str, str]],
+        *,
+        lr: float = 1e-3,
+        steps: int = 1,
+        rank: int = 8,
+        output_adapter_dir: Optional[Path] = None,
+    ) -> Dict[str, Any]:
+        if not examples or steps < 1 or not math.isfinite(lr) or lr <= 0:
+            raise ValueError("examples must be non-empty, steps >= 1, and lr finite positive")
+        _, _, peft = self._require_hf_dependencies()
+        from aix_training_runtime import model_for, tokenizer_for
+        cfg = {"base_model": str(self.model_dir), "training": {"device": "auto"}}
+        tok = tokenizer_for(cfg)
+        model = model_for(cfg)
+        lora_cfg = peft.LoraConfig(
+            task_type="CAUSAL_LM",
+            r=int(rank),
+            lora_alpha=2 * int(rank),
+            lora_dropout=0.0,
+            target_modules=list(self.validation.get("supported_lora_targets", ("q_proj", "v_proj"))[:2])
+            if "supported_lora_targets" in self.validation
+            else ["q_proj", "v_proj"],
+            bias="none",
+        )
+        peft_model = peft.get_peft_model(model, lora_cfg)
+        batch_rows = []
+        max_len = int(self.validation["max_position_embeddings"])
+        for ex in examples:
+            p_ids = tok.encode(self.render_prompt(ex["prompt"]), add_special_tokens=False)
+            c_ids = tok.encode(ex["completion"], add_special_tokens=False) + [tok.eos_token_id]
+            if len(p_ids) + len(c_ids) <= max_len:
+                batch_rows.append((p_ids + c_ids, [-100] * len(p_ids) + c_ids))
+        if not batch_rows:
+            raise ValueError("No training examples fit within HF model context limit")
+        opt = torch.optim.AdamW([p for p in peft_model.parameters() if p.requires_grad], lr=float(lr))
+        peft_model.eval()
+        with torch.no_grad():
+            pre_loss = sum(
+                float(peft_model(input_ids=torch.tensor([x], device=peft_model.device), labels=torch.tensor([y], device=peft_model.device)).loss.item())
+                for x, y in batch_rows
+            ) / len(batch_rows)
+        peft_model.train()
+        for s_idx in range(int(steps)):
+            x, y = batch_rows[s_idx % len(batch_rows)]
+            opt.zero_grad(set_to_none=True)
+            loss = peft_model(input_ids=torch.tensor([x], device=peft_model.device), labels=torch.tensor([y], device=peft_model.device)).loss
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(peft_model.parameters(), 1.0)
+            opt.step()
+        peft_model.eval()
+        with torch.no_grad():
+            post_loss = sum(
+                float(peft_model(input_ids=torch.tensor([x], device=peft_model.device), labels=torch.tensor([y], device=peft_model.device)).loss.item())
+                for x, y in batch_rows
+            ) / len(batch_rows)
+        if output_adapter_dir is not None:
+            out_p = Path(output_adapter_dir)
+            out_p.mkdir(parents=True, exist_ok=True)
+            peft_model.save_pretrained(str(out_p))
+        return {
+            "backend": self.backend_name,
+            "steps_completed": int(steps),
+            "pre_loss": round(pre_loss, 6),
+            "post_loss": round(post_loss, 6),
+            "adapter_dir": str(output_adapter_dir) if output_adapter_dir is not None else None,
+        }
 
     def reload_artifact(self, artifact_path: Path) -> Dict[str, Any]:
         ap = Path(artifact_path)

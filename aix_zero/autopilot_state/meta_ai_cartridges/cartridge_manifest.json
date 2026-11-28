@@ -26,8 +26,8 @@
   },
   "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
   "active_core_physical_parameters": 817410,
-  "registered_cartridges": 200,
-  "total_cartridge_bank_parameters": 9830400,
+  "registered_cartridges": 209,
+  "total_cartridge_bank_parameters": 10272768,
   "cartridges": {
     "META_SCALING_OPTIMIZER": {
       "domain": "META_SCALING_OPTIMIZER",
@@ -36,8 +36,8 @@
       "prefix": "Q:MetaScale:",
       "formula": "D_opt = C / (6 * N)",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_scaling_optimizer_f33a74c4d1092f8494de6a11ada971f76e79393b9a5295d7476e0a736c314fc0.safetensors",
-      "sha256": "f33a74c4d1092f8494de6a11ada971f76e79393b9a5295d7476e0a736c314fc0",
+      "cartridge_file": "expert_meta_scaling_optimizer_8ca3ffa2f01730f3e1d8b94e6c7d6001ab271e38c595bdccd3b78b9d796df835.safetensors",
+      "sha256": "8ca3ffa2f01730f3e1d8b94e6c7d6001ab271e38c595bdccd3b78b9d796df835",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -76,17 +76,17 @@
         "target_slot": 0,
         "trainable_parameters": 49152,
         "steps_completed": 24,
-        "learning_rate": 0.0035,
-        "seed": 20263082,
-        "pre_train_loss": 0.572341,
-        "post_train_loss": 0.4047,
-        "pre_val_loss": 1.2745,
-        "post_val_loss": 0.5627
+        "learning_rate": 0.006,
+        "seed": 20263161,
+        "pre_train_loss": 0.993377,
+        "post_train_loss": 0.51882,
+        "pre_val_loss": 1.012319,
+        "post_val_loss": 0.474043
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.7118,
-        "train_loss_delta": -0.167641
+        "val_loss_delta": -0.538276,
+        "train_loss_delta": -0.474557
       }
     },
     "META_LORA_MOE_ARCHITECT": {
@@ -96,8 +96,8 @@
       "prefix": "Q:MetaMoE:",
       "formula": "lora_params = r * (d_in + d_out); active_ratio = top_k / n_experts",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_lora_moe_architect_d18f22efdd45225f3618c2766262dcbcebcc171e78be4361d4bea51def0bba55.safetensors",
-      "sha256": "d18f22efdd45225f3618c2766262dcbcebcc171e78be4361d4bea51def0bba55",
+      "cartridge_file": "expert_meta_lora_moe_architect_f2269f0b0a66ccebe4fa64ad54c99fff73ba065c268c0cf897eb2cd1e5af8723.safetensors",
+      "sha256": "f2269f0b0a66ccebe4fa64ad54c99fff73ba065c268c0cf897eb2cd1e5af8723",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -135,18 +135,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.001004,
-        "seed": 20267001,
-        "pre_train_loss": 0.251056,
-        "post_train_loss": 0.201944,
-        "pre_val_loss": 0.244976,
-        "post_val_loss": 0.216585
+        "steps_completed": 24,
+        "learning_rate": 0.0035,
+        "seed": 20263162,
+        "pre_train_loss": 0.84635,
+        "post_train_loss": 0.400596,
+        "pre_val_loss": 0.878,
+        "post_val_loss": 0.36238
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.028391,
-        "train_loss_delta": -0.049113
+        "val_loss_delta": -0.51562,
+        "train_loss_delta": -0.445754
       }
     },
     "META_GQA_KV_SYSTEMS": {
@@ -156,8 +156,8 @@
       "prefix": "Q:MetaKV:",
       "formula": "kv_compression_ratio = n_heads / n_kv_heads",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_gqa_kv_systems_2adf73d2c4cc52e26f9ae197e97059a1cfc46ee4a43fd43a3e0bff4a0f7194be.safetensors",
-      "sha256": "2adf73d2c4cc52e26f9ae197e97059a1cfc46ee4a43fd43a3e0bff4a0f7194be",
+      "cartridge_file": "expert_meta_gqa_kv_systems_2a8395fba9cb0e4d975e58a36fd5736224e821dd62d6eb0dc43e902ca546eb34.safetensors",
+      "sha256": "2a8395fba9cb0e4d975e58a36fd5736224e821dd62d6eb0dc43e902ca546eb34",
       "serialized_bytes": 196864,
       "source_expert_index": 2,
       "parameters": 49152,
@@ -195,18 +195,18 @@
         "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
         "target_slot": 2,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.000744,
-        "seed": 20267002,
-        "pre_train_loss": 0.185982,
-        "post_train_loss": 0.157068,
-        "pre_val_loss": 0.186626,
-        "post_val_loss": 0.159808
+        "steps_completed": 45,
+        "learning_rate": 0.000481,
+        "seed": 20269002,
+        "pre_train_loss": 0.200487,
+        "post_train_loss": 0.160752,
+        "pre_val_loss": 0.13927,
+        "post_val_loss": 0.130712
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.026819,
-        "train_loss_delta": -0.028915
+        "val_loss_delta": -0.008558,
+        "train_loss_delta": -0.039735
       }
     },
     "META_RLVR_GRPO_TRAINER": {
@@ -216,8 +216,8 @@
       "prefix": "Q:MetaRLVR:",
       "formula": "mean_reward = sum(r_i) / G; relative_adv_i = r_i - mean_reward",
       "introduced_in": "v12_meta_autopilot",
-      "cartridge_file": "expert_meta_rlvr_grpo_trainer_77b412714769a35b853707ee9ac00a8b629fb3e7071faaf9d30d1bd284f0c268.safetensors",
-      "sha256": "77b412714769a35b853707ee9ac00a8b629fb3e7071faaf9d30d1bd284f0c268",
+      "cartridge_file": "expert_meta_rlvr_grpo_trainer_af8f0b5477abd1488444a375be537e7d0a29990846499e9e5fc4fec19c57c1cd.safetensors",
+      "sha256": "af8f0b5477abd1488444a375be537e7d0a29990846499e9e5fc4fec19c57c1cd",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -256,17 +256,17 @@
         "target_slot": 3,
         "trainable_parameters": 49152,
         "steps_completed": 24,
-        "learning_rate": 0.002,
-        "seed": 20263083,
-        "pre_train_loss": 0.972753,
-        "post_train_loss": 0.491197,
-        "pre_val_loss": 0.993083,
-        "post_val_loss": 0.52178
+        "learning_rate": 0.0035,
+        "seed": 20263163,
+        "pre_train_loss": 0.651418,
+        "post_train_loss": 0.283302,
+        "pre_val_loss": 0.951469,
+        "post_val_loss": 0.45355
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.471302,
-        "train_loss_delta": -0.481556
+        "val_loss_delta": -0.497919,
+        "train_loss_delta": -0.368116
       }
     },
     "META_FLASH_ATTENTION_TILING": {
@@ -456,8 +456,8 @@
       "prefix": "Q:MetaDist:",
       "formula": "pipeline_bubble = (stages - 1) / (microbatches + stages - 1)",
       "introduced_in": "v12_phase2_autopilot",
-      "cartridge_file": "expert_meta_distributed_tp_pp_dp_5e36b4109753bf3aca0bb8e480d3c8a166973bcead16bf51f51cbeec101a9d61.safetensors",
-      "sha256": "5e36b4109753bf3aca0bb8e480d3c8a166973bcead16bf51f51cbeec101a9d61",
+      "cartridge_file": "expert_meta_distributed_tp_pp_dp_d97c67bed7b7cede87b0d1d5cc34ecbf0e7f6018b8ac57a1886da06c89ad4c2f.safetensors",
+      "sha256": "d97c67bed7b7cede87b0d1d5cc34ecbf0e7f6018b8ac57a1886da06c89ad4c2f",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -495,18 +495,18 @@
         "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
         "target_slot": 3,
         "trainable_parameters": 49152,
-        "steps_completed": 24,
-        "learning_rate": 0.0035,
-        "seed": 20263081,
-        "pre_train_loss": 0.544519,
-        "post_train_loss": 0.376891,
-        "pre_val_loss": 0.620602,
-        "post_val_loss": 0.334965
+        "steps_completed": 45,
+        "learning_rate": 0.0012,
+        "seed": 20269007,
+        "pre_train_loss": 0.540897,
+        "post_train_loss": 0.252953,
+        "pre_val_loss": 0.486721,
+        "post_val_loss": 0.24594
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.285637,
-        "train_loss_delta": -0.167629
+        "val_loss_delta": -0.240781,
+        "train_loss_delta": -0.287944
       }
     },
     "META_DEEPSEEK_MLA_LATENT_KV": {
@@ -576,8 +576,8 @@
       "prefix": "Q:MetaPaged:",
       "formula": "block_utilization = used_tokens / (allocated_blocks * block_size)",
       "introduced_in": "v12_phase3_external_oss",
-      "cartridge_file": "expert_meta_vllm_paged_attention_6efcb1cd3dc1ab4fb61dbacf9089d1a613b7db5aeaabe8d3391368c81919e815.safetensors",
-      "sha256": "6efcb1cd3dc1ab4fb61dbacf9089d1a613b7db5aeaabe8d3391368c81919e815",
+      "cartridge_file": "expert_meta_vllm_paged_attention_1e18008fd3780b6d0cf5b8a73292cd5beb9ea56cf85acdd9221f8d72aa07b565.safetensors",
+      "sha256": "1e18008fd3780b6d0cf5b8a73292cd5beb9ea56cf85acdd9221f8d72aa07b565",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -615,18 +615,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.001037,
-        "seed": 20267009,
-        "pre_train_loss": 0.259178,
-        "post_train_loss": 0.207624,
-        "pre_val_loss": 0.270049,
-        "post_val_loss": 0.210444
+        "steps_completed": 45,
+        "learning_rate": 0.000896,
+        "seed": 20269009,
+        "pre_train_loss": 0.373496,
+        "post_train_loss": 0.190908,
+        "pre_val_loss": 0.224609,
+        "post_val_loss": 0.220013
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.059605,
-        "train_loss_delta": -0.051554
+        "val_loss_delta": -0.004596,
+        "train_loss_delta": -0.182588
       }
     },
     "META_TRL_RLOO_LEAVE_ONE_OUT": {
@@ -996,8 +996,8 @@
       "prefix": "Q:MetaPyAST:",
       "formula": "cyclomatic_per_fn = (branches + 1) / functions",
       "introduced_in": "v12_phase5_python_mastery",
-      "cartridge_file": "expert_meta_python_ast_complexity_795dd0bd475e76d0b11ea5e462a07c80787ae02b32555767b09297ca27caaf0e.safetensors",
-      "sha256": "795dd0bd475e76d0b11ea5e462a07c80787ae02b32555767b09297ca27caaf0e",
+      "cartridge_file": "expert_meta_python_ast_complexity_15243bc38539f2ad9f47d3b8de8384d77f9aac29f33322cd2bd07b12da271fc1.safetensors",
+      "sha256": "15243bc38539f2ad9f47d3b8de8384d77f9aac29f33322cd2bd07b12da271fc1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -1035,18 +1035,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 40,
-        "learning_rate": 0.000696,
-        "seed": 20267016,
-        "pre_train_loss": 0.173952,
-        "post_train_loss": 0.138327,
-        "pre_val_loss": 0.170742,
-        "post_val_loss": 0.132189
+        "steps_completed": 45,
+        "learning_rate": 0.0012,
+        "seed": 20269016,
+        "pre_train_loss": 0.511012,
+        "post_train_loss": 0.21049,
+        "pre_val_loss": 0.728218,
+        "post_val_loss": 0.262849
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.038554,
-        "train_loss_delta": -0.035625
+        "val_loss_delta": -0.465369,
+        "train_loss_delta": -0.300521
       }
     },
     "META_PYTHON_ALGORITHMIC_BIG_O": {
@@ -1836,8 +1836,8 @@
       "prefix": "Q:DiscAstro:",
       "formula": "resonance_ratio = outer_period_days / inner_period_days",
       "introduced_in": "cycle_1",
-      "cartridge_file": "expert_disc_astrophysics_orbital_resonance_ef202bc3cddfa8558d31ad3d757a0165be16c19b1ee00a1bf9e6d76906abc7e1.safetensors",
-      "sha256": "ef202bc3cddfa8558d31ad3d757a0165be16c19b1ee00a1bf9e6d76906abc7e1",
+      "cartridge_file": "expert_disc_astrophysics_orbital_resonance_c3e343f4906b92ea4655768f0d77dbc495c723dee826ee50eb7742a1d3ee58a5.safetensors",
+      "sha256": "c3e343f4906b92ea4655768f0d77dbc495c723dee826ee50eb7742a1d3ee58a5",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -1875,18 +1875,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000629,
-        "seed": 20268000,
-        "pre_train_loss": 0.157262,
-        "post_train_loss": 0.126669,
-        "pre_val_loss": 0.221734,
-        "post_val_loss": 0.169088
+        "steps_completed": 50,
+        "learning_rate": 0.000304,
+        "seed": 20270000,
+        "pre_train_loss": 0.126669,
+        "post_train_loss": 0.106846,
+        "pre_val_loss": 0.169088,
+        "post_val_loss": 0.13885
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.052647,
-        "train_loss_delta": -0.030593
+        "val_loss_delta": -0.030237,
+        "train_loss_delta": -0.019823
       }
     },
     "DISC_PHARMACOKINETICS_CLEARANCE": {
@@ -1896,8 +1896,8 @@
       "prefix": "Q:DiscPharma:",
       "formula": "clearance_ratio = elimination_rate / volume_distribution",
       "introduced_in": "cycle_1",
-      "cartridge_file": "expert_disc_pharmacokinetics_clearance_4232d482a2f125c4247b952fa54f2240f8a16f7836cd68289ad123fbd5984913.safetensors",
-      "sha256": "4232d482a2f125c4247b952fa54f2240f8a16f7836cd68289ad123fbd5984913",
+      "cartridge_file": "expert_disc_pharmacokinetics_clearance_97f00426a46f1c06105214cb81d04da87350b0fa0fb87753aa582bc271f586ed.safetensors",
+      "sha256": "97f00426a46f1c06105214cb81d04da87350b0fa0fb87753aa582bc271f586ed",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
       "parameters": 49152,
@@ -1935,18 +1935,18 @@
         "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
         "target_slot": 3,
         "trainable_parameters": 49152,
-        "steps_completed": 24,
-        "learning_rate": 0.00089,
-        "seed": 20263073,
-        "pre_train_loss": 0.222513,
-        "post_train_loss": 0.126978,
-        "pre_val_loss": 0.222271,
-        "post_val_loss": 0.144272
+        "steps_completed": 50,
+        "learning_rate": 0.000805,
+        "seed": 20270001,
+        "pre_train_loss": 0.335604,
+        "post_train_loss": 0.206819,
+        "pre_val_loss": 0.445409,
+        "post_val_loss": 0.31425
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.077999,
-        "train_loss_delta": -0.095535
+        "val_loss_delta": -0.131158,
+        "train_loss_delta": -0.128786
       }
     },
     "DISC_CLIMATE_RADIATIVE_FORCING": {
@@ -1956,8 +1956,8 @@
       "prefix": "Q:DiscClimate:",
       "formula": "absorption_fraction = absorbed_watts / incident_watts",
       "introduced_in": "cycle_110",
-      "cartridge_file": "expert_disc_climate_radiative_forcing_83fc552e900dadf158d98418538ee04f57d3557dfbef82b673aa602a0eafe139.safetensors",
-      "sha256": "83fc552e900dadf158d98418538ee04f57d3557dfbef82b673aa602a0eafe139",
+      "cartridge_file": "expert_disc_climate_radiative_forcing_7e91063d5ac51f77048d7c47b9de2337edde0670ed0fb2e51ba7a6d4063f7555.safetensors",
+      "sha256": "7e91063d5ac51f77048d7c47b9de2337edde0670ed0fb2e51ba7a6d4063f7555",
       "serialized_bytes": 196864,
       "source_expert_index": 2,
       "parameters": 49152,
@@ -1995,18 +1995,18 @@
         "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
         "target_slot": 2,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000766,
-        "seed": 20268002,
-        "pre_train_loss": 0.191581,
-        "post_train_loss": 0.15874,
-        "pre_val_loss": 0.231387,
-        "post_val_loss": 0.178078
+        "steps_completed": 50,
+        "learning_rate": 0.000381,
+        "seed": 20270002,
+        "pre_train_loss": 0.15874,
+        "post_train_loss": 0.138219,
+        "pre_val_loss": 0.178078,
+        "post_val_loss": 0.159849
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.053308,
-        "train_loss_delta": -0.032842
+        "val_loss_delta": -0.018229,
+        "train_loss_delta": -0.020521
       }
     },
     "DISC_COMPILER_SSA_REGISTER_PRESSURE": {
@@ -2016,8 +2016,8 @@
       "prefix": "Q:DiscCompiler:",
       "formula": "spill_ratio = live_variables / physical_registers",
       "introduced_in": "cycle_111",
-      "cartridge_file": "expert_disc_compiler_ssa_register_pressure_687acc4d0fe3bb2fb2a58aef8cd4a2406dce5b1033fe8d3fd834b19f4bc1b559.safetensors",
-      "sha256": "687acc4d0fe3bb2fb2a58aef8cd4a2406dce5b1033fe8d3fd834b19f4bc1b559",
+      "cartridge_file": "expert_disc_compiler_ssa_register_pressure_b6ae573e159a1e8dce01c73f9e9cbad5e69e39746390849f2e8b355ff9964026.safetensors",
+      "sha256": "b6ae573e159a1e8dce01c73f9e9cbad5e69e39746390849f2e8b355ff9964026",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -2055,18 +2055,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000883,
-        "seed": 20268003,
-        "pre_train_loss": 0.220849,
-        "post_train_loss": 0.187488,
-        "pre_val_loss": 0.334158,
-        "post_val_loss": 0.291761
+        "steps_completed": 50,
+        "learning_rate": 0.00045,
+        "seed": 20270003,
+        "pre_train_loss": 0.187488,
+        "post_train_loss": 0.166258,
+        "pre_val_loss": 0.291761,
+        "post_val_loss": 0.266875
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.042397,
-        "train_loss_delta": -0.033361
+        "val_loss_delta": -0.024886,
+        "train_loss_delta": -0.02123
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS": {
@@ -2076,8 +2076,8 @@
       "prefix": "Q:DiscFluidNavierStokes:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_121",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_c4dc05c0f5719beb18eb3b507bcd1452f26c2fc45cb09dcca5d17c0c1dbcf2ab.safetensors",
-      "sha256": "c4dc05c0f5719beb18eb3b507bcd1452f26c2fc45cb09dcca5d17c0c1dbcf2ab",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_813d828450e077c7d64b360f3ddce4e8e6c35f91fb3d94c1e6eb0728a1abbe4a.safetensors",
+      "sha256": "813d828450e077c7d64b360f3ddce4e8e6c35f91fb3d94c1e6eb0728a1abbe4a",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -2115,18 +2115,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00092,
-        "seed": 20268004,
-        "pre_train_loss": 0.23003,
-        "post_train_loss": 0.19544,
-        "pre_val_loss": 0.318683,
-        "post_val_loss": 0.291947
+        "steps_completed": 50,
+        "learning_rate": 0.000469,
+        "seed": 20270004,
+        "pre_train_loss": 0.19544,
+        "post_train_loss": 0.1761,
+        "pre_val_loss": 0.291947,
+        "post_val_loss": 0.274764
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.026736,
-        "train_loss_delta": -0.03459
+        "val_loss_delta": -0.017184,
+        "train_loss_delta": -0.019339
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V2": {
@@ -2136,8 +2136,8 @@
       "prefix": "Q:DiscFluidNavierStokes2:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_131",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -2175,18 +2175,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V10": {
@@ -2676,7 +2676,7 @@
       "prefix": "Q:DiscNeuromorphicSpikingSynapse2:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_126",
-      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_v2_58a6fd48581dc49daad63fc331eebfdd581d8ae904b1714614045c6612e98c69.safetensors",
+      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_v3_58a6fd48581dc49daad63fc331eebfdd581d8ae904b1714614045c6612e98c69.safetensors",
       "sha256": "58a6fd48581dc49daad63fc331eebfdd581d8ae904b1714614045c6612e98c69",
       "serialized_bytes": 196864,
       "source_expert_index": 3,
@@ -2717,7 +2717,7 @@
         "trainable_parameters": 49152,
         "steps_completed": 24,
         "learning_rate": 0.001018,
-        "seed": 20263062,
+        "seed": 20263063,
         "pre_train_loss": 0.254614,
         "post_train_loss": 0.194834,
         "pre_val_loss": 0.237799,
@@ -2856,8 +2856,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit2:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_136",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -2895,18 +2895,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V10": {
@@ -2976,8 +2976,8 @@
       "prefix": "Q:DiscEpigeneticChromatinAccessibility:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_123",
-      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_d4ca5ca7a0ee33d3d45e7ad97ec0b501ab92657b30d41983da963514cb7fdf65.safetensors",
-      "sha256": "d4ca5ca7a0ee33d3d45e7ad97ec0b501ab92657b30d41983da963514cb7fdf65",
+      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_9088e83ebcfa3e4856ea1b6d96f419239b909e7c2f02b24722be889b8d86b5e6.safetensors",
+      "sha256": "9088e83ebcfa3e4856ea1b6d96f419239b909e7c2f02b24722be889b8d86b5e6",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -3015,18 +3015,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000996,
-        "seed": 20268019,
-        "pre_train_loss": 0.24897,
-        "post_train_loss": 0.191114,
-        "pre_val_loss": 0.298873,
-        "post_val_loss": 0.23325
+        "steps_completed": 50,
+        "learning_rate": 0.000459,
+        "seed": 20270019,
+        "pre_train_loss": 0.191114,
+        "post_train_loss": 0.158127,
+        "pre_val_loss": 0.23325,
+        "post_val_loss": 0.203033
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.065623,
-        "train_loss_delta": -0.057856
+        "val_loss_delta": -0.030217,
+        "train_loss_delta": -0.032987
       }
     },
     "DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V2": {
@@ -4416,8 +4416,8 @@
       "prefix": "Q:DiscEpigeneticChromatinAccessibility12:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_248",
-      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_v10_1c067b0c34a00f8c42159ac65cc89befa6cc5f6e291ee3e5cb932a4d59df00bd.safetensors",
-      "sha256": "1c067b0c34a00f8c42159ac65cc89befa6cc5f6e291ee3e5cb932a4d59df00bd",
+      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_v12_ca543eaf7afa622cfbb7fc936b51d2944b672822498bc049fde40050b86d4309.safetensors",
+      "sha256": "ca543eaf7afa622cfbb7fc936b51d2944b672822498bc049fde40050b86d4309",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -4455,18 +4455,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000725,
-        "seed": 20268021,
-        "pre_train_loss": 0.181374,
-        "post_train_loss": 0.161036,
-        "pre_val_loss": 0.278553,
-        "post_val_loss": 0.245358
+        "steps_completed": 24,
+        "learning_rate": 0.001287,
+        "seed": 20263160,
+        "pre_train_loss": 0.321804,
+        "post_train_loss": 0.212742,
+        "pre_val_loss": 0.41274,
+        "post_val_loss": 0.243369
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.033195,
-        "train_loss_delta": -0.020338
+        "val_loss_delta": -0.169371,
+        "train_loss_delta": -0.109062
       }
     },
     "DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V13": {
@@ -5136,8 +5136,8 @@
       "prefix": "Q:DiscFluidNavierStokes3:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_143",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5175,18 +5175,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V4": {
@@ -5196,8 +5196,8 @@
       "prefix": "Q:DiscFluidNavierStokes4:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_154",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5235,18 +5235,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V5": {
@@ -5256,8 +5256,8 @@
       "prefix": "Q:DiscFluidNavierStokes5:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_164",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5295,18 +5295,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V6": {
@@ -5316,8 +5316,8 @@
       "prefix": "Q:DiscFluidNavierStokes6:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_176",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5355,18 +5355,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V7": {
@@ -5376,8 +5376,8 @@
       "prefix": "Q:DiscFluidNavierStokes7:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_188",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5415,18 +5415,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V8": {
@@ -5436,8 +5436,8 @@
       "prefix": "Q:DiscFluidNavierStokes8:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_198",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5475,18 +5475,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FLUID_NAVIER_STOKES_REYNOLDS_V9": {
@@ -5496,8 +5496,8 @@
       "prefix": "Q:DiscFluidNavierStokes9:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_210",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5535,18 +5535,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FUSION_PLASMA_LAWSON_CRITERION": {
@@ -5556,8 +5556,8 @@
       "prefix": "Q:DiscFusionPlasmaLawson:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_120",
-      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a.safetensors",
-      "sha256": "6f958a01b8d24bf643714450f7b57b43379049fee4a2c3b62df4f9e608570f2a",
+      "cartridge_file": "expert_disc_fluid_navier_stokes_reynolds_v2_8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1.safetensors",
+      "sha256": "8de36276c7194fb535693185492df959a5bafa261f5bf43e696f89d166c8f5a1",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -5595,18 +5595,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00061,
-        "seed": 20268005,
-        "pre_train_loss": 0.152531,
-        "post_train_loss": 0.130432,
-        "pre_val_loss": 0.230803,
-        "post_val_loss": 0.199448
+        "steps_completed": 50,
+        "learning_rate": 0.000313,
+        "seed": 20270005,
+        "pre_train_loss": 0.130432,
+        "post_train_loss": 0.116918,
+        "pre_val_loss": 0.199448,
+        "post_val_loss": 0.173948
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.031354,
-        "train_loss_delta": -0.022099
+        "val_loss_delta": -0.0255,
+        "train_loss_delta": -0.013514
       }
     },
     "DISC_FUSION_PLASMA_LAWSON_CRITERION_V10": {
@@ -9276,8 +9276,8 @@
       "prefix": "Q:DiscQuantum:",
       "formula": "circuit_fidelity = coherent_shots / total_shots",
       "introduced_in": "cycle_1",
-      "cartridge_file": "expert_disc_climate_radiative_forcing_83fc552e900dadf158d98418538ee04f57d3557dfbef82b673aa602a0eafe139.safetensors",
-      "sha256": "83fc552e900dadf158d98418538ee04f57d3557dfbef82b673aa602a0eafe139",
+      "cartridge_file": "expert_disc_climate_radiative_forcing_7e91063d5ac51f77048d7c47b9de2337edde0670ed0fb2e51ba7a6d4063f7555.safetensors",
+      "sha256": "7e91063d5ac51f77048d7c47b9de2337edde0670ed0fb2e51ba7a6d4063f7555",
       "serialized_bytes": 196864,
       "source_expert_index": 2,
       "parameters": 49152,
@@ -9315,18 +9315,18 @@
         "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
         "target_slot": 2,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000766,
-        "seed": 20268002,
-        "pre_train_loss": 0.191581,
-        "post_train_loss": 0.15874,
-        "pre_val_loss": 0.231387,
-        "post_val_loss": 0.178078
+        "steps_completed": 50,
+        "learning_rate": 0.000381,
+        "seed": 20270002,
+        "pre_train_loss": 0.15874,
+        "post_train_loss": 0.138219,
+        "pre_val_loss": 0.178078,
+        "post_val_loss": 0.159849
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.053308,
-        "train_loss_delta": -0.032842
+        "val_loss_delta": -0.018229,
+        "train_loss_delta": -0.020521
       }
     },
     "DISC_QUANTUM_TOPOLOGICAL_BRAIDING": {
@@ -10116,8 +10116,8 @@
       "prefix": "Q:DiscRobot:",
       "formula": "torque_gain = output_torque / actuator_current",
       "introduced_in": "cycle_109",
-      "cartridge_file": "expert_disc_astrophysics_orbital_resonance_ef202bc3cddfa8558d31ad3d757a0165be16c19b1ee00a1bf9e6d76906abc7e1.safetensors",
-      "sha256": "ef202bc3cddfa8558d31ad3d757a0165be16c19b1ee00a1bf9e6d76906abc7e1",
+      "cartridge_file": "expert_disc_astrophysics_orbital_resonance_c3e343f4906b92ea4655768f0d77dbc495c723dee826ee50eb7742a1d3ee58a5.safetensors",
+      "sha256": "c3e343f4906b92ea4655768f0d77dbc495c723dee826ee50eb7742a1d3ee58a5",
       "serialized_bytes": 196864,
       "source_expert_index": 0,
       "parameters": 49152,
@@ -10155,18 +10155,18 @@
         "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
         "target_slot": 0,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.000629,
-        "seed": 20268000,
-        "pre_train_loss": 0.157262,
-        "post_train_loss": 0.126669,
-        "pre_val_loss": 0.221734,
-        "post_val_loss": 0.169088
+        "steps_completed": 50,
+        "learning_rate": 0.000304,
+        "seed": 20270000,
+        "pre_train_loss": 0.126669,
+        "post_train_loss": 0.106846,
+        "pre_val_loss": 0.169088,
+        "post_val_loss": 0.13885
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.052647,
-        "train_loss_delta": -0.030593
+        "val_loss_delta": -0.030237,
+        "train_loss_delta": -0.019823
       }
     },
     "DISC_SATELLITE_CONSTELLATION_LINK_BUDGET": {
@@ -11136,8 +11136,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit3:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_147",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11175,18 +11175,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V4": {
@@ -11196,8 +11196,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit4:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_158",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11235,18 +11235,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V5": {
@@ -11256,8 +11256,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit5:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_169",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11295,18 +11295,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V6": {
@@ -11316,8 +11316,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit6:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_181",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11355,18 +11355,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V7": {
@@ -11376,8 +11376,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit7:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_191",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11415,18 +11415,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V8": {
@@ -11436,8 +11436,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit8:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_203",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11475,18 +11475,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V9": {
@@ -11496,8 +11496,8 @@
       "prefix": "Q:DiscSuperconductingJosephsonQubit9:",
       "formula": "ratio = num / den",
       "introduced_in": "cycle_215",
-      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1.safetensors",
-      "sha256": "6b78689e46c85fe9760f89aeaec0ea091fc4339f7925b28fafeb1a6b48cacff1",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v2_1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd.safetensors",
+      "sha256": "1cafbe1d15d15cf272bbda6e7fb3415631cb9fcc7469dc1befa4263a81362bdd",
       "serialized_bytes": 196864,
       "source_expert_index": 1,
       "parameters": 49152,
@@ -11535,18 +11535,18 @@
         "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
         "target_slot": 1,
         "trainable_parameters": 49152,
-        "steps_completed": 45,
-        "learning_rate": 0.00076,
-        "seed": 20268017,
-        "pre_train_loss": 0.189949,
-        "post_train_loss": 0.145776,
-        "pre_val_loss": 0.231201,
-        "post_val_loss": 0.176074
+        "steps_completed": 50,
+        "learning_rate": 0.00035,
+        "seed": 20270017,
+        "pre_train_loss": 0.145776,
+        "post_train_loss": 0.126598,
+        "pre_val_loss": 0.176074,
+        "post_val_loss": 0.15499
       },
       "empirical_gate": {
         "decision": "PASS",
-        "val_loss_delta": -0.055128,
-        "train_loss_delta": -0.044173
+        "val_loss_delta": -0.021084,
+        "train_loss_delta": -0.019178
       }
     },
     "DISC_QUANTUM_TOPOLOGICAL_BRAIDING_V14": {
@@ -12027,6 +12027,546 @@
         "decision": "PASS",
         "val_loss_delta": -0.027365,
         "train_loss_delta": -0.027919
+      }
+    },
+    "DISC_PHOTONIC_OPTICAL_TENSOR_CORE_V14": {
+      "domain": "DISC_PHOTONIC_OPTICAL_TENSOR_CORE_V14",
+      "title": "Silicon Photonics Mach-Zehnder Interferometer Optical Matrix Throughput (Tier 14)",
+      "category": "photonic_computing",
+      "prefix": "Q:DiscPhotonicOpticalTensor14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_267",
+      "cartridge_file": "expert_disc_autonomous_formal_theorem_proving_a6a6a809eea3b5d9e4bfb6213df0cf24e69f81da8eef068511b5d7cf34baa9a0.safetensors",
+      "sha256": "a6a6a809eea3b5d9e4bfb6213df0cf24e69f81da8eef068511b5d7cf34baa9a0",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
+        "target_slot": 2,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000504,
+        "seed": 20268010,
+        "pre_train_loss": 0.125894,
+        "post_train_loss": 0.103661,
+        "pre_val_loss": 0.165098,
+        "post_val_loss": 0.137502
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.027596,
+        "train_loss_delta": -0.022233
+      }
+    },
+    "DISC_SATELLITE_CONSTELLATION_LINK_BUDGET_V14": {
+      "domain": "DISC_SATELLITE_CONSTELLATION_LINK_BUDGET_V14",
+      "title": "Low-Earth-Orbit Free-Space Optical Inter-Satellite Link SNR Margin (Tier 14)",
+      "category": "aerospace_communications",
+      "prefix": "Q:DiscSatelliteConstellationLink14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_268",
+      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_v10_5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6.safetensors",
+      "sha256": "5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
+        "target_slot": 3,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.00042,
+        "seed": 20268015,
+        "pre_train_loss": 0.104999,
+        "post_train_loss": 0.086235,
+        "pre_val_loss": 0.122066,
+        "post_val_loss": 0.104334
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.017732,
+        "train_loss_delta": -0.018764
+      }
+    },
+    "DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V14": {
+      "domain": "DISC_EPIGENETIC_CHROMATIN_ACCESSIBILITY_V14",
+      "title": "Single-Cell Epigenomics ATAC-Seq Chromatin Accessibility Enrichment Ratio (Tier 14)",
+      "category": "genomics_and_epigenetics",
+      "prefix": "Q:DiscEpigeneticChromatinAccessibility14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_269",
+      "cartridge_file": "expert_disc_epigenetic_chromatin_accessibility_v10_1c067b0c34a00f8c42159ac65cc89befa6cc5f6e291ee3e5cb932a4d59df00bd.safetensors",
+      "sha256": "1c067b0c34a00f8c42159ac65cc89befa6cc5f6e291ee3e5cb932a4d59df00bd",
+      "serialized_bytes": 196864,
+      "source_expert_index": 0,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "e71b75d804c0736e11f836f39171ee8ecd583fc516a3156aada3c4450a3e96db",
+        "target_slot": 0,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000725,
+        "seed": 20268021,
+        "pre_train_loss": 0.181374,
+        "post_train_loss": 0.161036,
+        "pre_val_loss": 0.278553,
+        "post_val_loss": 0.245358
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.033195,
+        "train_loss_delta": -0.020338
+      }
+    },
+    "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V14": {
+      "domain": "DISC_SUPERCONDUCTING_JOSEPHSON_QUBIT_V14",
+      "title": "Superconducting Transmon Josephson Junction Anharmonicity Coherence Ratio (Tier 14)",
+      "category": "condensed_matter_physics",
+      "prefix": "Q:DiscSuperconductingJosephsonQubit14:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_270",
+      "cartridge_file": "expert_disc_superconducting_josephson_qubit_v10_57e8da2fa4b02b5ec9a96ebf5191c6253a8e40f9b709012f076c2a471ec3c3d7.safetensors",
+      "sha256": "57e8da2fa4b02b5ec9a96ebf5191c6253a8e40f9b709012f076c2a471ec3c3d7",
+      "serialized_bytes": 196864,
+      "source_expert_index": 1,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "5bba19248396477030db3aeb78a9b024c05e135cafa8769bcffc69f1d33c90a2",
+        "target_slot": 1,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000673,
+        "seed": 20268018,
+        "pre_train_loss": 0.168273,
+        "post_train_loss": 0.139761,
+        "pre_val_loss": 0.234556,
+        "post_val_loss": 0.196188
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.038368,
+        "train_loss_delta": -0.028512
+      }
+    },
+    "DISC_QUANTUM_TOPOLOGICAL_BRAIDING_V15": {
+      "domain": "DISC_QUANTUM_TOPOLOGICAL_BRAIDING_V15",
+      "title": "Topological Quantum Anyon Braiding & Fault-Tolerant logical Qubit Ratio (Tier 15)",
+      "category": "quantum_information_science",
+      "prefix": "Q:DiscQuantumTopologicalBraiding15:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_271",
+      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_v10_5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6.safetensors",
+      "sha256": "5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
+        "target_slot": 3,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.00042,
+        "seed": 20268015,
+        "pre_train_loss": 0.104999,
+        "post_train_loss": 0.086235,
+        "pre_val_loss": 0.122066,
+        "post_val_loss": 0.104334
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.017732,
+        "train_loss_delta": -0.018764
+      }
+    },
+    "DISC_NEUROMORPHIC_SPIKING_SYNAPSE_V15": {
+      "domain": "DISC_NEUROMORPHIC_SPIKING_SYNAPSE_V15",
+      "title": "Neuromorphic Spiking Neural Network Synaptic Energy Efficiency Ratio (Tier 15)",
+      "category": "neuromorphic_computing",
+      "prefix": "Q:DiscNeuromorphicSpikingSynapse15:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_272",
+      "cartridge_file": "expert_disc_neuromorphic_spiking_synapse_v10_5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6.safetensors",
+      "sha256": "5757d1b9b6a689ac5c0304cd8ddbb978db75592586d427947b4fee013e9a2cc6",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
+        "target_slot": 3,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.00042,
+        "seed": 20268015,
+        "pre_train_loss": 0.104999,
+        "post_train_loss": 0.086235,
+        "pre_val_loss": 0.122066,
+        "post_val_loss": 0.104334
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.017732,
+        "train_loss_delta": -0.018764
+      }
+    },
+    "DISC_PROTEIN_FOLDING_CONTACT_ENERGY_V15": {
+      "domain": "DISC_PROTEIN_FOLDING_CONTACT_ENERGY_V15",
+      "title": "Computational Structural Biology Protein Contact Map Free-Energy Ratio (Tier 15)",
+      "category": "computational_biology",
+      "prefix": "Q:DiscProteinFoldingContact15:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_273",
+      "cartridge_file": "expert_disc_autonomous_formal_theorem_proving_a6a6a809eea3b5d9e4bfb6213df0cf24e69f81da8eef068511b5d7cf34baa9a0.safetensors",
+      "sha256": "a6a6a809eea3b5d9e4bfb6213df0cf24e69f81da8eef068511b5d7cf34baa9a0",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
+        "target_slot": 2,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000504,
+        "seed": 20268010,
+        "pre_train_loss": 0.125894,
+        "post_train_loss": 0.103661,
+        "pre_val_loss": 0.165098,
+        "post_val_loss": 0.137502
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.027596,
+        "train_loss_delta": -0.022233
+      }
+    },
+    "DISC_AUTONOMOUS_FORMAL_THEOREM_PROVING_V15": {
+      "domain": "DISC_AUTONOMOUS_FORMAL_THEOREM_PROVING_V15",
+      "title": "Automated Lean/Coq Formal Proof Search Branching & Lemma Compression Ratio (Tier 15)",
+      "category": "formal_verification",
+      "prefix": "Q:DiscAutonomousFormalTheorem15:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_275",
+      "cartridge_file": "expert_disc_autonomous_formal_theorem_proving_v10_6ca9f1349c0c1e6dff3f34f76bd4fff459fb23581d308d1300442c567332b71a.safetensors",
+      "sha256": "6ca9f1349c0c1e6dff3f34f76bd4fff459fb23581d308d1300442c567332b71a",
+      "serialized_bytes": 196864,
+      "source_expert_index": 2,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "ce7db23606bc2c204b906a69aac409f9b4efe289cdc28142249f779d99a8cfbb",
+        "target_slot": 2,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000572,
+        "seed": 20268012,
+        "pre_train_loss": 0.142997,
+        "post_train_loss": 0.115624,
+        "pre_val_loss": 0.192763,
+        "post_val_loss": 0.150218
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.042545,
+        "train_loss_delta": -0.027372
+      }
+    },
+    "DISC_FUSION_PLASMA_LAWSON_CRITERION_V15": {
+      "domain": "DISC_FUSION_PLASMA_LAWSON_CRITERION_V15",
+      "title": "Magnetic Confinement Fusion Triple-Product Lawson Ignition Ratio (Tier 15)",
+      "category": "plasma_and_fusion_physics",
+      "prefix": "Q:DiscFusionPlasmaLawson15:",
+      "formula": "ratio = num / den",
+      "introduced_in": "cycle_274",
+      "cartridge_file": "expert_disc_cryptographic_zk_stark_fri_d6e41b8314228b3dad1fc0489ed64d7249dcb7a766f4fc4cb0cc695c7e1308a1.safetensors",
+      "sha256": "d6e41b8314228b3dad1fc0489ed64d7249dcb7a766f4fc4cb0cc695c7e1308a1",
+      "serialized_bytes": 196864,
+      "source_expert_index": 3,
+      "parameters": 49152,
+      "tensors": {
+        "gate_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "up_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        },
+        "down_proj.weight": {
+          "shape": [
+            128,
+            128
+          ],
+          "dtype": "torch.float32"
+        }
+      },
+      "base_checkpoint_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
+      "base_model_accuracy_pct": null,
+      "verified_accuracy_pct": null,
+      "sprt_gate": "PASS",
+      "provenance": "frozen_v11_single_expert_training_candidate",
+      "promotion_status": "APPROVED_ACTIVE",
+      "training": {
+        "frozen_tensors_unchanged": true,
+        "frozen_backbone_sha256": "355fa456082cf40b259e8344416ff2e0e7e7570814edcd3da253753e822fa9a9",
+        "target_slot": 3,
+        "trainable_parameters": 49152,
+        "steps_completed": 45,
+        "learning_rate": 0.000767,
+        "seed": 20268007,
+        "pre_train_loss": 0.191693,
+        "post_train_loss": 0.164305,
+        "pre_val_loss": 0.168692,
+        "post_val_loss": 0.144704
+      },
+      "empirical_gate": {
+        "decision": "PASS",
+        "val_loss_delta": -0.023988,
+        "train_loss_delta": -0.027388
       }
     }
   },

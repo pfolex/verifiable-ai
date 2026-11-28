@@ -8,100 +8,100 @@
     "python_and_swe_systems": "internal_diag_python_swe",
     "discovered_universal_subjects": "internal_diag_discovered_subjects"
   },
-  "generated_at_utc": "2026-11-27T15:16:40.900822+00:00",
-  "cycle_index": 261,
-  "elapsed_seconds": 333.537,
+  "generated_at_utc": "2026-11-28T11:01:14.949994+00:00",
+  "cycle_index": 273,
+  "elapsed_seconds": 186.222,
   "model_identity": {
     "checkpoint": "aix_zero_v12_evolving.pt",
     "state_sha256": "b3a1ca9c013c61cbd71740e71acd93c96f7844fe92c2283b310a0e31d77aaa57",
     "tokenizer_sha256": "119921a77f6fbcd13d00770c240144dd3714200f7443e520ab41f211f0c00b10",
-    "certified_sme_subjects": 193
+    "certified_sme_subjects": 208
   },
   "overall_summary": {
-    "total_domain_problems_tested": 278,
+    "total_domain_problems_tested": 292,
     "routed_neural_only": {
       "assistance_mode": "neural_only_with_predicted_prefix_cartridge_routing",
       "inflight_alu": false,
-      "correct": 88,
-      "tested": 278,
-      "accuracy": 0.3165,
+      "correct": 107,
+      "tested": 292,
+      "accuracy": 0.3664,
       "wilson_95_ci": [
-        0.2647,
-        0.3734
+        0.3132,
+        0.4231
       ]
     },
     "bounded_alu_assisted": {
       "assistance_mode": "bounded_alu_assisted",
-      "correct": 120,
-      "tested": 278,
-      "accuracy": 0.4317
+      "correct": 133,
+      "tested": 292,
+      "accuracy": 0.4555
     },
     "neuro_symbolic_verified": {
       "assistance_mode": "symbolic_verifier_and_solver",
-      "correct": 278,
-      "tested": 278,
+      "correct": 292,
+      "tested": 292,
       "accuracy": 1.0
     }
   },
   "benchmark_suites": {
     "internal_diag_quant_math": {
       "tested": 10,
-      "routed_neural_only_accuracy": 0.6,
-      "routed_neural_only_correct": 6,
+      "routed_neural_only_accuracy": 0.8,
+      "routed_neural_only_correct": 8,
       "equation_prefix_valid_rate": 1.0,
-      "bounded_alu_assisted_accuracy": 0.6,
+      "bounded_alu_assisted_accuracy": 0.8,
       "neuro_symbolic_verified_accuracy": 1.0,
       "wilson_95_ci_neural_only": [
-        0.3127,
-        0.8318
+        0.4902,
+        0.9433
       ]
     },
     "internal_diag_stem_logic": {
       "tested": 10,
-      "routed_neural_only_accuracy": 0.9,
-      "routed_neural_only_correct": 9,
+      "routed_neural_only_accuracy": 1.0,
+      "routed_neural_only_correct": 10,
       "equation_prefix_valid_rate": 1.0,
       "bounded_alu_assisted_accuracy": 1.0,
       "neuro_symbolic_verified_accuracy": 1.0,
       "wilson_95_ci_neural_only": [
-        0.5958,
-        0.9821
+        0.7225,
+        1.0
       ]
     },
     "internal_diag_ml_systems": {
       "tested": 74,
-      "routed_neural_only_accuracy": 0.4054,
-      "routed_neural_only_correct": 30,
-      "equation_prefix_valid_rate": 0.7838,
+      "routed_neural_only_accuracy": 0.4189,
+      "routed_neural_only_correct": 31,
+      "equation_prefix_valid_rate": 0.7973,
       "bounded_alu_assisted_accuracy": 0.4189,
       "neuro_symbolic_verified_accuracy": 1.0,
       "wilson_95_ci_neural_only": [
-        0.3009,
-        0.5192
+        0.3132,
+        0.5326
       ]
     },
     "internal_diag_python_swe": {
       "tested": 20,
-      "routed_neural_only_accuracy": 0.65,
-      "routed_neural_only_correct": 13,
-      "equation_prefix_valid_rate": 0.85,
-      "bounded_alu_assisted_accuracy": 0.7,
+      "routed_neural_only_accuracy": 0.7,
+      "routed_neural_only_correct": 14,
+      "equation_prefix_valid_rate": 0.9,
+      "bounded_alu_assisted_accuracy": 0.75,
       "neuro_symbolic_verified_accuracy": 1.0,
       "wilson_95_ci_neural_only": [
-        0.4329,
-        0.8188
+        0.481,
+        0.8545
       ]
     },
     "internal_diag_discovered_subjects": {
-      "tested": 164,
-      "routed_neural_only_accuracy": 0.1829,
-      "routed_neural_only_correct": 30,
-      "equation_prefix_valid_rate": 0.7988,
-      "bounded_alu_assisted_accuracy": 0.3598,
+      "tested": 178,
+      "routed_neural_only_accuracy": 0.2472,
+      "routed_neural_only_correct": 44,
+      "equation_prefix_valid_rate": 0.8258,
+      "bounded_alu_assisted_accuracy": 0.3876,
       "neuro_symbolic_verified_accuracy": 1.0,
       "wilson_95_ci_neural_only": [
-        0.1312,
-        0.2491
+        0.1896,
+        0.3155
       ]
     }
   },
@@ -110,11 +110,11 @@
     "split_note": "Coefficient-disjoint, template-shared development (k=9..12 vs train k=1..8)",
     "steps_completed": 25,
     "initial_loss": 7.312994,
-    "final_loss": 0.149214,
+    "final_loss": 0.080249,
     "train_fit_after": {
-      "correct": 21,
+      "correct": 20,
       "total": 24,
-      "accuracy": 0.875
+      "accuracy": 0.8333
     },
     "dev_before": {
       "correct": 0,
@@ -129,7 +129,7 @@
   },
   "swe_three_arm_patch_suite": {
     "attribution_mode": "heuristic_ast_control_not_model_generated",
-    "aix_solo_pass_rate": 0.5,
+    "aix_solo_pass_rate": 0.0,
     "peer_solo_pass_rate": 0.5,
     "collaborative_pass_rate": 1.0,
     "offered_tasks": 2

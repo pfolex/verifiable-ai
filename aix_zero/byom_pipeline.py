@@ -107,20 +107,20 @@ def run_byom_experiment(
     baseline_dev = _score_split(backend, dev_rows, max_new_tokens=max_new_tokens)
     baseline_ret = _score_split(backend, ret_rows, max_new_tokens=max_new_tokens)
 
-    # 4. Bounded training & candidate artifact export
-    if is_hf:
-        raise NotImplementedError(
-            "For full HF LoRA runs, run train_aix.py prepare/train/report; "
-            "HuggingFaceBackendAdapter validated compatibility and dataset isolation."
-        )
-
+    # 4. Bounded training & candidate artifact export via unified backend interface
     train_examples = [{"prompt": r["prompt_text"], "completion": r["target"]} for r in train_rows]
-    train_report = backend.train_step(train_examples, lr=float(lr), steps=int(steps))
-    cand_pt = run_root / "candidate_state.pt"
-    torch.save(backend.model.state_dict(), cand_pt)
-
-    # 5. Reload candidate cleanly & evaluate with identical settings
-    reloaded = AIXZeroBackendAdapter(m_path, state_dict_override_path=cand_pt)
+    if is_hf:
+        cand_artifact = run_root / "candidate_adapter"
+        train_report = backend.train_step(
+            train_examples, lr=float(lr), steps=int(steps), output_adapter_dir=cand_artifact
+        )
+        reloaded: ModelBackendAdapter = HuggingFaceBackendAdapter(m_path, requested_device=device)
+        reloaded.reload_artifact(cand_artifact)
+    else:
+        train_report = backend.train_step(train_examples, lr=float(lr), steps=int(steps))
+        cand_artifact = run_root / "candidate_state.pt"
+        torch.save(backend.model.state_dict(), cand_artifact)
+        reloaded = AIXZeroBackendAdapter(m_path, state_dict_override_path=cand_artifact)
     cand_dev = _score_split(reloaded, dev_rows, max_new_tokens=max_new_tokens)
     cand_ret = _score_split(reloaded, ret_rows, max_new_tokens=max_new_tokens)
 
@@ -138,7 +138,7 @@ def run_byom_experiment(
     decision = "PROMOTED" if (allow_promotion and dev_improved and ret_held) else "REJECTED_RECORD_ONLY"
 
     export_manifest = export_verified_adapter_bundle(
-        source_path=cand_pt,
+        source_path=cand_artifact,
         output_dir=run_root / "exported_bundle",
         base_identity={
             "checkpoint": str(m_path.name),
@@ -157,7 +157,7 @@ def run_byom_experiment(
             "decision": decision,
         },
         release_label="promoted_champion" if decision == "PROMOTED" else "rejected_candidate_record",
-        verify_aix_zero_roundtrip_ckpt=m_path,
+        verify_aix_zero_roundtrip_ckpt=None if is_hf else m_path,
     )
 
     summary = {

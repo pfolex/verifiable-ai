@@ -163,6 +163,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_byom.add_argument("--lr", type=float, default=1e-3)
     p_byom.add_argument("--allow-promotion", action="store_true")
 
+    p_ext = sub.add_parser("external-bench", help="Evaluate an AIX-Zero or HF model on a pinned external public benchmark JSONL (#441)")
+    p_ext.add_argument("--dataset", type=Path, default=Path("aix_zero/benchmarks/gsm8k_pinned_sample.jsonl"), help="Pinned external benchmark JSONL")
+    p_ext.add_argument("--model", type=Path, default=Path("aix_zero/checkpoints/aix_zero_v11_kip.safetensors"), help="Checkpoint or HF directory")
+    p_ext.add_argument("--state-pt", type=Path, default=None, help="Optional evolving .pt state_dict override")
+    p_ext.add_argument("--max-new-tokens", type=int, default=36)
+
     p_checkpoint = sub.add_parser("checkpoint", help="Pause at cycle boundary and create a verified model bundle")
     p_checkpoint.add_argument("--output-dir", type=Path, default=Path("checkpoint-releases"))
     p_checkpoint.add_argument("--publish", action="store_true", help="Publish verified assets as a GitHub release")
@@ -606,6 +612,27 @@ def main(argv: Optional[List[str]] = None) -> int:
             allow_promotion=bool(args.allow_promotion),
         )
         print(json.dumps(res, indent=2))
+        return 0
+
+    if args.command == "external-bench":
+        from aix_zero.backend_interface import AIXZeroBackendAdapter, HuggingFaceBackendAdapter
+        from aix_zero.external_benchmark_adapter import (
+            evaluate_backend_on_pinned_external_benchmark,
+            load_pinned_external_benchmark,
+        )
+        m_path = Path(args.model)
+        if m_path.is_dir():
+            backend = HuggingFaceBackendAdapter(m_path)
+        else:
+            backend = AIXZeroBackendAdapter(m_path, state_dict_override_path=args.state_pt)
+        bundle = load_pinned_external_benchmark(Path(args.dataset))
+        rep = evaluate_backend_on_pinned_external_benchmark(
+            backend,
+            bundle,
+            max_new_tokens=args.max_new_tokens,
+            output_path=ctrl.state_dir / "external_benchmark_scorecard.json",
+        )
+        print(json.dumps(rep, indent=2))
         return 0
 
     return 1
